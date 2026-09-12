@@ -42,25 +42,22 @@ const TELEMETRY_FEATURE_NAMES = [
     'SampleCompanyOpened',
     'CompanyCreateOpened', 'ReceiptScanOpened', 'InvoiceCreateOpened',
     'ExpenseCreateOpened', 'RevenueCreateOpened', 'ReportOpened',
-    // The import funnel. Which stage or reason travels in the free-form context field, so a
-    // new failure mode needs no server change.
+    // The import funnel
     'ImportOpened', 'ImportPreviewShown', 'ImportAbandoned', 'ImportFailed',
     'ReceiptScanFailed', 'EmptyStateShown', 'WelcomeShown',
-    // The paywall. Shown is the wall someone hit, opened is them acting on it; which limit
-    // or entry point is in the context on both.
+    // The paywall
     'UpgradePromptShown', 'UpgradeModalOpened',
-    // Payroll reported only its exceptions, so a company could run payroll all year
-    // and file its T4s without producing one event.
+    // Payroll
     'PayRunDrafted',
     'PayRunApproved',
     'PayStubsExported',
     'T4SlipsGenerated',
     'T4XmlGenerated',
-    // Record of Employment. The worksheet is somebody keying figures into ROE Web by hand;
-    // the XML is the payroll extract they upload instead. Separated for the same reason the
-    // T4 pair is: one is a filing and one is a preview.
     'RoeWorksheetGenerated',
-    'RoeXmlGenerated'
+    'RoeXmlGenerated',
+    // The dashboard editor.
+    'DashboardCustomized',
+    'DashboardReset'
 ];
 
 // Business descriptors on a CompanyProfile event. Free text, not enum-checked: these
