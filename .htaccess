@@ -61,10 +61,6 @@ Deny from all
     RewriteRule ^database/ - [F,L]
     RewriteRule ^vendor/ - [F,L]
     RewriteRule ^cron/logs/ - [F,L]
-    # Deploy secrets (SSH key, secret backups) must never be served as static
-    # files. They are gitignored and not deployed by CI; this is defense in
-    # depth in case they are ever placed on the server manually.
-    RewriteRule ^secrets/ - [F,L]
     # Never serve/execute scripts from the user-upload directories. Authoritative
     # here in the root .htaccess because /community/uploads/ is gitignored, so a
     # per-directory .htaccess inside it would not be deployed. Images and other

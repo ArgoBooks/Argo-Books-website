@@ -60,7 +60,7 @@ foreach (argo_rewrite_rules($docRoot . '/.htaccess') as $rule) {
     $mods  = in_array('NC', $flags, true) ? 'i' : '';
     if (!preg_match('#' . str_replace('#', '\#', $rule['pattern']) . '#' . $mods, $rel, $m)) continue;
 
-    // [F] forbids outright (database/, vendor/, secrets/, cron/logs/, api/v1/lib/, ...)
+    // [F] forbids outright (database/, vendor/, cron/logs/, api/v1/lib/, ...)
     if (in_array('F', $flags, true)) {
         http_response_code(403);
         exit('Forbidden (router.php, mirroring .htaccess RewriteRule [F])');
