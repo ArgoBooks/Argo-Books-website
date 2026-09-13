@@ -1,25 +1,28 @@
 <?php
 // profit-analyzer/index.php
-// Owner-facing landing page for the free Profit Analyzer tool.
-// Tool-isolated (own CSS, no main site header/footer): a focused, one-way
-// conversion funnel into Argo Books, matching the approved design mockup.
+// Owner-facing landing page for the free Profit Analyzer. Tier 1 (see
+// read-me/Tool page standards.md). Upload handling in assets/upload.js, the
+// sample money-flow chart in assets/owner-sample.js.
 
 require_once __DIR__ . '/../shared/_base.php';
+require_once __DIR__ . '/../partials/schema.php';
 
 if (PHP_SAPI !== 'cli') {
     require_once __DIR__ . '/../statistics.php';
     track_page_view('profit_analyzer');
 }
 
-$canonical = 'https://argorobots.com/profit-analyzer/';
-$title = 'Free Profit Analyzer — see where your business is losing money | Argo Books';
-$description = 'Upload your spreadsheet and instantly see where your business is losing money: fees, unprofitable products, and your true margin. Free, no signup.';
+$page_title = 'Free Profit Analyzer — see where your business is losing money | Argo Books';
+$page_description = 'Upload your spreadsheet and instantly see where your business is losing money: fees, unprofitable products, and your true margin. Free, no signup.';
+$canonical_url = 'https://argorobots.com/profit-analyzer/';
+
+$tools_back = ['href' => INVGEN_BASE . '/tools/', 'label' => 'All tools'];
 
 // Conversion CTA target + tracking. "Try Argo" funnels into the download page.
 $cta = INVGEN_BASE . '/downloads/?source=profit-analyzer-tool&amp;utm_source=profit-analyzer&amp;utm_medium=tool&amp;utm_campaign=launch';
 $results = INVGEN_BASE . '/profit-analyzer/results/';
 
-$schema = json_encode([
+$page_schema_json = json_encode([
   '@context' => 'https://schema.org',
   '@type' => 'SoftwareApplication',
   'name' => 'Free Profit Analyzer',
@@ -27,213 +30,134 @@ $schema = json_encode([
   'operatingSystem' => 'Web',
   'offers' => ['@type' => 'Offer', 'price' => '0', 'priceCurrency' => 'USD'],
   'creator' => ['@id' => 'https://argorobots.com/#organization'],
-  'url' => $canonical,
+  'url' => $canonical_url,
 ], JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
-?><!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title><?= htmlspecialchars($title) ?></title>
-<meta name="description" content="<?= htmlspecialchars($description) ?>">
-<link rel="canonical" href="<?= $canonical ?>">
-<link rel="icon" href="<?= INVGEN_BASE ?>/resources/images/argo-logo/argo-icon.ico" sizes="any">
-<meta property="og:title" content="<?= htmlspecialchars($title) ?>">
-<meta property="og:description" content="<?= htmlspecialchars($description) ?>">
-<meta property="og:url" content="<?= $canonical ?>">
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="Argo Books">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="<?= htmlspecialchars($title) ?>">
-<meta name="twitter:description" content="<?= htmlspecialchars($description) ?>">
-<script type="application/ld+json"><?= $schema ?></script>
-<link rel="stylesheet" href="<?= INVGEN_BASE ?>/profit-analyzer/assets/fonts.css">
-<link rel="stylesheet" href="<?= INVGEN_BASE ?>/profit-analyzer/assets/profit-analyzer.css">
-</head>
-<body>
 
-<!-- NAV -->
-<nav>
-  <div class="wrap">
-    <a class="brand" href="<?= INVGEN_BASE ?>/profit-analyzer/"><img src="<?= INVGEN_BASE ?>/resources/images/argo-logo/argo-logo-white.png" alt="Argo Books" width="160" height="30"></a>
-    <div class="links">
-      <?php /* Route back to the tools hub. This page predates shared/layout.php,
-               so it cannot use the standard "All tools" breadcrumb and puts the
-               link in its own nav instead. See read-me/Tool page standards.md. */ ?>
-      <a href="<?= INVGEN_BASE ?>/tools/">All tools</a>
-      <a href="#how">How it works</a>
-      <a href="#trust">Privacy</a>
-    </div>
-  </div>
-</nav>
+$breadcrumb_schema_json = argo_breadcrumb_schema([
+    'Home' => '/',
+    'Free Tools' => '/tools/',
+    'Profit Analyzer' => $canonical_url,
+]);
 
-<!-- HERO -->
-<header class="hero">
-  <div class="wrap">
-    <div class="eyebrow rise d1">Free profit analyzer · no signup</div>
-    <h1 class="rise d2">See exactly where your<br>business is <em>losing money</em>.</h1>
-    <p class="sub rise d3">Upload your spreadsheet and get a clear, honest picture of your numbers in about 60 seconds. Free.</p>
+$extra_head = '<link rel="stylesheet" href="' . INVGEN_BASE . '/shared/styles/calculator.css">'
+    . '<link rel="stylesheet" href="' . INVGEN_BASE . '/profit-analyzer/assets/profit-analyzer.css">';
 
+$extra_scripts = '<script>'
+    . 'window.PA_TOOL = ' . json_encode(INVGEN_BASE . '/profit-analyzer/', JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) . ';'
+    . 'window.PA_RESULTS = ' . json_encode($results, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) . ';'
+    . '</script>'
+    . '<script src="' . INVGEN_BASE . '/profit-analyzer/assets/echarts.min.js"></script>'
+    . '<script src="' . INVGEN_BASE . '/profit-analyzer/assets/owner-sample.js"></script>'
+    . '<script src="' . INVGEN_BASE . '/profit-analyzer/assets/upload.js"></script>';
+
+ob_start();
+?>
+<div class="calc-app">
+
+  <section class="site-hero">
+    <h1 class="site-hero-title">Profit Analyzer</h1>
+    <p class="site-hero-tagline">Upload a sales or expense spreadsheet and see where the money goes: fees, costs, your best and worst sellers, and the margin you keep.</p>
+  </section>
+
+  <aside class="page-banner" role="complementary">
+    <span class="page-banner-text">Argo Books keeps these figures up to date as you record sales and expenses.</span>
+    <a class="page-banner-link" href="<?= $cta ?>&amp;placement=banner">Try Argo Books free <span aria-hidden="true">&rarr;</span></a>
+  </aside>
+
+  <div class="pa-upload-panel">
     <input type="file" id="paFile" accept=".xlsx,.csv" hidden>
-    <label class="upload rise d4" for="paFile" id="paDrop">
-      <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 16V4m0 0L7 9m5-5 5 5"/><path d="M5 18v1a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-1"/></svg></div>
-      <div class="big">Drop your spreadsheet here</div>
-      <div class="small">.xlsx or .csv · any spreadsheet or export</div>
-      <span class="pick">Choose file</span>
+    <label class="pa-dropzone" for="paFile" id="paDrop">
+      <span class="pa-dropzone-title">Drop a spreadsheet here</span>
+      <span class="pa-dropzone-sub">.xlsx or .csv, up to 5 MB</span>
+      <span class="pa-pick">Choose file</span>
     </label>
-    <div class="or-sample rise d4">or <a href="<?= $results ?>?sample=1">try it with sample data →</a></div>
-    <div class="upload-err rise" id="paError" role="alert" hidden></div>
-
-    <div class="trust-line rise d5">
-      <span><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg> Encrypted</span>
-      <span><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="m3 6 1 14a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-14M8 6V4a2 2 0 0 1 2-2h0a2 2 0 0 1 2 2v2"/></svg> Deleted after analysis</span>
-      <span><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg> Never used to train AI</span>
-      <span><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg> No account needed</span>
-    </div>
+    <p class="pa-sample">No file to hand? <a class="calc-link" href="<?= $results ?>?sample=1">Open the results for a sample shop</a>.</p>
+    <div class="pa-error" id="paError" role="alert" hidden></div>
   </div>
-</header>
 
-<!-- SAMPLE DASHBOARD -->
-<section class="block" id="sample">
-  <div class="wrap">
-    <div class="kicker">Here's what you'll see</div>
-    <h2 class="h2">A clear read on your money</h2>
-    <p class="sub2">Example below uses a sample Shopify seller's data, the real thing renders on your own numbers.</p>
+  <section class="pa-preview" aria-labelledby="pa-preview-title">
+    <h2 class="pa-preview-title" id="pa-preview-title">What the results look like</h2>
+    <p class="pa-preview-lead">This is part of the dashboard for a sample online shop selling totes, mugs and candles. Your file produces the same charts from your own numbers.</p>
 
-    <div class="preview-shell">
-      <div class="preview-bar">
-        <svg class="file-ic" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#94a3b8" stroke-width="2"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M4 9h16M4 15h16M10 3v18"/></svg>
-        <span class="file">maple-goods-sales-2024.xlsx</span>
-        <span class="badge">✓ 1,284 rows analyzed</span>
-      </div>
-      <div class="preview-body">
+    <div class="pa-frame">
+      <div class="pa-frame-bar">maple-goods-sales-2024.xlsx</div>
+      <div class="pa-frame-body">
 
-        <div class="insight">
-          <div class="warn"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg></div>
-          <div>
-            <h3>You're losing 9% of revenue to payment &amp; processing fees</h3>
-            <p>That's <b>$1,840</b> over the last 90 days, and after every cost you keep just <b>19%</b> as profit.</p>
-          </div>
+        <div class="pa-insight">
+          <h3>You're losing 9% of revenue to payment &amp; processing fees</h3>
+          <p>That's <b>$2,230</b> over the last 90 days, and after every cost you keep <b>19%</b> as profit.</p>
         </div>
 
-        <div class="grid">
-          <!-- MONEY FLOW SANKEY -->
-          <div class="flowcard" id="flowCard">
-            <div class="flowhead">
-              <div>
-                <h3 class="flowttl">Follow your money</h3>
-                <div class="meta">Where every dollar of revenue goes before it reaches you</div>
-              </div>
-              <div class="keptstat"><b>19%</b><span>kept as profit</span></div>
+        <div class="pa-card">
+          <div class="pa-card-head">
+            <div>
+              <h3 class="pa-card-title">Follow your money</h3>
+              <p class="pa-card-meta">Where each dollar of revenue goes before it reaches you</p>
             </div>
-            <div id="sankeyChart" style="width:100%;height:360px"></div>
+            <p class="pa-kept"><b>19%</b> kept as profit</p>
           </div>
+          <div id="sankeyChart" style="width:100%;height:360px"></div>
+        </div>
 
-          <!-- REVENUE BY PRODUCT -->
-          <div class="chartcard row2">
-            <div class="ttl">Top products by revenue</div>
-            <div class="meta">Revenue per product, last 90 days</div>
-            <div class="revbars">
-              <div class="rrow"><div class="rname">Totes</div><div class="rtrack"><div class="rbar" style="width:100%;--dl:.05s"></div></div><div class="rval">$8,240</div></div>
-              <div class="rrow"><div class="rname">Mugs</div><div class="rtrack"><div class="rbar" style="width:78%;--dl:.12s"></div></div><div class="rval">$6,460</div></div>
-              <div class="rrow"><div class="rname">Candles</div><div class="rtrack"><div class="rbar" style="width:57%;--dl:.19s"></div></div><div class="rval">$4,720</div></div>
-              <div class="rrow"><div class="rname">Greeting cards</div><div class="rtrack"><div class="rbar" style="width:25%;--dl:.26s"></div></div><div class="rval">$2,040</div></div>
-              <div class="rrow"><div class="rname">Enamel pins</div><div class="rtrack"><div class="rbar" style="width:16%;--dl:.33s"></div></div><div class="rval">$1,280</div></div>
-              <div class="rrow"><div class="rname">Stickers</div><div class="rtrack"><div class="rbar" style="width:12%;--dl:.4s"></div></div><div class="rval">$960</div></div>
-            </div>
+        <div class="pa-card">
+          <h3 class="pa-card-title">Top products by revenue</h3>
+          <p class="pa-card-meta">Revenue per product, last 90 days</p>
+          <div class="revbars">
+            <div class="pa-bar-row"><div class="pa-bar-name">Totes</div><div class="pa-bar-track"><div class="pa-bar" style="width:100%"></div></div><div class="pa-bar-val">$8,240</div></div>
+            <div class="pa-bar-row"><div class="pa-bar-name">Mugs</div><div class="pa-bar-track"><div class="pa-bar" style="width:78%"></div></div><div class="pa-bar-val">$6,460</div></div>
+            <div class="pa-bar-row"><div class="pa-bar-name">Candles</div><div class="pa-bar-track"><div class="pa-bar" style="width:57%"></div></div><div class="pa-bar-val">$4,720</div></div>
+            <div class="pa-bar-row"><div class="pa-bar-name">Greeting cards</div><div class="pa-bar-track"><div class="pa-bar" style="width:25%"></div></div><div class="pa-bar-val">$2,040</div></div>
+            <div class="pa-bar-row"><div class="pa-bar-name">Enamel pins</div><div class="pa-bar-track"><div class="pa-bar" style="width:16%"></div></div><div class="pa-bar-val">$1,280</div></div>
+            <div class="pa-bar-row"><div class="pa-bar-name">Stickers</div><div class="pa-bar-track"><div class="pa-bar" style="width:12%"></div></div><div class="pa-bar-val">$960</div></div>
           </div>
         </div>
 
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- HOW IT WORKS -->
-<section class="block" id="how" style="background:#fff;border-top:1px solid var(--line);border-bottom:1px solid var(--line)">
-  <div class="wrap">
-    <div class="kicker">Dead simple</div>
-    <h2 class="h2">Three steps, sixty seconds</h2>
-    <p class="sub2"></p>
-    <div class="steps">
-      <div class="step"><div class="n">1</div><h3>Upload your file</h3><p>Drag in any spreadsheet or export. Messy, multi-tab, weird column names, our importer handles it.</p></div>
-      <div class="step"><div class="n">2</div><h3>We read it instantly</h3><p>The same AI engine inside Argo Books figures out what each column means, no manual mapping.</p></div>
-      <div class="step"><div class="n">3</div><h3>See your money leaks</h3><p>Clear charts and plain-language insights about where your profit is actually going.</p></div>
-    </div>
-  </div>
-</section>
+  <article class="calc-content">
 
-<!-- WHAT IT FINDS -->
-<section class="block">
-  <div class="wrap">
-    <div class="kicker">No fluff</div>
-    <h2 class="h2">What it finds in your numbers</h2>
-    <p class="sub2"></p>
-    <div class="finds">
-      <div class="find"><div class="ck"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg></div><div><b>Fee &amp; processing drag</b><p>How much of every sale disappears before it reaches you.</p></div></div>
-      <div class="find"><div class="ck"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg></div><div><b>Top and bottom sellers</b><p>Which products and services bring in the most revenue, and which barely move.</p></div></div>
-      <div class="find"><div class="ck"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg></div><div><b>Your biggest expenses</b><p>Where the money goes, ranked, with no digging required.</p></div></div>
-      <div class="find"><div class="ck"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg></div><div><b>Your true margin</b><p>The real number after everything, not the one you hope for.</p></div></div>
-    </div>
-  </div>
-</section>
+    <section id="how">
+      <h2>What file to upload</h2>
+      <p>Any spreadsheet of sales, expenses, or both, saved as .xlsx or .csv. An export from a shop platform, a payment processor, or a sheet you keep by hand all work. Files with several tabs or unusual column names are fine.</p>
+      <p>The analyzer uses the same AI import engine as Argo Books to work out what each column holds, so there is nothing to map by hand. It takes about a minute, and you can also download the data it read as a cleaned, organized Excel workbook.</p>
+    </section>
 
-<!-- TRUST -->
-<section class="block" id="trust" style="background:#fff;border-top:1px solid var(--line)">
-  <div class="wrap">
-    <div class="trust-card">
-      <div class="hd">
-        <div class="lock"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div>
-        <h3>Your data is safe, and stays yours</h3>
-      </div>
+    <section>
+      <h2>What it shows you</h2>
       <ul>
-        <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.2"><path d="M20 6 9 17l-5-5"/></svg> Encrypted in transit and at rest</li>
-        <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.2"><path d="M20 6 9 17l-5-5"/></svg> Automatically deleted after analysis</li>
-        <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.2"><path d="M20 6 9 17l-5-5"/></svg> Processed by paid AI that never trains on your data</li>
-        <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.2"><path d="M20 6 9 17l-5-5"/></svg> No account or email required to see results</li>
+        <li><strong>Fees and processing costs.</strong> How much of each sale goes to payment and platform fees before it reaches you.</li>
+        <li><strong>Top and bottom sellers.</strong> Which products and services bring in the most revenue, and which barely move.</li>
+        <li><strong>Your biggest expenses.</strong> Where the money goes, ranked by amount.</li>
+        <li><strong>Your real margin.</strong> The share of revenue left after every cost in the file.</li>
       </ul>
-    </div>
-  </div>
-</section>
+    </section>
 
-<!-- BRIDGE CTA -->
-<section class="block">
-  <div class="wrap">
-    <div class="bridge">
-      <h2>This is a one-time snapshot.<br>Argo Books keeps it true every day.</h2>
-      <p>Argo Books tracks your profit automatically, all year, plus invoices, expenses, and tax-ready reports. One affordable app instead of a spreadsheet you rebuild every month.</p>
-      <div class="bridge-cta">
-        <a class="btn btn-primary btn-lg" href="<?= $cta ?>">Try Argo Books free →</a>
-        <label class="mini-upload" for="paFile">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 16V4m0 0L7 9m5-5 5 5"/><path d="M5 18v1a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-1"/></svg>
-          Analyze another spreadsheet - free
-        </label>
-      </div>
-    </div>
-  </div>
-</section>
+    <section id="trust">
+      <h2>What happens to your file</h2>
+      <p>Your file is encrypted in transit and at rest, and deleted automatically after the analysis. It is processed by a paid AI service that does not train on your data. You do not need an account or an email address to see results. The details are in the <a class="calc-link" href="<?= INVGEN_BASE ?>/profit-analyzer/legal/privacy.php">privacy notice</a> and <a class="calc-link" href="<?= INVGEN_BASE ?>/profit-analyzer/legal/terms.php">terms of use</a>.</p>
+    </section>
 
-<footer>
-  <div style="margin-bottom:8px"><a href="<?= INVGEN_BASE ?>/profit-analyzer/legal/privacy.php">Privacy &amp; Data</a> · <a href="<?= INVGEN_BASE ?>/profit-analyzer/legal/terms.php">Terms of Use</a></div>
-  © <?= date('Y') ?> Argo Books · Built for small businesses
-</footer>
+    <section>
+      <h2>Where a one-off analysis stops helping</h2>
+      <p>This reads one file at one point in time. Next month it is out of date, and you would have to export and upload again to see what changed.</p>
+      <p><a class="calc-link" href="<?= $cta ?>&amp;placement=content">Argo Books</a> tracks the same figures as you record sales and expenses, alongside invoices and tax-ready reports, so the numbers stay current without rebuilding a spreadsheet.</p>
+    </section>
 
-<!-- Analysis loading overlay -->
+  </article>
+
+</div>
+
 <div class="pa-overlay" id="paOverlay" hidden>
-  <div class="pa-overlay-card">
-    <div class="pa-spinner"></div>
+  <div class="pa-overlay-card" role="status">
+    <div class="pa-spinner" aria-hidden="true"></div>
     <div class="pa-overlay-title">Reading your spreadsheet…</div>
     <div class="pa-overlay-sub" id="paOverlaySub">Detecting columns and cleaning your data. This takes about a minute.</div>
     <button type="button" class="pa-cancel" id="paCancel">Cancel</button>
   </div>
 </div>
+<?php
+$body_content = ob_get_clean();
 
-<script>
-  window.PA_TOOL = <?= json_encode(INVGEN_BASE . '/profit-analyzer/', JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
-  window.PA_RESULTS = <?= json_encode($results, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
-</script>
-<script src="<?= INVGEN_BASE ?>/profit-analyzer/assets/echarts.min.js"></script>
-<script src="<?= INVGEN_BASE ?>/profit-analyzer/assets/owner-sample.js"></script>
-<script src="<?= INVGEN_BASE ?>/profit-analyzer/assets/upload.js"></script>
-</body>
-</html>
+include __DIR__ . '/../shared/layout.php';

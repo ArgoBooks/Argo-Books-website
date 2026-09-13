@@ -232,7 +232,7 @@
     var fileEl=document.querySelector('.rhead .file'); if(fileEl){
       var badge=fileEl.querySelector('.badge'); var name=esc(m.filename||'your-spreadsheet.xlsx');
       fileEl.childNodes.forEach&&fileEl.childNodes.forEach(function(n){ if(n.nodeType===3)n.textContent=' '+m.filename+' '; });
-      if(badge)badge.textContent='✓ '+Number(m.rows||0).toLocaleString()+' rows analyzed';
+      if(badge)badge.textContent=Number(m.rows||0).toLocaleString()+' rows analyzed';
     }
   }
   // Multi-entity cleaned data: one tab per entity present (Sales, Expenses,

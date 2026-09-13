@@ -255,7 +255,7 @@ function finishBulk(items) {
   bulkIndex = 0;
   const skipped = items.length - ok.length;
   const limited = items.some((i) => i.status === 'limit');
-  bulkNote = skipped ? `${skipped} of ${items.length} couldn't be scanned${limited ? ' — daily limit reached' : ''}.` : '';
+  bulkNote = skipped ? `${skipped} of ${items.length} couldn't be scanned${limited ? ' because the daily limit was reached' : ''}.` : '';
   window.__rsImg = bulkResults[0].imgUrl;
   renderReview(bulkResults[0].receipt);
   setState('review'); show('rs-upload', false); show('rs-review', true);

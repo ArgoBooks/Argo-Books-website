@@ -52,9 +52,9 @@ $home = INVGEN_BASE . '/profit-analyzer/';
     <div>
       <div class="file">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M4 9h16M4 15h16M10 3v18"/></svg>
-        maple-goods-sales-2024.xlsx <span class="badge">✓ 248 rows analyzed</span>
+        maple-goods-sales-2024.xlsx <span class="badge">248 rows analyzed</span>
       </div>
-      <h1>Your numbers, <em>made clear</em>.</h1>
+      <h1>Your results</h1>
     </div>
     <button type="button" class="btn-download"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 4v12m0 0 4-4m-4 4-4-4"/><path d="M4 20h16"/></svg> Download organized spreadsheet</button>
   </div>
@@ -79,9 +79,9 @@ $home = INVGEN_BASE . '/profit-analyzer/';
   <div class="panel active" data-panel="dashboard">
     <div class="kpis">
       <div class="kpi bad"><div class="lbl">Total Expenses</div><div class="val">$20,090</div><div class="sub down">81% of revenue</div></div>
-      <div class="kpi good"><div class="lbl">Total Revenue</div><div class="val">$24,800</div><div class="sub up">▲ 12% vs last period</div></div>
-      <div class="kpi"><div class="lbl">Net Profit</div><div class="val">$4,710</div><div class="sub up">▲ 8%</div></div>
-      <div class="kpi"><div class="lbl">Profit Margin</div><div class="val">19%</div><div class="sub">healthy</div></div>
+      <div class="kpi good"><div class="lbl">Total Revenue</div><div class="val">$24,800</div></div>
+      <div class="kpi"><div class="lbl">Net Profit</div><div class="val">$4,710</div></div>
+      <div class="kpi"><div class="lbl">Profit Margin</div><div class="val">19%</div></div>
     </div>
 
     <div class="flowcard">
@@ -272,11 +272,10 @@ $home = INVGEN_BASE . '/profit-analyzer/';
     </div>
   </div>
 
-  <div class="bridge">
-    <h2>This is a snapshot. Argo Books keeps it true every day.</h2>
-    <p>Every chart on this page updates automatically inside Argo Books, all year, plus invoices, expenses, and tax-ready reports.</p>
-    <a class="btn btn-primary btn-lg" href="<?= $cta ?>">Try Argo Books free →</a>
-  </div>
+  <aside class="page-banner" role="complementary">
+    <span class="page-banner-text">These charts come from one file. In Argo Books they update as you record sales and expenses.</span>
+    <a class="page-banner-link" href="<?= $cta ?>&amp;placement=banner">Try Argo Books free <span aria-hidden="true">&rarr;</span></a>
+  </aside>
 </div>
 
 <footer>

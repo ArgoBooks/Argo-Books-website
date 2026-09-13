@@ -140,7 +140,7 @@ if (PHP_SAPI !== 'cli') {
 
 A new tool is not finished until all four are done:
 
-1. A card in `$tools` in `tools/index.php`, with an icon from `resources/icons.php` and one of the five colour variants
+1. A row in the right group of `$tool_groups` in `tools/index.php`, with its own one-line description and an icon added to `$tool_icons` in the same file
 2. An entry in the `$toolPages` block in `sitemap_urls.php`
 3. Its test file in the `test` script in `package.json`
 4. `php -l` clean, and one render through the PHP CLI with no notices
