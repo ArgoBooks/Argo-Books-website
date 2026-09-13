@@ -7,55 +7,55 @@
         <language>en</language>
 
         <item>
-            <title>Version 2.0.14</title>
-            <sparkle:version>2.0.14</sparkle:version>
+            <title>Version 2.0.15</title>
+            <sparkle:version>2.0.15</sparkle:version>
             <sparkle:releaseNotesLink>https://argorobots.com/whats-new/</sparkle:releaseNotesLink>
             <pubDate>Thu, 01 Jan 2026 10:00:00 +0000</pubDate>
-            <enclosure url="https://argorobots.com/resources/downloads/2.0.14/Argo%20Books%20Installer%20V.2.0.14.exe"
-                       sparkle:version="2.0.14"
+            <enclosure url="https://argorobots.com/resources/downloads/2.0.15/Argo%20Books%20Installer%20V.2.0.15.exe"
+                       sparkle:version="2.0.15"
                        sparkle:os="windows"
                        type="application/octet-stream"
                        length="0"
-                       sparkle:edSignature="h9LLo6Sn12hI5loqM1KcA35c+JhxQFsaJ/yDaHMDg3MoVQkqHpAzeU/dB0pbqLEzNrc7IX+hFpxliYpMI3ThDg==" />
+                       sparkle:edSignature="T2RoBFggum1NCEK6O8ZeIWi5TpNoKtiDsBwKdn16EFQkuUTLU4nfPM0YPx8JHydvBqlj66Or9GRBo4bpqDabAg==" />
         </item>
 
         <item>
-            <title>Version 2.0.14</title>
-            <sparkle:version>2.0.14</sparkle:version>
+            <title>Version 2.0.15</title>
+            <sparkle:version>2.0.15</sparkle:version>
             <sparkle:releaseNotesLink>https://argorobots.com/whats-new/</sparkle:releaseNotesLink>
             <pubDate>Thu, 01 Jan 2026 10:00:00 +0000</pubDate>
-            <enclosure url="https://argorobots.com/resources/downloads/2.0.14/ArgoBooks-2.0.14-linux-x64.AppImage"
-                       sparkle:version="2.0.14"
+            <enclosure url="https://argorobots.com/resources/downloads/2.0.15/ArgoBooks-2.0.15-linux-x64.AppImage"
+                       sparkle:version="2.0.15"
                        sparkle:os="linux"
                        type="application/octet-stream"
                        length="0"
-                       sparkle:edSignature="kfOMfxXRIUR+haAv06KnsYeQ5XjgiFmRMTvxpEEPdhPVH4OWOk5q/xX+v6criQ1PuoW1+vlPgm/JZovKGI1eCQ==" />
+                       sparkle:edSignature="QP21spA6Mn+5/G3e2jJiJzvfjAPaMy1Bax8fPgLGEsO1Y6DvjmgjwbcwLJKgeyDcbxnEPQdtHQa7hACNhJ2pDQ==" />
         </item>
 
         <item>
-            <title>Version 2.0.14</title>
-            <sparkle:version>2.0.14</sparkle:version>
+            <title>Version 2.0.15</title>
+            <sparkle:version>2.0.15</sparkle:version>
             <sparkle:releaseNotesLink>https://argorobots.com/whats-new/</sparkle:releaseNotesLink>
             <pubDate>Thu, 01 Jan 2026 10:00:00 +0000</pubDate>
-            <enclosure url="https://argorobots.com/resources/downloads/2.0.14/ArgoBooks-2.0.14-osx-arm64.zip"
-                       sparkle:version="2.0.14"
+            <enclosure url="https://argorobots.com/resources/downloads/2.0.15/ArgoBooks-2.0.15-osx-arm64.zip"
+                       sparkle:version="2.0.15"
                        sparkle:os="macos-arm64"
                        type="application/zip"
                        length="118840544"
-                       sparkle:edSignature="WjGY+3t2WZVlF5DTngUT8GDGmfjAtL2D1grRsvbvPfX69pdwBnZ08P8OwPSKRbmi8hMspm05lGKyQOaA8NBdAw==" />
+                       sparkle:edSignature="UJjoaFC060Auw36D5sT50GU+2mlykOWmum96Qq+g84RRWrBx8awqOPTDQnFePAj+XAgqGjJQrhmsHKwbrs5uAw==" />
         </item>
 
         <item>
-            <title>Version 2.0.14</title>
-            <sparkle:version>2.0.14</sparkle:version>
+            <title>Version 2.0.15</title>
+            <sparkle:version>2.0.15</sparkle:version>
             <sparkle:releaseNotesLink>https://argorobots.com/whats-new/</sparkle:releaseNotesLink>
             <pubDate>Thu, 01 Jan 2026 10:00:00 +0000</pubDate>
-            <enclosure url="https://argorobots.com/resources/downloads/2.0.14/ArgoBooks-2.0.14-osx-x64.zip"
-                       sparkle:version="2.0.14"
+            <enclosure url="https://argorobots.com/resources/downloads/2.0.15/ArgoBooks-2.0.15-osx-x64.zip"
+                       sparkle:version="2.0.15"
                        sparkle:os="macos-x64"
                        type="application/zip"
                        length="148047275"
-                       sparkle:edSignature="F30tgwGHp4sGFdVDMQO7l/IjB7zHfjunE8IJa5y4544mJzynVZUomJ0BSADOm6QoUbZowvz7CxX/QRWBQlIpCg==" />
+                       sparkle:edSignature="0slCDEJ13LwaNcXUaLR6y/5HP/M5YYdZ9Lc4fjtvmJFO9Z51Hxove2q0pkkGteiBu1U3V2Mo2v9/RyzRPMXSBQ==" />
         </item>
     </channel>
 </rss>

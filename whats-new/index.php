@@ -93,6 +93,60 @@ $pricing = get_pricing_config();
     <div class="container">
         <div class="version-grid">
 
+            <!-- Version 2.0.15 -->
+            <div class="version-card">
+                <div class="version-header">
+                    <div class="version-info">
+                        <span class="version-tag">Version 2.0.15</span>
+                        <span class="date-tag">September 12 2026</span>
+                    </div>
+                    <?= svg_icon('chevron-down', 24, 'dropdown-arrow', null, 'stroke-linecap="round" stroke-linejoin="round"') ?>
+                </div>
+
+                <div class="version-content">
+                    <div class="changelog">
+                        <div class="changelog-section">
+                            <h4 class="section-label feature">New Features</h4>
+                            <ul class="changelog-list">
+                                <li><strong>Argo Books for Mac:</strong> Download Argo Books on any Mac, Apple silicon or Intel. With Premium, you can open your company file with Touch ID.</li>
+                                <li><strong>Add items as you go:</strong> When you record an expense or revenue, type a new item or category right on the line and Argo Books creates it when you save. No more stopping to set up products first.</li>
+                                <li><strong>Export a Record of Employment:</strong> Create the ROE file itself, ready to upload to Service Canada.</li>
+                            </ul>
+                        </div>
+                        <div class="changelog-section">
+                            <h4 class="section-label enhancement">Enhancements</h4>
+                            <ul class="changelog-list">
+                                <li><strong>An easier start:</strong> For new users, the first screen now puts Create New Company up front, with the sample company right below it.</li>
+                                <li><strong>Choose the currency on scanned receipts:</strong> When you review a scanned receipt, you can see the currency and change it before saving.</li>
+                                <li><strong>Last name is optional:</strong> You can now add a customer with only a first name.</li>
+                                <li><strong>Categories to start with:</strong> A new company starts with categories for its industry.</li>
+                                <li><strong>A helping hand in Analytics:</strong> An empty Analytics page points you to adding your first expense.</li>
+                                <li><strong>Argo Books speaks your language from the start:</strong> A new install opens in your computer's language when we have that translation.</li>
+                            </ul>
+                        </div>
+                        <div class="changelog-section">
+                            <h4 class="section-label fix">Fixes</h4>
+                            <ul class="changelog-list">
+                                <li>A yearly schedule that starts on February 29 now stays on the 29th in leap years.</li>
+                                <li>Exporting a PDF receipt saves the original PDF, with every page.</li>
+                                <li>Two scanned receipts with the same file name each show their own preview.</li>
+                                <li>Changing the return date on a rental updates what it costs.</li>
+                                <li>A purchase order that arrived in part can now be received the rest of the way.</li>
+                                <li>Undoing a bank match puts the suggestions on the other lines straight back.</li>
+                                <li>Editing a recurring schedule's start date moves its next date to match.</li>
+                                <li>Resuming a paused recurring schedule picks up from today.</li>
+                                <li>Extending a finished recurring schedule starts it again.</li>
+                                <li>A refunded invoice no longer shows as overdue.</li>
+                                <li>Spreadsheets with day-first dates, like UK dates, import correctly.</li>
+                                <li>The archive button on the employee list is no longer cut off.</li>
+                                <li>Archiving now has its own icon.</li>
+                                <li>The update window shows the Argo Books logo.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Version 2.0.14 -->
             <div class="version-card">
                 <div class="version-header">
