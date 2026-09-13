@@ -96,6 +96,7 @@ array_unshift($history, $current_post);
     <link rel="stylesheet" href="../resources/styles/link.css">
     <link rel="stylesheet" href="../resources/styles/custom-colors.css">
     <link rel="stylesheet" href="../resources/header/style.css">
+    <link rel="stylesheet" href="../resources/header/dark.css">
     <link rel="stylesheet" href="../resources/footer/style.css">
 </head>
 
@@ -104,18 +105,9 @@ array_unshift($history, $current_post);
         <?php include __DIR__ . '/../resources/header/header.php'; ?>
     </header>
 
-    <div class="hero hero-compact">
-        <div class="hero-bg">
-            <div class="hero-gradient-orb hero-orb-1"></div>
-            <div class="hero-gradient-orb hero-orb-2"></div>
-        </div>
-        <div class="hero-content">
-            <div class="hero-badge">
-                <?= svg_icon('edit', 16) ?>
-                <span>Edit History</span>
-            </div>
-        </div>
-    </div>
+    <nav class="post-breadcrumb" aria-label="Breadcrumb">
+        <a href="./">Community</a><span class="sep" aria-hidden="true">/</span><a href="view_post.php?id=<?php echo $post_id; ?>"><?php echo $post['post_type'] === 'bug' ? 'Bug Report' : 'Feature Request'; ?></a><span class="sep" aria-hidden="true">/</span><span>Edit History</span>
+    </nav>
 
     <div class="community-wrapper">
         <div class="page-header">

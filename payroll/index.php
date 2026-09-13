@@ -166,12 +166,12 @@ $faqs = [
 
     <link rel="stylesheet" href="../resources/styles/marketing-sections.css">
     <link rel="stylesheet" href="../resources/styles/custom-colors.css">
-    <link rel="stylesheet" href="../resources/styles/typography.css">
     <link rel="stylesheet" href="../resources/styles/button.css">
     <link rel="stylesheet" href="../resources/styles/link.css">
     <link rel="stylesheet" href="../resources/styles/faq.css">
     <link rel="stylesheet" href="../resources/header/style.css">
     <link rel="stylesheet" href="../resources/footer/style.css">
+    <link rel="stylesheet" href="../resources/styles/typography.css">
     <link rel="stylesheet" href="style.css">
 </head>
 
@@ -185,14 +185,9 @@ $faqs = [
         <!-- Shared .hero. The site header is position:absolute with white nav
              text until it goes sticky, so a light hero hides the navigation. -->
         <section class="hero">
-            <div class="hero-bg">
-                <div class="hero-gradient-orb hero-orb-1"></div>
-                <div class="hero-gradient-orb hero-orb-2"></div>
-            </div>
             <div class="container pr-hero-grid">
                 <div class="pr-hero-copy animate-fade-in">
-                    <span class="hero-badge"><?= svg_icon('map-pin', 14) ?> CRA and Revenu Qu&eacute;bec</span>
-                    <h1>Payroll without the<br><span class="text-gradient">per-employee bill</span>.</h1>
+                    <h1>Payroll without the<br>per-employee bill.</h1>
                     <p class="hero-subtitle">
                         CPP, EI and income tax worked out from the CRA's own tables for every province and territory,
                         Quebec included. Pay stubs on payday, T4s in January, and the XML file the CRA accepts.
@@ -210,7 +205,8 @@ $faqs = [
                 </div>
 
                 <!-- Real markup rather than a screenshot: the numbers are the argument. -->
-                <aside class="pr-stub animate-fade-in" aria-label="Example pay stub">
+                <div class="pr-stub-frame animate-fade-in">
+                <aside class="pr-stub" aria-label="Example pay stub">
                     <div class="pr-stub-head">
                         <span class="pr-stub-title">Semi-monthly pay</span>
                         <span class="pr-stub-tag">Example</span>
@@ -232,6 +228,7 @@ $faqs = [
                         <span>Calculated on your computer, from the CRA table covering this pay date.</span>
                     </div>
                 </aside>
+                </div>
             </div>
         </section>
 

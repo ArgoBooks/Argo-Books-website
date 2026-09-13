@@ -62,14 +62,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $premium_subscription) {
     <link rel="stylesheet" href="../../resources/footer/style.css">
     <style>
         .subscription-info {
-            background: linear-gradient(135deg, #f5f3ff, #ede9fe);
-            border: 1px solid #c4b5fd;
+            background: var(--premium-50);
+            border: 1px solid var(--premium-200);
             border-radius: 8px;
             padding: 20px;
             margin: 20px 0;
         }
         .subscription-info h3 {
-            color: #7c3aed;
+            color: var(--premium-600);
             margin-top: 0;
         }
     </style>

@@ -151,7 +151,6 @@ $faqs = $d['faqs'];
     <!-- Hero. Split, with the live mockup beside the copy rather than centred
          text on a gradient. Same demo markup and loop the landing page uses. -->
     <section class="fp-hero hero">
-        <div class="hero-bg" aria-hidden="true"></div>
         <div class="fp-wrap">
             <div class="fp-hero-grid">
                 <div>

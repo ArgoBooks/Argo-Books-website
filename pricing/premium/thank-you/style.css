@@ -9,7 +9,7 @@
 .success-icon {
     width: 100px;
     height: 100px;
-    background: linear-gradient(135deg, var(--premium-500), var(--premium-600));
+    background: var(--premium-500);
     border-radius: var(--radius-round);
     display: flex;
     align-items: center;

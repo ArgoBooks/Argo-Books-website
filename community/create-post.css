@@ -6,65 +6,20 @@ header .header-inner .menu-container .menu .community:after {
 /* ========================================
    Hero Section
    ======================================== */
+/* Lit slate, as on the homepage and pricing. The form card rises into the
+   bottom of this band. */
 .hero {
-  position: relative;
-  padding: 80px 0 40px;
-  background: linear-gradient(135deg, var(--hero-gradient-start) 0%, var(--hero-gradient-end) 100%);
+  padding: 148px 0 152px;
+  background:
+    radial-gradient(50% 80% at 50% 0%, rgba(120, 150, 220, 0.16), transparent 70%),
+    linear-gradient(160deg, var(--hero-gradient-start) 0%, var(--hero-gradient-end) 100%);
   text-align: center;
-  overflow: hidden;
-}
-
-.hero .hero-bg {
-  position: absolute;
-  inset: 0;
-}
-
-.hero .hero-gradient-orb {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(80px);
-  opacity: 0.5;
-}
-
-.hero .hero-orb-1 {
-  width: 400px;
-  height: 400px;
-  background: linear-gradient(135deg, var(--emerald-500), var(--cyan-500));
-  top: -100px;
-  left: -100px;
-}
-
-.hero .hero-orb-2 {
-  width: 300px;
-  height: 300px;
-  background: linear-gradient(135deg, var(--primary-blue), var(--purple-500));
-  bottom: -50px;
-  right: -50px;
 }
 
 .hero .hero-content {
-  position: relative;
-  z-index: 2;
   max-width: 700px;
   margin: 0 auto;
   padding: 0 24px;
-}
-
-.hero .hero-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  background: var(--hero-badge-bg);
-  border: 1px solid var(--hero-badge-border);
-  border-radius: 50px;
-  font-size: 0.9rem;
-  color: var(--white);
-  margin-bottom: 24px;
-}
-
-.hero .hero-badge svg {
-  color: var(--emerald-500);
 }
 
 .hero h1 {
@@ -79,6 +34,45 @@ header .header-inner .menu-container .menu .community:after {
   font-size: 1.25rem;
   color: var(--white);
   margin-bottom: 24px;
+}
+
+/* Breadcrumb that replaces the hero on the view-post page. The top padding
+   clears the site's absolute header. */
+.post-breadcrumb {
+  width: 90%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 110px 10px 16px;
+  font-size: 14px;
+  color: var(--gray-700);
+}
+
+.post-breadcrumb a {
+  color: var(--primary-blue);
+  text-decoration: none;
+}
+
+.post-breadcrumb a:hover {
+  text-decoration: underline;
+}
+
+.post-breadcrumb .sep {
+  margin: 0 6px;
+  color: var(--gray-400);
+}
+
+.comment-ban-notice {
+  margin-top: 20px;
+  padding: 16px;
+  background-color: var(--red-100);
+  border: 1px solid var(--red-200);
+  border-radius: 6px;
+  color: var(--red-800);
+}
+
+.comment-ban-notice h4 {
+  margin-top: 0;
+  color: var(--red-800);
 }
 
 /* ========================================
@@ -96,6 +90,15 @@ header .header-inner .menu-container .menu .community:after {
   border-radius: 8px;
   box-shadow: 0 2px 10px var(--shadow-sm);
   padding: 30px;
+}
+
+/* view_post.php shares this file but has no hero. */
+.hero + .community-wrapper .post-form-container {
+  position: relative;
+  margin: -100px auto 64px;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--elevation-lg);
 }
 
 .post-form h2 {
@@ -147,7 +150,12 @@ header .header-inner .menu-container .menu .community:after {
 
 @media (max-width: 768px) {
   .hero {
-    padding: 120px 0 60px;
+    padding: 120px 0 120px;
+  }
+
+  .hero + .community-wrapper .post-form-container {
+    margin: -80px auto 40px;
+    padding: 20px;
   }
 
   .hero h1 {
@@ -316,7 +324,7 @@ header .header-inner .menu-container .menu .community:after {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--primary-blue), var(--blue-800));
+  background: var(--primary-blue);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -371,9 +379,13 @@ header .header-inner .menu-container .menu .community:after {
 }
 
 .preview-empty-icon {
-  font-size: 48px;
-  margin-bottom: 16px;
-  opacity: 0.5;
+  margin-bottom: 12px;
+  color: var(--gray-400);
+}
+
+.preview-empty-icon svg {
+  display: block;
+  margin: 0 auto;
 }
 
 .preview-avatar img {

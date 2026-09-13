@@ -28,13 +28,12 @@ return [
     'og_title' => 'Argo Books vs FreshBooks: A Simpler, More Affordable Alternative',
     'og_description' => 'Compare Argo Books and FreshBooks side by side. See why small businesses are choosing Argo Books for simpler, more affordable finance management.',
 
-    'hero_eyebrow' => 'FreshBooks alternative',
-    'hero_h1' => 'Argo Books <span class="text-gradient">vs FreshBooks</span>',
+    'hero_h1' => 'Argo Books vs FreshBooks',
     'hero_subtitle' => 'A simpler, more affordable way to manage your small business finances. All the essentials, none of the accounting jargon or the per-client fees.',
 
     'differences_h2' => 'What\'s the difference between Argo Books and FreshBooks?',
     'differences_desc' => 'Both handle the small business basics. The difference is who they\'re built for. FreshBooks is built for freelancers billing by the hour and priced per client; Argo Books is built for the business owner doing their own books, with no client limits and one flat price.',
-    'why_h3' => 'Why choose Argo Books over FreshBooks?',
+    'why_h3' => 'What changes when you move from FreshBooks to Argo Books',
     'why_list' => [
         '<strong>Everything in one clean app.</strong> Invoicing, expenses, receipts, inventory, and forecasting together, with no accounting jargon and no double-entry to learn.',
         '<strong>A genuinely free plan.</strong> All the core features forever, no trial and no credit card. FreshBooks only gives you a 30-day trial.',
@@ -42,8 +41,6 @@ return [
         '<strong>AI that\'s included, not upsold.</strong> Receipt scanning, spreadsheet import, and predictive analytics come built in, not features FreshBooks offers at all.',
         '<strong>One predictable price.</strong> Everything in Premium for $' . $argo_monthly . ' CAD/month. No per-client fees and no client limits on any plan.',
     ],
-    'callout_title' => 'No client limits',
-    'callout_sub' => 'FreshBooks caps clients on its cheaper plans',
 
     // Feature, Argo Free, Argo Premium, FreshBooks.
     // 'yes' and 'no' render the tick and cross; any other string is a grey pill.
@@ -92,12 +89,12 @@ return [
         'Mobile apps for iOS and Android, plus polished, strong invoicing',
     ],
 
-    'key_h2' => 'Everything you need, nothing you don\'t',
+    'key_h2' => 'No client limits, and it works offline',
     'key_desc' => 'Both tools work for small businesses, but they focus on different things. FreshBooks shines at invoicing and time tracking. Argo Books focuses on simplicity, offline access, and inventory.',
     'key_cards' => [
-        ['tone' => '', 'icon' => 'dollar', 'h3' => 'More affordable', 'p' => 'FreshBooks starts at $' . $fb_lite . ' CAD/month for just 5 clients. Argo Books has a free version with core features, and Premium is a fraction of the cost with no client limits.'],
-        ['tone' => 'purple', 'icon' => 'bolt', 'h3' => 'Works offline', 'p' => 'FreshBooks is cloud-only: no internet, no access. Argo Books is a desktop app that works offline, so you\'re never locked out of your own data.'],
-        ['tone' => 'green', 'icon' => 'map-pin', 'h3' => 'Made in Canada', 'p' => 'Built by a Canadian startup that understands Canadian small businesses. Our pricing is in CAD, and our team is based in Saskatchewan.'],
+        ['icon' => 'dollar', 'h3' => 'More affordable', 'p' => 'FreshBooks starts at $' . $fb_lite . ' CAD/month for just 5 clients. Argo Books has a free version with core features, and Premium is a fraction of the cost with no client limits.'],
+        ['icon' => 'bolt', 'h3' => 'Works offline', 'p' => 'FreshBooks is cloud-only: no internet, no access. Argo Books is a desktop app that works offline, so you\'re never locked out of your own data.'],
+        ['icon' => 'map-pin', 'h3' => 'Made in Canada', 'p' => 'Built in Saskatchewan for Canadian small businesses, with pricing in CAD.'],
     ],
 
     'honest' => [

@@ -152,24 +152,18 @@ foreach ($platforms as $key => $platform) {
     <main>
 
     <section class="hero">
-        <div class="hero-bg">
-            <div class="hero-orb hero-orb-1"></div>
-            <div class="hero-orb hero-orb-2"></div>
-        </div>
         <div class="hero-content">
             <h1>Older Versions</h1>
             <p>Download previous releases of Argo Books</p>
+            <p class="version-notice">
+                These are past releases, kept for anyone who needs a specific version. For everyday use,
+                <a href="../downloads">download the latest version</a>, which has every current feature and update.
+            </p>
         </div>
     </section>
 
-    <div class="warning-box">
-        <h3>⚠️ Important Notice</h3>
-        <p><strong>We recommend using the <a href="../downloads">latest version</a>.</strong> Older versions may have
-            security vulnerabilities, compatibility issues, or missing features. Only use previous versions if you have
-            a specific need for it.</p>
-    </div>
-
     <div class="container">
+
         <!-- Platform Tabs -->
         <div class="platform-tabs">
             <?php foreach ($platforms as $key => $platform): ?>
@@ -236,9 +230,6 @@ foreach ($platforms as $key => $platform) {
                                 data-platform="<?php echo $key; ?>">
                                 Download V.<?php echo htmlspecialchars($version['version']); ?>
                             </a>
-                            <div class="version-badge">
-                                Legacy Version
-                            </div>
                         </div>
                     </div>
                     <?php endforeach; ?>

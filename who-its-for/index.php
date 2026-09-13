@@ -146,36 +146,34 @@ $niches = [
     </header>
     <main>
 
-    <section class="hero">
-        <div class="hero-bg">
-            <div class="hero-gradient-orb hero-orb-1"></div>
-            <div class="hero-gradient-orb hero-orb-2"></div>
-        </div>
+    <section class="hero wif-hero">
         <div class="container">
-            <h1 class="animate-fade-in">Who Argo Books is for</h1>
-            <p class="hero-subtitle animate-fade-in">Argo Books was built for small business owners doing their own bookkeeping. Here's how it fits the work you actually do.</p>
-            <div class="hero-ctas animate-fade-in">
-                <a href="<?= htmlspecialchars($download_url) ?>" class="btn-cta btn-cta-primary">
-                    <span>Download Free</span>
-                    <?= svg_icon('arrow-right', 18) ?>
-                </a>
-                <a href="#niches" class="btn-cta btn-cta-outline">
-                    <span>Find Your Industry</span>
-                </a>
+            <div class="wif-hero-grid">
+                <div class="wif-hero-copy">
+                    <h1 class="animate-fade-in">Who Argo Books is for</h1>
+                    <p class="hero-subtitle animate-fade-in">Argo Books was built for small business owners doing their own bookkeeping. Here's how it fits the work you actually do.</p>
+                    <div class="hero-ctas animate-fade-in">
+                        <a href="<?= htmlspecialchars($download_url) ?>" class="btn-cta btn-cta-primary">
+                            <span>Download Free</span>
+                            <?= svg_icon('arrow-right', 18) ?>
+                        </a>
+                        <a href="#niches" class="btn-cta btn-cta-outline">
+                            <span>Find Your Industry</span>
+                        </a>
+                    </div>
+                    <p class="hero-reassurance animate-fade-in">Free desktop app for Windows, macOS, and Linux. No account, no credit card.</p>
+                </div>
+                <div class="wif-hero-intro animate-fade-in">
+                    <h2>Ten industries, one app</h2>
+                    <p>Each page below covers how Argo Books handles the billing patterns, supply costs, and reporting that matter for that line of work. If your industry is not listed, the core bookkeeping still works the same way: invoices, expenses, reports, and (where it applies) inventory or rentals.</p>
+                </div>
             </div>
-            <p class="hero-reassurance animate-fade-in">Free desktop app for Windows, macOS, and Linux. No account, no credit card.</p>
         </div>
     </section>
 
-    <section id="niches" class="niches-section">
+    <section class="niches-section">
         <div class="container">
-            <div class="section-header animate-on-scroll">
-                <span class="section-label">Industries</span>
-                <h2>Ten industries, one app</h2>
-                <p class="section-desc">Each page below covers how Argo Books handles the billing patterns, supply costs, and reporting that matter for that line of work. If your industry is not listed, the core bookkeeping still works the same way: invoices, expenses, reports, and (where it applies) inventory or rentals.</p>
-            </div>
-
-            <div class="niche-card-grid">
+            <div id="niches" class="niche-card-grid">
                 <?php foreach ($niches as $n): ?>
                 <a href="../for-<?= htmlspecialchars($n['slug']) ?>/?source=<?= htmlspecialchars($cta_source) ?>" class="niche-card animate-on-scroll">
                     <div class="niche-card-icon <?= htmlspecialchars($n['tone']) ?>">

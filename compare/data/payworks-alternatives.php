@@ -29,8 +29,7 @@ return [
     'og_title' => 'Payworks alternatives for small Canadian businesses',
     'og_description' => 'Payworks is a quoted payroll service aimed at established employers. Argo Books is software you download, with Canadian payroll, T4s and Quebec at one flat price.',
 
-    'hero_eyebrow' => 'Payworks alternative',
-    'hero_h1' => '<span class="text-gradient">Payworks</span><br>alternatives',
+    'hero_h1' => 'Payworks alternatives',
     'hero_subtitle' => 'Payworks is a managed payroll service: a quote, an onboarding process, and a bill that scales with headcount. Argo Books is software you download and run, with Canadian payroll, T4s and Quebec included at $' . $argo_monthly . ' CAD a month.',
 
     'differences_h2' => 'What\'s the difference between Argo Books and Payworks?',
@@ -43,8 +42,6 @@ return [
         '<strong>Right-sized for a very small payroll.</strong> A managed service\'s base fee is most of the bill when you are paying two or three people, which is where a flat software price makes the most difference.',
         '<strong>Staff records stay on your machine</strong>, rather than being held by a payroll provider.',
     ],
-    'callout_title' => 'Service, or software',
-    'callout_sub' => 'A quoted contract billed per head, against a published flat price you download',
 
     // Feature, Argo Free, Argo Premium, Payworks.
     'table_argo_sub' => '$' . $argo_monthly . ' CAD/month, unlimited employees',
@@ -101,9 +98,9 @@ return [
     'key_h2' => 'Two very different purchases',
     'key_desc' => 'This is less a feature comparison than a choice about what you are buying. A managed payroll service costs more and takes the work away. Software costs less and leaves the filing with you. Neither is the right answer in general, and the deciding factor is usually headcount.',
     'key_cards' => [
-        ['tone' => '', 'icon' => 'users', 'h3' => 'Where the base fee bites', 'p' => 'On a two-person payroll, most of a managed service\'s bill is the base fee rather than the work. That is the size where a flat software price makes the clearest difference.'],
-        ['tone' => 'purple', 'icon' => 'document-lines', 'h3' => 'Nothing to negotiate', 'p' => 'A published price means you can compare without a call, a quote or a discovery process. Download it and run a pay period you already know the answer to.'],
-        ['tone' => 'green', 'icon' => 'map-pin', 'h3' => 'Quebec done properly', 'p' => 'QPP, QPIP, Quebec income tax and the federal abatement calculated separately, and the RL-1 figures worked out at year end.'],
+        ['icon' => 'users', 'h3' => 'Where the base fee bites', 'p' => 'On a two-person payroll, most of a managed service\'s bill is the base fee rather than the work. That is the size where a flat software price makes the clearest difference.'],
+        ['icon' => 'document-lines', 'h3' => 'Nothing to negotiate', 'p' => 'A published price means you can compare without a call, a quote or a discovery process. Download it and run a pay period you already know the answer to.'],
+        ['icon' => 'map-pin', 'h3' => 'Quebec done properly', 'p' => 'QPP, QPIP, Quebec income tax and the federal abatement calculated separately, and the RL-1 figures worked out at year end.'],
     ],
 
     'honest' => [

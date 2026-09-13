@@ -70,7 +70,7 @@ $isDocsLanding = true;
     <section class="hero">
         <div class="hero-content">
             <h1>How can we help you?</h1>
-            <p class="hero-subtitle">Everything you need to master Argo Books - from quick setup to advanced features</p>
+            <p class="hero-subtitle">Setup guides, feature walkthroughs, and reference tables for Argo Books</p>
 
             <!-- Search Bar -->
             <div class="hero-search">
@@ -81,28 +81,23 @@ $isDocsLanding = true;
                 </div>
                 <div id="searchResults" class="search-results"></div>
             </div>
-        </div>
-        <div class="hero-decoration">
-            <div class="floating-shape shape-1"></div>
-            <div class="floating-shape shape-2"></div>
-            <div class="floating-shape shape-3"></div>
-        </div>
-    </section>
 
-    <!-- Quick Links -->
-    <section class="quick-links">
-        <a href="pages/getting-started/quick-start.php" class="quick-link">
-            <?= svg_icon('bolt', 20) ?>
-            Quick Start
-        </a>
-        <a href="../downloads/" class="quick-link">
-            <?= svg_icon('download', 20) ?>
-            Download
-        </a>
-        <a href="../contact-us/" class="quick-link">
-            <?= svg_icon('chat', 20) ?>
-            Contact Support
-        </a>
+            <!-- Quick Links -->
+            <nav class="quick-links" aria-label="Quick links">
+                <a href="pages/getting-started/quick-start.php" class="quick-link">
+                    <?= svg_icon('bolt', 18) ?>
+                    Quick Start
+                </a>
+                <a href="../downloads/" class="quick-link">
+                    <?= svg_icon('download', 18) ?>
+                    Download
+                </a>
+                <a href="../contact-us/" class="quick-link">
+                    <?= svg_icon('chat', 18) ?>
+                    Contact Support
+                </a>
+            </nav>
+        </div>
     </section>
 
     <!-- Main Content -->
@@ -115,7 +110,7 @@ $isDocsLanding = true;
                 </div>
                 <div class="category-info">
                     <h2>Getting Started</h2>
-                    <p>New to Argo Books? Begin your journey here</p>
+                    <p>Install and set up Argo Books</p>
                 </div>
             </div>
             <div class="category-cards">
@@ -145,7 +140,7 @@ $isDocsLanding = true;
                         <?= svg_icon('clipboard-check', 20) ?>
                     </div>
                     <h3>Free vs. Paid Version</h3>
-                    <p>Compare features and choose wisely</p>
+                    <p>Compare what each plan includes</p>
                 </a>
                 <a href="pages/getting-started/redeem-license-key.php" class="doc-card">
                     <div class="card-icon">
@@ -165,7 +160,7 @@ $isDocsLanding = true;
                 </div>
                 <div class="category-info">
                     <h2>Core Features</h2>
-                    <p>Master the powerful tools at your fingertips</p>
+                    <p>How each part of Argo Books works</p>
                 </div>
             </div>
             <div class="category-cards">
@@ -484,7 +479,7 @@ $isDocsLanding = true;
                 </div>
                 <div class="category-info">
                     <h2>Security</h2>
-                    <p>Keep your business data safe and protected</p>
+                    <p>Encryption, passwords, and backups</p>
                 </div>
             </div>
             <div class="category-cards">
@@ -520,7 +515,7 @@ $isDocsLanding = true;
             </div>
             <div class="help-text">
                 <h3>Still have questions?</h3>
-                <p>Our support team is ready to help you succeed with Argo Books</p>
+                <p>Send a message and I'll get back to you</p>
             </div>
             <a href="../contact-us/" class="help-button">Contact Support</a>
         </div>

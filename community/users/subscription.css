@@ -170,23 +170,16 @@
     font-weight: 600;
     text-align: center;
     border-radius: 8px;
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
-}
-
-.subscription-actions .btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px var(--shadow-default);
 }
 
 .subscription-actions .btn-premium {
-    background: linear-gradient(135deg, var(--premium-500), var(--premium-600));
+    background: var(--primary-blue);
     color: var(--white);
     border: none;
 }
 
 .subscription-actions .btn-premium:hover {
-    background: linear-gradient(135deg, var(--premium-600), var(--premium-700));
-    box-shadow: 0 6px 16px rgba(124, 58, 237, 0.28);
+    background: var(--blue-700);
 }
 
 /* Scoped neutral cancel: softer than the global .btn-outline-red so it
@@ -263,10 +256,9 @@
 }
 
 .features-section h3 {
-    font-size: 14px;
-    color: var(--black);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--gray-900);
     margin: 0 0 16px 0;
 }
 
@@ -301,7 +293,7 @@
 .no-subscription-card {
     text-align: center;
     padding: 40px 20px;
-    background: linear-gradient(135deg, var(--premium-50) 0%, var(--premium-100) 100%);
+    background: var(--premium-50);
     border-radius: 12px;
 }
 
@@ -578,9 +570,7 @@
 .modal-overlay {
     position: fixed;
     inset: 0;
-    background: var(--overlay-dark);
-    backdrop-filter: blur(4px);
-    display: flex;
+    background: var(--overlay-dark);    display: flex;
     align-items: center;
     justify-content: center;
     z-index: 1000;

@@ -176,10 +176,6 @@ $systemRequirements = getSystemRequirements();
     <main>
 
     <section class="hero">
-        <div class="hero-bg">
-            <div class="hero-orb hero-orb-1"></div>
-            <div class="hero-orb hero-orb-2"></div>
-        </div>
         <div class="hero-content">
             <h1>Download Argo Books</h1>
             <p>Get started for free. No account required.</p>

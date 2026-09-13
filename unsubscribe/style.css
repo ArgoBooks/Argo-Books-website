@@ -1,90 +1,40 @@
-/* Base styles */
+/* Shared by unsubscribe/, verify-email/ and subscribe/confirm.php */
 .first {
   min-height: calc(100vh - 80px);
   padding: 100px 0 40px;
-  background: linear-gradient(to bottom, var(--whiteBackground), var(--white));
+  background: var(--whiteBackground);
   display: flex;
   align-items: flex-start;
   justify-content: center;
 }
 
-/* Success container */
 .success-container {
-  max-width: 640px;
+  max-width: 600px;
   width: 85%;
   margin: 20px auto 0;
   background: var(--white);
+  border: 1px solid var(--gray-200);
   border-radius: var(--radius-md);
-  box-shadow: var(--elevation-lg);
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  padding: 50px 40px;
-  position: relative;
-  animation: fadeIn 0.5s ease-out;
+  padding: 40px;
+  text-align: left;
 }
 
-/* Success icon */
-.success-icon {
-  width: 90px;
-  height: 90px;
-  border-radius: var(--radius-round);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 25px;
-  color: var(--white);
-  transform: scale(0);
-  animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-  animation-delay: 0.2s;
-}
-
-.state-unsubscribed .success-icon,
-.state-already_unsubscribed .success-icon {
-  background: linear-gradient(45deg, var(--primary-blue), var(--blue-700));
-}
-
-.state-resubscribed .success-icon {
-  background: linear-gradient(45deg, var(--emerald-500), var(--emerald-600));
-}
-
-.state-invalid .success-icon {
-  background: linear-gradient(45deg, var(--amber-500), var(--amber-600));
-}
-
-.success-icon svg {
-  width: 45px;
-  height: 45px;
-  stroke-width: 2.5;
-}
-
-/* Success content */
 .success-content {
   width: 100%;
 }
 
 h1 {
-  font-size: var(--text-3xl);
+  font-size: var(--text-2xl);
   font-weight: 600;
   color: var(--slate-1a202c);
-  margin-bottom: 16px;
-  transform: translateY(20px);
-  opacity: 0;
-  animation: slideUp 0.5s ease-out forwards;
-  animation-delay: 0.4s;
+  margin: 0 0 16px;
 }
 
 .success-message {
   font-size: var(--text-md);
   color: var(--black);
   line-height: 1.6;
-  margin-bottom: 30px;
-  transform: translateY(20px);
-  opacity: 0;
-  animation: slideUp 0.5s ease-out forwards;
-  animation-delay: 0.6s;
+  margin: 0 0 24px;
 }
 
 .success-message strong {
@@ -92,24 +42,18 @@ h1 {
   font-weight: 600;
 }
 
-/* Information box */
 .info-box {
   background: var(--neutral-f7fafc);
   border-radius: var(--radius-sm);
-  padding: 22px 25px;
-  margin-bottom: 30px;
-  text-align: left;
-  transform: translateY(20px);
-  opacity: 0;
-  animation: slideUp 0.5s ease-out forwards;
-  animation-delay: 0.8s;
+  padding: 20px 24px;
+  margin-bottom: 24px;
 }
 
 .info-box h3 {
   font-size: var(--text-sm);
   font-weight: 500;
   color: var(--slate-2d3748);
-  margin-bottom: 12px;
+  margin: 0 0 12px;
 }
 
 .info-box ul {
@@ -128,28 +72,16 @@ h1 {
   margin-bottom: 0;
 }
 
-/* Sign-off signature */
 .signature {
-  font-style: italic;
   color: var(--black);
   font-size: var(--text-sm);
-  margin-bottom: 28px;
-  transform: translateY(20px);
-  opacity: 0;
-  animation: slideUp 0.5s ease-out forwards;
-  animation-delay: 0.9s;
+  margin-bottom: 24px;
 }
 
-/* Action buttons */
 .action-buttons {
   display: flex;
-  justify-content: center;
-  gap: 16px;
+  gap: 12px;
   flex-wrap: wrap;
-  transform: translateY(20px);
-  opacity: 0;
-  animation: slideUp 0.5s ease-out forwards;
-  animation-delay: 1s;
 }
 
 .btn {
@@ -159,7 +91,7 @@ h1 {
   text-decoration: none;
   padding: 12px 24px;
   border-radius: var(--radius-sm);
-  transition: all 0.3s ease;
+  transition: background 0.2s ease;
   border: none;
   cursor: pointer;
 }
@@ -171,8 +103,6 @@ h1 {
 
 .primary-btn:hover {
   background: var(--blue-700);
-  transform: translateY(-2px);
-  box-shadow: var(--elevation-sm);
 }
 
 .secondary-btn {
@@ -182,17 +112,12 @@ h1 {
 
 .secondary-btn:hover {
   background: var(--gray-200);
-  transform: translateY(-2px);
 }
 
-/* Undo line */
 .undo-line {
-  margin-top: 28px;
-  font-size: var(--text-xs);
+  margin: 24px 0 0;
+  font-size: var(--text-sm);
   color: var(--black);
-  opacity: 0;
-  animation: fadeIn 0.5s ease-out forwards;
-  animation-delay: 1.2s;
 }
 
 .undo-line a {
@@ -205,38 +130,13 @@ h1 {
   text-decoration: underline;
 }
 
-/* Animations */
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes popIn {
-  0% { transform: scale(0); }
-  70% { transform: scale(1.1); }
-  100% { transform: scale(1); }
-}
-
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Responsive */
 @media (max-width: 768px) {
   .first {
     padding: 120px 0 40px;
-    align-items: flex-start;
   }
 
   .success-container {
-    padding: 40px 28px;
+    padding: 32px 24px;
     width: 90%;
   }
 
@@ -250,11 +150,10 @@ h1 {
 
   .action-buttons {
     flex-direction: column;
-    gap: 12px;
   }
 
   .btn {
-    width: 100%;
+    text-align: center;
   }
 }
 
@@ -264,22 +163,8 @@ h1 {
   }
 
   .success-container {
-    padding: 32px 20px;
+    padding: 28px 20px;
     width: 95%;
-  }
-
-  .success-icon {
-    width: 72px;
-    height: 72px;
-  }
-
-  .success-icon svg {
-    width: 36px;
-    height: 36px;
-  }
-
-  h1 {
-    font-size: var(--text-xl);
   }
 
   .info-box {

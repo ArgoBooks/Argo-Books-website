@@ -61,51 +61,6 @@ require_once __DIR__ . '/../partials/fonts.php';
     <!-- Brand typefaces (Fraunces display + IBM Plex Sans body), matched to the rest of the site -->
     <?= argo_font_links('default', '    ') ?>
     <link rel="stylesheet" href="../resources/styles/typography.css">
-
-    <!-- Page-local additions: live/coming-soon badges and a muted card state
-         for integrations that aren't built yet. Reuses features/style.css for
-         everything else, these two states don't exist there. -->
-    <style>
-        .integration-card-badge {
-            display: inline-block;
-            font-size: 0.7rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.04em;
-            padding: 3px 10px;
-            border-radius: 20px;
-            margin-bottom: 14px;
-        }
-
-        .integration-card-badge.live {
-            background: var(--emerald-100);
-            color: var(--emerald-700);
-        }
-
-        .integration-card-badge.soon {
-            background: var(--gray-bg-light);
-            color: var(--gray-500);
-        }
-
-        .feature-card.integration-card-disabled {
-            cursor: default;
-            opacity: 0.8;
-        }
-
-        .feature-card.integration-card-disabled:hover {
-            transform: none;
-            box-shadow: none;
-        }
-
-        .integration-card-disabled .feature-card-icon {
-            background: var(--gray-bg-light) !important;
-            color: var(--gray-400) !important;
-        }
-
-        .integration-card-disabled h3 {
-            color: var(--gray-600);
-        }
-    </style>
 </head>
 
 <body>
@@ -115,11 +70,7 @@ require_once __DIR__ . '/../partials/fonts.php';
     <main>
 
     <!-- Hero Section -->
-    <section class="hero">
-        <div class="hero-bg">
-            <div class="hero-gradient-orb hero-orb-1"></div>
-            <div class="hero-gradient-orb hero-orb-2"></div>
-        </div>
+    <section class="hero hero--rise">
         <div class="container">
             <h1 class="animate-fade-in">Integrations</h1>
             <p class="hero-subtitle animate-fade-in">Bring the tools you already use into your books. Connect an existing tool, or your own systems through the API, so your sales, fees, and customers arrive on their own.</p>
@@ -136,17 +87,16 @@ require_once __DIR__ . '/../partials/fonts.php';
     </section>
 
     <!-- Integrations Grid Section -->
-    <section class="features-overview">
+    <section class="features-overview rise-section">
         <div class="container">
-            <div class="section-header animate-on-scroll">
-                <span class="section-label">Connect Your Tools</span>
+            <div class="rise-sheet">
+            <div class="section-header">
                 <h2 class="section-title">What you can connect</h2>
-                <p class="section-desc">Stripe and the Argo Books API are live today. We're building out support for the other platforms below next.</p>
+                <p class="section-desc">Stripe and the Argo Books API are live today.</p>
             </div>
             <div class="features-grid">
                 <!-- Stripe (live) -->
-                <a href="<?= $base ?>integrations/stripe/" class="feature-card animate-on-scroll">
-                    <span class="integration-card-badge live">Live</span>
+                <a href="<?= $base ?>integrations/stripe/" class="feature-card">
                     <div class="feature-card-icon blue">
                         <?= svg_icon('credit-card', 24) ?>
                     </div>
@@ -155,10 +105,8 @@ require_once __DIR__ . '/../partials/fonts.php';
                     <span class="feature-card-link">Learn more <?= svg_icon('arrow-right', 16) ?></span>
                 </a>
 
-                <!-- Argo Books API (live). Kept beside Stripe so the two that
-                     actually work sit together at the front of the grid. -->
-                <a href="<?= $base ?>integrations/argo-books-api/" class="feature-card animate-on-scroll">
-                    <span class="integration-card-badge live">Live</span>
+                <!-- Argo Books API (live) -->
+                <a href="<?= $base ?>integrations/argo-books-api/" class="feature-card">
                     <div class="feature-card-icon green">
                         <?= svg_icon('bolt', 24) ?>
                     </div>
@@ -166,66 +114,9 @@ require_once __DIR__ . '/../partials/fonts.php';
                     <p>Connect your own store, booking system or in-house tool and send sales straight into your books.</p>
                     <span class="feature-card-link">Learn more <?= svg_icon('arrow-right', 16) ?></span>
                 </a>
+            </div>
 
-                <!-- Square (coming soon) -->
-                <div class="feature-card integration-card-disabled animate-on-scroll">
-                    <span class="integration-card-badge soon">Coming Soon</span>
-                    <div class="feature-card-icon purple">
-                        <?= svg_icon('shape-square', 24) ?>
-                    </div>
-                    <h3>Square</h3>
-                    <p>Coming soon.</p>
-                </div>
-
-                <!-- PayPal (coming soon) -->
-                <div class="feature-card integration-card-disabled animate-on-scroll">
-                    <span class="integration-card-badge soon">Coming Soon</span>
-                    <div class="feature-card-icon cyan">
-                        <?= svg_icon('credit-card', 24) ?>
-                    </div>
-                    <h3>PayPal</h3>
-                    <p>Coming soon.</p>
-                </div>
-
-                <!-- Shopify (coming soon) -->
-                <div class="feature-card integration-card-disabled animate-on-scroll">
-                    <span class="integration-card-badge soon">Coming Soon</span>
-                    <div class="feature-card-icon amber">
-                        <?= svg_icon('shopping-bag', 24) ?>
-                    </div>
-                    <h3>Shopify</h3>
-                    <p>Coming soon.</p>
-                </div>
-
-                <!-- Etsy (coming soon) -->
-                <div class="feature-card integration-card-disabled animate-on-scroll">
-                    <span class="integration-card-badge soon">Coming Soon</span>
-                    <div class="feature-card-icon red">
-                        <?= svg_icon('package', 24) ?>
-                    </div>
-                    <h3>Etsy</h3>
-                    <p>Coming soon.</p>
-                </div>
-
-                <!-- WooCommerce (coming soon) -->
-                <div class="feature-card integration-card-disabled animate-on-scroll">
-                    <span class="integration-card-badge soon">Coming Soon</span>
-                    <div class="feature-card-icon purple">
-                        <?= svg_icon('globe', 24) ?>
-                    </div>
-                    <h3>WooCommerce</h3>
-                    <p>Coming soon.</p>
-                </div>
-
-                <!-- Gumroad (coming soon) -->
-                <div class="feature-card integration-card-disabled animate-on-scroll">
-                    <span class="integration-card-badge soon">Coming Soon</span>
-                    <div class="feature-card-icon cyan">
-                        <?= svg_icon('download', 24) ?>
-                    </div>
-                    <h3>Gumroad</h3>
-                    <p>Coming soon.</p>
-                </div>
+            <p class="section-desc" style="text-align: center; margin-top: 28px;">Next up: Square, PayPal, Shopify, Etsy, WooCommerce and Gumroad.</p>
             </div>
         </div>
     </section>

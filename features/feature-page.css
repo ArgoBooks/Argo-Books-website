@@ -193,15 +193,6 @@ h3, h4, h5, h6 {
   pointer-events: none;
 }
 
-/* Host for the shared cursor orb. It clips to the hero and stays behind
-   .fp-hero-grid, which is positioned and comes later in the DOM. */
-.fp-hero .hero-bg {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  pointer-events: none;
-}
-
 .fp-hero-grid {
   position: relative;
   display: grid;
@@ -793,14 +784,11 @@ h3, h4, h5, h6 {
 /* ============================================================
    Outro: final CTA and footer share one dark block.
    ============================================================ */
-/* Copied from /about-us/: the wrapper owns the gradient, the footer goes
-   transparent, and footer/style.css lets the footer's orbs overflow upward
-   once .dark-section-wrapper is on the parent. Without that last part the
-   orbs stay clipped to the footer box and a hard seam appears where the
-   glow starts. */
+/* The wrapper owns the background and the footer goes transparent, so the
+   CTA and footer read as one block with no seam between them. */
 .fp-outro {
   position: relative;
-  background: linear-gradient(135deg, var(--hero-gradient-start) 0%, var(--hero-gradient-end) 100%);
+  background: var(--hero-gradient-start);
   overflow: hidden;
 }
 
@@ -812,13 +800,6 @@ h3, h4, h5, h6 {
   position: relative;
   padding: 96px 0 76px;
   text-align: center;
-}
-
-/* The orb is appended straight to .cta-section, so the copy needs its own
-   stacking context to stay above it. */
-.fp-outro-cta > .fp-wrap {
-  position: relative;
-  z-index: 2;
 }
 
 .fp-outro-cta h2 {

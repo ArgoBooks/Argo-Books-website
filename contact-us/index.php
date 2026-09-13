@@ -39,14 +39,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
   <!-- SEO Meta Tags -->
   <meta name="description"
-    content="Contact Argo Books support team in Saskatoon, Canada. Get help with finance management software, report bugs, request features, or ask questions. Fast response times within 1-8 business hours.">
+    content="Contact Argo Books support in Saskatoon, Canada. Get help with the software, report a problem, request features, or ask questions. Replies usually within 1-8 business hours.">
   <meta name="keywords"
     content="contact argo books, customer support saskatoon, business software help, finance management, sales tracker support, contact form, technical support, saskatoon software company contact, customer service">
 
   <!-- Open Graph Meta Tags -->
   <meta property="og:title" content="Contact Us - Argo Books Support">
   <meta property="og:description"
-    content="Contact Argo Books support team in Saskatoon, Canada. Get help with finance management software, report bugs, request features, or ask questions. Fast response times within 1-8 business hours.">
+    content="Contact Argo Books support in Saskatoon, Canada. Get help with the software, report a problem, request features, or ask questions. Replies usually within 1-8 business hours.">
   <meta property="og:url" content="https://argorobots.com/contact-us/">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Argo Books">
@@ -56,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Contact Us - Argo Books Support">
   <meta name="twitter:description"
-    content="Contact Argo Books support team in Saskatoon, Canada. Get help with finance management software, report bugs, request features, or ask questions. Fast response times within 1-8 business hours.">
+    content="Contact Argo Books support in Saskatoon, Canada. Get help with the software, report a problem, request features, or ask questions. Replies usually within 1-8 business hours.">
   <meta property="og:image" content="https://argorobots.com/resources/images/og/og-home.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
@@ -93,13 +93,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
   <!-- Hero Section -->
   <section class="hero">
-    <div class="hero-bg">
-      <div class="hero-gradient-orb hero-orb-1"></div>
-      <div class="hero-gradient-orb hero-orb-2"></div>
-    </div>
     <div class="container">
-      <h1 class="animate-fade-in">Get in Touch</h1>
-      <p class="hero-subtitle animate-fade-in">Have a question or need help? We're here for you.</p>
+      <h1>Get in Touch</h1>
+      <p class="hero-subtitle">Questions, billing, feature requests or problems with the app: send them here and I'll reply by email.</p>
     </div>
   </section>
 
@@ -124,23 +120,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
 
         <div class="option-card animate-on-scroll">
-          <div class="option-icon feedback">
+          <div class="option-icon">
             <?= svg_icon('chat', null, '', 1.5) ?>
           </div>
           <h3>Send Feedback</h3>
-          <p>Share ideas, feature requests, or suggestions to help us improve Argo Books.</p>
+          <p>Share ideas, feature requests, or suggestions for Argo Books.</p>
           <a href="mailto:feedback@argorobots.com" class="option-link">
             feedback@argorobots.com
             <?= svg_icon('arrow-right', 16) ?>
           </a>
           <span class="response-time">
             <?= svg_icon('thumbs-up', 14) ?>
-            We read every message
+            Every message is read
           </span>
         </div>
 
         <div class="option-card animate-on-scroll">
-          <div class="option-icon community">
+          <div class="option-icon">
             <?= svg_icon('users', null, '', 1.5) ?>
           </div>
           <h3>Community Forum</h3>
@@ -151,7 +147,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           </a>
           <span class="response-time">
             <?= svg_icon('user', 14) ?>
-            Active community
+            Open to all users
           </span>
         </div>
       </div>
@@ -163,8 +159,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="container">
       <div class="form-wrapper animate-on-scroll">
         <div class="form-header">
-          <h2>Send us a Message</h2>
-          <p>Fill out the form below and we'll get back to you as soon as possible.</p>
+          <h2>Send a Message</h2>
+          <p>Fill out the form below and I'll reply to the email address you enter.</p>
         </div>
 
         <?php if (!empty($error_message)): ?>
@@ -206,7 +202,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
           <div class="form-group">
             <label for="message">Message</label>
-            <textarea id="message" name="message" maxlength="3000" rows="6" placeholder="How can we help you?" required><?php echo htmlspecialchars($form_data['message']); ?></textarea>
+            <textarea id="message" name="message" maxlength="3000" rows="6" placeholder="How can I help?" required><?php echo htmlspecialchars($form_data['message']); ?></textarea>
           </div>
 
           <button type="submit" class="submit-btn">
@@ -231,7 +227,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <?= svg_icon('map-pin', null, '', 1.5) ?>
           </div>
           <h4>Based in Canada</h4>
-          <p>We're a Canadian company proudly serving businesses worldwide.</p>
+          <p>Argo Books is built and supported in Canada.</p>
           <span class="location-badge">
             <?= svg_icon('map-pin', 14) ?>
             Saskatoon, SK, Canada

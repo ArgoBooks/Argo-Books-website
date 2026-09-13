@@ -36,7 +36,7 @@
    ======================================== */
 .features-section {
     padding: 120px 0;
-    background: linear-gradient(180deg, var(--gray-50), var(--blue-50));
+    background: var(--gray-50);
 }
 .features-section .section-header {
     max-width: none;

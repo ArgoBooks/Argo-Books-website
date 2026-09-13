@@ -26,13 +26,12 @@ return [
     'og_title' => 'ZipBooks Alternatives: More Features, Lower Price',
     'og_description' => 'Comparing ZipBooks alternatives on free-plan limits, upgrade price and what you actually get for it.',
 
-    'hero_eyebrow' => 'ZipBooks alternatives',
-    'hero_h1' => 'ZipBooks <span class="text-gradient">alternatives</span>',
+    'hero_h1' => 'ZipBooks alternatives',
     'hero_subtitle' => 'Both simple, both free to start. But Argo Books works offline, includes AI, and costs less to upgrade.',
 
     'differences_h2' => 'What\'s the difference between Argo Books and ZipBooks?',
     'differences_desc' => 'Both are simple, and both are free to start. The difference is where your data lives, what\'s built in, and what you pay to unlock more. Argo Books works offline, includes AI, and costs less to upgrade.',
-    'why_h3' => 'Why choose Argo Books over ZipBooks?',
+    'why_h3' => 'What changes when you move from ZipBooks to Argo Books',
     'why_list' => [
         '<strong>Everything in one clean app.</strong> Invoicing, expenses, receipts, inventory, and forecasting together, with no accounting jargon and no double-entry to learn.',
         '<strong>A more capable free plan.</strong> Both are free to start, but Argo\'s Free tier adds AI receipt scanning and inventory that ZipBooks\' free plan doesn\'t include.',
@@ -40,8 +39,6 @@ return [
         '<strong>AI that\'s built in.</strong> Receipt scanning, spreadsheet import, and predictive analytics come included, features ZipBooks doesn\'t offer at all.',
         '<strong>One predictable price.</strong> Everything in Premium for $' . $argo_monthly . ' CAD/month, less than ZipBooks Smarter, with no per-client fees or upsells.',
     ],
-    'callout_title' => 'Less, for more',
-    'callout_sub' => 'Argo Books Premium is cheaper than ZipBooks Smarter and does more',
 
     // Feature, Argo Free, Argo Premium, ZipBooks.
     // 'yes' and 'no' render the tick and cross; any other string is a grey pill.
@@ -89,9 +86,9 @@ return [
     'key_h2' => 'Same simplicity, more features, lower price',
     'key_desc' => 'ZipBooks was acquired by Divvy, which was later acquired by BILL Holdings, and has seen limited development since. Argo Books offers AI receipt scanning, predictive analytics, and local data storage at a lower price, with active support and development.',
     'key_cards' => [
-        ['tone' => '', 'icon' => 'dollar', 'h3' => 'Lower premium price', 'p' => 'ZipBooks\' paid plans start at $' . $zb_smarter . ' CAD/month. Argo Books Premium is $' . $argo_monthly . ' CAD/month, with AI receipt scanning, predictive analytics, and inventory management included.'],
-        ['tone' => 'purple', 'icon' => 'bolt', 'h3' => 'Works offline', 'p' => 'ZipBooks is cloud-only: no internet, no access. Argo Books is a desktop app that works offline, with your data stored locally on your device for full privacy and control.'],
-        ['tone' => 'green', 'icon' => 'map-pin', 'h3' => 'Made in Canada', 'p' => 'Built by a Canadian startup that understands Canadian small businesses. Our pricing is in CAD, and our team is based in Saskatchewan.'],
+        ['icon' => 'dollar', 'h3' => 'Lower premium price', 'p' => 'ZipBooks\' paid plans start at $' . $zb_smarter . ' CAD/month. Argo Books Premium is $' . $argo_monthly . ' CAD/month, with AI receipt scanning, predictive analytics, and inventory management included.'],
+        ['icon' => 'bolt', 'h3' => 'Works offline', 'p' => 'ZipBooks is cloud-only: no internet, no access. Argo Books is a desktop app that works offline, with your data stored locally on your device for full privacy and control.'],
+        ['icon' => 'map-pin', 'h3' => 'Made in Canada', 'p' => 'Built in Saskatchewan for Canadian small businesses, with pricing in CAD.'],
     ],
 
     'honest' => [

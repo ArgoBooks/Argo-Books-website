@@ -6,45 +6,17 @@ header .header-inner .menu-container .menu .community:after {
 /* ========================================
    Hero Section
    ======================================== */
+/* Lit slate, as on the homepage and pricing. The forum sheet below rises into
+   the bottom of this band. */
 .hero {
-  position: relative;
-  padding: 100px 0 60px;
-  background: linear-gradient(135deg, var(--hero-gradient-start) 0%, var(--hero-gradient-end) 100%);
+  padding: 148px 0 152px;
+  background:
+    radial-gradient(50% 80% at 50% 0%, rgba(120, 150, 220, 0.16), transparent 70%),
+    linear-gradient(160deg, var(--hero-gradient-start) 0%, var(--hero-gradient-end) 100%);
   text-align: center;
-  overflow: hidden;
-}
-
-.hero .hero-bg {
-  position: absolute;
-  inset: 0;
-}
-
-.hero .hero-gradient-orb {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(80px);
-  opacity: 0.5;
-}
-
-.hero .hero-orb-1 {
-  width: 400px;
-  height: 400px;
-  background: linear-gradient(135deg, var(--emerald-500), var(--cyan-500));
-  top: -100px;
-  left: -100px;
-}
-
-.hero .hero-orb-2 {
-  width: 300px;
-  height: 300px;
-  background: linear-gradient(135deg, var(--primary-blue), var(--purple-500));
-  bottom: -50px;
-  right: -50px;
 }
 
 .hero .hero-content {
-  position: relative;
-  z-index: 2;
   max-width: 700px;
   margin: 0 auto;
   padding: 0 24px;
@@ -75,25 +47,19 @@ header .header-inner .menu-container .menu .community:after {
   color: var(--white);
   font-size: 0.9rem;
   text-decoration: none;
-  transition: all 0.2s ease;
+  transition: background 0.2s ease;
 }
 
 .hero .guidelines-btn:hover {
   background: var(--hero-badge-border);
-  transform: translateY(-2px);
 }
 
 /* ========================================
    Login Prompt
    ======================================== */
 .login-prompt {
-  background: linear-gradient(135deg, var(--blue-50), var(--blue-100));
-  border: 1px solid var(--blue-300);
-  color: var(--blue-800);
-  text-align: center;
-  padding: 16px 24px;
-  margin-bottom: 24px;
-  border-radius: 12px;
+  color: var(--gray-700);
+  margin-bottom: 16px;
 }
 
 .login-prompt p {
@@ -110,6 +76,25 @@ header .header-inner .menu-container .menu .community:after {
   text-decoration: underline;
 }
 
+.ban-notice {
+  margin-bottom: 20px;
+  padding: 16px;
+  background-color: var(--red-100);
+  border: 1px solid var(--red-200);
+  border-radius: 6px;
+  color: var(--red-800);
+  text-align: center;
+}
+
+.ban-notice h4 {
+  margin-top: 0;
+  color: var(--red-800);
+}
+
+.ban-notice p {
+  margin-bottom: 0;
+}
+
 /* ========================================
    Community Wrapper
    ======================================== */
@@ -117,6 +102,19 @@ header .header-inner .menu-container .menu .community:after {
   max-width: 1000px;
   margin: 40px auto;
   padding: 0 24px;
+}
+
+/* post_history.php shares this file but has no hero, so only the page with a
+   band gets the raised sheet. */
+.hero + .community-wrapper {
+  position: relative;
+  box-sizing: border-box;
+  margin: -100px auto 64px;
+  padding: 28px 32px 12px;
+  background: var(--white);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--elevation-lg);
 }
 
 .community-actions {
@@ -213,12 +211,11 @@ header .header-inner .menu-container .menu .community:after {
   margin-bottom: 16px;
   overflow: hidden;
   position: relative;
-  transition: box-shadow 0.2s ease, transform 0.2s ease;
+  transition: box-shadow 0.2s ease;
 }
 
 .post-card:hover {
   box-shadow: 0 8px 24px var(--shadow);
-  transform: translateY(-2px);
 }
 
 /* Selection checkbox styling */
@@ -492,7 +489,13 @@ header .header-inner .menu-container .menu .community:after {
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .hero {
-    padding: 120px 0 60px;
+    padding: 120px 0 120px;
+  }
+
+  .hero + .community-wrapper {
+    margin: -80px 12px 32px;
+    padding: 20px 16px 4px;
+    border-radius: var(--radius-lg);
   }
 
   .hero h1 {

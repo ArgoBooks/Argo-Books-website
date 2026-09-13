@@ -25,13 +25,12 @@ return [
     'og_title' => 'Manager.io Alternatives: Local Books Without the Learning Curve',
     'og_description' => 'Manager.io keeps your data on your machine and expects you to know double-entry. Here is the alternative that keeps the local data and drops the prerequisite.',
 
-    'hero_eyebrow' => 'Manager.io alternatives',
-    'hero_h1' => 'Manager.io <span class="text-gradient">alternatives</span>',
+    'hero_h1' => 'Manager.io alternatives',
     'hero_subtitle' => 'Both run on your machine and keep your data local. Argo Books assumes you are a business owner, not a bookkeeper.',
 
     'differences_h2' => 'What\'s the difference between Argo Books and Manager.io?',
     'differences_desc' => 'Manager.io is the closest thing to Argo Books in philosophy: a real desktop application, free to download, with your data on your own disk. Where they part company is the audience. Manager.io is built around traditional double-entry accounting; Argo Books is built for the person running the business.',
-    'why_h3' => 'Why choose Argo Books over Manager.io?',
+    'why_h3' => 'What changes when you move from Manager.io to Argo Books',
     'why_list' => [
         '<strong>No accounting knowledge required.</strong> Manager.io expects you to understand double-entry, chart of accounts and journal entries. Argo Books asks what you spent and who you paid.',
         '<strong>AI that\'s built in.</strong> Receipt scanning turns a photo into a filed expense, spreadsheet import maps your columns automatically, and predictive analytics forecasts your cash flow. Manager.io has none of these.',
@@ -39,8 +38,6 @@ return [
         '<strong>Modern interface.</strong> Argo Books is built to look and behave like software from this decade rather than a forms-and-tables admin panel.',
         '<strong>Local data on both sides.</strong> You do not have to give up privacy to get usability. Argo Books keeps your books on your machine, encrypted, exactly as Manager.io does.',
     ],
-    'callout_title' => 'Same principle, different audience',
-    'callout_sub' => 'Both keep your data local; Argo does not require accounting training',
 
     // Feature, Argo Free, Argo Premium, Manager.io.
     // 'yes' and 'no' render the tick and cross; any other string is a grey pill.
@@ -90,9 +87,9 @@ return [
     'key_h2' => 'Local data without the accounting degree',
     'key_desc' => 'Manager.io proves people want desktop accounting that keeps data local. Argo Books agrees with that and takes out the part where you have to learn double-entry bookkeeping first.',
     'key_cards' => [
-        ['tone' => '', 'icon' => 'users', 'h3' => 'Built for owners, not bookkeepers', 'p' => 'Manager.io is organised around accounts, journals and ledgers. Argo Books is organised around invoices, expenses, receipts and stock, in the language you already use.'],
-        ['tone' => 'purple', 'icon' => 'bolt', 'h3' => 'AI that does the typing', 'p' => 'Receipt scanning, spreadsheet import and cash flow forecasting are included. Manager.io has no AI features at all.'],
-        ['tone' => 'green', 'icon' => 'map-pin', 'h3' => 'Made in Canada', 'p' => 'Built by a Canadian startup that understands Canadian small businesses. Our pricing is in CAD, and our team is based in Saskatchewan.'],
+        ['icon' => 'users', 'h3' => 'Built for owners, not bookkeepers', 'p' => 'Manager.io is organised around accounts, journals and ledgers. Argo Books is organised around invoices, expenses, receipts and stock, in the language you already use.'],
+        ['icon' => 'bolt', 'h3' => 'AI that does the typing', 'p' => 'Receipt scanning, spreadsheet import and cash flow forecasting are included. Manager.io has no AI features at all.'],
+        ['icon' => 'map-pin', 'h3' => 'Made in Canada', 'p' => 'Built in Saskatchewan for Canadian small businesses, with pricing in CAD.'],
     ],
 
     'honest' => [

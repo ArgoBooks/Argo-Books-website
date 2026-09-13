@@ -106,14 +106,8 @@ function initHeaderDropdowns() {
 }
 
 // The header and footer are now rendered server-side (PHP includes), so they
-// are already in the DOM. On ready we just load the avatar and the cursor orb.
+// are already in the DOM. On ready we just load the avatar and wire the dropdowns.
 document.addEventListener("DOMContentLoaded", function () {
   loadAvatar();
   initHeaderDropdowns();
-
-  // Load cursor orb script
-  var cursorOrbScript = document.createElement('script');
-  cursorOrbScript.src = BASE_PATH + "resources/scripts/cursor-orb.js";
-  cursorOrbScript.defer = true;
-  document.head.appendChild(cursorOrbScript);
 });

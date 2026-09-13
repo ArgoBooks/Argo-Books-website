@@ -89,13 +89,9 @@ if (empty($_SESSION['csrf_token'])) {
     <main>
 
     <div class="hero">
-        <div class="hero-bg">
-            <div class="hero-gradient-orb hero-orb-1"></div>
-            <div class="hero-gradient-orb hero-orb-2"></div>
-        </div>
         <div class="hero-content">
             <h1>Argo Books Community</h1>
-            <p>Report bugs, suggest features, and help shape the future of Argo Books</p>
+            <p>Report bugs and request features for Argo Books</p>
             <a href="guidelines.php" class="guidelines-btn">
                 <?= svg_icon('document-lines', 16) ?>
                 Community Guidelines
@@ -106,14 +102,14 @@ if (empty($_SESSION['csrf_token'])) {
     <div class="community-wrapper">
         <?php if (!$is_logged_in): ?>
             <div class="login-prompt">
-                <p>Welcome to our community! <a href="users/login.php">Log in</a> or <a href="users/register.php">create an account</a> to participate in discussions and submit your own posts.</p>
+                <p><a href="users/login.php">Log in</a> or <a href="users/register.php">create an account</a> to post, comment, or vote.</p>
             </div>
         <?php endif; ?>
 
         <?php if ($is_logged_in && $user_ban): ?>
-            <div style="margin-bottom: 20px; padding: 16px; background-color: #fee2e2; border: 1px solid #fecaca; border-radius: 6px; color: #991b1b; text-align: center;">
-                <h4 style="margin-top: 0; color: #991b1b;">Cannot Create Posts</h4>
-                <p style="margin-bottom: 0;"><?php echo htmlspecialchars(get_ban_message($user_ban)); ?></p>
+            <div class="ban-notice">
+                <h4>Cannot Create Posts</h4>
+                <p><?php echo htmlspecialchars(get_ban_message($user_ban)); ?></p>
             </div>
         <?php endif; ?>
 
@@ -166,7 +162,7 @@ if (empty($_SESSION['csrf_token'])) {
         <div id="posts-container" class="posts-container">
             <?php if (empty($posts)): ?>
                 <div class="empty-state">
-                    <h3>No posts yet!</h3>
+                    <h3>No posts yet</h3>
                     <p>Be the first to create a post in our community.</p>
                 </div>
             <?php else: ?>

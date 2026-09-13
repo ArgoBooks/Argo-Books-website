@@ -26,13 +26,12 @@ return [
     'og_title' => 'Bonsai Alternatives: Flat Price, Not Per Seat',
     'og_description' => 'Bonsai bills per user and stops at the client workflow. Here are the alternatives that are one flat price and keep your actual books.',
 
-    'hero_eyebrow' => 'Bonsai alternatives',
-    'hero_h1' => 'Bonsai <span class="text-gradient">alternatives</span>',
+    'hero_h1' => 'Bonsai alternatives',
     'hero_subtitle' => 'Bonsai bills per user, and invoicing only starts on its middle tier. Argo Books is one price, with the books included.',
 
     'differences_h2' => 'What\'s the difference between Argo Books and Bonsai?',
     'differences_desc' => 'Bonsai is a freelancer workspace: proposals, contracts, time tracking and client management, with invoicing layered on. Argo Books is bookkeeping software. The pricing shape differs too: Bonsai charges per user every month, Argo Books charges once per business.',
-    'why_h3' => 'Why choose Argo Books over Bonsai?',
+    'why_h3' => 'What changes when you move from Bonsai to Argo Books',
     'why_list' => [
         '<strong>One price, not one price per person.</strong> Bonsai bills per user, so a second person doubles your cost. Argo Books Premium is $' . $argo_monthly . ' CAD/month regardless of headcount.',
         '<strong>Invoicing is not an upgrade.</strong> Bonsai\'s Basic tier has no invoicing at all, so the real comparison starts at Essentials. Argo includes invoicing on the free plan.',
@@ -40,8 +39,6 @@ return [
         '<strong>Yours, and offline.</strong> A native desktop app for Windows, macOS, and Linux. Your records open with no internet, and your data stays on your machine.',
         '<strong>Priced in CAD.</strong> Bonsai publishes in US dollars, so what a Canadian actually pays moves with the exchange rate.',
     ],
-    'callout_title' => 'Flat beats per-user',
-    'callout_sub' => 'Argo does not charge more when your team grows',
 
     // Feature, Argo Free, Argo Premium, Bonsai.
     // 'yes' and 'no' render the tick and cross; any other string is a grey pill.
@@ -91,9 +88,9 @@ return [
     'key_h2' => 'One price, and the books to go with it',
     'key_desc' => 'Bonsai is a good client-and-project workspace. It is not bookkeeping software, and its per-user billing means the price you see is per person, per month, before invoicing is even included.',
     'key_cards' => [
-        ['tone' => '', 'icon' => 'dollar', 'h3' => 'Flat pricing, in CAD', 'p' => 'Bonsai Essentials is $' . $bonsai_essentials . ' CAD per user per month. Argo Books Premium is $' . $argo_monthly . ' CAD/month for the business, however many people use it.'],
-        ['tone' => 'purple', 'icon' => 'bolt', 'h3' => 'Works offline', 'p' => 'Bonsai is cloud-only. Argo Books is a desktop app that works without a connection, with your data stored locally on your device.'],
-        ['tone' => 'green', 'icon' => 'map-pin', 'h3' => 'Made in Canada', 'p' => 'Built by a Canadian startup that understands Canadian small businesses. Our pricing is in CAD, and our team is based in Saskatchewan.'],
+        ['icon' => 'dollar', 'h3' => 'Flat pricing, in CAD', 'p' => 'Bonsai Essentials is $' . $bonsai_essentials . ' CAD per user per month. Argo Books Premium is $' . $argo_monthly . ' CAD/month for the business, however many people use it.'],
+        ['icon' => 'bolt', 'h3' => 'Works offline', 'p' => 'Bonsai is cloud-only. Argo Books is a desktop app that works without a connection, with your data stored locally on your device.'],
+        ['icon' => 'map-pin', 'h3' => 'Made in Canada', 'p' => 'Built in Saskatchewan for Canadian small businesses, with pricing in CAD.'],
     ],
 
     'honest' => [

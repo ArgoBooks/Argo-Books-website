@@ -181,12 +181,7 @@ function argo_feature_split(array $b): void
          <?= $d['hero_banner'] ?? 'HERO' ?>
 
          ============================================= -->
-    <?php /* The `hero` class and the .hero-bg child are what resources/scripts/
-             cursor-orb.js looks for. Without the child the orb is appended to
-             the section itself and paints over the headline; inside .hero-bg it
-             sits behind the content the way it does on every other page. */ ?>
     <section class="fp-hero hero">
-        <div class="hero-bg" aria-hidden="true"></div>
         <div class="fp-wrap">
             <div class="fp-hero-grid">
                 <div>
@@ -330,8 +325,7 @@ function argo_feature_split(array $b): void
 
     </main>
 
-    <!-- Final CTA and footer share one dark block. dark-section-wrapper is what
-         lets the footer's orbs bleed up past the footer's own box. -->
+    <!-- Final CTA and footer share one dark block. -->
     <div class="dark-section-wrapper fp-outro">
         <section class="fp-outro-cta cta-section">
             <div class="fp-wrap">

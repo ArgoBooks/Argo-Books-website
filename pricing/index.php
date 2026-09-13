@@ -65,10 +65,10 @@ $yearlySavings = ($monthlyPrice * 12) - $yearlyPrice;
                 },
                 {
                     "@type": "Question",
-                    "name": "What does Premium unlock?",
+                    "name": "What does Premium include?",
                     "acceptedAnswer": {
                         "@type": "Answer",
-                        "text": "Premium removes all limits and adds powerful tools to help your business scale. You get unlimited invoicing, <?= (int) $pricing['receipt_scan_monthly_limit'] ?> AI receipt scans per month, predictive analytics that forecast trends in your data, biometric login (Windows Hello, Touch ID or your Linux login), and priority customer support. Premium is available at $<?php echo number_format($monthlyPrice, 0); ?> CAD/month or $<?php echo number_format($yearlyPrice, 0); ?> CAD/year. The annual plan saves you $<?php echo number_format($yearlySavings, 0); ?> per year."
+                        "text": "Premium includes unlimited invoicing, <?= (int) $pricing['receipt_scan_monthly_limit'] ?> AI receipt scans per month, predictive analytics that forecast trends in your data, biometric login (Windows Hello, Touch ID or your Linux login), and priority customer support. Premium is available at $<?php echo number_format($monthlyPrice, 0); ?> CAD/month or $<?php echo number_format($yearlyPrice, 0); ?> CAD/year. The annual plan saves you $<?php echo number_format($yearlySavings, 0); ?> per year."
                     }
                 },
                 {
@@ -116,7 +116,7 @@ $yearlySavings = ($monthlyPrice * 12) - $yearlyPrice;
                     "name": "What if I need help getting started?",
                     "acceptedAnswer": {
                         "@type": "Answer",
-                        "text": "We've got you covered. All users have access to our documentation and community forum. Premium subscribers get priority support with faster response times. You can also reach us through our contact page. We're a small team and we personally read every message."
+                        "text": "All users have access to our documentation and community forum. Premium subscribers get priority support with faster response times. You can also reach us through our contact page. Evan, who builds Argo Books, reads every message personally."
                     }
                 }
             ]
@@ -149,13 +149,9 @@ $yearlySavings = ($monthlyPrice * 12) - $yearlyPrice;
     <main>
 
     <section class="hero">
-        <div class="hero-bg">
-            <div class="hero-gradient-orb hero-orb-1"></div>
-            <div class="hero-gradient-orb hero-orb-2"></div>
-        </div>
         <div class="container">
             <h1>Find a plan that's right for you</h1>
-            <p class="hero-subtitle">Unlock the full power of Argo Books</p>
+            <p class="hero-subtitle">Premium adds unlimited invoices, more AI receipt scans, predictive analytics and biometric login.</p>
         </div>
     </section>
 
@@ -177,12 +173,8 @@ $yearlySavings = ($monthlyPrice * 12) - $yearlyPrice;
     <section class="premium-intro">
         <div class="container">
             <div class="premium-intro-inner animate-on-scroll">
-                <div class="premium-intro-badge">
-                    <?= svg_icon('star', 16) ?>
-                    <span>Premium Features</span>
-                </div>
-                <h2>Everything you unlock with Premium</h2>
-                <p>The complete toolkit for running your business: AI-powered, unlimited, and built to save you time.</p>
+                <h2>What Premium adds</h2>
+                <p>Receipt scanning, revenue forecasts and unlimited invoicing with online payments, each explained below.</p>
             </div>
         </div>
     </section>
@@ -195,7 +187,6 @@ $yearlySavings = ($monthlyPrice * 12) - $yearlyPrice;
         <div class="container">
             <div class="feature-detail animate-on-scroll">
                 <div class="feature-detail-text">
-                    <span class="section-label">AI-Powered</span>
                     <h2>Scan receipts in seconds, not minutes</h2>
                     <p>Point your camera at any receipt and Argo Books extracts the supplier, date, and total automatically, with no typing required. Receipts are categorized and attached to your expense records instantly.</p>
                     <ul class="feature-checklist">
@@ -219,7 +210,6 @@ $yearlySavings = ($monthlyPrice * 12) - $yearlyPrice;
         <div class="container">
             <div class="feature-detail reversed animate-on-scroll">
                 <div class="feature-detail-text">
-                    <span class="section-label">Smart Insights</span>
                     <h2>See where your revenue is heading</h2>
                     <p>Argo Books analyzes your historical data to surface trends and forecast revenue. Built-in charts show where your business is headed, with no spreadsheets or external tools needed.</p>
                     <ul class="feature-checklist">
@@ -236,28 +226,6 @@ $yearlySavings = ($monthlyPrice * 12) - $yearlyPrice;
     </section>
 
     <!-- =============================================
-         STATS BANNER
-         ============================================= -->
-    <section class="highlight-banner">
-        <div class="container">
-            <div class="highlight-grid animate-on-scroll">
-                <div class="highlight-item">
-                    <h3>500</h3>
-                    <p>AI receipt scans per month</p>
-                </div>
-                <div class="highlight-item">
-                    <h3>Unlimited</h3>
-                    <p>Invoices you can send</p>
-                </div>
-                <div class="highlight-item">
-                    <h3>Analytics</h3>
-                    <p>Predictive analytics and actionable insights</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- =============================================
          DETAIL: Invoices & Payments
          Text left, image right
          ============================================= -->
@@ -265,7 +233,6 @@ $yearlySavings = ($monthlyPrice * 12) - $yearlyPrice;
         <div class="container">
             <div class="feature-detail animate-on-scroll">
                 <div class="feature-detail-text">
-                    <span class="section-label">Get Paid Faster</span>
                     <h2>Send unlimited invoices and accept online payments</h2>
                     <p>The free plan caps invoices at <?= (int) $pricing['free_invoice_monthly_limit'] ?> per month. Premium removes that limit entirely, and adds online payment links so customers can pay directly from the invoice by credit card.</p>
                     <ul class="feature-checklist">
@@ -282,57 +249,28 @@ $yearlySavings = ($monthlyPrice * 12) - $yearlyPrice;
     </section>
 
     <!-- =============================================
-         BENEFITS GRID
+         ALSO IN PREMIUM
+         The two Premium features the blocks above don't cover.
          ============================================= -->
     <section class="benefits-section" style="background: var(--gray-50);">
         <div class="container">
             <div class="section-header animate-on-scroll">
-                <span class="section-label">What You Get</span>
-                <h2 class="section-title">Six reasons to go Premium</h2>
-                <p class="section-desc">Every Premium feature is designed to save you time, reduce manual work, and give you a clearer picture of your business.</p>
+                <h2 class="section-title">Also in Premium</h2>
             </div>
             <div class="benefits-grid">
                 <div class="benefit-card animate-on-scroll">
-                    <div class="benefit-card-icon purple">
-                        <?= svg_icon('receipt-scan', 22) ?>
-                    </div>
-                    <h3>AI Receipt Scanning</h3>
-                    <p>Snap a photo and let AI handle the data entry. Suppliers, dates, and totals are extracted and categorized automatically.</p>
-                </div>
-                <div class="benefit-card animate-on-scroll">
                     <div class="benefit-card-icon">
-                        <?= svg_icon('analytics', 22) ?>
-                    </div>
-                    <h3>Predictive Analytics</h3>
-                    <p>Historical trends become forward-looking forecasts. Know what's coming before your next bank statement arrives.</p>
-                </div>
-                <div class="benefit-card animate-on-scroll">
-                    <div class="benefit-card-icon green">
-                        <?= svg_icon('document', 22) ?>
-                    </div>
-                    <h3>Unlimited Invoices</h3>
-                    <p>Send as many invoices as your business demands and accept online payments directly. No monthly cap, ever.</p>
-                </div>
-                <div class="benefit-card animate-on-scroll">
-                    <div class="benefit-card-icon amber">
                         <?= svg_icon('shield', 22) ?>
                     </div>
                     <h3>Biometric Login</h3>
-                    <p>Unlock your books with your fingerprint or face instead of typing your password each time. Works with Windows Hello, Touch ID on a Mac, and your Linux login.</p>
+                    <p>Open your books with your fingerprint or face instead of typing your password each time. Works with Windows Hello, Touch ID on a Mac, and your Linux login.</p>
                 </div>
                 <div class="benefit-card animate-on-scroll">
-                    <div class="benefit-card-icon cyan">
+                    <div class="benefit-card-icon">
                         <?= svg_icon('message-circle', 22) ?>
                     </div>
                     <h3>Priority Support</h3>
-                    <p>Premium subscribers get to the front of the queue: real help, faster, when something needs attention.</p>
-                </div>
-                <div class="benefit-card animate-on-scroll">
-                    <div class="benefit-card-icon red">
-                        <?= svg_icon('trending-up', 22) ?>
-                    </div>
-                    <h3>Higher AI Limits</h3>
-                    <p><?= (int) $pricing['receipt_scan_monthly_limit'] ?> receipt scans and expanded AI headroom each month, built to keep up as your business grows.</p>
+                    <p>Support messages from Premium subscribers are answered first.</p>
                 </div>
             </div>
         </div>
@@ -349,10 +287,10 @@ $yearlySavings = ($monthlyPrice * 12) - $yearlyPrice;
                             <p>You can use it for as long as you like. When your business needs more, upgrading to Premium takes just a few clicks.</p>
                         
             <?php $faqs[] = ['q_html' => $q, 'a_html' => ob_get_clean()];
-            ob_start(); ?>What does Premium unlock?<?php $q = ob_get_clean();
+            ob_start(); ?>What does Premium include?<?php $q = ob_get_clean();
             ob_start(); ?>
 
-                            <p>Premium removes all limits and adds powerful tools to help your business scale. You get unlimited invoicing, <?= (int) $pricing['receipt_scan_monthly_limit'] ?> AI receipt scans per month, predictive analytics that forecast trends in your data, biometric login (Windows Hello, Touch ID or your Linux login), and priority customer support.</p>
+                            <p>Premium includes unlimited invoicing, <?= (int) $pricing['receipt_scan_monthly_limit'] ?> AI receipt scans per month, predictive analytics that forecast trends in your data, biometric login (Windows Hello, Touch ID or your Linux login), and priority customer support.</p>
                             <p>Premium is available at <strong>$<?php echo number_format($monthlyPrice, 0); ?> CAD/month</strong> or <strong>$<?php echo number_format($yearlyPrice, 0); ?> CAD/year</strong>. The annual plan saves you $<?php echo number_format($yearlySavings, 0); ?> per year.</p>
                         
             <?php $faqs[] = ['q_html' => $q, 'a_html' => ob_get_clean()];
@@ -394,8 +332,8 @@ $yearlySavings = ($monthlyPrice * 12) - $yearlyPrice;
             ob_start(); ?>What if I need help getting started?<?php $q = ob_get_clean();
             ob_start(); ?>
 
-                            <p>We've got you covered. All users have access to our <a href="../documentation/">documentation</a> and <a href="../community/">community forum</a>. Premium subscribers get priority support with faster response times.</p>
-                            <p>You can also reach us through our <a href="../contact.php">contact page</a>. We're a small team and we personally read every message.</p>
+                            <p>All users have access to our <a href="../documentation/">documentation</a> and <a href="../community/">community forum</a>. Premium subscribers get priority support with faster response times.</p>
+                            <p>You can also reach us through our <a href="../contact.php">contact page</a>. Evan, who builds Argo Books, reads every message personally.</p>
                         
             <?php $faqs[] = ['q_html' => $q, 'a_html' => ob_get_clean()];
             echo argo_faq_grid($faqs); ?>
@@ -442,7 +380,7 @@ $yearlySavings = ($monthlyPrice * 12) - $yearlyPrice;
         <section class="cta-section">
             <div class="container">
                 <div class="cta-card animate-on-scroll">
-                    <h2>The complete toolkit for $<?php echo number_format($monthlyPrice, 0); ?>/month</h2>
+                    <h2>Premium for $<?php echo number_format($monthlyPrice, 0); ?>/month</h2>
                     <p>Everything in Free, plus AI receipt scanning, predictive analytics, unlimited invoices, and biometric login.</p>
                     <div class="cta-buttons">
                         <a href="premium/" class="btn-cta btn-cta-primary">

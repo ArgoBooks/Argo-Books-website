@@ -664,26 +664,6 @@
   }
 }
 
-@keyframes successSlideIn {
-  from {
-    opacity: 0;
-    transform: translateY(-20px) scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-@keyframes progressBar {
-  from {
-    left: -100%;
-  }
-  to {
-    left: 100%;
-  }
-}
-
 /* Report button in profile header */
 .report-btn-user {
   background: none;

@@ -57,14 +57,6 @@ $title = $titles[$state];
   <main>
     <section class="first">
       <div class="success-container state-<?= htmlspecialchars($state) ?>">
-        <div class="success-icon">
-          <?php if ($state === 'confirmed'): ?>
-            <?= svg_icon('circle-check', null, '', null, 'stroke-linecap="round" stroke-linejoin="round"') ?>
-          <?php else: ?>
-            <?= svg_icon('x', null, '', null, 'stroke-linecap="round" stroke-linejoin="round"') ?>
-          <?php endif; ?>
-        </div>
-
         <div class="success-content">
           <h1><?= htmlspecialchars($title) ?></h1>
 

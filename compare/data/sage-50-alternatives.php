@@ -29,13 +29,12 @@ return [
     'og_title' => 'Sage 50 Alternatives: A Fraction of the Price',
     'og_description' => 'Sage 50 is powerful, expensive and Windows-only. Here are the modern cross-platform alternatives, minus the complexity.',
 
-    'hero_eyebrow' => 'Sage 50 alternatives',
-    'hero_h1' => 'Sage 50 <span class="text-gradient">alternatives</span>',
+    'hero_h1' => 'Sage 50 alternatives',
     'hero_subtitle' => 'A simpler, more affordable way to manage your small business finances. All the essentials, none of Sage\'s price tag, learning curve, or Windows-only limits.',
 
     'differences_h2' => 'What\'s the difference between Argo Books and Sage 50?',
     'differences_desc' => 'Sage 50 is deep, mature desktop accounting built for established or complex businesses, but it\'s pricey, Windows-only, and has a steep learning curve. Argo Books is a fraction of the cost, modern and simple, cross-platform, with AI built in, for owners who don\'t need Sage\'s depth.',
-    'why_h3' => 'Why choose Argo Books over Sage 50?',
+    'why_h3' => 'What changes when you move from Sage 50 to Argo Books',
     'why_list' => [
         '<strong>Everything in one clean app.</strong> Invoicing, expenses, receipts, inventory, and forecasting together, with no accounting jargon and no double-entry to learn.',
         '<strong>A genuinely free plan.</strong> All the core features forever, no trial and no credit card. Sage 50 has no free plan, only a time-limited trial.',
@@ -43,8 +42,6 @@ return [
         '<strong>AI that\'s included, not upsold.</strong> Receipt scanning, bank-statement import, and spreadsheet import are built into Premium at $' . $argo_monthly . '/mo. On Sage 50 that same document capture is a paid add-on, AutoEntry, at about $' . $sage_autoentry . ' CAD/month for 500 credits.',
         '<strong>One predictable price.</strong> Everything in Premium for $' . $argo_monthly . ' CAD/month. No annual lock-in and none of Sage\'s four-figure yearly bills.',
     ],
-    'callout_title' => 'Enterprise pricing',
-    'callout_sub' => 'Sage 50 runs about $814&ndash;$5,600+ a year',
 
     // Feature, Argo Free, Argo Premium, Sage 50.
     // 'yes' and 'no' render the tick and cross; any other string is a grey pill.
@@ -91,12 +88,12 @@ return [
         'Job and project costing, departmental accounting, and payroll add-ons',
     ],
 
-    'key_h2' => 'Everything you need, nothing you don\'t',
+    'key_h2' => 'Desktop accounting without Sage 50\'s price or learning curve',
     'key_desc' => 'Both tools are desktop accounting apps, but they focus on different things. Sage 50 shines at deep, complex accounting for established businesses. Argo Books focuses on being simple, affordable, and cross-platform.',
     'key_cards' => [
-        ['tone' => '', 'icon' => 'dollar', 'h3' => 'A fraction of the cost', 'p' => 'Sage 50 runs from about $814/year up to $5,636/year, billed annually. Argo Books has a free version with core features, and Premium is just $' . $argo_monthly . ' CAD/month.'],
-        ['tone' => 'purple', 'icon' => 'bolt', 'h3' => 'Modern &amp; cross-platform', 'p' => 'Sage 50 is powerful but Windows-only with a steep learning curve. Argo Books is the opposite: so simple that anyone can keep their own books from day one, with no training and no accounting background, on Windows, macOS, or Linux.'],
-        ['tone' => 'green', 'icon' => 'map-pin', 'h3' => 'Made in Canada', 'p' => 'Built by a Canadian startup that understands Canadian small businesses. Our pricing is in CAD, and our team is based in Saskatchewan.'],
+        ['icon' => 'dollar', 'h3' => 'A fraction of the cost', 'p' => 'Sage 50 runs from about $814/year up to $5,636/year, billed annually. Argo Books has a free version with core features, and Premium is just $' . $argo_monthly . ' CAD/month.'],
+        ['icon' => 'bolt', 'h3' => 'Modern &amp; cross-platform', 'p' => 'Sage 50 is powerful but Windows-only with a steep learning curve. Argo Books is the opposite: so simple that anyone can keep their own books from day one, with no training and no accounting background, on Windows, macOS, or Linux.'],
+        ['icon' => 'map-pin', 'h3' => 'Made in Canada', 'p' => 'Built in Saskatchewan for Canadian small businesses, with pricing in CAD.'],
     ],
 
     'honest' => [

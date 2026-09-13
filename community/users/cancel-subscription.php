@@ -170,19 +170,6 @@ $premium_features = get_plan_features()['premium']['features'];
     margin-bottom: 32px;
 }
 
-.cancel-eyebrow {
-    display: inline-block;
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: var(--red-600);
-    background: var(--red-50);
-    padding: 4px 10px;
-    border-radius: 20px;
-    margin-bottom: 16px;
-}
-
 .cancel-hero h1 {
     font-size: 30px;
     font-weight: 700;
@@ -211,23 +198,18 @@ $premium_features = get_plan_features()['premium']['features'];
 }
 
 .access-end-card {
-    position: relative;
-    background: linear-gradient(135deg, var(--premium-50) 0%, var(--white) 100%);
-    border: 1px solid var(--premium-200);
-    border-left: 4px solid var(--premium-500);
+    background: var(--gray-50);
+    border: 1px solid var(--gray-border);
     border-radius: 12px;
     padding: 20px 24px;
     margin-bottom: 28px;
-    overflow: hidden;
 }
 
 .access-end-label {
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    color: var(--premium-600);
-    font-weight: 700;
-    margin-bottom: 6px;
+    font-size: 14px;
+    color: var(--gray-700);
+    font-weight: 600;
+    margin-bottom: 4px;
 }
 
 .access-end-date {
@@ -246,11 +228,9 @@ $premium_features = get_plan_features()['premium']['features'];
 }
 
 .cancel-section-label {
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    color: var(--gray-700);
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--gray-900);
     margin: 0 0 14px 0;
 }
 
@@ -304,12 +284,6 @@ $premium_features = get_plan_features()['premium']['features'];
     font-weight: 600;
     border-radius: 10px;
     text-align: center;
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
-}
-
-.cancel-actions .btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 14px var(--shadow-default);
 }
 
 .cancel-footnote {
@@ -355,7 +329,6 @@ $premium_features = get_plan_features()['premium']['features'];
     <main class="cancel-page">
         <div class="cancel-card">
             <div class="cancel-hero">
-                <span class="cancel-eyebrow">Argo Books Premium</span>
                 <h1>Are you sure you want to cancel?</h1>
                 <p>Your subscription will stay active until the end of your current billing period. You can resubscribe at any time.</p>
             </div>

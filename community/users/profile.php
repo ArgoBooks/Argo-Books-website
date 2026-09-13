@@ -1100,9 +1100,9 @@ if ($user) {
                     if (data.success) {
                         // Show success notification
                         if (typeof showNotification === 'function') {
-                            showNotification('Report submitted successfully. Our team will review it shortly.', 'success');
+                            showNotification('Report submitted. It will be reviewed shortly.', 'success');
                         } else {
-                            alert('Report submitted successfully. Our team will review it shortly.');
+                            alert('Report submitted. It will be reviewed shortly.');
                         }
                         closeModal();
                     } else {

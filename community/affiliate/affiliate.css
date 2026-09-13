@@ -1,6 +1,4 @@
-/* Affiliate area — matches the community pages exactly: a centered dark-slate
-   hero with emerald/cyan + blue/purple orbs, a light body, white cards with
-   soft borders, blue accents, gray-50 toolbars. Same recipe as
+/* Affiliate area. Uses the same flat dark hero, light body and white cards as
    community/index.css so it reads as part of the same site. */
 
 body {
@@ -9,46 +7,18 @@ body {
 }
 
 /* ---- Hero (mirrors community/index.css .hero) ---- */
+/* Lit slate, as on the homepage and pricing. The first panel below rises into
+   the bottom of this band. */
 .aff-hero {
-    position: relative;
     /* extra top padding clears the site's absolute, transparent header */
-    padding: 120px 0 64px;
-    background: linear-gradient(135deg, var(--hero-gradient-start) 0%, var(--hero-gradient-end) 100%);
+    padding: 148px 0 144px;
+    background:
+        radial-gradient(50% 80% at 50% 0%, rgba(120, 150, 220, 0.16), transparent 70%),
+        linear-gradient(160deg, var(--hero-gradient-start) 0%, var(--hero-gradient-end) 100%);
     text-align: center;
-    overflow: hidden;
-}
-
-.aff-hero-bg {
-    position: absolute;
-    inset: 0;
-}
-
-.aff-orb {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(80px);
-    opacity: 0.5;
-}
-
-.aff-orb-1 {
-    width: 400px;
-    height: 400px;
-    background: linear-gradient(135deg, var(--emerald-500), var(--cyan-500));
-    top: -100px;
-    left: -100px;
-}
-
-.aff-orb-2 {
-    width: 300px;
-    height: 300px;
-    background: linear-gradient(135deg, var(--primary-blue), var(--purple-500));
-    bottom: -50px;
-    right: -50px;
 }
 
 .aff-hero-content {
-    position: relative;
-    z-index: 2;
     max-width: 720px;
     margin: 0 auto;
     padding: 0 24px;
@@ -71,24 +41,20 @@ body {
 
 /* ---- Body wrapper (mirrors .community-wrapper) ---- */
 .aff-wrap {
+    position: relative;
     max-width: 1000px;
-    margin: 40px auto 64px;
+    margin: -92px auto 64px;
     padding: 0 24px;
 }
 
-/* Info banner (mirrors .login-prompt) */
-.aff-note {
-    background: linear-gradient(135deg, var(--blue-50), var(--blue-100));
-    border: 1px solid var(--blue-300);
-    color: var(--blue-800);
-    text-align: center;
-    padding: 16px 24px;
-    margin-bottom: 24px;
-    border-radius: 12px;
+.aff-wrap > :first-child {
+    box-shadow: var(--elevation-lg);
 }
 
-.aff-note p {
-    margin: 0;
+/* The gray toolbar would read as a grey slab on the dark band. */
+.aff-wrap > .aff-linkbox:first-child {
+    background: var(--white);
+    border: 1px solid var(--gray-border);
 }
 
 /* Alerts */
@@ -102,14 +68,14 @@ body {
 
 .aff-alert-success {
     background: var(--emerald-50);
-    border: 1px solid #a7f3d0;
-    color: #047857;
+    border: 1px solid var(--emerald-200);
+    color: var(--emerald-700);
 }
 
 .aff-alert-error {
     background: var(--red-50);
-    border: 1px solid #fecaca;
-    color: #b91c1c;
+    border: 1px solid var(--red-200);
+    color: var(--red-700);
 }
 
 /* Section heading */
@@ -182,7 +148,7 @@ body {
 .aff-field textarea:focus {
     outline: none;
     border-color: var(--primary-blue);
-    box-shadow: 0 0 0 3px rgba(63, 99, 232, 0.15);
+    box-shadow: 0 0 0 3px var(--blue-alpha-15);
 }
 
 .aff-field small {
@@ -204,14 +170,14 @@ body {
 
 .aff-code-input:focus-within {
     border-color: var(--primary-blue);
-    box-shadow: 0 0 0 3px rgba(63, 99, 232, 0.15);
+    box-shadow: 0 0 0 3px var(--blue-alpha-15);
 }
 
 .aff-code-prefix {
     display: flex;
     align-items: center;
     padding: 0 4px 0 13px;
-    background: var(--gray-50, #f8fafc);
+    background: var(--gray-50);
     color: var(--gray-600);
     font-family: var(--font-mono);
     font-size: 0.9rem;
@@ -304,8 +270,8 @@ body {
 .aff-copy.copied,
 .aff-copy.copied:hover,
 .aff-copy.copied:focus {
-    background: #dcfce7;
-    color: #166534;
+    background: var(--green-100);
+    color: var(--green-800);
 }
 
 /* Stat cards */
@@ -353,14 +319,12 @@ body {
 }
 
 .aff-earn-card.featured {
-    border-color: #fcd34d;
-    background: linear-gradient(160deg, var(--amber-50), var(--white) 70%);
+    border-color: var(--amber-300);
+    background: var(--amber-50);
 }
 
 .aff-earn-label {
-    font-size: 0.78rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+    font-size: 0.9rem;
     color: var(--gray-600);
     font-weight: 600;
 }
@@ -379,8 +343,6 @@ body {
     font-size: 12px;
     font-weight: 700;
     line-height: 1;
-    letter-spacing: 0;
-    text-transform: none;
     cursor: default;
     vertical-align: middle;
     transition: background 0.15s ease, color 0.15s ease;
@@ -389,7 +351,7 @@ body {
 .aff-info:hover,
 .aff-info:focus {
     background: var(--primary-blue);
-    color: #fff;
+    color: var(--white);
     outline: none;
 }
 
@@ -403,11 +365,11 @@ body {
 }
 
 .aff-earn-card.featured .aff-earn-num {
-    color: #b45309;
+    color: var(--amber-700);
 }
 
 .aff-earn-card.emerald .aff-earn-num {
-    color: #059669;
+    color: var(--emerald-600);
 }
 
 .aff-earn-foot {
@@ -464,7 +426,12 @@ body {
 /* Responsive */
 @media (max-width: 768px) {
     .aff-hero {
-        padding: 104px 0 52px;
+        padding: 120px 0 112px;
+    }
+
+    .aff-wrap {
+        margin-top: -72px;
+        padding: 0 16px;
     }
 
     .aff-hero h1 {

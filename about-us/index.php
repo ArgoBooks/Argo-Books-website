@@ -12,14 +12,14 @@ require_once __DIR__ . '/../partials/fonts.php';
 
     <!-- SEO Meta Tags -->
     <meta name="description"
-        content="Learn about Argo, the Canada-based startup creating affordable finance management software for small businesses. Our mission: Better tools, built by entrepreneurs who understand your challenges.">
+        content="Learn about Argo, the Canada-based startup creating affordable finance management software for small businesses. Built by Evan, a self-funded founder in Saskatoon.">
     <meta name="keywords"
         content="about argo books, Canada startup, small business software company, affordable business tools, finance management developers, canadian software company, Canadian, saskatchewan tech company">
 
     <!-- Open Graph Meta Tags -->
     <meta property="og:title" content="About Us - Argo Books | Canadian Software Company">
     <meta property="og:description"
-        content="Learn about Argo, the Canada-based startup creating affordable finance management software for small businesses. Our mission: Better tools, built by entrepreneurs who understand your challenges.">
+        content="Learn about Argo, the Canada-based startup creating affordable finance management software for small businesses. Built by Evan, a self-funded founder in Saskatoon.">
     <meta property="og:url" content="https://argorobots.com/about-us/">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="Argo Books">
@@ -29,7 +29,7 @@ require_once __DIR__ . '/../partials/fonts.php';
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="About Us - Argo Books | Canadian Software Company">
     <meta name="twitter:description"
-        content="Learn about Argo, the Canada-based startup creating affordable finance management software for small businesses. Our mission: Better tools, built by entrepreneurs who understand your challenges.">
+        content="Learn about Argo, the Canada-based startup creating affordable finance management software for small businesses. Built by Evan, a self-funded founder in Saskatoon.">
     <meta property="og:image" content="https://argorobots.com/resources/images/og/og-home.png">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
@@ -88,17 +88,17 @@ require_once __DIR__ . '/../partials/fonts.php';
 
     <!-- Hero Section -->
     <section class="hero">
-        <div class="hero-bg">
-            <div class="hero-gradient-orb hero-orb-1"></div>
-            <div class="hero-gradient-orb hero-orb-2"></div>
-        </div>
         <div class="container">
-            <h1 class="animate-fade-in">About Argo Books</h1>
-            <p class="hero-subtitle animate-fade-in">Building the future of small business management, one feature at a time.</p>
-            <p class="hero-made-in animate-fade-in">
-                <img src="../resources/images/canada-flag.svg" alt="Canadian flag" width="22" height="11">
-                <span>Made in Canada</span>
-            </p>
+            <div class="hero-copy">
+                <h1>About Argo Books</h1>
+                <p class="hero-subtitle">Accounting software for small businesses, built and supported in Saskatoon, Canada.</p>
+            </div>
+            <figure class="hero-photo">
+                <div class="hero-photo-frame">
+                    <img src="../resources/images/saskatoon.webp" alt="Saskatoon skyline" fetchpriority="high">
+                </div>
+                <figcaption><?= svg_icon('map-pin', 16) ?> Saskatoon, SK, Canada</figcaption>
+            </figure>
         </div>
     </section>
 
@@ -107,11 +107,9 @@ require_once __DIR__ . '/../partials/fonts.php';
         <div class="container">
             <div class="mission-grid">
                 <div class="mission-content animate-on-scroll">
-                    <span class="section-label">Our Mission</span>
                     <h2>Affordable tools for every business</h2>
-                    <p>We believe in giving you the tools you need to manage your business affordably. Most finance
-                        management software require expensive monthly subscriptions and are difficult to use. We
-                        created Argo Books to be different.</p>
+                    <p>Most finance management software needs an expensive monthly subscription and is difficult
+                        to use. I built Argo Books to be affordable and easy to pick up.</p>
                     <div class="mission-points">
                         <div class="mission-point">
                             <div class="point-icon">
@@ -123,13 +121,13 @@ require_once __DIR__ . '/../partials/fonts.php';
                             <div class="point-icon">
                                 <?= svg_icon('check-rounded') ?>
                             </div>
-                            <p>Easy to use but packed with powerful features</p>
+                            <p>Easy to learn, with the features a small business needs</p>
                         </div>
                         <div class="mission-point">
                             <div class="point-icon">
                                 <?= svg_icon('check-rounded') ?>
                             </div>
-                            <p>Flexible pricing: Use it for free, or unlock more with the premium version</p>
+                            <p>Free to use, with a paid Premium plan when you need more</p>
                         </div>
                     </div>
                 </div>
@@ -144,11 +142,10 @@ require_once __DIR__ . '/../partials/fonts.php';
     <section class="product-overview">
         <div class="container">
             <div class="overview-content animate-on-scroll">
-                <span class="section-label">The Product</span>
-                <h2>What We Build</h2>
-                <p>Argo Books is a free, easy-to-use, yet powerful cross-platform app built for small
-                    businesses, startups, and solo entrepreneurs who need an affordable solution to manage finances, automate everyday bookkeeping,
-                    and grow their business.</p>
+                <h2>What Argo Books does</h2>
+                <p>Argo Books is a free app for Windows, macOS and Linux, made for small businesses, startups and
+                    solo entrepreneurs who need an affordable way to manage their finances and handle everyday
+                    bookkeeping.</p>
             </div>
             <div class="features-grid">
                 <a class="feature-item animate-on-scroll" href="../features/receipt-scanning/">
@@ -159,21 +156,21 @@ require_once __DIR__ . '/../partials/fonts.php';
                     <p>Snap a photo and let Argo Books extract all the details automatically</p>
                 </a>
                 <a class="feature-item animate-on-scroll" href="../features/invoicing/">
-                    <div class="feature-icon green">
+                    <div class="feature-icon">
                         <?= svg_icon('document', null, '', 1.5) ?>
                     </div>
                     <h3>Invoicing &amp; Payments</h3>
                     <p>Create professional invoices and get paid faster</p>
                 </a>
                 <a class="feature-item animate-on-scroll" href="../features/predictive-analytics/">
-                    <div class="feature-icon purple">
+                    <div class="feature-icon">
                         <?= svg_icon('analytics', null, '', 1.5) ?>
                     </div>
                     <h3>Predictive Analytics</h3>
-                    <p>Forecast sales trends and make data-driven decisions</p>
+                    <p>Forecast sales trends from your own numbers</p>
                 </a>
                 <a class="feature-item animate-on-scroll" href="../features/expense-revenue-tracking/">
-                    <div class="feature-icon amber">
+                    <div class="feature-icon">
                         <?= svg_icon('dollar', null, '', 1.5) ?>
                     </div>
                     <h3>Expense &amp; Revenue</h3>
@@ -194,34 +191,13 @@ require_once __DIR__ . '/../partials/fonts.php';
         <div class="container">
             <div class="story-grid">
                 <div class="story-content animate-on-scroll">
-                    <span class="section-label">Our Story</span>
-                    <h2>Built by entrepreneurs, for entrepreneurs</h2>
-                    <p>From humble beginnings with a simple goal: Create the finance tracking tool we
-                        wished existed for our own small businesses.</p>
-                    <p>What sets us apart is our first-hand experience with the challenges small businesses face. We're
-                        not a large corporation with venture capital funding. We're a small, self-funded business that
-                        understands what it means to watch every dollar and make smart investments in technology.</p>
-                    <div class="story-stats">
-                        <div class="stat">
-                            <span class="stat-value">2024</span>
-                            <span class="stat-label">Founded</span>
-                        </div>
-                        <div class="stat">
-                            <span class="stat-value">100%</span>
-                            <span class="stat-label">Self-funded</span>
-                        </div>
-                        <div class="stat">
-                            <span class="stat-value">Free</span>
-                            <span class="stat-label">Core Version</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="story-image animate-on-scroll">
-                    <img src="../resources/images/saskatoon.webp" alt="Saskatoon Skyline" loading="lazy">
-                    <div class="image-badge">
-                        <?= svg_icon('map-pin', 16) ?>
-                        Saskatoon, SK, Canada
-                    </div>
+                    <h2>Why I started Argo Books</h2>
+                    <p>I started Argo Books in 2024 with a simple goal: make the finance tracking tool I
+                        wished existed for my own small businesses.</p>
+                    <p>I've dealt with the same challenges small businesses face. Argo Books isn't a large
+                        corporation with venture capital funding. It's fully self-funded, so I know what it means
+                        to watch every dollar and choose carefully what to spend on software. The core version
+                        is free.</p>
                 </div>
             </div>
         </div>
@@ -231,11 +207,10 @@ require_once __DIR__ . '/../partials/fonts.php';
     <section class="founder">
         <div class="container">
             <div class="founder-grid">
-                <div class="founder-image animate-on-scroll">
-                    <img src="../resources/images/founder.jpg" alt="Evan, founder of Argo Books" loading="lazy">
-                </div>
+                <figure class="founder-photo animate-on-scroll">
+                    <img src="../resources/images/founder.jpg" alt="Evan, founder of Argo Books" width="675" height="900" loading="lazy">
+                </figure>
                 <div class="founder-content animate-on-scroll">
-                    <span class="section-label">Meet the Founder</span>
                     <h2>Hi, I'm Evan</h2>
                     <p>I'm the founder of Argo Books, based in Saskatoon. I built it to give small
                         businesses accounting software they can count on: capable enough to run the whole
@@ -243,6 +218,8 @@ require_once __DIR__ . '/../partials/fonts.php';
                     <p>Handling your business's finances is a responsibility I take seriously. Every
                         release is tested, and your data is kept secure. I'm committed
                         to keeping Argo Books dependable and improving it for years to come.</p>
+                    <p>When you write in, you hear from the person who built it. I read every support
+                        message myself and usually reply within 1-8 business hours.</p>
                     <div class="founder-footer">
                         <p class="founder-signature">Evan<span>Founder &amp; Developer, Argo Books</span></p>
                         <a href="../contact-us/" class="founder-contact">
@@ -255,50 +232,13 @@ require_once __DIR__ . '/../partials/fonts.php';
         </div>
     </section>
 
-    <!-- Values Section -->
-    <section class="values">
-        <div class="container">
-            <div class="values-header animate-on-scroll">
-                <span class="section-label">What Drives Us</span>
-                <h2>Our Values</h2>
-            </div>
-            <div class="values-grid">
-                <div class="value-card animate-on-scroll">
-                    <div class="value-icon">
-                        <?= svg_icon('innovation') ?>
-                    </div>
-                    <h3>Innovation</h3>
-                    <p>We constantly evolve our software to meet the changing needs of modern businesses.</p>
-                </div>
-
-                <div class="value-card animate-on-scroll">
-                    <div class="value-icon purple">
-                        <?= svg_icon('user-focused') ?>
-                    </div>
-                    <h3>User-Focused</h3>
-                    <p>Every feature we build starts with understanding our users' needs and challenges.</p>
-                </div>
-
-                <div class="value-card animate-on-scroll">
-                    <div class="value-icon green">
-                        <?= svg_icon('reliability') ?>
-                    </div>
-                    <h3>Reliability</h3>
-                    <p>We build software you can trust with your business data and daily operations.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
     <!-- Future Section -->
     <section class="future">
         <div class="container">
             <div class="future-content animate-on-scroll">
-                <span class="section-label">What's Next</span>
-                <h2>Looking Forward</h2>
-                <p>As a growing Canadian startup, we're excited about what's ahead. Our roadmap is filled with new
-                    features and improvements based directly on user feedback. We're committed to expanding our offerings
-                    while maintaining the simplicity and affordability that makes Argo special.</p>
+                <h2>What's next</h2>
+                <p>Most new features and improvements come directly from user feedback. I plan to keep adding to
+                    Argo Books while keeping it simple and affordable. Every update is listed in the changelog.</p>
                 <a href="../whats-new/" class="btn btn-secondary">
                     <span>View Changelog</span>
                     <?= svg_icon('arrow-right', 18) ?>
@@ -315,10 +255,10 @@ require_once __DIR__ . '/../partials/fonts.php';
         <section class="contact-section">
             <div class="container">
                 <div class="contact-card animate-on-scroll">
-                    <h2>Let's Build Together</h2>
-                    <p>Have questions or suggestions? We'd love to hear from you and make Argo Books even better.</p>
+                    <h2>Get in touch</h2>
+                    <p>Questions and suggestions come straight to me, and they shape what gets built next.</p>
                     <a href="../contact-us/" class="btn btn-primary">
-                        <span>Contact Us</span>
+                        <span>Contact me</span>
                         <?= svg_icon('arrow-right', 18) ?>
                     </a>
                 </div>

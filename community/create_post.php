@@ -7,6 +7,7 @@ require_once __DIR__ . '/rate_limit.php';
 require_once __DIR__ . '/formatting/formatting_functions.php';
 require_once __DIR__ . '/report/ban_check.php';
 require_once __DIR__ . '/../resources/icons.php';
+require_once __DIR__ . '/../partials/fonts.php';
 
 require_login();
 $current_user = \CommunityUsers\get_current_user();
@@ -196,6 +197,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="stylesheet" href="../resources/styles/custom-colors.css">
     <link rel="stylesheet" href="../resources/header/style.css">
     <link rel="stylesheet" href="../resources/footer/style.css">
+    <?= argo_font_links('default', '    ') ?>
+    <link rel="stylesheet" href="../resources/styles/typography.css">
 
     <!-- Mentions system -->
     <link rel="stylesheet" href="mentions/mentions.css">
@@ -209,15 +212,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </header>
 
     <div class="hero">
-        <div class="hero-bg">
-            <div class="hero-gradient-orb hero-orb-1"></div>
-            <div class="hero-gradient-orb hero-orb-2"></div>
-        </div>
         <div class="hero-content">
-            <div class="hero-badge">
-                <?= svg_icon('pencil', 16) ?>
-                <span>New Post</span>
-            </div>
             <h1>Create a Post</h1>
             <p>Share a bug report or feature request with the community</p>
         </div>
@@ -314,7 +309,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="preview-post">
                         <div id="preview-content">
                             <div class="preview-empty-state">
-                                <div class="preview-empty-icon">👁️</div>
+                                <div class="preview-empty-icon"><?= svg_icon('eye', 40) ?></div>
                                 <p>Fill out the form to see a preview of your post</p>
                             </div>
                         </div>

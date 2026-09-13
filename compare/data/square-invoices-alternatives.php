@@ -25,13 +25,12 @@ return [
     'og_title' => 'Square Invoices Alternatives: Billing Plus the Books',
     'og_description' => 'Square Invoices is free and stops at billing. Here are the alternatives that also track expenses, stock and reports.',
 
-    'hero_eyebrow' => 'Square Invoices alternatives',
-    'hero_h1' => 'Square Invoices <span class="text-gradient">alternatives</span>',
+    'hero_h1' => 'Square Invoices alternatives',
     'hero_subtitle' => 'Square Invoices is genuinely free for unlimited invoicing. The question is not price, it\'s whether invoicing alone is enough.',
 
     'differences_h2' => 'What\'s the difference between Argo Books and Square Invoices?',
     'differences_desc' => 'This one is not about cost. Square Invoices is free and does not cap your invoices, and we are not going to pretend otherwise. The difference is scope: Square bills your customers, Argo Books keeps your books, and only one of the two works without an internet connection.',
-    'why_h3' => 'Why choose Argo Books over Square Invoices?',
+    'why_h3' => 'What changes when you move from Square Invoices to Argo Books',
     'why_list' => [
         '<strong>Your whole books, not just billing.</strong> Expenses, receipts, inventory, reports and forecasting are built in, where Square Invoices covers the invoice and the payment.',
         '<strong>Yours, and offline.</strong> A native desktop app for Windows, macOS, and Linux. Your records open instantly with no internet, and your data stays on your machine rather than on Square\'s servers.',
@@ -39,8 +38,6 @@ return [
         '<strong>You are not tied to one processor.</strong> Argo Books connects to your own Stripe, PayPal or Square account, so you keep your rates and your relationship.',
         '<strong>Free to start, and honest about it.</strong> Both are free. Argo\'s free tier includes AI receipt scanning and inventory, which invoicing tools generally do not.',
     ],
-    'callout_title' => 'Both free to start',
-    'callout_sub' => 'The difference is scope, not price: Argo keeps the books as well',
 
     // Feature, Argo Free, Argo Premium, Square Invoices.
     // 'yes' and 'no' render the tick and cross; any other string is a grey pill.
@@ -90,9 +87,9 @@ return [
     'key_h2' => 'Free either way, so compare what you get',
     'key_desc' => 'Square Invoices costs nothing and sends unlimited invoices, so the honest comparison is about scope. Argo Books is also free to start, and covers the bookkeeping that has to happen after the invoice is paid.',
     'key_cards' => [
-        ['tone' => '', 'icon' => 'document', 'h3' => 'Books, not just invoices', 'p' => 'Square Invoices ends at the payment. Argo Books tracks the expense side, scans receipts, manages stock, and produces the reports your accountant asks for.'],
-        ['tone' => 'purple', 'icon' => 'bolt', 'h3' => 'Works offline', 'p' => 'Square Invoices is cloud-only. Argo Books is a desktop app that works without a connection, with your data stored locally on your device.'],
-        ['tone' => 'green', 'icon' => 'map-pin', 'h3' => 'Made in Canada', 'p' => 'Built by a Canadian startup that understands Canadian small businesses. Our pricing is in CAD, and our team is based in Saskatchewan.'],
+        ['icon' => 'document', 'h3' => 'Books, not just invoices', 'p' => 'Square Invoices ends at the payment. Argo Books tracks the expense side, scans receipts, manages stock, and produces the reports your accountant asks for.'],
+        ['icon' => 'bolt', 'h3' => 'Works offline', 'p' => 'Square Invoices is cloud-only. Argo Books is a desktop app that works without a connection, with your data stored locally on your device.'],
+        ['icon' => 'map-pin', 'h3' => 'Made in Canada', 'p' => 'Built in Saskatchewan for Canadian small businesses, with pricing in CAD.'],
     ],
 
     'honest' => [

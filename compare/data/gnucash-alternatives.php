@@ -26,13 +26,12 @@ return [
     'og_title' => 'GnuCash Alternatives: Local Data Without the Learning Curve',
     'og_description' => 'GnuCash is free, local and powerful, and built for people who know double-entry accounting. Here is the alternative that keeps the local data and drops the prerequisite.',
 
-    'hero_eyebrow' => 'GnuCash alternatives',
-    'hero_h1' => 'GnuCash <span class="text-gradient">alternatives</span>',
+    'hero_h1' => 'GnuCash alternatives',
     'hero_subtitle' => 'GnuCash is free, runs on your machine, and keeps your data yours. It also expects you to already understand double-entry bookkeeping.',
 
     'differences_h2' => 'What\'s the difference between Argo Books and GnuCash?',
     'differences_desc' => 'GnuCash and Argo Books agree on the important part: accounting software should run on your computer and keep your books on your disk. Where they differ is the starting line. GnuCash was built for people who know accounting; Argo Books is built for people who run a business.',
-    'why_h3' => 'Why choose Argo Books over GnuCash?',
+    'why_h3' => 'What changes when you move from GnuCash to Argo Books',
     'why_list' => [
         '<strong>No accounting knowledge required.</strong> GnuCash opens on a chart of accounts and expects you to know what a credit is. Argo Books asks what you spent and who you paid.',
         '<strong>AI that\'s built in.</strong> Receipt scanning turns a photo into a filed expense, spreadsheet import maps your columns automatically, and predictive analytics forecasts your cash flow. GnuCash has none of these.',
@@ -40,8 +39,6 @@ return [
         '<strong>Built this decade.</strong> GnuCash\'s interface has changed very little in twenty years. Argo Books is designed around the tasks you do each week.',
         '<strong>Local data on both sides.</strong> You do not have to give up privacy to get usability. Argo Books keeps your books on your machine, encrypted, exactly as GnuCash does.',
     ],
-    'callout_title' => 'Same principle, different starting line',
-    'callout_sub' => 'Both keep your data local; only one needs an accounting background',
 
     // Feature, Argo Free, Argo Premium, GnuCash.
     // 'yes' and 'no' render the tick and cross; any other string is a grey pill.
@@ -91,9 +88,9 @@ return [
     'key_h2' => 'Keep the local data, drop the prerequisite',
     'key_desc' => 'GnuCash proved that people want accounting software that runs on their own computer. Argo Books agrees, and removes the part where you have to learn double-entry bookkeeping before you can record your first expense.',
     'key_cards' => [
-        ['tone' => '', 'icon' => 'users', 'h3' => 'Built for owners, not accountants', 'p' => 'GnuCash is organised around accounts, ledgers and journal entries. Argo Books is organised around invoices, expenses, receipts and stock, in the language you already use.'],
-        ['tone' => 'purple', 'icon' => 'bolt', 'h3' => 'AI that does the typing', 'p' => 'Receipt scanning, spreadsheet import and cash flow forecasting are included. GnuCash has no AI features, so every transaction is typed by hand.'],
-        ['tone' => 'green', 'icon' => 'map-pin', 'h3' => 'Made in Canada', 'p' => 'Built by a Canadian startup that understands Canadian small businesses. Our pricing is in CAD, and our team is based in Saskatchewan.'],
+        ['icon' => 'users', 'h3' => 'Built for owners, not accountants', 'p' => 'GnuCash is organised around accounts, ledgers and journal entries. Argo Books is organised around invoices, expenses, receipts and stock, in the language you already use.'],
+        ['icon' => 'bolt', 'h3' => 'AI that does the typing', 'p' => 'Receipt scanning, spreadsheet import and cash flow forecasting are included. GnuCash has no AI features, so every transaction is typed by hand.'],
+        ['icon' => 'map-pin', 'h3' => 'Made in Canada', 'p' => 'Built in Saskatchewan for Canadian small businesses, with pricing in CAD.'],
     ],
 
     'honest' => [

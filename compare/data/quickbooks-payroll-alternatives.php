@@ -35,8 +35,7 @@ return [
     'og_title' => 'QuickBooks Payroll alternatives for Canadian small businesses',
     'og_description' => 'QuickBooks charges for the books, then for payroll, then per employee. Argo Books charges once. Compared on deductions, T4s, Quebec and what each one files for you.',
 
-    'hero_eyebrow' => 'QuickBooks Payroll alternative',
-    'hero_h1' => '<span class="text-gradient">QuickBooks Payroll</span><br>alternatives',
+    'hero_h1' => 'QuickBooks Payroll alternatives',
     'hero_subtitle' => 'The cheapest QuickBooks bundle that includes payroll is $' . $qbp_base . ' a month plus $' . $qbp_per . ' per employee. Argo Books does the books and Canadian payroll together for $' . $argo_monthly . ' CAD flat, with no per-employee fee.',
 
     'differences_h2' => 'What does QuickBooks Payroll actually cost in Canada?',
@@ -49,8 +48,6 @@ return [
         '<strong>Your staff records stay on your computer.</strong> Social insurance numbers and salaries are written locally instead of held in a cloud account.',
         '<strong>No price creep.</strong> The pattern people leave QuickBooks over is the annual increase on a plan they are already deep into. A flat desktop price is a different arrangement.',
     ],
-    'callout_title' => 'Charged per head',
-    'callout_sub' => '$' . $qbp_base . ' plus $' . $qbp_per . ' per employee, against one flat $' . $argo_monthly,
 
     // Feature, Argo Free, Argo Premium, QuickBooks Payroll.
     'table_argo_sub' => '$' . $argo_monthly . ' CAD/month, books + payroll',
@@ -107,9 +104,9 @@ return [
     'key_h2' => 'The same job, priced per head',
     'key_desc' => 'QuickBooks calculates Canadian deductions correctly and files for you, and for many businesses that is worth paying for. What people bring to a comparison page is rarely the payroll itself. It is that the bill goes up every time they hire.',
     'key_cards' => [
-        ['tone' => '', 'icon' => 'subscription', 'h3' => 'One price, whatever the headcount', 'p' => 'Books, payroll and staff are the same $' . $argo_monthly . ' a month in Argo Books. There is no plan tier tied to how many people you employ.'],
-        ['tone' => 'purple', 'icon' => 'users', 'h3' => 'Hiring is free', 'p' => 'At $' . $qbp_per . ' per employee a month, taking on four people adds about $' . number_format($qbp_per * 4 * 12) . ' a year to a QuickBooks bill. In Argo Books it adds nothing.'],
-        ['tone' => 'green', 'icon' => 'map-pin', 'h3' => 'Quebec done properly', 'p' => 'QPP, QPIP, Quebec income tax and the federal abatement calculated separately, and the RL-1 figures worked out at year end.'],
+        ['icon' => 'subscription', 'h3' => 'One price, whatever the headcount', 'p' => 'Books, payroll and staff are the same $' . $argo_monthly . ' a month in Argo Books. There is no plan tier tied to how many people you employ.'],
+        ['icon' => 'users', 'h3' => 'Hiring is free', 'p' => 'At $' . $qbp_per . ' per employee a month, taking on four people adds about $' . number_format($qbp_per * 4 * 12) . ' a year to a QuickBooks bill. In Argo Books it adds nothing.'],
+        ['icon' => 'map-pin', 'h3' => 'Quebec done properly', 'p' => 'QPP, QPIP, Quebec income tax and the federal abatement calculated separately, and the RL-1 figures worked out at year end.'],
     ],
 
     'honest' => [

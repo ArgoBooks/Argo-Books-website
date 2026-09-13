@@ -28,13 +28,12 @@ return [
     'og_title' => 'Argo Books vs Xero: Simpler, Offline-Capable & More Affordable',
     'og_description' => 'Compare Argo Books and Xero side by side. See why small businesses are choosing Argo Books for simpler, more affordable finance management with offline access.',
 
-    'hero_eyebrow' => 'Xero alternative',
-    'hero_h1' => 'Argo Books <span class="text-gradient">vs Xero</span>',
+    'hero_h1' => 'Argo Books vs Xero',
     'hero_subtitle' => 'A simpler, more affordable way to manage your small business finances. All the essentials, none of the accounting jargon or the cloud dependency.',
 
     'differences_h2' => 'What\'s the difference between Argo Books and Xero?',
     'differences_desc' => 'Both handle the accounting basics. The difference is who they\'re built for. Xero is built for accountants and bookkeepers, cloud-only, and caps invoices on its cheapest plan; Argo Books is built for the business owner doing their own books, works offline, and stays one flat price.',
-    'why_h3' => 'Why choose Argo Books over Xero?',
+    'why_h3' => 'What changes when you move from Xero to Argo Books',
     'why_list' => [
         '<strong>Everything in one clean app.</strong> Invoicing, expenses, receipts, inventory, and forecasting together, with no accounting jargon and no double-entry to learn.',
         '<strong>A genuinely free plan.</strong> All the core features forever, no trial and no credit card. Xero has no free tier at all.',
@@ -42,8 +41,6 @@ return [
         '<strong>AI that\'s included, not upsold.</strong> Receipt scanning, spreadsheet import, and predictive analytics come built in, not bolted on as pricey add-ons.',
         '<strong>One predictable price.</strong> Everything in Premium for $' . $argo_monthly . ' CAD/month, with no invoice caps and no per-tier upsells.',
     ],
-    'callout_title' => '20-invoice cap',
-    'callout_sub' => 'Xero\'s Starter plan limits you to about 20 invoices a month',
 
     // Feature, Argo Free, Argo Premium, Xero.
     // 'yes' and 'no' render the tick and cross; any other string is a grey pill.
@@ -95,9 +92,9 @@ return [
     'key_h2' => 'Built for business owners, not accountants',
     'key_desc' => 'Xero is polished and globally popular, but it\'s cloud-only, designed for businesses that already have an accountant, and its Starter plan caps you at just 20 invoices per month. Argo Books is built for non-accountants who want simplicity, privacy, and affordable pricing.',
     'key_cards' => [
-        ['tone' => '', 'icon' => 'dollar', 'h3' => 'No invoice caps', 'p' => 'Xero\'s Starter plan limits you to 20 invoices per month, pushing most businesses to the $' . $xero_standard . '/month Standard plan. Argo Books Premium includes unlimited invoicing for $' . $argo_monthly . ' CAD/month.'],
-        ['tone' => 'purple', 'icon' => 'bolt', 'h3' => 'Works offline', 'p' => 'Xero is cloud-only: no internet, no access to your data. Argo Books is a desktop app that works offline, so your finances are always available and stored locally on your device.'],
-        ['tone' => 'green', 'icon' => 'map-pin', 'h3' => 'Made in Canada', 'p' => 'Built by a Canadian startup that understands Canadian small businesses. Our pricing is in CAD, and our team is based in Saskatchewan.'],
+        ['icon' => 'dollar', 'h3' => 'No invoice caps', 'p' => 'Xero\'s Starter plan limits you to 20 invoices per month, pushing most businesses to the $' . $xero_standard . '/month Standard plan. Argo Books Premium includes unlimited invoicing for $' . $argo_monthly . ' CAD/month.'],
+        ['icon' => 'bolt', 'h3' => 'Works offline', 'p' => 'Xero is cloud-only: no internet, no access to your data. Argo Books is a desktop app that works offline, so your finances are always available and stored locally on your device.'],
+        ['icon' => 'map-pin', 'h3' => 'Made in Canada', 'p' => 'Built in Saskatchewan for Canadian small businesses, with pricing in CAD.'],
     ],
 
     'honest' => [

@@ -70,27 +70,19 @@ require_once __DIR__ . '/../partials/fonts.php'; ?>
     <!-- =============================================
          HERO
          ============================================= -->
-    <section class="hero">
-        <div class="hero-bg">
-            <div class="hero-gradient-orb hero-orb-1"></div>
-            <div class="hero-gradient-orb hero-orb-2"></div>
-        </div>
+    <section class="hero hero--rise">
         <div class="container">
-            <div class="hero-badge animate-fade-in">
-                <?= svg_icon('star', 16) ?>
-                <span>Share Your Experience</span>
-            </div>
-            <h1 class="animate-fade-in">Help others discover Argo Books</h1>
-            <p class="hero-subtitle animate-fade-in">
+            <h1>Help others discover Argo Books</h1>
+            <p class="hero-subtitle">
                 If Argo Books has saved you time or simplified your books, a review on Capterra is one of the most useful ways to give back. It helps small businesses find software that fits the way they actually work.
             </p>
-            <div class="review-prefer-contact animate-fade-in">
+            <div class="review-prefer-contact">
                 <?= svg_icon('message-circle', 18) ?>
                 <span>
                     Having an issue? <a href="../contact-us/">Tell us first. We'd love to fix it.</a>
                 </span>
             </div>
-            <div class="hero-ctas animate-fade-in">
+            <div class="hero-ctas">
                 <a href="<?= htmlspecialchars($capterra_url) ?>" target="_blank" rel="noopener" class="btn-cta btn-cta-primary">
                     <span>Leave a Review on Capterra</span>
                     <?= svg_icon('arrow-top-right', 18) ?>
@@ -103,44 +95,18 @@ require_once __DIR__ . '/../partials/fonts.php'; ?>
     </section>
 
     <!-- =============================================
-         STATS BANNER: quick reassurance
-         ============================================= -->
-    <section class="highlight-banner">
-        <div class="container">
-            <div class="highlight-grid animate-on-scroll">
-                <div class="highlight-item">
-                    <h3>~5 min</h3>
-                    <p>Average time to leave a review</p>
-                </div>
-                <div class="highlight-item">
-                    <h3>Verified</h3>
-                    <p>Every review is manually checked by Capterra</p>
-                </div>
-                <div class="highlight-item">
-                    <h3>Independent</h3>
-                    <p>Capterra is owned by Gartner, not by us</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- =============================================
          WHAT IS CAPTERRA?
          ============================================= -->
-    <section class="feature-detail-section">
+    <section class="feature-detail-section rise-section">
         <div class="container">
-            <div class="feature-detail animate-on-scroll">
+            <div class="rise-sheet">
+            <div class="feature-detail">
                 <div class="feature-detail-text">
-                    <span class="section-label">About Capterra</span>
-                    <h2>An independent review site small businesses trust</h2>
+                    <h2>What Capterra is</h2>
                     <p>
-                        Capterra is one of the largest independent software review sites on the internet, owned by Gartner. It lets real users compare business tools side by side using verified reviews, not paid ads. People researching accounting software regularly check Capterra before they pick a product, so a thoughtful review from an actual user has real weight.
+                        Capterra is a software review site owned by Gartner. It lets people compare business tools side by side using reviews from verified users, and people researching accounting software often check it before they pick a product.
                     </p>
                     <ul class="feature-checklist">
-                        <li>
-                            <?= svg_icon('check', 20) ?>
-                            <span>Reviews are read by thousands of small business owners every day</span>
-                        </li>
                         <li>
                             <?= svg_icon('check', 20) ?>
                             <span>Capterra is independent: we don't pay for placement or curate reviews</span>
@@ -152,32 +118,12 @@ require_once __DIR__ . '/../partials/fonts.php'; ?>
                     </ul>
                 </div>
                 <div class="feature-detail-visual">
-                    <div class="review-info-card">
-                        <div class="review-info-card-header">
-                            <div class="review-info-card-stars">
-                                <?= svg_icon('star', 22) ?>
-                                <?= svg_icon('star', 22) ?>
-                                <?= svg_icon('star', 22) ?>
-                                <?= svg_icon('star', 22) ?>
-                                <?= svg_icon('star', 22) ?>
-                            </div>
-                            <span class="review-info-card-label">Verified review</span>
-                        </div>
-                        <p class="review-info-card-quote">
-                            &ldquo;Argo Books replaced three different tools we were paying for. Setup took an afternoon and the receipt scanning alone has saved us hours every week.&rdquo;
-                        </p>
-                        <div class="review-info-card-meta">
-                            <div class="review-info-card-avatar">
-                                <?= svg_icon('user', 20) ?>
-                            </div>
-                            <div>
-                                <div class="review-info-card-name">Sarah K.</div>
-                                <div class="review-info-card-role">Owner, Retail, 2-10 employees</div>
-                            </div>
-                        </div>
-                        <p class="review-info-card-disclaimer">Illustrative example. Reviews display first name, role, industry, and company size.</p>
+                    <div class="review-note">
+                        <p>I build Argo Books on my own, so reviews are one of the few ways I hear how it holds up in someone else's business. Please be honest, including about what's missing or annoying. Critical reviews tell me what to fix next.</p>
+                        <p class="review-note-sign">Evan, founder of Argo Books</p>
                     </div>
                 </div>
+            </div>
             </div>
         </div>
     </section>
@@ -187,9 +133,8 @@ require_once __DIR__ . '/../partials/fonts.php'; ?>
          ============================================= -->
     <section id="what-to-expect" class="feature-detail-section" style="background: var(--gray-50);">
         <div class="container">
-            <div class="feature-detail reversed animate-on-scroll">
+            <div class="feature-detail reversed">
                 <div class="feature-detail-text">
-                    <span class="section-label">What to Expect</span>
                     <h2>Verifying you're a real person</h2>
                     <p>
                         Before publishing your review, Capterra needs to confirm you're genuinely a user of Argo Books and not a bot, a competitor, or someone connected to us. You'll see this verification screen near the end of the form, and you can choose either path.
@@ -231,32 +176,31 @@ require_once __DIR__ . '/../partials/fonts.php'; ?>
          ============================================= -->
     <section class="benefits-section">
         <div class="container">
-            <div class="section-header animate-on-scroll">
-                <span class="section-label">Capterra's Guidelines</span>
-                <h2 class="section-title">Tips for a great review</h2>
-                <p class="section-desc">Capterra surfaces these three tips on the verification screen. They're also what make a review most useful to other small business owners.</p>
+            <div class="section-header">
+                <h2 class="section-title">Tips for a useful review</h2>
+                <p class="section-desc">Capterra shows these three tips on the verification screen.</p>
             </div>
-            <div class="benefits-grid">
-                <div class="benefit-card animate-on-scroll">
+            <div class="benefits-grid benefits-grid--three">
+                <div class="benefit-card">
                     <div class="benefit-card-icon">
                         <?= svg_icon('search', 22) ?>
                     </div>
                     <h3>Be specific &amp; relevant</h3>
-                    <p>Share concrete examples of features you liked or disliked. Real details from your day-to-day use are far more useful to readers than general impressions.</p>
+                    <p>Share concrete examples of features you liked or disliked. Details from your day-to-day use are more useful to readers than general impressions.</p>
                 </div>
-                <div class="benefit-card animate-on-scroll">
-                    <div class="benefit-card-icon green">
+                <div class="benefit-card">
+                    <div class="benefit-card-icon">
                         <?= svg_icon('user', 22) ?>
                     </div>
                     <h3>Be authentic</h3>
                     <p>Write in your own words about your genuine experience. Capterra asks people not to use AI tools to generate review content.</p>
                 </div>
-                <div class="benefit-card animate-on-scroll">
-                    <div class="benefit-card-icon purple">
+                <div class="benefit-card">
+                    <div class="benefit-card-icon">
                         <?= svg_icon('analytics', 22) ?>
                     </div>
                     <h3>Be balanced</h3>
-                    <p>Highlight what's working and where things could improve. Balanced reviews are the most helpful, and the ones other small business owners actually trust.</p>
+                    <p>Cover what works and what could be better. A review that only praises is harder for other owners to judge.</p>
                 </div>
             </div>
         </div>
@@ -267,14 +211,13 @@ require_once __DIR__ . '/../partials/fonts.php'; ?>
          ============================================= -->
     <section class="feature-detail-section">
         <div class="container">
-            <div class="section-header animate-on-scroll">
-                <span class="section-label">Privacy</span>
+            <div class="section-header">
                 <h2 class="section-title">What's shared, and what stays private</h2>
                 <p class="section-desc">Capterra publishes enough information to make a review credible, without exposing your full identity or contact details.</p>
             </div>
             <div class="review-privacy-grid">
-                <div class="review-privacy-card review-privacy-public animate-on-scroll">
-                    <div class="review-privacy-card-icon green">
+                <div class="review-privacy-card review-privacy-public">
+                    <div class="review-privacy-card-icon">
                         <?= svg_icon('eye', 22) ?>
                     </div>
                     <h3>Shown publicly</h3>
@@ -287,8 +230,8 @@ require_once __DIR__ . '/../partials/fonts.php'; ?>
                         <li><?= svg_icon('check', 18) ?><span>A profile photo (only in some cases)</span></li>
                     </ul>
                 </div>
-                <div class="review-privacy-card review-privacy-private animate-on-scroll">
-                    <div class="review-privacy-card-icon purple">
+                <div class="review-privacy-card review-privacy-private">
+                    <div class="review-privacy-card-icon">
                         <?= svg_icon('lock', 22) ?>
                     </div>
                     <h3>Kept private</h3>
@@ -308,26 +251,24 @@ require_once __DIR__ . '/../partials/fonts.php'; ?>
          ============================================= -->
     <section class="how-it-works">
         <div class="container">
-            <div class="section-header animate-on-scroll">
-                <span class="section-label">After You Submit</span>
-                <h2 class="section-title">What happens next</h2>
-                <p class="section-desc">From submit to live on Capterra, here's the full path your review takes.</p>
+            <div class="section-header">
+                <h2 class="section-title">What happens after you submit</h2>
             </div>
             <div class="steps-grid">
-                <div class="step-card animate-on-scroll">
+                <div class="step-card">
                     <div class="step-number">1</div>
                     <h3>You submit your review</h3>
                     <p>Fill in the rating, what you like, what could be better, and how you use Argo Books. Choose LinkedIn or manual verification at the end.</p>
                 </div>
-                <div class="step-card animate-on-scroll">
+                <div class="step-card">
                     <div class="step-number">2</div>
                     <h3>Capterra verifies you</h3>
                     <p>Their quality assurance team manually confirms you're a real person and that the review fits their community guidelines. They may email you with a quick follow-up question.</p>
                 </div>
-                <div class="step-card animate-on-scroll">
+                <div class="step-card">
                     <div class="step-number">3</div>
                     <h3>Your review goes live</h3>
-                    <p>Once approved, usually within a few business days, your review appears on the Argo Books listing on Capterra and starts helping other small businesses make a confident decision.</p>
+                    <p>Once approved, your review appears on the Argo Books listing on Capterra.</p>
                 </div>
             </div>
         </div>
@@ -341,9 +282,9 @@ require_once __DIR__ . '/../partials/fonts.php'; ?>
     <div class="dark-section-wrapper">
         <section class="cta-section">
             <div class="container">
-                <div class="cta-card animate-on-scroll">
-                    <h2>Ready to share your experience?</h2>
-                    <p>It takes about five minutes, and your review genuinely helps other small business owners pick the right tool. Thank you for taking the time.</p>
+                <div class="cta-card">
+                    <h2>Leave a review on Capterra</h2>
+                    <p>Your review helps other small business owners decide whether Argo Books fits them. Thank you for taking the time.</p>
                     <div class="cta-buttons">
                         <a href="<?= htmlspecialchars($capterra_url) ?>" target="_blank" rel="noopener" class="btn-cta btn-cta-primary">
                             <span>Leave a Review on Capterra</span>
@@ -362,7 +303,6 @@ require_once __DIR__ . '/../partials/fonts.php'; ?>
         </footer>
     </div>
 
-    <script defer src="../resources/scripts/reveal.js"></script>
 </body>
 
 </html>

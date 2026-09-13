@@ -27,13 +27,12 @@ return [
     'og_title' => 'Invoice2Go Alternatives Without the Invoice Caps',
     'og_description' => 'Invoice2Go caps how many invoices you send and stops at billing. Here are the alternatives with no caps and the whole books.',
 
-    'hero_eyebrow' => 'Invoice2Go alternatives',
-    'hero_h1' => 'Invoice2Go <span class="text-gradient">alternatives</span>',
+    'hero_h1' => 'Invoice2Go alternatives',
     'hero_subtitle' => 'Invoice2Go\'s cheapest plan allows two invoices a month. Argo Books gives you full bookkeeping, offline, for less than their unlimited tier.',
 
     'differences_h2' => 'What\'s the difference between Argo Books and Invoice2Go?',
     'differences_desc' => 'Invoice2Go is an invoicing app. Argo Books is the whole set of books, with invoicing inside it. The other difference is the caps: Invoice2Go\'s cheaper tiers limit how many invoices you can send, so the plan that actually compares to Argo is their most expensive one.',
-    'why_h3' => 'Why choose Argo Books over Invoice2Go?',
+    'why_h3' => 'What changes when you move from Invoice2Go to Argo Books',
     'why_list' => [
         '<strong>No invoice caps to work around.</strong> Invoice2Go Starter allows 2 invoices a month and Professional allows 5. Argo Books Premium does not cap invoices at all.',
         '<strong>Your actual books, not just invoicing.</strong> Expenses, receipts, inventory, reports and forecasting are all included, where Invoice2Go stops at billing.',
@@ -41,8 +40,6 @@ return [
         '<strong>AI that\'s built in.</strong> Receipt scanning, spreadsheet import, and predictive analytics come included rather than as an upsell.',
         '<strong>One predictable price in CAD.</strong> Invoice2Go publishes in USD. The figures here are converted to CAD so the comparison is like for like.',
     ],
-    'callout_title' => 'Unlimited for less',
-    'callout_sub' => 'Argo Books Premium costs less than Invoice2Go Premium and keeps your whole books',
 
     // Feature, Argo Free, Argo Premium, Invoice2Go.
     // 'yes' and 'no' render the tick and cross; any other string is a grey pill.
@@ -90,9 +87,9 @@ return [
     'key_h2' => 'Unlimited invoicing without the unlimited price',
     'key_desc' => 'Invoice2Go\'s plan ladder is built around how many invoices you send. Argo Books charges one flat price and does not meter your billing, then adds the bookkeeping Invoice2Go leaves out.',
     'key_cards' => [
-        ['tone' => '', 'icon' => 'dollar', 'h3' => 'No caps, lower price', 'p' => 'Invoice2Go\'s unlimited tier is $' . $i2g_premium . ' CAD/month. Argo Books Premium is $' . $argo_monthly . ' CAD/month with no invoice cap, plus receipt scanning, inventory and forecasting.'],
-        ['tone' => 'purple', 'icon' => 'bolt', 'h3' => 'Works offline', 'p' => 'Invoice2Go is cloud-only. Argo Books is a desktop app that works without a connection, with your data stored locally on your device.'],
-        ['tone' => 'green', 'icon' => 'map-pin', 'h3' => 'Made in Canada', 'p' => 'Built by a Canadian startup that understands Canadian small businesses. Our pricing is in CAD, and our team is based in Saskatchewan.'],
+        ['icon' => 'dollar', 'h3' => 'No caps, lower price', 'p' => 'Invoice2Go\'s unlimited tier is $' . $i2g_premium . ' CAD/month. Argo Books Premium is $' . $argo_monthly . ' CAD/month with no invoice cap, plus receipt scanning, inventory and forecasting.'],
+        ['icon' => 'bolt', 'h3' => 'Works offline', 'p' => 'Invoice2Go is cloud-only. Argo Books is a desktop app that works without a connection, with your data stored locally on your device.'],
+        ['icon' => 'map-pin', 'h3' => 'Made in Canada', 'p' => 'Built in Saskatchewan for Canadian small businesses, with pricing in CAD.'],
     ],
 
     'honest' => [

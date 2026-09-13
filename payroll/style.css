@@ -19,19 +19,44 @@
  * side is reset to the left and the grid is applied to .hero .container.
  */
 
+/* The lit band stops short of the section's bottom edge, so the pay stub
+   hangs out of it into the calculator section below, as the home page's
+   screenshot does. */
 .payroll-page .hero {
     text-align: left;
+    padding: 148px 0 0;
+    background: var(--white);
+}
+
+.payroll-page .hero::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 88px 0;
+    background:
+        radial-gradient(52% 70% at 72% 40%, rgba(120, 150, 220, 0.18), transparent 72%),
+        linear-gradient(160deg, var(--hero-gradient-start) 0%, var(--hero-gradient-end) 100%);
 }
 
 .pr-hero-grid {
     display: grid;
     grid-template-columns: 1.05fr 0.95fr;
     gap: clamp(32px, 5vw, 64px);
-    align-items: center;
+    align-items: end;
 }
 
-.pr-hero-copy .hero-badge svg {
-    color: var(--red);
+.pr-hero-copy {
+    padding-bottom: 148px;
+}
+
+/* The slate frame the home page and feature page demos sit in. */
+.pr-stub-frame {
+    position: relative;
+    z-index: 2;
+    padding: 12px;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--white-alpha-10);
+    background: linear-gradient(150deg, var(--gray-800) 0%, var(--gray-700) 100%);
+    box-shadow: var(--elevation-frame-dark);
 }
 
 .pr-hero-copy h1 {
@@ -41,14 +66,6 @@
     letter-spacing: -0.03em;
     margin-bottom: 20px;
     color: var(--white);
-}
-
-/* Matches the treatment on the comparison pages so the two read as one site. */
-.payroll-page .hero .text-gradient {
-    background: linear-gradient(135deg, var(--sky-400), var(--purple-300));
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
 }
 
 .pr-hero-copy .hero-subtitle {
@@ -85,11 +102,9 @@
 
 .pr-stub {
     position: relative;
-    z-index: 2;
     background: var(--white);
-    border-radius: 14px;
-    padding: 26px 28px 20px;
-    box-shadow: 0 30px 60px -30px rgba(2, 6, 23, 0.9);
+    border-radius: 6px;
+    padding: 34px 36px 26px;
     font-variant-numeric: tabular-nums;
     color: var(--gray-700);
 }
@@ -104,7 +119,7 @@
 
 .pr-stub-title {
     font-family: Fraunces, Georgia, serif;
-    font-size: 17px;
+    font-size: 20px;
     font-weight: 700;
     color: var(--gray-900);
 }
@@ -124,8 +139,8 @@
     display: flex;
     justify-content: space-between;
     gap: 16px;
-    font-size: 15px;
-    padding: 9px 0;
+    font-size: 16px;
+    padding: 11px 0;
 }
 
 .pr-stub-gross {
@@ -141,14 +156,14 @@
 }
 
 .pr-stub-deductions .pr-stub-row {
-    font-size: 14px;
-    padding: 6px 0;
+    font-size: 15px;
+    padding: 8px 0;
     color: var(--gray-600);
 }
 
 .pr-stub-net {
     font-weight: 700;
-    font-size: 17px;
+    font-size: 20px;
     color: var(--gray-900);
     border-top: 1px solid var(--gray-200);
     margin-top: 8px;
@@ -380,7 +395,7 @@
 
 .pr-deadline {
     padding: clamp(56px, 7vw, 90px) 0;
-    background: linear-gradient(135deg, var(--hero-gradient-start) 0%, var(--hero-gradient-end) 100%);
+    background: var(--hero-gradient-start);
 }
 
 .pr-deadline-grid {
@@ -626,12 +641,11 @@
     padding: 22px 24px;
     text-decoration: none;
     background: var(--white);
-    transition: border-color 0.15s ease, transform 0.15s ease;
+    transition: border-color 0.15s ease;
 }
 
 .pr-compare-card:hover {
     border-color: var(--premium-300);
-    transform: translateY(-2px);
 }
 
 .pr-compare-card h3 {
@@ -680,6 +694,19 @@
         grid-template-columns: 1fr;
     }
 
+    .pr-hero-copy {
+        padding-bottom: 0;
+    }
+
+    .pr-stub-frame {
+        width: 100%;
+        max-width: 560px;
+    }
+
+    .payroll-page .hero::before {
+        bottom: 150px;
+    }
+
     .pr-calc-control {
         grid-template-columns: 1fr;
         gap: 12px;
@@ -703,7 +730,15 @@
    heading is wider than a phone and drags the whole document with it. */
 @media (max-width: 600px) {
     .payroll-page .hero {
-        padding: 120px 0 60px;
+        padding: 120px 0 0;
+    }
+
+    .payroll-page .hero::before {
+        bottom: 130px;
+    }
+
+    .pr-stub-frame {
+        padding: 8px;
     }
 
     .pr-hero-copy h1 {
@@ -755,6 +790,7 @@
  * closing block are already dark in both themes, so they need nothing here.
  */
 
+[data-theme='dark'] .payroll-page .hero,
 [data-theme='dark'] .pr-cost,
 [data-theme='dark'] .pr-compare,
 [data-theme='dark'] .pr-faq {

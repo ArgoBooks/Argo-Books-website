@@ -31,13 +31,12 @@ return [
     'og_title' => 'Zoho Books Alternatives: Standalone, Offline, Yours',
     'og_description' => 'Zoho Books pulls you into a wider suite and needs a connection. Here are the alternatives that stay standalone and work offline.',
 
-    'hero_eyebrow' => 'Zoho Books alternatives',
-    'hero_h1' => 'Zoho Books <span class="text-gradient">alternatives</span>',
+    'hero_h1' => 'Zoho Books alternatives',
     'hero_subtitle' => 'A simpler, offline way to manage your small business finances. All the essentials in one native desktop app, with a free plan that has no revenue cap, no 40-app suite to navigate.',
 
     'differences_h2' => 'What\'s the difference between Argo Books and Zoho Books?',
     'differences_desc' => 'Both cover the small business basics, both are free to start, and their paid plans begin at about the same price. The difference is what kind of tool each one is. Zoho Books is a powerful, feature-dense cloud app and one piece of a 40-plus app suite; Argo Books is a simple, standalone desktop app that works offline and is built for the owner doing their own books.',
-    'why_h3' => 'Why choose Argo Books over Zoho Books?',
+    'why_h3' => 'What changes when you move from Zoho Books to Argo Books',
     'why_list' => [
         '<strong>A free plan with no revenue cap.</strong> All the core features forever, no trial and no credit card. Zoho Books has a free plan too, but it\'s capped by your annual revenue.',
         '<strong>Yours, and offline.</strong> A native desktop app for Windows, macOS, and Linux. Your books open instantly and keep working with no internet, and your data stays on your machine. Zoho Books is cloud-only.',
@@ -45,8 +44,6 @@ return [
         '<strong>Standalone, not a suite.</strong> Argo is one focused tool, not a slice of a 40-app ecosystem full of cross-sells and add-ons.',
         '<strong>One predictable price.</strong> Everything in Premium for $' . $argo_monthly . ' CAD/month, with AI receipt scanning included in one flat plan.',
     ],
-    'callout_title' => 'Free, but capped',
-    'callout_sub' => 'Zoho\'s free plan is limited by your revenue; Argo\'s isn\'t',
 
     // Feature, Argo Free, Argo Premium, Zoho Books.
     // 'yes' and 'no' render the tick and cross; any other string is a grey pill.
@@ -90,12 +87,12 @@ return [
         'A huge marketplace of integrations, and it scales as you grow',
     ],
 
-    'key_h2' => 'Everything you need, nothing you don\'t',
+    'key_h2' => 'A free plan with no revenue cap, and books that work offline',
     'key_desc' => 'Both tools work for small businesses, but they focus on different things. Zoho Books goes wide and deep with features and integrations. Argo Books focuses on simplicity, offline access, and staying out of your way.',
     'key_cards' => [
-        ['tone' => '', 'icon' => 'dollar', 'h3' => 'Free without the cap', 'p' => 'Zoho\'s free plan is limited by your annual revenue. Argo\'s free plan has core features with no revenue cap, and Premium is one flat price with AI receipt scanning included.'],
-        ['tone' => 'purple', 'icon' => 'bolt', 'h3' => 'Works offline', 'p' => 'Zoho Books is cloud-only: no internet, no access, and your books live on their servers. Argo Books is a desktop app that works offline, so you\'re never locked out of your own data.'],
-        ['tone' => 'green', 'icon' => 'map-pin', 'h3' => 'Made in Canada', 'p' => 'Built by a Canadian startup that understands Canadian small businesses. Our pricing is in CAD, and our team is based in Saskatchewan.'],
+        ['icon' => 'dollar', 'h3' => 'Free without the cap', 'p' => 'Zoho\'s free plan is limited by your annual revenue. Argo\'s free plan has core features with no revenue cap, and Premium is one flat price with AI receipt scanning included.'],
+        ['icon' => 'bolt', 'h3' => 'Works offline', 'p' => 'Zoho Books is cloud-only: no internet, no access, and your books live on their servers. Argo Books is a desktop app that works offline, so you\'re never locked out of your own data.'],
+        ['icon' => 'map-pin', 'h3' => 'Made in Canada', 'p' => 'Built in Saskatchewan for Canadian small businesses, with pricing in CAD.'],
     ],
 
     'honest' => [

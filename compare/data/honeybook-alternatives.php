@@ -28,13 +28,12 @@ return [
     'og_title' => 'HoneyBook Alternatives That Keep Your Actual Books',
     'og_description' => 'HoneyBook books clients and sends invoices. Here are the alternatives that also track expenses, stock and profit.',
 
-    'hero_eyebrow' => 'HoneyBook alternatives',
-    'hero_h1' => 'HoneyBook <span class="text-gradient">alternatives</span>',
+    'hero_h1' => 'HoneyBook alternatives',
     'hero_subtitle' => 'HoneyBook runs your client pipeline and gets you paid. Argo Books actually keeps your books. See where each one fits, and why Argo does the books and the invoicing in one app.',
 
     'differences_h2' => 'What\'s the difference between Argo Books and HoneyBook?',
     'differences_desc' => 'They solve different problems. HoneyBook is a client-flow and CRM platform for service solopreneurs: proposals, contracts, scheduling, a client portal, lead forms, invoicing, and payments. Argo Books is bookkeeping: expense and revenue tracking, financial reports, inventory, and invoicing in one app. Many HoneyBook users still run separate accounting; Argo does the books and the invoicing together.',
-    'why_h3' => 'Why choose Argo Books over HoneyBook?',
+    'why_h3' => 'What changes when you move from HoneyBook to Argo Books',
     'why_list' => [
         '<strong>It actually keeps your books.</strong> Invoicing, expenses, receipts, inventory, and reports in one clean app. HoneyBook isn\'t accounting software, so with it you\'d still need a separate tool for your books.',
         '<strong>A genuinely free plan.</strong> All the core features forever, no trial and no credit card. HoneyBook has no free plan, just a 7-day trial.',
@@ -42,8 +41,6 @@ return [
         '<strong>AI built into your books.</strong> Receipt scanning, spreadsheet import, and predictive analytics come included, aimed at your bookkeeping rather than your client pipeline.',
         '<strong>One predictable price.</strong> Everything in Premium for $' . $argo_monthly . ' CAD/month. No per-client fees, and no HoneyBook-style $' . $hb_starter . '+ CAD/month floor.',
     ],
-    'callout_title' => 'Not your books',
-    'callout_sub' => 'HoneyBook manages clients; Argo keeps the actual books.',
 
     // Feature, Argo Free, Argo Premium, HoneyBook.
     // 'yes' and 'no' render the tick and cross; any other string is a grey pill.
@@ -87,12 +84,12 @@ return [
         'Built to book clients and get paid, with HoneyBook AI to help along the way',
     ],
 
-    'key_h2' => 'Everything you need, nothing you don\'t',
+    'key_h2' => 'Your actual books, not just the client flow',
     'key_desc' => 'Both tools help small businesses get paid, but they focus on different things. HoneyBook shines at client flow: proposals, contracts, and scheduling. Argo Books focuses on your actual books, offline access, and inventory.',
     'key_cards' => [
-        ['tone' => '', 'icon' => 'dollar', 'h3' => 'More affordable', 'p' => 'HoneyBook has no free plan and runs about $' . $hb_starter . ' to $' . $hb_premium . ' CAD/month. Argo Books has a free version with core features, and Premium is a fraction of the cost.'],
-        ['tone' => 'purple', 'icon' => 'bolt', 'h3' => 'Actually your books', 'p' => 'HoneyBook manages clients and invoices, then hands off to QuickBooks for the accounting. Argo Books keeps the books itself, invoicing included, so it\'s one tool instead of two.'],
-        ['tone' => 'green', 'icon' => 'map-pin', 'h3' => 'Made in Canada', 'p' => 'Built by a Canadian startup that understands Canadian small businesses. Our pricing is in CAD, and our team is based in Saskatchewan.'],
+        ['icon' => 'dollar', 'h3' => 'More affordable', 'p' => 'HoneyBook has no free plan and runs about $' . $hb_starter . ' to $' . $hb_premium . ' CAD/month. Argo Books has a free version with core features, and Premium is a fraction of the cost.'],
+        ['icon' => 'bolt', 'h3' => 'Actually your books', 'p' => 'HoneyBook manages clients and invoices, then hands off to QuickBooks for the accounting. Argo Books keeps the books itself, invoicing included, so it\'s one tool instead of two.'],
+        ['icon' => 'map-pin', 'h3' => 'Made in Canada', 'p' => 'Built in Saskatchewan for Canadian small businesses, with pricing in CAD.'],
     ],
 
     'honest' => [

@@ -143,6 +143,7 @@ foreach ($d['related'] as $related_slug) {
     <link rel="stylesheet" href="../../resources/styles/faq.css">
     <link rel="stylesheet" href="../../resources/header/style.css">
     <link rel="stylesheet" href="../../resources/footer/style.css">
+    <link rel="stylesheet" href="../../resources/styles/typography.css">
 </head>
 
 <body class="compare-page">
@@ -153,13 +154,8 @@ foreach ($d['related'] as $related_slug) {
 
     <!-- Hero Section -->
     <section class="hero">
-        <div class="hero-bg">
-            <div class="hero-gradient-orb hero-orb-1"></div>
-            <div class="hero-gradient-orb hero-orb-2"></div>
-        </div>
         <div class="container">
             <div class="hero-content animate-fade-in">
-                <span class="hero-eyebrow"><?= $d['hero_eyebrow'] ?></span>
                 <h1><?= $d['hero_h1'] ?></h1>
                 <p class="hero-subtitle"><?= $d['hero_subtitle'] ?></p>
                 <div class="hero-ctas">
@@ -176,7 +172,7 @@ foreach ($d['related'] as $related_slug) {
                 <div class="hero-device">
                     <img src="../../resources/images/dashboard.webp"
                          srcset="../../resources/images/dashboard-800.webp 800w, ../../resources/images/dashboard-1200.webp 1200w, ../../resources/images/dashboard-1600.webp 1600w"
-                         sizes="(max-width: 900px) 90vw, 540px"
+                         sizes="(max-width: 900px) 90vw, 760px"
                          alt="The Argo Books dashboard" width="2400" height="1528" fetchpriority="high">
                 </div>
             </div>
@@ -207,10 +203,6 @@ foreach ($d['related'] as $related_slug) {
                     <div class="diff-mockup">
 <?php include __DIR__ . '/mockups/' . $slug . '.php'; ?>
                     </div>
-                    <div class="diff-callout">
-                        <span class="diff-callout-title"><?= $d['callout_title'] ?></span>
-                        <span class="diff-callout-sub"><?= $d['callout_sub'] ?></span>
-                    </div>
                 </div>
             </div>
         </div>
@@ -223,7 +215,6 @@ foreach ($d['related'] as $related_slug) {
     <section class="comparison-table-section">
         <div class="container">
             <div class="section-header animate-on-scroll">
-                <span class="section-label">Feature Comparison</span>
                 <h2>Side by side</h2>
             </div>
             <div class="table-wrapper animate-on-scroll">
@@ -303,14 +294,13 @@ foreach ($d['related'] as $related_slug) {
     <section class="key-differences">
         <div class="container">
             <div class="section-header animate-on-scroll">
-                <span class="section-label">Why Switch?</span>
                 <h2><?= $d['key_h2'] ?></h2>
                 <p class="section-desc"><?= $d['key_desc'] ?></p>
             </div>
             <div class="diff-grid">
 <?php foreach ($d['key_cards'] as $card): ?>
                 <div class="diff-card animate-on-scroll">
-                    <div class="diff-icon<?= $card['tone'] === '' ? '' : ' ' . $card['tone'] ?>">
+                    <div class="diff-icon">
                         <?= svg_icon($card['icon'], $d['key_icon_size'] ?? 30, '', 1.5) ?>
                     </div>
                     <h3><?= $card['h3'] ?></h3>
@@ -365,7 +355,6 @@ foreach ($d['related'] as $related_slug) {
     <section class="other-comparisons">
         <div class="container">
             <div class="section-header animate-on-scroll">
-                <span class="section-label">Keep comparing</span>
                 <h2>How does Argo Books compare to other accounting software?</h2>
             </div>
             <div class="compare-cards animate-on-scroll">

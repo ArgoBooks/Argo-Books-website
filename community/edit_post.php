@@ -7,6 +7,7 @@ require_once __DIR__ . '/formatting/formatting_functions.php';
 require_once __DIR__ . '/report/ban_check.php';
 
 require_once __DIR__ . '/../resources/icons.php';
+require_once __DIR__ . '/../partials/fonts.php';
 
 // Check for remember me cookie and auto-login user if valid
 if (!isset($_SESSION['user_id']) && isset($_COOKIE['remember_me'])) {
@@ -234,6 +235,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="stylesheet" href="../resources/styles/custom-colors.css">
     <link rel="stylesheet" href="../resources/header/style.css">
     <link rel="stylesheet" href="../resources/footer/style.css">
+    <?= argo_font_links('default', '    ') ?>
+    <link rel="stylesheet" href="../resources/styles/typography.css">
 
     <!-- Mentions system -->
     <link rel="stylesheet" href="mentions/mentions.css">
@@ -247,15 +250,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </header>
 
     <div class="hero">
-        <div class="hero-bg">
-            <div class="hero-gradient-orb hero-orb-1"></div>
-            <div class="hero-gradient-orb hero-orb-2"></div>
-        </div>
         <div class="hero-content">
-            <div class="hero-badge">
-                <?= svg_icon('edit', 16) ?>
-                <span>Edit Post</span>
-            </div>
             <h1>Edit Your Post</h1>
             <p>Update your bug report or feature request</p>
         </div>
@@ -367,7 +362,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="preview-post">
                         <div id="preview-content">
                             <div class="preview-empty-state">
-                                <div class="preview-empty-icon">👁️</div>
+                                <div class="preview-empty-icon"><?= svg_icon('eye', 40) ?></div>
                                 <p>Fill out the form to see a preview of your post</p>
                             </div>
                         </div>

@@ -19,64 +19,26 @@ body {
 }
 
 /* Hero Section */
+/* The platform cards rise into the bottom of this band, so it never reads as
+   an empty bar. The overlap is the container's negative margin below. */
 .hero {
     position: relative;
-    background: linear-gradient(135deg, var(--hero-gradient-start), var(--hero-gradient-end));
+    background:
+        radial-gradient(50% 80% at 50% 0%, rgba(120, 150, 220, 0.16), transparent 70%),
+        linear-gradient(160deg, var(--hero-gradient-start) 0%, var(--hero-gradient-end) 100%);
     color: var(--white);
-    padding: 100px 20px 80px;
+    padding: 148px 20px 160px;
     text-align: center;
-    overflow: hidden;
-}
-
-.hero-bg {
-    position: absolute;
-    inset: 0;
-}
-
-.hero-orb {
-    position: absolute;
-    border-radius: var(--radius-round);
-    filter: blur(80px);
-    opacity: 0.5;
-    animation: orbFloat 8s ease-in-out infinite;
-}
-
-.hero-orb-1 {
-    width: 400px;
-    height: 400px;
-    background: linear-gradient(135deg, var(--blue-500), var(--cyan-500));
-    top: -100px;
-    right: -100px;
-}
-
-.hero-orb-2 {
-    width: 300px;
-    height: 300px;
-    background: linear-gradient(135deg, var(--purple-500), var(--pink-500));
-    bottom: -80px;
-    left: -80px;
-    animation-delay: -4s;
-}
-
-@keyframes orbFloat {
-    0%, 100% {
-        transform: translateY(0) scale(1);
-    }
-    50% {
-        transform: translateY(-20px) scale(1.05);
-    }
 }
 
 .hero-content {
-    position: relative;
-    z-index: 1;
     max-width: 600px;
     margin: 0 auto;
 }
 
 .hero h1 {
     font-size: var(--text-6xl);
-    margin: 0 0 16px 0;
+    margin: 0 0 12px 0;
     font-weight: 700;
     letter-spacing: -0.02em;
 }
@@ -84,8 +46,13 @@ body {
 .hero p {
     font-size: var(--text-lg);
     margin: 0;
-    opacity: 0.9;
     color: var(--white);
+}
+
+.hero + .container {
+    position: relative;
+    margin-top: -120px;
+    padding-top: 0;
 }
 
 /* Platform Grid */
@@ -106,13 +73,6 @@ body {
     flex-direction: column;
     align-items: center;
     text-align: center;
-    transition: all 0.3s ease;
-}
-
-.platform-card:hover {
-    box-shadow: var(--elevation-lg);
-    transform: translateY(-4px);
-    border-color: var(--gray-input-border);
 }
 
 .platform-icon {
@@ -120,24 +80,11 @@ body {
     height: 72px;
     margin-bottom: 24px;
     color: var(--black);
-    transition: color 0.3s ease;
 }
 
 .platform-icon svg {
     width: 100%;
     height: 100%;
-}
-
-.platform-windows:hover .platform-icon {
-    color: var(--blue-link-alt);
-}
-
-.platform-macos:hover .platform-icon {
-    color: var(--black);
-}
-
-.platform-linux:hover .platform-icon {
-    color: var(--brand-yellow);
 }
 
 .platform-info {
@@ -473,12 +420,6 @@ body {
     border: 1px solid var(--gray-border);
     display: flex;
     gap: 24px;
-    transition: all 0.3s ease;
-}
-
-.additional-card:hover {
-    box-shadow: var(--elevation-lg);
-    transform: translateY(-2px);
 }
 
 .additional-icon {
@@ -553,7 +494,7 @@ body {
 
 @media (max-width: 768px) {
     .hero {
-        padding: 80px 20px 60px;
+        padding: 120px 20px 130px;
     }
 
     .hero h1 {
@@ -566,6 +507,11 @@ body {
 
     .container {
         padding: 40px 16px;
+    }
+
+    .hero + .container {
+        margin-top: -96px;
+        padding-top: 0;
     }
 
     .platform-card {

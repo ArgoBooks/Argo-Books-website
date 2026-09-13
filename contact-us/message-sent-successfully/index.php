@@ -1,4 +1,5 @@
 <?php require_once __DIR__ . '/../../resources/icons.php';
+require_once __DIR__ . '/../../partials/fonts.php';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -13,8 +14,8 @@
   <meta name="author" content="Argo">
 
   <!-- Open Graph Meta Tags -->
-  <meta property="og:title" content="Argo Books - Message Sent Successfully">
-  <meta property="og:description" content="Your message has been sent successfully to the Argo Books support team.">
+  <meta property="og:title" content="Argo Books - Message Sent">
+  <meta property="og:description" content="Your message has been sent to Argo Books support.">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Argo Books">
   <meta property="og:image" content="https://argorobots.com/resources/images/og/og-home.png">
@@ -23,20 +24,21 @@
 
   <!-- Twitter Meta Tags -->
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Argo Books - Message Sent Successfully">
-  <meta name="twitter:description" content="Your message has been sent successfully to the Argo Books support team.">
+  <meta name="twitter:title" content="Argo Books - Message Sent">
+  <meta name="twitter:description" content="Your message has been sent to Argo Books support.">
   <meta name="twitter:image" content="https://argorobots.com/resources/images/og/og-home.png">
 
   <link rel="shortcut icon" type="image/x-icon" href="../../resources/images/argo-logo/argo-icon.ico">
-  <title>Argo Books - Message Sent Successfully</title>
+  <title>Argo Books - Message Sent</title>
 
   <script src="../../resources/scripts/main.js"></script>
 
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="../../resources/styles/custom-colors.css">
   <link rel="stylesheet" href="../../resources/header/style.css">
-  <link rel="stylesheet" href="../../resources/header/dark.css">
   <link rel="stylesheet" href="../../resources/footer/style.css">
+  <?= argo_font_links('default', '  ') ?>
+  <link rel="stylesheet" href="../../resources/styles/typography.css">
 </head>
 
 <body>
@@ -45,22 +47,25 @@
   </header>
   <main>
 
-  <section class="first">
-    <div class="success-container">
+  <section class="hero">
+    <div class="hero-inner">
       <div class="success-icon">
         <?= svg_icon('circle-check', null, '', null, 'stroke-linecap="round" stroke-linejoin="round"') ?>
       </div>
+      <h1>Got it, your message is sent</h1>
+      <p class="success-message">Thanks for writing. I read every message myself and will reply to the email
+        address you gave.</p>
+    </div>
+  </section>
 
+  <section class="first">
+    <div class="success-container">
       <div class="success-content">
-        <h1>Message Sent Successfully!</h1>
-        <p class="success-message">Thank you for reaching out. Our team will review your message and get back to you as
-          soon as possible.</p>
-
         <div class="info-box">
           <h3>What happens next?</h3>
           <ul>
-            <li>Your message has been delivered to our support team</li>
-            <li>We typically respond within 1-8 business hours</li>
+            <li>Your message is in the Argo Books support inbox</li>
+            <li>I typically reply within 1-8 business hours</li>
           </ul>
         </div>
 

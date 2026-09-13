@@ -91,86 +91,9 @@ h1, h2, h3, h4, h5, h6 {
   position: relative;
   padding: 140px 0 80px;
   text-align: center;
-  background: linear-gradient(135deg, var(--hero-gradient-start) 0%, var(--hero-gradient-end) 100%);
+  background: var(--hero-gradient-start);
   color: var(--white);
   overflow: hidden;
-}
-
-.hero .hero-bg {
-  position: absolute;
-  inset: 0;
-}
-
-.hero .hero-gradient-orb {
-  position: absolute;
-  border-radius: var(--radius-round);
-  filter: blur(80px);
-  opacity: 0;
-  mix-blend-mode: screen;
-  animation: heroOrbFadeIn 2s ease-out forwards;
-}
-
-.hero .hero-orb-1 {
-  width: 400px;
-  height: 400px;
-  background: linear-gradient(135deg, var(--primary-blue), var(--purple-500));
-  top: -100px;
-  right: -100px;
-  animation: heroOrbFadeIn 2s ease-out forwards, heroOrbPulse 4s ease-in-out infinite 2s, heroOrbFloat1 15s ease-in-out infinite;
-}
-
-.hero .hero-orb-2 {
-  width: 300px;
-  height: 300px;
-  background: linear-gradient(135deg, var(--cyan-500), var(--primary-blue));
-  bottom: -50px;
-  left: -50px;
-  animation: heroOrbFadeIn 2s ease-out 0.3s forwards, heroOrbPulse 5s ease-in-out infinite 2.3s, heroOrbFloat2 18s ease-in-out infinite;
-}
-
-@keyframes heroOrbFadeIn {
-  from { opacity: 0; transform: scale(0.6); }
-  to { opacity: 0.7; transform: scale(1); }
-}
-
-@keyframes heroOrbPulse {
-  0%, 100% { opacity: 0.7; }
-  50% { opacity: 0.95; }
-}
-
-@keyframes heroOrbFloat1 {
-  0%, 100% { transform: translate(0, 0) rotate(0deg); }
-  25% { transform: translate(-60px, 40px) rotate(3deg); }
-  50% { transform: translate(30px, -30px) rotate(-2deg); }
-  75% { transform: translate(70px, 50px) rotate(1deg); }
-}
-
-@keyframes heroOrbFloat2 {
-  0%, 100% { transform: translate(0, 0); }
-  25% { transform: translate(50px, -40px); }
-  50% { transform: translate(-30px, 50px); }
-  75% { transform: translate(40px, 20px); }
-}
-
-.hero .container {
-  position: relative;
-  z-index: 2;
-}
-
-.hero-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  background: var(--hero-badge-bg);
-  border: 1px solid var(--hero-badge-border);
-  border-radius: var(--radius-pill);
-  font-size: var(--text-xs);
-  margin-bottom: 24px;
-}
-
-.hero-badge svg {
-  color: var(--secondary-blue);
 }
 
 .hero h1 {
@@ -199,26 +122,39 @@ h1, h2, h3, h4, h5, h6 {
    Scoped under .compare-page (set on the <body> of every comparison page)
    so these rules never leak into other pages that share this stylesheet.
    ======================================== */
+/* Same construction as the homepage hero: the dark band stops short of the
+   section's bottom edge and the framed app window hangs over into the light
+   section below. The hub page (.compare-hub-page) overrides this further down. */
 .compare-page .hero {
-  padding: 150px 0 110px;
+  padding: 148px 0 56px;
   text-align: left;
+  background: var(--white);
+}
+
+.compare-page .hero::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 206px 0;
+  background:
+    radial-gradient(52% 60% at 74% 44%, rgba(120, 150, 220, 0.18), transparent 72%),
+    linear-gradient(160deg, var(--hero-gradient-start) 0%, var(--hero-gradient-end) 100%);
 }
 
 .compare-page .hero .container {
+  position: relative;
   display: grid;
-  grid-template-columns: 1.05fr 0.95fr;
-  gap: 56px;
-  align-items: center;
+  grid-template-columns: minmax(0, 0.88fr) minmax(0, 1.12fr);
+  gap: 64px;
+  align-items: end;
 }
 
-.compare-page .hero-eyebrow {
-  display: inline-block;
-  font-size: var(--text-2xs);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--sky-400);
-  margin-bottom: 18px;
+.compare-page .hero-content {
+  padding-bottom: 210px;
+}
+
+/* Runs past the content edge on wide screens; .hero clips it at the viewport. */
+.compare-page .hero-visual {
+  margin-right: -150px;
 }
 
 .compare-page .hero h1 {
@@ -226,22 +162,6 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 600;
   line-height: 1.08;
   margin-bottom: 20px;
-}
-
-/* Animated gradient wash on the "vs QuickBooks" line, lifted from the landing
-   page so the two heroes share the same signature treatment. */
-.compare-page .hero .text-gradient {
-  background: linear-gradient(135deg, var(--sky-400), var(--purple-300), var(--pink-400), var(--sky-400));
-  background-size: 300% 300%;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  animation: heroGradientShift 8s ease-in-out infinite;
-}
-
-@keyframes heroGradientShift {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
 }
 
 .compare-page .hero .hero-subtitle {
@@ -255,28 +175,20 @@ h1, h2, h3, h4, h5, h6 {
   justify-content: flex-start;
 }
 
-/* Product shot, reusing the landing page's device-frame treatment */
-.compare-page .hero-visual {
-  position: relative;
-}
-
+/* The homepage's slate device frame. */
 .compare-page .hero-device {
+  padding: 12px;
   border-radius: var(--radius-lg);
-  overflow: hidden;
-  box-shadow:
-    var(--elevation-frame-dark);
-  transform: perspective(1600px) rotateY(-4deg);
-  transition: transform 0.5s ease;
-}
-
-.compare-page .hero-device:hover {
-  transform: perspective(1600px) rotateY(0deg);
+  border: 1px solid var(--white-alpha-10);
+  background: linear-gradient(150deg, var(--gray-800) 0%, var(--gray-700) 100%);
+  box-shadow: var(--elevation-frame-dark);
 }
 
 .compare-page .hero-device img {
   display: block;
   width: 100%;
   height: auto;
+  border-radius: 6px;
 }
 
 /* ========================================
@@ -343,10 +255,6 @@ h1, h2, h3, h4, h5, h6 {
   color: var(--white);
 }
 
-.diff-visual {
-  position: relative;
-}
-
 /* Bespoke dashboard mockup (inline SVG), echoing the landing page's product
    framing. Purely decorative (aria-hidden in the markup). */
 .diff-mockup {
@@ -362,64 +270,6 @@ h1, h2, h3, h4, h5, h6 {
   border-radius: var(--radius-lg);
 }
 
-.dm-pulse {
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: dmPulse 2.6s ease-out infinite;
-}
-
-@keyframes dmPulse {
-  0% { transform: scale(1); opacity: 0.55; }
-  70%, 100% { transform: scale(3.4); opacity: 0; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .dm-pulse { animation: none; }
-}
-
-/* Floating annotation, echoing the "callout" treatment on Wave's page but
-   pointed at Argo's forecasting view. */
-.diff-callout {
-  position: absolute;
-  top: -24px;
-  right: -16px;
-  max-width: 230px;
-  padding: 13px 18px;
-  background: var(--white);
-  border: 1px solid var(--blue-100);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--elevation-md);
-  display: flex;
-  flex-direction: column;
-  z-index: 3;
-}
-
-.diff-callout::after {
-  content: "";
-  position: absolute;
-  left: 30px;
-  bottom: -6px;
-  width: 12px;
-  height: 12px;
-  background: var(--white);
-  border-right: 1px solid var(--blue-100);
-  border-bottom: 1px solid var(--blue-100);
-  transform: rotate(45deg);
-}
-
-.diff-callout-title {
-  font-family: var(--font-display);
-  font-weight: 600;
-  font-size: var(--text-sm);
-  color: var(--gray-900);
-}
-
-.diff-callout-sub {
-  font-size: var(--text-xs);
-  color: var(--gray-500);
-  margin-top: 3px;
-}
-
 /* ========================================
    CTA Buttons (hero + footer)
    ======================================== */
@@ -432,17 +282,16 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 600;
   border-radius: var(--radius-md);
   text-decoration: none;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  transition: background 0.2s ease, border-color 0.2s ease;
 }
 
 .btn-cta-primary {
-  background: linear-gradient(135deg, var(--primary-blue), var(--blue-700));
+  background: var(--primary-blue);
   color: var(--white);
 }
 
 .btn-cta-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--elevation-brand-strong);
+  background: var(--blue-700);
 }
 
 .btn-cta-outline {
@@ -485,19 +334,13 @@ h1, h2, h3, h4, h5, h6 {
   padding: 32px;
   border-radius: var(--radius-lg);
   border: 1px solid var(--gray-200);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
   justify-items: center;
-}
-
-.diff-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--elevation-lg);
 }
 
 .diff-icon {
   width: 56px;
   height: 56px;
-  background: linear-gradient(135deg, var(--blue-50), var(--blue-100));
+  background: var(--blue-50);
   border-radius: var(--radius-lg);
   display: grid;
   place-items: center;
@@ -508,22 +351,6 @@ h1, h2, h3, h4, h5, h6 {
   width: 28px;
   height: 28px;
   color: var(--primary-blue);
-}
-
-.diff-icon.purple {
-  background: linear-gradient(135deg, var(--purple-50), var(--purple-100));
-}
-
-.diff-icon.purple svg {
-  color: var(--purple-500);
-}
-
-.diff-icon.green {
-  background: linear-gradient(135deg, var(--green-50), var(--green-100));
-}
-
-.diff-icon.green svg {
-  color: var(--emerald-500);
 }
 
 .diff-card h3 {
@@ -569,7 +396,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .comparison-table thead {
-  background: linear-gradient(135deg, var(--gray-900) 0%, var(--primary-blue-dark) 100%);
+  background: var(--gray-900);
   color: var(--white);
 }
 
@@ -797,7 +624,7 @@ section.faq {
    ======================================== */
 .dark-section-wrapper {
   position: relative;
-  background: linear-gradient(135deg, var(--hero-gradient-start) 0%, var(--hero-gradient-end) 100%);
+  background: var(--hero-gradient-start);
   overflow: hidden;
 }
 
@@ -955,14 +782,11 @@ section.faq {
   line-height: 1.35;
   text-decoration: none;
   background: var(--white);
-  transition: border-color 0.18s ease, background 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+  transition: border-color 0.18s ease;
 }
 
 .compare-card:hover {
   border-color: var(--primary-blue);
-  background: var(--blue-50);
-  transform: translateY(-3px);
-  box-shadow: var(--elevation-md);
 }
 
 .compare-card svg {
@@ -978,6 +802,17 @@ section.faq {
 /* ========================================
    Responsive
    ======================================== */
+@media (max-width: 1200px) {
+  .compare-page .hero .container {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 48px;
+  }
+
+  .compare-page .hero-visual {
+    margin-right: 0;
+  }
+}
+
 @media (max-width: 900px) {
   .diff-grid {
     grid-template-columns: 1fr;
@@ -997,26 +832,28 @@ section.faq {
     margin: 0 auto;
   }
 
-  .diff-callout {
-    top: -18px;
-    right: 8px;
-    max-width: 210px;
-  }
-
-  .diff-mockup {
-    transform: none;
-  }
-
   /* Split hero stacks: text over product shot, both centered */
   .compare-page .hero {
-    padding: 130px 0 80px;
+    padding: 128px 0 40px;
     text-align: center;
   }
 
+  .compare-page .hero::before {
+    bottom: 150px;
+  }
+
   .compare-page .hero .container {
-    grid-template-columns: 1fr;
-    gap: 44px;
-    max-width: 560px;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 48px;
+    max-width: 640px;
+  }
+
+  .compare-page .hero-content {
+    padding-bottom: 0;
+  }
+
+  .compare-page .hero-visual {
+    margin-right: 0;
   }
 
   .compare-page .hero .hero-subtitle {
@@ -1026,10 +863,6 @@ section.faq {
 
   .compare-page .hero-ctas {
     justify-content: center;
-  }
-
-  .compare-page .hero-device {
-    transform: none;
   }
 }
 
@@ -1141,9 +974,18 @@ section.faq {
 /* ========================================
    Comparison hub page (compare/index.php)
    ======================================== */
+/* Lit slate like the pricing hero. The first row of comparison cards rises
+   into the bottom of the band, so it never reads as an empty bar. */
 .compare-hub-page .hero {
   text-align: center;
-  padding: 150px 0 90px;
+  padding: 148px 0 176px;
+  background:
+    radial-gradient(50% 80% at 50% 0%, rgba(120, 150, 220, 0.16), transparent 70%),
+    linear-gradient(160deg, var(--hero-gradient-start) 0%, var(--hero-gradient-end) 100%);
+}
+
+.compare-hub-page .hero::before {
+  content: none;
 }
 
 .compare-hub-page .hero .container {
@@ -1153,6 +995,16 @@ section.faq {
 .compare-hub-page .hero-content {
   max-width: 720px;
   margin: 0 auto;
+  padding-bottom: 0;
+}
+
+.compare-hub > .container {
+  position: relative;
+  margin-top: -112px;
+}
+
+.compare-hub-page .hub-card {
+  box-shadow: var(--elevation-md);
 }
 
 .compare-hub-page .hero .hero-subtitle {
@@ -1166,7 +1018,7 @@ section.faq {
 }
 
 .compare-hub {
-  padding: 80px 0 110px;
+  padding: 0 0 110px;
 }
 
 .hub-grid {
@@ -1186,13 +1038,11 @@ section.faq {
   border-radius: var(--radius-lg);
   background: var(--white);
   text-decoration: none;
-  transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+  transition: border-color 0.18s ease;
 }
 
 .hub-card:hover {
   border-color: var(--primary-blue);
-  box-shadow: var(--elevation-md);
-  transform: translateY(-3px);
 }
 
 .hub-card-title {
@@ -1233,6 +1083,7 @@ section.faq {
 
 @media (max-width: 600px) {
   .hub-grid { grid-template-columns: 1fr; max-width: 420px; }
-  .compare-hub-page .hero { padding: 120px 0 60px; }
-  .compare-hub { padding: 60px 0 80px; }
+  .compare-hub-page .hero { padding: 120px 0 128px; }
+  .compare-hub { padding: 0 0 80px; }
+  .compare-hub > .container { margin-top: -80px; }
 }

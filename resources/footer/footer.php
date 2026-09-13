@@ -1,8 +1,4 @@
 <?php require_once __DIR__ . '/../includes/site-base-path.php'; $base = site_base_path(); ?>
-<div class="footer-bg">
-  <div class="footer-gradient-orb footer-orb-1"></div>
-  <div class="footer-gradient-orb footer-orb-2"></div>
-</div>
 <div class="footer-content">
   <div class="footer-section">
     <img src="<?= $base ?>resources/images/argo-logo/argo-logo-white.png" alt="Argo Books Logo" class="footer-logo">

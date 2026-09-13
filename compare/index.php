@@ -66,6 +66,7 @@ $comparisons = [
     <link rel="stylesheet" href="../resources/styles/button.css">
     <link rel="stylesheet" href="../resources/header/style.css">
     <link rel="stylesheet" href="../resources/footer/style.css">
+    <link rel="stylesheet" href="../resources/styles/typography.css">
 </head>
 
 <body class="compare-page compare-hub-page">
@@ -76,14 +77,9 @@ $comparisons = [
 
     <!-- Hero -->
     <section class="hero">
-        <div class="hero-bg">
-            <div class="hero-gradient-orb hero-orb-1"></div>
-            <div class="hero-gradient-orb hero-orb-2"></div>
-        </div>
         <div class="container">
             <div class="hero-content animate-fade-in">
-                <span class="hero-eyebrow">Comparisons</span>
-                <h1>How Argo Books <span class="text-gradient">compares</span></h1>
+                <h1>How Argo Books compares</h1>
                 <p class="hero-subtitle">See how Argo Books stacks up against the other accounting and invoicing tools, side by side, on features, pricing, and ease of use.</p>
                 <div class="hero-ctas">
                     <a href="../downloads/" class="btn-cta btn-cta-primary">

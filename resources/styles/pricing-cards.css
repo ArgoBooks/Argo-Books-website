@@ -92,15 +92,9 @@
     padding: 32px;
     border: 1px solid var(--gray-200);
     position: relative;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
     display: flex;
     flex-direction: column;
     text-align: left;
-}
-
-.pcard:hover {
-    transform: translateY(-6px);
-    box-shadow: var(--elevation-lg);
 }
 
 .pcard-premium {

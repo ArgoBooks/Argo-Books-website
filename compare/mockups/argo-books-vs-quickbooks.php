@@ -51,7 +51,6 @@
                                 <g fill="#3f63e8"><circle cx="88" cy="289" r="3"/><circle cx="206" cy="289" r="3"/><circle cx="324" cy="289" r="3"/><circle cx="442" cy="289" r="3"/></g>
 
                                 <!-- End markers -->
-                                <circle class="dm-pulse" cx="560" cy="194" r="5" fill="#ef4444"/>
                                 <circle cx="560" cy="194" r="3.2" fill="#ef4444" stroke="#ffffff" stroke-width="1.3"/>
                                 <circle cx="560" cy="289" r="3.6" fill="#3f63e8" stroke="#ffffff" stroke-width="1.3"/>
 

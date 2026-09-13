@@ -26,13 +26,12 @@ return [
     'og_title' => 'Argo Books vs Spreadsheets: When Excel Stops Being Enough',
     'og_description' => 'Spreadsheets are free and flexible until they are not. See what changes when your books stop being a file you maintain by hand.',
 
-    'hero_eyebrow' => 'Spreadsheets alternative',
-    'hero_h1' => 'Argo Books <span class="text-gradient">vs Spreadsheets</span>',
+    'hero_h1' => 'Argo Books vs Spreadsheets',
     'hero_subtitle' => 'A spreadsheet is the right answer right up until it isn\'t. Bring yours across in one go and keep the history.',
 
     'differences_h2' => 'What\'s the difference between Argo Books and Spreadsheets?',
     'differences_desc' => 'Almost everyone starts in a spreadsheet, and for a while that is the correct choice: it is free, you already know it, and it does exactly what you tell it. The trouble starts when the file gets long enough that you stop trusting it, and when a typed formula quietly changes a number you already reported.',
-    'why_h3' => 'Why choose Argo Books over Spreadsheets?',
+    'why_h3' => 'What changes when you move from spreadsheets to Argo Books',
     'why_list' => [
         '<strong>Nothing to maintain by hand.</strong> No formulas to drag down, no ranges to extend, no column that silently stops being included in the total.',
         '<strong>It checks before it saves.</strong> Guided forms enforce the fields and verify the amounts, so a transaction cannot land half finished or in the wrong column.',
@@ -40,8 +39,6 @@ return [
         '<strong>Reports you don\'t build.</strong> Profit and loss, balance sheet and expense summaries generate from your records, rather than being a second sheet you maintain.',
         '<strong>Bring the history with you.</strong> AI spreadsheet import reads your existing file, works out which column is which, and shows you what it will create before anything is saved.',
     ],
-    'callout_title' => 'Free either way',
-    'callout_sub' => 'Argo Free costs nothing too, and does the parts a spreadsheet cannot',
 
     // Feature, Argo Free, Argo Premium, Spreadsheets.
     // 'yes' and 'no' render the tick and cross; any other string is a grey pill.
@@ -91,9 +88,9 @@ return [
     'key_h2' => 'Keep the spreadsheet habit, lose the spreadsheet work',
     'key_desc' => 'Nobody should move off a spreadsheet before they need to. The signal is when you stop trusting the file: when you check a total twice, or find a formula that stopped covering the last few rows.',
     'key_cards' => [
-        ['tone' => '', 'icon' => 'document-upload', 'h3' => 'Bring your file across', 'p' => 'AI spreadsheet import reads your Excel or CSV file, works out which column holds the date, the amount and the supplier, and previews everything before saving. Years of history move in one go.'],
-        ['tone' => 'purple', 'icon' => 'check', 'h3' => 'It checks your work', 'p' => 'Guided forms enforce required fields and verify amounts, so nothing saves half finished. A spreadsheet lets you type anything into any cell.'],
-        ['tone' => 'green', 'icon' => 'map-pin', 'h3' => 'Made in Canada', 'p' => 'Built by a Canadian startup that understands Canadian small businesses. Our pricing is in CAD, and our team is based in Saskatchewan.'],
+        ['icon' => 'document-upload', 'h3' => 'Bring your file across', 'p' => 'AI spreadsheet import reads your Excel or CSV file, works out which column holds the date, the amount and the supplier, and previews everything before saving. Years of history move in one go.'],
+        ['icon' => 'check', 'h3' => 'It checks your work', 'p' => 'Guided forms enforce required fields and verify amounts, so nothing saves half finished. A spreadsheet lets you type anything into any cell.'],
+        ['icon' => 'map-pin', 'h3' => 'Made in Canada', 'p' => 'Built in Saskatchewan for Canadian small businesses, with pricing in CAD.'],
     ],
 
     'honest' => [

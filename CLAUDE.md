@@ -67,8 +67,7 @@ The header and footer are **server-side PHP includes**, already in the DOM on fi
 
 `resources/scripts/main.js` (loaded in `<head>`) is small and vanilla. It only:
 - detects the base path for local Laragon subfolder installs vs production root (`getBasePath()` / `BASE_PATH`),
-- populates the account avatar in the already-rendered header via `fetch` to `community/get_avatar_info.php`,
-- lazy-appends `cursor-orb.js` on `DOMContentLoaded`.
+- populates the account avatar in the already-rendered header via `fetch` to `community/get_avatar_info.php`.
 
 Consequences:
 - Header/footer markup changes go in `header.php` / `footer.php` directly. New site-wide footer links (e.g. a new compare or guide page) are added there; there is no `fixLinks` URL-rewriting step anymore.

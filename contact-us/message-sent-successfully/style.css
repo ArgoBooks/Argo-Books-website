@@ -3,110 +3,103 @@ header .header-inner .menu-container .menu .contact-us:after {
   transform: translateX(-50%) scaleX(1);
 }
 
-/* Base styles */
-.first {
-  min-height: calc(100vh - 80px);
-  padding: 100px 0 40px;
-  background: linear-gradient(to bottom, var(--whiteBackground), var(--white));
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-}
-
-/* Success container */
-.success-container {
-  max-width: 800px;
-  width: 85%;
-  margin: 20px auto 0;
-  background: var(--white);
-  border-radius: var(--radius-md);
-  box-shadow: var(--elevation-lg);
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  padding: 50px 40px;
+/* Hero: the confirmation, with the next-steps card rising into its bottom edge */
+.hero {
   position: relative;
-  animation: fadeIn 0.5s ease-out;
+  background:
+    radial-gradient(50% 80% at 50% 0%, rgba(120, 150, 220, 0.16), transparent 70%),
+    linear-gradient(160deg, var(--hero-gradient-start) 0%, var(--hero-gradient-end) 100%);
+  color: var(--white);
+  padding: 148px 24px 160px;
+  text-align: center;
 }
 
-/* Success icon */
+.hero-inner {
+  max-width: 640px;
+  margin: 0 auto;
+}
+
 .success-icon {
-  width: 90px;
-  height: 90px;
-  background: linear-gradient(45deg, var(--primary-blue), var(--blue-700));
+  width: 56px;
+  height: 56px;
+  background: var(--white-alpha-10);
+  border: 1px solid var(--white-alpha-20);
   border-radius: var(--radius-round);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 25px;
-  color: var(--white);
-  transform: scale(0);
-  animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-  animation-delay: 0.2s;
+  margin: 0 auto 20px;
+  color: var(--blue-300);
 }
 
 .success-icon svg {
-  width: 45px;
-  height: 45px;
+  width: 30px;
+  height: 30px;
   stroke-width: 2.5;
 }
 
-/* Success content */
-.success-content {
-  width: 100%;
-}
-
-h1 {
-  font-size: var(--text-4xl);
-  font-weight: 600;
-  color: var(--slate-1a202c);
-  margin-bottom: 16px;
-  transform: translateY(20px);
-  opacity: 0;
-  animation: slideUp 0.5s ease-out forwards;
-  animation-delay: 0.4s;
+.hero h1 {
+  font-size: var(--text-5xl);
+  font-weight: 700;
+  color: var(--white);
+  margin: 0 0 12px;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
 }
 
 .success-message {
   font-size: var(--text-lg);
-  color: var(--black);
+  color: var(--white);
   line-height: 1.6;
-  margin-bottom: 30px;
-  transform: translateY(20px);
-  opacity: 0;
-  animation: slideUp 0.5s ease-out forwards;
-  animation-delay: 0.6s;
+  margin: 0;
+}
+
+/* Card section */
+.first {
+  padding: 0 0 96px;
+  background: var(--gray-50);
+}
+
+.success-container {
+  position: relative;
+  max-width: 640px;
+  width: calc(100% - 48px);
+  margin: -120px auto 0;
+  background: var(--white);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--gray-border);
+  box-shadow: var(--elevation-lg);
+  padding: 32px;
+}
+
+.success-content {
+  width: 100%;
 }
 
 /* Information box */
 .info-box {
   background: var(--neutral-f7fafc);
-  border-radius: var(--radius-sm);
-  padding: 25px;
-  margin-bottom: 35px;
+  border-radius: var(--radius-md);
+  padding: 24px;
+  margin-bottom: 28px;
   text-align: left;
-  transform: translateY(20px);
-  opacity: 0;
-  animation: slideUp 0.5s ease-out forwards;
-  animation-delay: 0.8s;
 }
 
 .info-box h3 {
   font-size: var(--text-lg);
-  font-weight: 500;
+  font-weight: 600;
   color: var(--slate-2d3748);
-  margin-bottom: 15px;
+  margin: 0 0 12px;
 }
 
 .info-box ul {
+  margin: 0;
   padding-left: 20px;
 }
 
 .info-box li {
   color: var(--black);
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   padding-left: 5px;
 }
 
@@ -118,11 +111,7 @@ h1 {
 .action-buttons {
   display: flex;
   justify-content: center;
-  gap: 20px;
-  transform: translateY(20px);
-  opacity: 0;
-  animation: slideUp 0.5s ease-out forwards;
-  animation-delay: 1s;
+  gap: 16px;
 }
 
 .btn {
@@ -130,9 +119,10 @@ h1 {
   font-size: var(--text-sm);
   font-weight: 500;
   text-decoration: none;
+  text-align: center;
   padding: 12px 24px;
   border-radius: var(--radius-sm);
-  transition: all 0.3s ease;
+  transition: background 0.2s ease;
 }
 
 .primary-btn {
@@ -142,8 +132,6 @@ h1 {
 
 .primary-btn:hover {
   background: var(--blue-700);
-  transform: translateY(-2px);
-  box-shadow: var(--elevation-sm);
 }
 
 .secondary-btn {
@@ -153,64 +141,30 @@ h1 {
 
 .secondary-btn:hover {
   background: var(--gray-200);
-  transform: translateY(-2px);
-}
-
-/* Animations */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes popIn {
-  0% {
-    transform: scale(0);
-  }
-
-  70% {
-    transform: scale(1.1);
-  }
-
-  100% {
-    transform: scale(1);
-  }
-}
-
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
-  .first {
-    padding: 120px 0 40px;
-    align-items: flex-start;
+  .hero {
+    padding: 120px 20px 130px;
   }
 
-  .success-container {
-    padding: 40px 30px;
-    width: 90%;
-  }
-
-  h1 {
-    font-size: var(--text-2xl);
+  .hero h1 {
+    font-size: var(--text-3xl);
   }
 
   .success-message {
-    font-size: var(--text-sm);
+    font-size: var(--text-md);
+  }
+
+  .success-container {
+    margin-top: -96px;
+    width: calc(100% - 32px);
+    padding: 24px;
+  }
+
+  .first {
+    padding-bottom: 64px;
   }
 
   .action-buttons {
@@ -224,29 +178,6 @@ h1 {
 }
 
 @media (max-width: 480px) {
-  .first {
-    padding-top: 100px;
-  }
-
-  .success-container {
-    padding: 30px 20px;
-    width: 95%;
-  }
-
-  .success-icon {
-    width: 70px;
-    height: 70px;
-  }
-
-  .success-icon svg {
-    width: 35px;
-    height: 35px;
-  }
-
-  h1 {
-    font-size: var(--text-xl);
-  }
-
   .info-box {
     padding: 20px;
   }

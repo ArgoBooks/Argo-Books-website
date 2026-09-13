@@ -30,13 +30,12 @@ return [
     'og_title' => 'A QuickBooks Alternative Without the Subscription',
     'og_description' => 'QuickBooks raises its price every year and needs a connection. Here is the alternative that runs on your machine for one flat price.',
 
-    'hero_eyebrow' => 'QuickBooks alternative',
-    'hero_h1' => 'Argo Books <span class="text-gradient">vs QuickBooks</span>',
+    'hero_h1' => 'Argo Books vs QuickBooks',
     'hero_subtitle' => 'A simpler, more affordable way to manage your small business finances. All the essentials, none of the accounting jargon or the price creep.',
 
     'differences_h2' => 'What\'s the difference between Argo Books and QuickBooks?',
     'differences_desc' => 'Both handle the accounting basics. The difference is who they\'re built for. QuickBooks is built for accountants and priced for growth; Argo Books is built for the business owner doing their own books, and priced to stay that way.',
-    'why_h3' => 'Why choose Argo Books over QuickBooks?',
+    'why_h3' => 'What changes when you move from QuickBooks to Argo Books',
     'why_list' => [
         '<strong>Everything in one clean app.</strong> Invoicing, expenses, receipts, inventory, and forecasting together, with no accounting jargon and no double-entry to learn.',
         '<strong>A genuinely free plan.</strong> All the core features forever, no trial and no credit card. QuickBooks has no free tier at all.',
@@ -44,8 +43,6 @@ return [
         '<strong>AI that\'s included, not upsold.</strong> Receipt scanning, spreadsheet import, and predictive analytics come built in, not bolted on as pricey add-ons.',
         '<strong>One predictable price.</strong> Everything in Premium for $' . $argo_monthly . ' CAD/month. No per-client fees, no upsells, no yearly price hikes.',
     ],
-    'callout_title' => 'No price creep',
-    'callout_sub' => 'QuickBooks rose ~70% in 5 years',
 
     // Feature, Argo Free, Argo Premium, QuickBooks.
     // 'yes' and 'no' render the tick and cross; any other string is a grey pill.
@@ -96,9 +93,9 @@ return [
     'key_h2' => 'Built for small businesses, not accountants',
     'key_desc' => 'QuickBooks assumes double-entry knowledge, surfaces accounting jargon throughout the UI, and gates useful features behind expensive tiers. Argo Books was built for business owners who want to manage finances without the learning curve or the price creep.',
     'key_cards' => [
-        ['tone' => '', 'icon' => 'dollar', 'h3' => 'No price creep', 'p' => 'QuickBooks has raised their prices twice since we launched this comparison page, and we\'ve had to update these numbers each time. They increased their prices by 70% in the last 5 years. How much will they increase it in the next 5 years?'],
-        ['tone' => 'purple', 'icon' => 'bolt', 'h3' => 'No feature gating', 'p' => 'QuickBooks locks inventory management and other core features behind their $' . $qb_plus . '+/month plans. Argo Books Premium gives you everything for $' . $argo_monthly . ' CAD/month: no upsells, no surprises.'],
-        ['tone' => 'green', 'icon' => 'map-pin', 'h3' => 'Made in Canada', 'p' => 'Built by a Canadian startup that understands Canadian small businesses. Our pricing is in CAD, and our team is based in Saskatchewan.'],
+        ['icon' => 'dollar', 'h3' => 'No price creep', 'p' => 'QuickBooks has raised their prices twice since we launched this comparison page, and we\'ve had to update these numbers each time. They increased their prices by 70% in the last 5 years. How much will they increase it in the next 5 years?'],
+        ['icon' => 'bolt', 'h3' => 'No feature gating', 'p' => 'QuickBooks locks inventory management and other core features behind their $' . $qb_plus . '+/month plans. Argo Books Premium gives you everything for $' . $argo_monthly . ' CAD/month: no upsells, no surprises.'],
+        ['icon' => 'map-pin', 'h3' => 'Made in Canada', 'p' => 'Built in Saskatchewan for Canadian small businesses, with pricing in CAD.'],
     ],
 
     'honest_comment' => 'Confusion Stats',

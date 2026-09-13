@@ -70,14 +70,10 @@ require_once __DIR__ . '/../partials/fonts.php';
     <main>
 
     <!-- Hero Section -->
-    <section class="hero">
-        <div class="hero-bg">
-            <div class="hero-gradient-orb hero-orb-1"></div>
-            <div class="hero-gradient-orb hero-orb-2"></div>
-        </div>
+    <section class="hero hero--rise">
         <div class="container">
-            <h1 class="animate-fade-in">Everything you need to run your business</h1>
-            <p class="hero-subtitle animate-fade-in">AI-powered tools that automate bookkeeping, track inventory, generate invoices, and give you real-time insights, so you can focus on growing your business.</p>
+            <h1 class="animate-fade-in">What Argo Books does</h1>
+            <p class="hero-subtitle animate-fade-in">Scan receipts with AI, track expenses and inventory, send invoices, run Canadian payroll, and see how your business is doing in one set of books.</p>
             <div class="hero-ctas animate-fade-in">
                 <a href="../downloads/" class="btn-cta btn-cta-primary">
                     <span>Get Started Free</span>
@@ -91,16 +87,16 @@ require_once __DIR__ . '/../partials/fonts.php';
     </section>
 
     <!-- Features Grid Section -->
-    <section class="features-overview">
+    <section class="features-overview rise-section">
         <div class="container">
-            <div class="section-header animate-on-scroll">
-                <span class="section-label">What's Included</span>
-                <h2 class="section-title">Powerful tools, simple to use</h2>
-                <p class="section-desc">From AI-powered receipt scanning to predictive analytics, Argo Books gives you everything you need to manage your finances, without the learning curve.</p>
+            <div class="rise-sheet">
+            <div class="section-header">
+                <h2 class="section-title">What's in Argo Books</h2>
+                <p class="section-desc">Receipt scanning, expense tracking, inventory, rentals, invoicing, payroll and reports in one desktop app. Each one has its own page with the details.</p>
             </div>
             <div class="features-grid">
                 <!-- AI Receipt Scanning -->
-                <a href="receipt-scanning/" class="feature-card animate-on-scroll">
+                <a href="receipt-scanning/" class="feature-card">
                     <div class="feature-card-icon blue">
                         <?= svg_icon('receipt-scan-detail', 24) ?>
                     </div>
@@ -110,7 +106,7 @@ require_once __DIR__ . '/../partials/fonts.php';
                 </a>
 
                 <!-- Expense & Revenue Tracking -->
-                <a href="expense-revenue-tracking/" class="feature-card animate-on-scroll">
+                <a href="expense-revenue-tracking/" class="feature-card">
                     <div class="feature-card-icon green">
                         <?= svg_icon('dollar', 24) ?>
                     </div>
@@ -155,7 +151,7 @@ require_once __DIR__ . '/../partials/fonts.php';
                         <?= svg_icon('users', 24) ?>
                     </div>
                     <h3>Customer Management</h3>
-                    <p>Keep a complete record of your customers, their purchase history, and contact details. Build stronger relationships with the people who matter most.</p>
+                    <p>Keep each customer's contact details and purchase history in one place, so you can see what they bought and when.</p>
                     <span class="feature-card-link">Learn more <?= svg_icon('arrow-right', 16) ?></span>
                 </a>
 
@@ -165,7 +161,7 @@ require_once __DIR__ . '/../partials/fonts.php';
                         <?= svg_icon('document', 24) ?>
                     </div>
                     <h3>Invoicing</h3>
-                    <p>Create professional invoices in seconds. Customize templates, track payment status, and get paid faster with clean, branded invoices your clients will love.</p>
+                    <p>Create branded invoices from templates you customize, and track which ones have been paid.</p>
                     <span class="feature-card-link">Learn more <?= svg_icon('arrow-right', 16) ?></span>
                 </a>
 
@@ -209,6 +205,7 @@ require_once __DIR__ . '/../partials/fonts.php';
                     <span class="feature-card-link">Learn more <?= svg_icon('arrow-right', 16) ?></span>
                 </a>
             </div>
+            </div>
         </div>
     </section>
 
@@ -217,8 +214,8 @@ require_once __DIR__ . '/../partials/fonts.php';
         <div class="container">
             <div class="section-header animate-on-scroll">
                 <span class="section-label">Why Argo Books</span>
-                <h2 class="section-title">Built different, on purpose</h2>
-                <p class="section-desc">We built Argo Books for people who want powerful tools without the complexity, the bloated pricing, or the cloud dependency.</p>
+                <h2 class="section-title">Simple, local, and free to start</h2>
+                <p class="section-desc">Argo Books is for people who keep their own books and don't want to learn accounting, depend on an internet connection, or pay before they've tried it.</p>
             </div>
             <div class="why-grid">
                 <div class="why-card animate-on-scroll">

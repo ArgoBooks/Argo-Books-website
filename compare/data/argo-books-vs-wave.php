@@ -27,13 +27,12 @@ return [
     'og_title' => 'Argo Books vs Wave: Offline-Capable Finance & Inventory Management',
     'og_description' => 'Compare Argo Books and Wave side by side. See why small businesses are choosing Argo Books for offline-capable finance and inventory management.',
 
-    'hero_eyebrow' => 'Wave alternative',
-    'hero_h1' => 'Argo Books <span class="text-gradient">vs Wave</span>',
+    'hero_h1' => 'Argo Books vs Wave',
     'hero_subtitle' => 'Both free to start, but built for different businesses. Argo Books does more for product businesses: inventory, offline access, and AI receipt scanning included free.',
 
     'differences_h2' => 'What\'s the difference between Argo Books and Wave?',
     'differences_desc' => 'Both are free to start. The difference is what you get. Wave keeps things simple for freelancers and service businesses; Argo Books does more for product businesses, with inventory, offline access, and AI receipt scanning included free, for less on the paid plan.',
-    'why_h3' => 'Why choose Argo Books over Wave?',
+    'why_h3' => 'What changes when you move from Wave to Argo Books',
     'why_list' => [
         '<strong>Everything in one clean app.</strong> Invoicing, expenses, receipts, inventory, and forecasting together, with no accounting jargon and no double-entry to learn.',
         '<strong>A free plan that does more.</strong> All the core features forever, plus inventory and AI receipt scanning at no extra cost. Wave\'s free Starter charges extra for receipt scanning.',
@@ -41,8 +40,6 @@ return [
         '<strong>AI that\'s included, not upsold.</strong> Receipt scanning, spreadsheet import, and predictive analytics come built in. Wave charges about $' . $wave_receipt_mo . '/month for receipt scanning on its free plan.',
         '<strong>One predictable price.</strong> Everything in Premium for $' . $argo_monthly . ' CAD/month, less than Wave Pro at $' . $wave_pro . ' CAD/month. No per-add-on fees.',
     ],
-    'callout_title' => 'Scanning costs extra',
-    'callout_sub' => 'Wave charges about $' . $wave_receipt_mo . '/month for receipt scanning Argo includes free',
 
     // Feature, Argo Free, Argo Premium, Wave.
     // 'yes' and 'no' render the tick and cross; any other string is a grey pill.
@@ -93,9 +90,9 @@ return [
     'key_h2' => 'Built for product businesses, not just service providers',
     'key_desc' => 'Wave is great for freelancers and service businesses. Argo Books is built for small businesses that sell products and need inventory management, offline access, and predictive analytics.',
     'key_cards' => [
-        ['tone' => '', 'icon' => 'dollar', 'h3' => 'Inventory management', 'p' => 'Wave has no inventory features at all. Argo Books Premium includes full inventory management, so you can track stock levels alongside your finances.'],
-        ['tone' => 'purple', 'icon' => 'bolt', 'h3' => 'Works offline', 'p' => 'Wave is cloud-only: no internet, no access. Argo Books is a desktop app that works offline, so you\'re never locked out of your own data.'],
-        ['tone' => 'green', 'icon' => 'map-pin', 'h3' => 'Made in Canada', 'p' => 'Built by a Canadian startup that understands Canadian small businesses. Our pricing is in CAD, and our team is based in Saskatchewan.'],
+        ['icon' => 'dollar', 'h3' => 'Inventory management', 'p' => 'Wave has no inventory features at all. Argo Books Premium includes full inventory management, so you can track stock levels alongside your finances.'],
+        ['icon' => 'bolt', 'h3' => 'Works offline', 'p' => 'Wave is cloud-only: no internet, no access. Argo Books is a desktop app that works offline, so you\'re never locked out of your own data.'],
+        ['icon' => 'map-pin', 'h3' => 'Made in Canada', 'p' => 'Built in Saskatchewan for Canadian small businesses, with pricing in CAD.'],
     ],
 
     'honest' => [

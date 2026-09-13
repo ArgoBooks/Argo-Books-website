@@ -137,18 +137,13 @@ if ($update_xml !== false && isset($update_xml->channel->item[0])) {
 
     <!-- Hero Section -->
     <section class="hero">
-        <div class="hero-bg">
-            <div class="hero-gradient-orb hero-orb-1"></div>
-            <div class="hero-gradient-orb hero-orb-2"></div>
-            <div class="hero-gradient-orb hero-orb-3"></div>
-        </div>
         <div class="container">
             <div class="hero-content">
                 <h1 class="hero-title animate-fade-in-up">
                     <span class="hero-app-title hero-title-line">Argo Books</span>
                     <span class="hero-title-line">Simple accounting</span>
-                    <span class="hero-title-line text-gradient">software for</span>
-                    <span class="hero-title-line text-gradient">small business</span>
+                    <span class="hero-title-line">software for</span>
+                    <span class="hero-title-line">small business</span>
                 </h1>
                 <p class="hero-subtitle animate-fade-in-up delay-1">
                     Track income and expenses, send invoices, and scan receipts in minutes.
@@ -160,7 +155,9 @@ if ($update_xml !== false && isset($update_xml->channel->item[0])) {
                         <span>Get Started For Free</span>
                         <?= svg_icon('arrow-right', 20) ?>
                     </a>
+                    <a href="pricing" class="hero-textlink">See pricing</a>
                 </div>
+                <p class="hero-facts animate-fade-in-up delay-2">Free for Windows, Mac and Linux. No account needed to get started.</p>
             </div>
             <div class="hero-visual animate-fade-in-up delay-2">
                 <div class="hero-device">
@@ -183,7 +180,7 @@ if ($update_xml !== false && isset($update_xml->channel->item[0])) {
         <div class="container">
             <div class="section-header animate-on-scroll">
                 <h2 class="section-title">The tools your business actually runs on</h2>
-                <p class="section-description">Smart receipt scanning, invoicing, analytics, and inventory tracking, all in one easy app.</p>
+                <p class="section-description">Receipt scanning, invoicing, analytics, and inventory tracking, in the same app you keep your books in.</p>
             </div>
 
             <div class="features-tabs">
@@ -339,7 +336,7 @@ if ($update_xml !== false && isset($update_xml->channel->item[0])) {
         <div class="container">
             <div class="section-header animate-on-scroll">
                 <h2 class="section-title">Stay tax-ready with clean books and instant reports</h2>
-                <p class="section-description">Every transaction is categorized and matched to its receipt as you go. Generate any report you need in seconds. No spreadsheets, no scrambling at year-end.</p>
+                <p class="section-description">Every transaction is categorized and matched to its receipt as you go. Generate any report you need in seconds.</p>
             </div>
 
             <div class="tax-ready-grid">
@@ -650,21 +647,7 @@ if ($update_xml !== false && isset($update_xml->channel->item[0])) {
                 <div class="security-text animate-on-scroll">
                     <h2 class="section-title text-left">This is what your data looks like on disk</h2>
                     <p class="section-description text-left">Every transaction, invoice, and customer record is encrypted with AES-256-GCM before it's saved. Even if someone copied your files, they'd see nothing useful.</p>
-
-                    <div class="security-stats">
-                        <div class="security-stat">
-                            <span class="security-stat-value">AES-256</span>
-                            <span class="security-stat-label">Encryption standard</span>
-                        </div>
-                        <div class="security-stat">
-                            <span class="security-stat-value">Local</span>
-                            <span class="security-stat-label">Data never leaves your PC</span>
-                        </div>
-                        <div class="security-stat">
-                            <span class="security-stat-value">Bio</span>
-                            <span class="security-stat-label">Fingerprint &amp; face unlock</span>
-                        </div>
-                    </div>
+                    <p class="section-description text-left">Your company file stays on your computer, and you can unlock it with your fingerprint or face.</p>
                 </div>
 
                 <div class="security-terminal-wrap animate-on-scroll">
@@ -711,7 +694,6 @@ if ($update_xml !== false && isset($update_xml->channel->item[0])) {
         <div class="container">
             <div class="section-header animate-on-scroll">
                 <h2 class="section-title">Free to start. Upgrade when you need more.</h2>
-                <p class="section-description">Start free, upgrade when you need more. No hidden fees, no surprises.</p>
             </div>
 
             <?php
@@ -727,62 +709,10 @@ if ($update_xml !== false && isset($update_xml->channel->item[0])) {
     <!-- Contact Section -->
     <section class="contact-section">
         <div class="container">
-            <div class="contact-header animate-on-scroll">
-                <h2>We're here to help</h2>
-                <p>Have questions about Argo Books? Our team is ready to assist you.</p>
-            </div>
-            <div class="contact-grid">
-                <div class="contact-card animate-on-scroll">
-                    <div class="contact-icon">
-                        <?= svg_icon('mail', null, '', 1.5) ?>
-                    </div>
-                    <h3>Email Support</h3>
-                    <p>Get help with technical issues, account questions, or general inquiries.</p>
-                    <a href="mailto:support@argorobots.com" class="contact-link">
-                        support@argorobots.com
-                        <?= svg_icon('arrow-right', 16) ?>
-                    </a>
-                </div>
-                <div class="contact-card animate-on-scroll">
-                    <div class="contact-icon feedback">
-                        <?= svg_icon('chat', null, '', 1.5) ?>
-                    </div>
-                    <h3>Send Feedback</h3>
-                    <p>Share your ideas, feature requests, or suggestions to help us improve.</p>
-                    <a href="mailto:feedback@argorobots.com" class="contact-link">
-                        feedback@argorobots.com
-                        <?= svg_icon('arrow-right', 16) ?>
-                    </a>
-                </div>
-                <div class="contact-card animate-on-scroll">
-                    <div class="contact-icon community">
-                        <?= svg_icon('users', null, '', 1.5) ?>
-                    </div>
-                    <h3>Community</h3>
-                    <p>Join our community to connect with other users and share tips.</p>
-                    <a href="community/" class="contact-link">
-                        Visit Community
-                        <?= svg_icon('arrow-right', 16) ?>
-                    </a>
-                </div>
-                <div class="contact-card animate-on-scroll">
-                    <div class="contact-icon docs">
-                        <?= svg_icon('book', null, '', 1.5) ?>
-                    </div>
-                    <h3>Documentation</h3>
-                    <p>Browse guides, tutorials, and references to get the most out of Argo Books.</p>
-                    <a href="documentation/" class="contact-link">
-                        View Docs
-                        <?= svg_icon('arrow-right', 16) ?>
-                    </a>
-                </div>
-            </div>
-            <div class="contact-cta animate-on-scroll">
-                <p>Want to reach out directly?</p>
-                <a href="contact-us/" class="btn btn-primary">
-                    <?= svg_icon('message-circle', 20) ?>
-                    Contact Us
-                </a>
+            <div class="contact-block animate-on-scroll">
+                <h2>Questions?</h2>
+                <p>Email me at <a href="mailto:support@argorobots.com">support@argorobots.com</a> for help with the app or your account. Ideas and feature requests go to <a href="mailto:feedback@argorobots.com">feedback@argorobots.com</a>.</p>
+                <p>Guides and how-tos are in the <a href="documentation/">documentation</a>, other users share tips in the <a href="community/">community</a>, and there's also a <a href="contact-us/">contact form</a>.</p>
             </div>
         </div>
     </section>
@@ -806,8 +736,8 @@ if ($update_xml !== false && isset($update_xml->channel->item[0])) {
         <section class="cta-section">
             <div class="container">
                 <div class="cta-content animate-on-scroll">
-                    <h2>Ready to transform your business?</h2>
-                    <p>Start using Argo Books to save time, reduce errors, and grow smarter.</p>
+                    <h2>Download Argo Books</h2>
+                    <p>Free for Windows, Mac and Linux. No account needed to get started.</p>
                     <div class="cta-buttons">
                         <a href="downloads" class="btn btn-white btn-lg">
                             <span>Get Started For Free</span>
@@ -816,20 +746,6 @@ if ($update_xml !== false && isset($update_xml->channel->item[0])) {
                         <a href="pricing/" class="btn btn-outline-white btn-lg">
                             <span>View Pricing</span>
                         </a>
-                    </div>
-                    <div class="cta-features">
-                        <span class="cta-feature">
-                            <?= svg_icon('check', 16) ?>
-                            Free to start
-                        </span>
-                        <span class="cta-feature">
-                            <?= svg_icon('check', 16) ?>
-                            No account required
-                        </span>
-                        <span class="cta-feature">
-                            <?= svg_icon('check', 16) ?>
-                            Setup in minutes
-                        </span>
                     </div>
                 </div>
             </div>

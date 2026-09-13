@@ -382,7 +382,7 @@ document.addEventListener("DOMContentLoaded", function () {
               if (allPosts.length === 0) {
                 postsContainer.innerHTML = `
                         <div class="empty-state">
-                            <h3>No posts yet!</h3>
+                            <h3>No posts yet</h3>
                             <p>Be the first to create a post in our community.</p>
                         </div>
                     `;
@@ -714,7 +714,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     document.getElementById("posts-container");
                   postsContainer.innerHTML = `
                       <div class="empty-state">
-                        <h3>No posts yet!</h3>
+                        <h3>No posts yet</h3>
                         <p>Be the first to create a post in our community.</p>
                       </div>
                     `;

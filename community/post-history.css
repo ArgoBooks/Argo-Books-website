@@ -3,6 +3,31 @@ header .header-inner .menu-container .menu .community:after {
   transform: translateX(-50%) scaleX(1);
 }
 
+/* Breadcrumb that replaces the hero. The top padding clears the site's
+   absolute header. */
+.post-breadcrumb {
+  width: 90%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 110px 10px 16px;
+  font-size: 14px;
+  color: var(--gray-700);
+}
+
+.post-breadcrumb a {
+  color: var(--primary-blue);
+  text-decoration: none;
+}
+
+.post-breadcrumb a:hover {
+  text-decoration: underline;
+}
+
+.post-breadcrumb .sep {
+  margin: 0 6px;
+  color: var(--gray-400);
+}
+
 .community-wrapper {
   width: 90%;
   max-width: 1200px;
@@ -98,13 +123,8 @@ header .header-inner .menu-container .menu .community:after {
 }
 
 .version-divider {
-  height: 2px;
-  background: linear-gradient(
-    to right,
-    var(--blue-alpha-50),
-    var(--blue-alpha-80),
-    var(--blue-alpha-50)
-  );
+  position: relative;
+  border-top: 1px solid var(--gray-border);
   margin: 30px 0;
 }
 
@@ -136,11 +156,6 @@ header .header-inner .menu-container .menu .community:after {
   display: inline-block;
   padding: 1px 3px;
   margin: 0;
-}
-
-/* Version divider enhancements */
-.version-divider {
-  position: relative;
 }
 
 .version-divider::after {

@@ -46,23 +46,6 @@ header .header-inner .menu-container .menu .community:after {
   gap: 8px;
 }
 
-/* Hero styles are in create-post.css which is imported */
-
-/* Compact hero for view post page */
-.hero.hero-compact {
-  padding: 100px 0 30px;
-}
-
-.hero.hero-compact .hero-badge {
-  margin-bottom: 0;
-}
-
-@media (max-width: 768px) {
-  .hero.hero-compact {
-    padding: 90px 0 24px;
-  }
-}
-
 /* Post detail */
 .post-detail {
   max-width: 800px;

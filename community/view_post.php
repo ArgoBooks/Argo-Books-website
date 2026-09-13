@@ -125,6 +125,7 @@ if (empty($_SESSION['csrf_token'])) {
     <link rel="stylesheet" href="../resources/styles/button.css">
     <link rel="stylesheet" href="../resources/styles/link.css">
     <link rel="stylesheet" href="../resources/header/style.css">
+    <link rel="stylesheet" href="../resources/header/dark.css">
     <link rel="stylesheet" href="../resources/footer/style.css">
     <link rel="stylesheet" href="../resources/notifications/notifications.css">
 
@@ -139,18 +140,9 @@ if (empty($_SESSION['csrf_token'])) {
         <?php include __DIR__ . '/../resources/header/header.php'; ?>
     </header>
 
-    <div class="hero hero-compact">
-        <div class="hero-bg">
-            <div class="hero-gradient-orb hero-orb-1"></div>
-            <div class="hero-gradient-orb hero-orb-2"></div>
-        </div>
-        <div class="hero-content">
-            <div class="hero-badge">
-                <?= svg_icon('chat', 16) ?>
-                <span><?php echo $post['post_type'] === 'bug' ? 'Bug Report' : 'Feature Request'; ?></span>
-            </div>
-        </div>
-    </div>
+    <nav class="post-breadcrumb" aria-label="Breadcrumb">
+        <a href="./">Community</a><span class="sep" aria-hidden="true">/</span><span><?php echo $post['post_type'] === 'bug' ? 'Bug Report' : 'Feature Request'; ?></span>
+    </nav>
 
     <?php if ($status_message): ?>
         <div class="community-wrapper">
@@ -434,8 +426,8 @@ if (empty($_SESSION['csrf_token'])) {
                     <?php if ($is_logged_in): ?>
                         <?php if ($user_ban): ?>
                             <!-- User is banned - show ban message -->
-                            <div style="padding: 16px; background-color: #fee2e2; border: 1px solid #fecaca; border-radius: 6px; color: #991b1b; margin-top: 20px;">
-                                <h4 style="margin-top: 0; color: #991b1b;">Cannot Post Comments</h4>
+                            <div class="comment-ban-notice">
+                                <h4>Cannot Post Comments</h4>
                                 <p style="margin-bottom: 0;"><?php echo htmlspecialchars(get_ban_message($user_ban)); ?></p>
                             </div>
                         <?php else: ?>

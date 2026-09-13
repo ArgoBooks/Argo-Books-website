@@ -5,6 +5,7 @@ require_once __DIR__ . '/../community_functions.php';
 require_once __DIR__ . '/../users/user_functions.php';
 require_once __DIR__ . '/affiliate_functions.php';
 require_once __DIR__ . '/affiliate_emails.php';
+require_once __DIR__ . '/../../partials/fonts.php';
 
 // Affiliates are community members, so reuse community auth.
 require_login();
@@ -106,6 +107,8 @@ if ($status === 'approved') {
     <link rel="stylesheet" href="../../resources/styles/link.css">
     <link rel="stylesheet" href="../../resources/header/style.css">
     <link rel="stylesheet" href="../../resources/footer/style.css">
+    <?= argo_font_links('default', '    ') ?>
+    <link rel="stylesheet" href="../../resources/styles/typography.css">
 </head>
 
 <body>
@@ -118,17 +121,13 @@ if ($status === 'approved') {
         // State-aware hero copy (same centered dark hero as the community page).
         $hero = [
             'none'      => ['Become an Argo Books affiliate', 'Earn 50% commission for every customer you refer, for their first 12 months.'],
-            'approved'  => ['Your affiliate dashboard', 'Share your link and track every click, signup, and dollar you earn.'],
-            'pending'   => ['Application under review', 'Hang tight, we\'re taking a look.'],
+            'approved'  => ['Your affiliate dashboard', 'Your referral link, clicks, signups, and commission.'],
+            'pending'   => ['Application under review', 'Your application has been received.'],
             'rejected'  => ['Affiliate application', 'An update on your application.'],
             'suspended' => ['Affiliate account paused', 'Your referral link is currently inactive.'],
         ][$status];
         ?>
         <div class="aff-hero">
-            <div class="aff-hero-bg">
-                <div class="aff-orb aff-orb-1"></div>
-                <div class="aff-orb aff-orb-2"></div>
-            </div>
             <div class="aff-hero-content">
                 <h1><?php echo htmlspecialchars($hero[0]); ?></h1>
                 <p><?php echo htmlspecialchars($hero[1]); ?></p>
@@ -237,7 +236,7 @@ if ($status === 'approved') {
                         <div class="aff-status-icon">
                             <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                         </div>
-                        <p>Thanks for applying. We review applications manually, usually within a day or two, and we'll email <strong><?php echo htmlspecialchars($user['email']); ?></strong> the moment there's a decision.</p>
+                        <p>Thanks for applying. We review applications manually, usually within a day or two, and we'll email <strong><?php echo htmlspecialchars($user['email']); ?></strong> when there's a decision.</p>
                     <?php elseif ($status === 'rejected'): ?>
                         <div class="aff-status-icon muted">
                             <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>

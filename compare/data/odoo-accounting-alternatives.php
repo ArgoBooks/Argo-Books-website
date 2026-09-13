@@ -26,13 +26,12 @@ return [
     'og_title' => 'Odoo Accounting Alternatives: One Flat Price',
     'og_description' => 'Odoo bills per user and per module and expects an implementation. Here are the alternatives that are one flat price and ready to use.',
 
-    'hero_eyebrow' => 'Odoo alternatives',
-    'hero_h1' => 'Odoo accounting <span class="text-gradient">alternatives</span>',
+    'hero_h1' => 'Odoo accounting alternatives',
     'hero_subtitle' => 'A simpler, more affordable way to manage your small business finances. All the essentials, none of the ERP complexity or the per-user price creep.',
 
     'differences_h2' => 'What\'s the difference between Argo Books and Odoo?',
     'differences_desc' => 'Both can handle your finances. The difference is scope. Odoo is a full modular ERP built for growing, multi-department companies and priced per user; Argo Books is built for the business owner who just needs their books, and priced as one flat plan for the whole team.',
-    'why_h3' => 'Why choose Argo Books over Odoo?',
+    'why_h3' => 'What changes when you move from Odoo to Argo Books',
     'why_list' => [
         '<strong>Everything in one clean app.</strong> Invoicing, expenses, receipts, inventory, and forecasting together, with no ERP modules to install or configure and no accounting jargon to learn.',
         '<strong>A genuinely usable free plan.</strong> All the core finance features forever, no credit card. Odoo\'s free plan is limited to a single app, so a second module already means paying per user.',
@@ -40,8 +39,6 @@ return [
         '<strong>AI that\'s included, not upsold.</strong> Receipt scanning, spreadsheet import, and predictive analytics come built in, with no consultant or implementation project required.',
         '<strong>One predictable price.</strong> Everything in Premium for $' . $argo_monthly . ' CAD/month, flat. No per-user fees, so your cost doesn\'t climb as your team grows.',
     ],
-    'callout_title' => 'Billed per user',
-    'callout_sub' => 'Odoo charges per user, per month. Argo is one flat price for your whole team',
 
     // Feature, Argo Free, Argo Premium, Odoo.
     // 'yes' and 'no' render the tick and cross; any other string is a grey pill.
@@ -90,9 +87,9 @@ return [
     'key_h2' => 'Built for small businesses, not enterprise ERP',
     'key_desc' => 'Odoo is a full ERP suite with hundreds of apps designed for mid-to-large businesses. Argo Books is purpose-built for small businesses that need finance and inventory management without the complexity.',
     'key_cards' => [
-        ['tone' => '', 'icon' => 'dollar', 'h3' => 'More affordable', 'p' => 'Odoo charges per user per month, and costs add up fast as your team grows. Argo Books has a free version and Premium at a flat $' . $argo_monthly . ' CAD/month, with no per-user fees.'],
-        ['tone' => 'purple', 'icon' => 'bolt', 'h3' => 'Simple from day one', 'p' => 'Odoo\'s learning curve is steep: it\'s a full ERP with hundreds of modules. Argo Books is focused and intuitive, so you can get started in minutes, not weeks.'],
-        ['tone' => 'green', 'icon' => 'map-pin', 'h3' => 'Made in Canada', 'p' => 'Built by a Canadian startup that understands Canadian small businesses. Our pricing is in CAD, and our team is based in Saskatchewan.'],
+        ['icon' => 'dollar', 'h3' => 'More affordable', 'p' => 'Odoo charges per user per month, and costs add up fast as your team grows. Argo Books has a free version and Premium at a flat $' . $argo_monthly . ' CAD/month, with no per-user fees.'],
+        ['icon' => 'bolt', 'h3' => 'Simple from day one', 'p' => 'Odoo\'s learning curve is steep: it\'s a full ERP with hundreds of modules. Argo Books is focused and intuitive, so you can get started in minutes, not weeks.'],
+        ['icon' => 'map-pin', 'h3' => 'Made in Canada', 'p' => 'Built in Saskatchewan for Canadian small businesses, with pricing in CAD.'],
     ],
 
     'honest' => [

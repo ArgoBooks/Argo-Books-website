@@ -103,7 +103,7 @@
             if (!title && !type && !content) {
                 previewContent.innerHTML = `
                     <div class="preview-empty-state">
-                        <div class="preview-empty-icon">👁️</div>
+                        <div class="preview-empty-icon"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div>
                         <p>Fill out the form to see a preview of your post</p>
                     </div>
                 `;
@@ -303,7 +303,7 @@
             text = text.replace(/`(.*?)`/g, '<code>$1</code>'); // Code
 
             // Simple @mention detection (just highlighting)
-            text = text.replace(/@(\w+)/g, '<span style="color: #2563eb; font-weight: 500;">@$1</span>');
+            text = text.replace(/@(\w+)/g, '<span style="color: var(--primary-blue); font-weight: 500;">@$1</span>');
 
             return text;
         }

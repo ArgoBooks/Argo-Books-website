@@ -36,11 +36,11 @@ $fmt = function (float $n): string {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="author" content="Argo">
 
-    <meta name="description" content="Join the Argo Books affiliate program and earn <?php echo $commission_rate_pct; ?>% recurring commission for every customer you refer, every month for their first year. Free to join, real-time dashboard, PayPal payouts.">
+    <meta name="description" content="Join the Argo Books affiliate program and earn <?php echo $commission_rate_pct; ?>% recurring commission for every customer you refer, for their first 12 months. Free to join, PayPal payouts.">
     <meta name="keywords" content="Argo Books affiliate program, accounting software affiliate, recurring commission, refer and earn">
 
     <meta property="og:title" content="Affiliate Program: Earn <?php echo $commission_rate_pct; ?>% Recurring | Argo Books">
-    <meta property="og:description" content="Earn <?php echo $commission_rate_pct; ?>% commission for every customer you refer to Argo Books, every month for their first year.">
+    <meta property="og:description" content="Earn <?php echo $commission_rate_pct; ?>% commission for every customer you refer to Argo Books, for their first 12 months.">
     <meta property="og:url" content="https://argorobots.com/affiliates/">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="Argo Books">
@@ -48,7 +48,7 @@ $fmt = function (float $n): string {
 
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Affiliate Program: Earn <?php echo $commission_rate_pct; ?>% Recurring | Argo Books">
-    <meta name="twitter:description" content="Earn <?php echo $commission_rate_pct; ?>% commission for every customer you refer to Argo Books, every month for their first year.">
+    <meta name="twitter:description" content="Earn <?php echo $commission_rate_pct; ?>% commission for every customer you refer to Argo Books, for their first 12 months.">
 
     <link rel="canonical" href="https://argorobots.com/affiliates/">
 
@@ -78,11 +78,10 @@ $fmt = function (float $n): string {
             <div class="aff-hero-grid" aria-hidden="true"></div>
             <div class="aff-hero-inner">
                 <div class="aff-hero-copy">
-                    <h1 class="aff-headline">One referral.<br><span class="aff-headline-accent">Twelve paydays.</span></h1>
+                    <h1 class="aff-headline">Earn <?php echo $commission_rate_pct; ?>% of every payment for 12 months</h1>
                     <p class="aff-lede">
-                        Earn <strong><?php echo $commission_rate_pct; ?>% of every payment</strong> from customers you send to
-                        Argo Books, every month for their first year. The more you share, the more your
-                        commission stacks up.
+                        Share your referral link. When someone subscribes to Argo Books Premium through it,
+                        you get <strong><?php echo $commission_rate_pct; ?>% of each payment</strong> they make in their first 12 months.
                     </p>
                     <div class="aff-hero-actions">
                         <a href="../community/affiliate/" class="aff-btn aff-btn-primary">
@@ -94,7 +93,7 @@ $fmt = function (float $n): string {
                     <ul class="aff-trust">
                         <li><?php echo svg_icon('circle-check', 16); ?> Free to join</li>
                         <li><?php echo svg_icon('circle-check', 16); ?> Paid via PayPal</li>
-                        <li><?php echo svg_icon('circle-check', 16); ?> Cancel anytime</li>
+                        <li><?php echo svg_icon('circle-check', 16); ?> No quotas</li>
                     </ul>
                 </div>
 
@@ -143,25 +142,21 @@ $fmt = function (float $n): string {
         <!-- ============ HOW IT WORKS: a real three-step sequence ============ -->
         <section class="aff-steps" id="how">
             <div class="aff-container">
-                <div class="aff-section-head aff-reveal">
-                    <span class="aff-kicker">How it works</span>
-                    <h2>From link to payout in three steps</h2>
+                <div class="aff-section-head">
+                    <h2>How it works</h2>
                 </div>
                 <ol class="aff-step-list">
-                    <li class="aff-step aff-reveal">
-                        <span class="aff-step-num">01</span>
-                        <h3>Apply in minutes</h3>
+                    <li class="aff-step">
+                        <h3>Apply</h3>
                         <p>Create a free Argo account and tell us how you plan to promote. Most applications are reviewed within a day or two.</p>
                     </li>
-                    <li class="aff-step aff-reveal">
-                        <span class="aff-step-num">02</span>
+                    <li class="aff-step">
                         <h3>Share your link</h3>
                         <p>Get a unique referral link and drop it in your videos, posts, newsletter, or client emails. Every click is tracked back to you.</p>
                     </li>
-                    <li class="aff-step aff-reveal">
-                        <span class="aff-step-num">03</span>
-                        <h3>Get paid every month</h3>
-                        <p>Earn <?php echo $commission_rate_pct; ?>% of every payment your referrals make for their first 12 months, sent straight to your PayPal.</p>
+                    <li class="aff-step">
+                        <h3>Get paid</h3>
+                        <p>Earn <?php echo $commission_rate_pct; ?>% of every payment your referrals make in their first 12 months, paid to your PayPal.</p>
                     </li>
                 </ol>
             </div>
@@ -170,40 +165,39 @@ $fmt = function (float $n): string {
         <!-- ============ WHY JOIN: the terms, stated plainly ============ -->
         <section class="aff-why">
             <div class="aff-container">
-                <div class="aff-section-head aff-reveal">
-                    <span class="aff-kicker">Why join</span>
-                    <h2>Built to actually be worth your while</h2>
+                <div class="aff-section-head">
+                    <h2>Program terms</h2>
                 </div>
                 <div class="aff-why-grid">
-                    <div class="aff-card aff-reveal">
+                    <div class="aff-card">
                         <span class="aff-card-figure"><?php echo $commission_rate_pct; ?>%</span>
-                        <h3>Generous commission</h3>
-                        <p>Half of every payment is yours, one of the most generous rates in accounting software.</p>
+                        <h3>Commission rate</h3>
+                        <p><?php echo $commission_rate_pct; ?>% of each payment a referred customer makes, before payment processing fees. That's <?php echo $fmt($c_month); ?> a month per customer on monthly Premium, or <?php echo $fmt($c_year); ?> per customer on yearly.</p>
                     </div>
-                    <div class="aff-card aff-reveal">
+                    <div class="aff-card">
                         <span class="aff-card-figure">12<span class="aff-card-figure-unit">mo</span></span>
-                        <h3>Recurring for a full year</h3>
-                        <p>You earn on every payment for twelve months, renewals included, not just the first sale. Monthly subscribers pay you every single month, so referrals compound as they add up.</p>
+                        <h3>Commission period</h3>
+                        <p>You earn on every payment a referred customer makes in the first 12 months of their subscription, not only the first one.</p>
                     </div>
-                    <div class="aff-card aff-reveal">
+                    <div class="aff-card">
                         <span class="aff-card-icon"><?php echo svg_icon('clock', 26); ?></span>
                         <h3><?php echo (int) $cookie_days; ?>-day referral cookie</h3>
-                        <p>When someone clicks your link, you're credited if they subscribe any time in the next <?php echo (int) $cookie_days; ?> days. No rush, no short window.</p>
+                        <p>When someone clicks your link, you're credited if they subscribe within the next <?php echo (int) $cookie_days; ?> days.</p>
                     </div>
-                    <div class="aff-card aff-reveal">
+                    <div class="aff-card">
                         <span class="aff-card-icon"><?php echo svg_icon('analytics', 26); ?></span>
-                        <h3>Real-time dashboard</h3>
-                        <p>See your clicks, signups, paying customers, and exactly what you're owed, all updating as referrals come in.</p>
+                        <h3>Affiliate dashboard</h3>
+                        <p>See your clicks, signups, paying customers, and what you're owed.</p>
                     </div>
-                    <div class="aff-card aff-reveal">
+                    <div class="aff-card">
                         <span class="aff-card-icon"><?php echo svg_icon('dollar', 26); ?></span>
-                        <h3>Fast PayPal payouts</h3>
-                        <p>Commission is paid to your PayPal on a monthly cadence, in the currency you expect.</p>
+                        <h3>PayPal payouts</h3>
+                        <p>Commission is paid to your PayPal in CAD after a <?php echo (int) $hold_days; ?>-day hold that covers the refund window.</p>
                     </div>
-                    <div class="aff-card aff-reveal">
+                    <div class="aff-card">
                         <span class="aff-card-icon"><?php echo svg_icon('circle-check', 26); ?></span>
                         <h3>Free to join</h3>
-                        <p>No cost, no quotas, no catch. Apply, get approved, and start sharing your link.</p>
+                        <p>No cost and no sales quota. Apply with a free Argo account.</p>
                     </div>
                 </div>
             </div>
@@ -212,15 +206,14 @@ $fmt = function (float $n): string {
         <!-- ============ WHO IT'S FOR ============ -->
         <section class="aff-audience">
             <div class="aff-container">
-                <div class="aff-section-head aff-reveal">
-                    <span class="aff-kicker">Who it's for</span>
-                    <h2>If your audience runs a small business, this is for you</h2>
+                <div class="aff-section-head">
+                    <h2>Who it's for</h2>
                 </div>
                 <div class="aff-audience-grid">
-                    <div class="aff-audience-item aff-reveal"><?php echo svg_icon('bank', 22); ?><span>Bookkeepers &amp; accountants setting up client books</span></div>
-                    <div class="aff-audience-item aff-reveal"><?php echo svg_icon('play', 22); ?><span>Creators &amp; YouTubers in finance and small business</span></div>
-                    <div class="aff-audience-item aff-reveal"><?php echo svg_icon('pencil', 22); ?><span>Bloggers &amp; reviewers writing software roundups</span></div>
-                    <div class="aff-audience-item aff-reveal"><?php echo svg_icon('users', 22); ?><span>LinkedIn creators posting to a small-business audience</span></div>
+                    <div class="aff-audience-item"><?php echo svg_icon('bank', 22); ?><span>Bookkeepers &amp; accountants setting up client books</span></div>
+                    <div class="aff-audience-item"><?php echo svg_icon('play', 22); ?><span>Creators &amp; YouTubers in finance and small business</span></div>
+                    <div class="aff-audience-item"><?php echo svg_icon('pencil', 22); ?><span>Bloggers &amp; reviewers writing software roundups</span></div>
+                    <div class="aff-audience-item"><?php echo svg_icon('users', 22); ?><span>LinkedIn creators posting to a small-business audience</span></div>
                 </div>
             </div>
         </section>
@@ -228,34 +221,33 @@ $fmt = function (float $n): string {
         <!-- ============ FAQ ============ -->
         <section class="aff-faq">
             <div class="aff-container aff-faq-inner">
-                <div class="aff-section-head aff-reveal">
-                    <span class="aff-kicker">Questions</span>
-                    <h2>The details, up front</h2>
+                <div class="aff-section-head">
+                    <h2>Questions</h2>
                 </div>
                 <div class="aff-faq-list">
-                    <details class="aff-faq-item aff-reveal">
-                        <summary>How much do I actually earn?<?php echo svg_icon('chevron-down', 20); ?></summary>
+                    <details class="aff-faq-item">
+                        <summary>How much do I earn?<?php echo svg_icon('chevron-down', 20); ?></summary>
                         <p><?php echo $commission_rate_pct; ?>% of every payment for the first 12 months of each subscription. On monthly Premium that's <?php echo $fmt($c_month); ?> per customer, every month. On yearly Premium it's <?php echo $fmt($c_year); ?> per customer.</p>
                     </details>
-                    <details class="aff-faq-item aff-reveal">
+                    <details class="aff-faq-item">
                         <summary>Who can join?<?php echo svg_icon('chevron-down', 20); ?></summary>
                         <p>Anyone with an audience of small-business owners or self-employed people. You don't need a huge following, just a genuine way to reach people who'd benefit from Argo Books.</p>
                     </details>
-                    <details class="aff-faq-item aff-reveal">
+                    <details class="aff-faq-item">
                         <summary>When and how do I get paid?<?php echo svg_icon('chevron-down', 20); ?></summary>
                         <p>Commission is paid to your PayPal once it clears a <?php echo (int) $hold_days; ?>-day hold and you've reached a payout. The hold is the refund window: if a sale is refunded or charged back in that time, no commission is earned on it. Your dashboard shows what's pending, what's cleared and available, and what's been paid.</p>
                     </details>
-                    <details class="aff-faq-item aff-reveal">
+                    <details class="aff-faq-item">
                         <summary>How are referrals tracked?<?php echo svg_icon('chevron-down', 20); ?></summary>
-                        <p>Your unique link tags every visitor you send. The tag lasts <?php echo (int) $cookie_days; ?> days, so if they subscribe any time in that window the sale is credited to you automatically, and it keeps earning on their renewals for a full year.</p>
+                        <p>Your unique link tags every visitor you send. The tag lasts <?php echo (int) $cookie_days; ?> days, so if they subscribe any time in that window the sale is credited to you automatically, and you earn on their payments for their first 12 months.</p>
                     </details>
-                    <details class="aff-faq-item aff-reveal">
+                    <details class="aff-faq-item">
                         <summary>Where do I track everything?<?php echo svg_icon('chevron-down', 20); ?></summary>
                         <p>In your affiliate dashboard. It shows your clicks, signups, paying customers, total earned, what's been paid, and what you're still owed. Open it any time from this page or from your Argo Books profile.</p>
                     </details>
-                    <details class="aff-faq-item aff-reveal">
+                    <details class="aff-faq-item">
                         <summary>Does it cost anything to join?<?php echo svg_icon('chevron-down', 20); ?></summary>
-                        <p>No. Joining is free, there are no quotas, and there's nothing to lose. Create a free Argo account and apply.</p>
+                        <p>No. Joining is free and there are no quotas. Create a free Argo account and apply.</p>
                     </details>
                 </div>
             </div>
@@ -263,9 +255,9 @@ $fmt = function (float $n): string {
 
         <!-- ============ FINAL CTA: flows into the dark footer ============ -->
         <section class="aff-final">
-            <div class="aff-container aff-final-inner aff-reveal">
-                <h2>Start earning from every referral</h2>
-                <p>Join the Argo Books affiliate program and turn your audience into recurring income.</p>
+            <div class="aff-container aff-final-inner">
+                <h2>Apply to the affiliate program</h2>
+                <p>Applications are reviewed by hand, usually within a day or two.</p>
                 <a href="../community/affiliate/" class="aff-btn aff-btn-primary aff-btn-lg">
                     <span>Become an affiliate</span>
                     <?php echo svg_icon('arrow-right', 18); ?>
@@ -362,19 +354,6 @@ $fmt = function (float $n): string {
             });
 
             render();
-
-            // Scroll reveal, reduced-motion safe.
-            var reveals = document.querySelectorAll('.aff-reveal');
-            if (reduce || !('IntersectionObserver' in window)) {
-                reveals.forEach(function (el) { el.classList.add('is-in'); });
-            } else {
-                var io = new IntersectionObserver(function (entries) {
-                    entries.forEach(function (e) {
-                        if (e.isIntersecting) { e.target.classList.add('is-in'); io.unobserve(e.target); }
-                    });
-                }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
-                reveals.forEach(function (el) { io.observe(el); });
-            }
         })();
     </script>
 </body>

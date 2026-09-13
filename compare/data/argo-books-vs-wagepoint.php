@@ -32,13 +32,12 @@ return [
     'og_title' => 'Argo Books vs Wagepoint: payroll without the per-employee fee',
     'og_description' => 'Wagepoint charges a base fee plus a few dollars per person per month. Argo Books charges one flat price. Compared on price, deductions, T4s and what each one actually files for you.',
 
-    'hero_eyebrow' => 'Wagepoint alternative',
-    'hero_h1' => 'Argo Books <span class="text-gradient">vs Wagepoint</span>',
+    'hero_h1' => 'Argo Books vs Wagepoint',
     'hero_subtitle' => 'Both run Canadian payroll properly, Quebec included. The difference is the bill: Wagepoint charges a base fee plus a few dollars per employee every month, and Argo Books charges $' . $argo_monthly . ' CAD flat however many people you pay.',
 
     'differences_h2' => 'What\'s the difference between Argo Books and Wagepoint?',
     'differences_desc' => 'Wagepoint is a dedicated cloud payroll service: it calculates the deductions, files with the CRA and moves the money for you, and prices per employee. Argo Books is desktop accounting software with payroll built in: it calculates the same deductions and prepares the same slips, but you do the filing and the payment, and the price does not change when you hire.',
-    'why_h3' => 'Why choose Argo Books over Wagepoint?',
+    'why_h3' => 'What changes when you move from Wagepoint to Argo Books',
     'why_list' => [
         '<strong>The bill stops growing when you hire.</strong> Wagepoint Unlimited is $' . $wp_unl_base . ' plus $' . $wp_unl_per . ' per employee per month. At five people that is $' . number_format($wp_at_five) . ' a month; Argo Books is $' . $argo_monthly . ' at five people and $' . $argo_monthly . ' at fifty.',
         '<strong>Payroll is not a separate subscription.</strong> The same $' . $argo_monthly . ' covers invoicing, expenses, receipt scanning, reports and inventory. With Wagepoint you are paying for payroll on top of whatever keeps your books.',
@@ -46,8 +45,6 @@ return [
         '<strong>The wages are already in your books.</strong> Approving a run posts the payroll expense directly, so payday matches your bank statement without an export or an integration in between.',
         '<strong>It works offline.</strong> A desktop app for Windows, macOS, and Linux, so a pay run does not depend on a connection or on a provider being up.',
     ],
-    'callout_title' => 'The per-employee fee',
-    'callout_sub' => 'At five people, Wagepoint Unlimited runs about $' . number_format($wp_gap_year) . ' a year more than Argo Books',
 
     // Feature, Argo Free, Argo Premium, Wagepoint.
     'table_argo_sub' => '$' . $argo_monthly . ' CAD/month, unlimited employees',
@@ -103,9 +100,9 @@ return [
     'key_h2' => 'Same deductions, different bill',
     'key_desc' => 'Both work the deductions out from the CRA\'s published formulas, and both handle Quebec\'s separate system. What differs is how you are charged, how much of the filing is done for you, and where your staff data sits.',
     'key_cards' => [
-        ['tone' => '', 'icon' => 'users', 'h3' => 'Flat, not per head', 'p' => 'Wagepoint Unlimited is $' . $wp_unl_base . ' plus $' . $wp_unl_per . ' per employee a month. Argo Books is $' . $argo_monthly . ' with no headcount component, so the gap widens with every hire.'],
-        ['tone' => 'purple', 'icon' => 'lock', 'h3' => 'Records stay local', 'p' => 'Payroll holds the most sensitive data in a business. Argo Books writes it to your own computer instead of uploading it to a provider.'],
-        ['tone' => 'green', 'icon' => 'map-pin', 'h3' => 'Quebec done properly', 'p' => 'QPP, QPIP, Quebec income tax and the federal abatement, calculated separately rather than approximated, and the RL-1 figures worked out at year end.'],
+        ['icon' => 'users', 'h3' => 'Flat, not per head', 'p' => 'Wagepoint Unlimited is $' . $wp_unl_base . ' plus $' . $wp_unl_per . ' per employee a month. Argo Books is $' . $argo_monthly . ' with no headcount component, so the gap widens with every hire.'],
+        ['icon' => 'lock', 'h3' => 'Records stay local', 'p' => 'Payroll holds the most sensitive data in a business. Argo Books writes it to your own computer instead of uploading it to a provider.'],
+        ['icon' => 'map-pin', 'h3' => 'Quebec done properly', 'p' => 'QPP, QPIP, Quebec income tax and the federal abatement, calculated separately rather than approximated, and the RL-1 figures worked out at year end.'],
     ],
 
     'honest' => [

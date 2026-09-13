@@ -1,104 +1,9 @@
 .footer {
   position: relative;
-  background: linear-gradient(135deg, var(--hero-gradient-start) 0%, var(--hero-gradient-end) 100%);
+  background: var(--hero-gradient-start);
   color: var(--white);
   padding: 60px 0 30px;
   overflow: hidden;
-}
-
-/* When footer is inside dark-section-wrapper, allow orbs to extend upward */
-.dark-section-wrapper .footer {
-  overflow: visible;
-}
-
-.dark-section-wrapper .footer .footer-bg {
-  overflow: visible;
-}
-
-.footer .footer-bg {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  overflow: hidden;
-  pointer-events: none;
-}
-
-.footer .footer-gradient-orb {
-  position: absolute;
-  border-radius: var(--radius-round);
-  filter: blur(80px);
-  opacity: 0;
-  animation: orbFadeIn 1.5s ease-out forwards, orbPulse 4s ease-in-out infinite 1.5s;
-}
-
-.footer .footer-orb-1 {
-  width: 300px;
-  height: 300px;
-  background: linear-gradient(135deg, var(--primary-blue), var(--cyan-500));
-  bottom: -100px;
-  left: -100px;
-  animation: orbFadeIn 1.5s ease-out forwards, orbPulse 4s ease-in-out infinite 1.5s, orbFloat1 12s ease-in-out infinite;
-}
-
-.footer .footer-orb-2 {
-  width: 250px;
-  height: 250px;
-  background: linear-gradient(135deg, var(--purple-500), var(--pink-500));
-  top: -80px;
-  right: -80px;
-  animation: orbFadeIn 1.5s ease-out 0.3s forwards, orbPulse 5s ease-in-out infinite 1.8s, orbFloat2 15s ease-in-out infinite;
-}
-
-@keyframes orbFadeIn {
-  from {
-    opacity: 0;
-    transform: scale(0.8);
-  }
-  to {
-    opacity: 0.5;
-    transform: scale(1);
-  }
-}
-
-@keyframes orbPulse {
-  0%, 100% {
-    opacity: 0.5;
-  }
-  50% {
-    opacity: 0.75;
-  }
-}
-
-@keyframes orbFloat1 {
-  0%, 100% {
-    transform: translate(0, 0);
-  }
-  25% {
-    transform: translate(60px, -40px);
-  }
-  50% {
-    transform: translate(30px, 50px);
-  }
-  75% {
-    transform: translate(-40px, 20px);
-  }
-}
-
-@keyframes orbFloat2 {
-  0%, 100% {
-    transform: translate(0, 0);
-  }
-  25% {
-    transform: translate(-50px, 30px);
-  }
-  50% {
-    transform: translate(-20px, -60px);
-  }
-  75% {
-    transform: translate(40px, -30px);
-  }
 }
 
 .footer-content {
@@ -192,11 +97,6 @@
 }
 
 @media (max-width: 400px) {
-  .footer .cursor-orb {
-    width: 250px;
-    height: 250px;
-  }
-
   .footer-section {
     min-width: unset;
   }

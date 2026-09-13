@@ -39,8 +39,8 @@
             <?= svg_icon('check-pricing') ?>
         </div>
 
-        <h1>You're All Set!</h1>
-        <p class="subtitle">Your Premium subscription is now active. Welcome to the future of finance tracking!</p>
+        <h1>Premium is active</h1>
+        <p class="subtitle">Your Premium subscription is active. Enter the license key below in Argo Books to turn on Premium features.</p>
 
         <div class="subscription-details">
             <h2>Subscription Details</h2>
@@ -57,7 +57,7 @@
             </div>
             <div class="detail-row">
                 <span class="detail-label">Status</span>
-                <span class="detail-value" style="color: #059669;">Active</span>
+                <span class="detail-value" style="color: var(--emerald-600);">Active</span>
             </div>
         </div>
 
@@ -68,7 +68,7 @@
                 <li>Click the blue <strong>Upgrade</strong> button in the top right corner</li>
                 <li>Click the <strong>Enter a Key</strong> button in the bottom right</li>
                 <li>Enter your <strong>License key</strong> as shown above</li>
-                <li>Click <strong>Verify Key</strong> and enjoy all premium features!</li>
+                <li>Click <strong>Verify Key</strong> to turn on Premium</li>
             </ol>
         </div>
 

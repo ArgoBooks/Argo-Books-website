@@ -66,98 +66,25 @@
   margin-top: 2px;
 }
 
-/* ========================================
-   Decorative review card (paired with "About Capterra")
-   Shows people what a review looks like once published.
-   ======================================== */
-.review-info-card {
-  background: var(--white);
+/* Note from Evan, paired with "What Capterra is" */
+.review-note {
+  background: var(--gray-50);
   border: 1px solid var(--gray-200);
-  border-radius: var(--radius-xl);
-  padding: 32px;
-  box-shadow: var(--elevation-xl);
-  position: relative;
+  border-radius: var(--radius-lg);
+  padding: 28px;
 }
 
-.review-info-card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 16px;
-}
-
-.review-info-card-stars {
-  display: flex;
-  gap: 2px;
-  color: var(--brand-yellow);
-}
-
-/* Force fill so the stroked star icon renders as filled yellow.
-   The svg's presentation attribute fill="none" is overridden by CSS. */
-.review-info-card-stars svg,
-.review-info-card-stars svg path {
-  fill: var(--brand-yellow);
-  stroke: var(--brand-yellow);
-}
-
-.review-info-card-label {
-  display: inline-flex;
-  align-items: center;
-  font-size: var(--text-2xs);
-  font-weight: 600;
-  line-height: 1;
-  color: var(--emerald-700);
-  background: var(--emerald-100);
-  padding: 6px 10px;
-  border-radius: var(--radius-pill);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-.review-info-card-quote {
+.review-note p {
   font-size: var(--text-sm);
-  line-height: 1.6;
+  line-height: 1.7;
   color: var(--gray-800);
-  margin: 0 0 20px;
-  font-style: italic;
+  margin: 0 0 16px;
 }
 
-.review-info-card-meta {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding-top: 16px;
-  border-top: 1px solid var(--gray-200);
-}
-
-.review-info-card-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: var(--radius-round);
-  background: linear-gradient(135deg, var(--blue-50), var(--blue-100));
-  color: var(--primary-blue);
-  display: grid;
-  place-items: center;
-  flex-shrink: 0;
-}
-
-.review-info-card-name {
+.review-note .review-note-sign {
+  margin: 0;
   font-weight: 600;
   color: var(--gray-900);
-  font-size: var(--text-sm);
-}
-
-.review-info-card-role {
-  font-size: var(--text-xs);
-  color: var(--gray-500);
-}
-
-.review-info-card-disclaimer {
-  font-size: var(--text-2xs);
-  color: var(--gray-400);
-  margin: 14px 0 0;
-  text-align: right;
-  font-style: italic;
 }
 
 /* ========================================
@@ -233,12 +160,6 @@
   border: 1px solid var(--gray-200);
   border-radius: var(--radius-lg);
   padding: 32px;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.review-privacy-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--elevation-lg);
 }
 
 .review-privacy-card-icon {
@@ -248,18 +169,8 @@
   display: grid;
   place-items: center;
   margin-bottom: 16px;
-  background: linear-gradient(135deg, var(--blue-50), var(--blue-100));
+  background: var(--blue-50);
   color: var(--primary-blue);
-}
-
-.review-privacy-card-icon.green {
-  background: linear-gradient(135deg, var(--green-50), var(--green-100));
-  color: var(--emerald-500);
-}
-
-.review-privacy-card-icon.purple {
-  background: linear-gradient(135deg, var(--purple-50), var(--purple-100));
-  color: var(--purple-500);
 }
 
 .review-privacy-card h3 {
@@ -290,12 +201,8 @@
   margin-top: 3px;
 }
 
-.review-privacy-public li svg {
-  color: var(--emerald-500);
-}
-
-.review-privacy-private li svg {
-  color: var(--purple-500);
+.review-privacy-card li svg {
+  color: var(--primary-blue);
 }
 
 /* ========================================
@@ -307,20 +214,21 @@
     max-width: 500px;
   }
 
-  .review-info-card,
+  .review-note,
   .review-screenshot-frame {
     margin: 0 auto;
     max-width: 480px;
   }
+
+  /* The sheet rising into the hero opens on its heading, not the note. */
+  .rise-sheet .feature-detail-visual {
+    order: 0;
+  }
 }
 
 @media (max-width: 600px) {
-  .review-info-card {
-    padding: 24px;
-  }
-
-  .review-info-card-quote {
-    font-size: var(--text-sm);
+  .review-note {
+    padding: 22px;
   }
 
   .review-screenshot-frame {
@@ -334,5 +242,31 @@
   .review-callout {
     font-size: var(--text-xs);
     padding: 12px 14px;
+  }
+}
+
+/* The tips are three cards, so they sit in one row and none needs a divider. */
+.benefits-grid--three {
+  grid-template-columns: repeat(3, 1fr);
+  column-gap: 40px;
+  max-width: 1120px;
+}
+
+.benefits-grid--three .benefit-card {
+  border-bottom: none;
+}
+
+@media (max-width: 900px) {
+  .benefits-grid--three {
+    grid-template-columns: 1fr;
+    max-width: 500px;
+  }
+
+  .benefits-grid--three .benefit-card {
+    border-bottom: 1px solid var(--gray-200);
+  }
+
+  .benefits-grid--three .benefit-card:last-child {
+    border-bottom: none;
   }
 }
