@@ -71,10 +71,6 @@ $pricing = get_pricing_config();
     <main>
 
     <section class="hero">
-        <div class="hero-bg">
-            <div class="hero-gradient-orb hero-orb-1"></div>
-            <div class="hero-gradient-orb hero-orb-2"></div>
-        </div>
         <div class="hero-content">
             <h1>What's New in Argo Books</h1>
             <p>Discover the latest improvements and features we've added to make managing your business even easier</p>
