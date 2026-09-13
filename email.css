@@ -1,3 +1,7 @@
+/* Every colour here is a literal hex, never var(--...): this file is inlined into
+   a bare <style> block with no :root, so custom properties never resolve in a
+   mail client. Values match resources/styles/custom-colors.css. */
+
 body {
     font-family: 'Segoe UI', Arial, sans-serif;
     font-size: 14px;
@@ -13,16 +17,16 @@ body {
     margin: 0 auto;
     border-radius: 8px;
     overflow: hidden;
-    box-shadow: 0 2px 8px var(--shadow-default);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     margin-top: 20px;
     margin-bottom: 20px;
 }
 
-/* Header styles */
+/* Header styles. Default is the brand blue (--primary-blue). */
 .header {
     padding: 20px;
     text-align: center;
-    background: linear-gradient(135deg, var(--gradient-indigo) 0%, var(--gradient-purple) 100%);
+    background: #3f63e8;
 }
 
 .header img {
@@ -55,9 +59,9 @@ p {
     margin: 0 0 15px 0;
 }
 
-/* Links */
+/* Links (--blue-600) */
 a {
-    color: var(--blue-600);
+    color: #2f4fd6;
     text-decoration: none;
 }
 
@@ -67,8 +71,8 @@ a:hover {
 
 /* License key display */
 .license-key {
-    background-color: var(--gray-50);
-    border: 1px solid var(--gray-200);
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
     border-radius: 4px;
     font-family: monospace;
     font-size: 18px;
@@ -81,9 +85,9 @@ a:hover {
 
 /* Button styles */
 .button {
-    background-color: var(--blue-600);
+    background-color: #2f4fd6;
     border-radius: 4px;
-    color: var(--white);
+    color: #ffffff;
     display: inline-block;
     font-weight: bold;
     margin-top: 15px;
@@ -93,7 +97,7 @@ a:hover {
 }
 
 .button:hover {
-    background-color: var(--blue-700);
+    background-color: #2740b5;
     text-decoration: none;
 }
 
@@ -104,8 +108,8 @@ a:hover {
 
 /* Footer styles */
 .footer {
-    background-color: var(--gray-50);
-    border-top: 1px solid var(--gray-200);
+    background-color: #f8fafc;
+    border-top: 1px solid #e2e8f0;
     font-size: 12px;
     padding: 20px;
     text-align: center;
@@ -116,14 +120,13 @@ a:hover {
 }
 
 /* Header variations */
+/* Generic second accent shared by affiliate, portal and refund mail (--purple-600). */
 .header-purple {
-    background: linear-gradient(135deg, var(--purple-500), var(--purple-600));
+    background: #7c3aed;
 }
 
-/* Premium subscription header. Separate from .header-purple because that one
-   is a generic second accent shared by affiliate, portal and refund mail;
-   only Premium moved to the blue brand ramp. Literal hex for the same reason
-   as .button-premium below. */
+/* Premium subscription header. Separate from .header-purple because only
+   Premium moved to the blue brand ramp. */
 .header-premium {
     background: #3f63e8;
 }
@@ -138,7 +141,7 @@ a:hover {
 
 .details-table td {
     padding: 8px 0;
-    border-bottom: 1px solid var(--gray-border);
+    border-bottom: 1px solid #e5e7eb;
 }
 
 .details-table td:last-child {
@@ -150,7 +153,7 @@ a:hover {
 }
 
 .details-table .label {
-    color: var(--gray-500);
+    color: #64748b;
 }
 
 .details-table .value {
@@ -174,32 +177,32 @@ a:hover {
 }
 
 .info-box-gray {
-    background: var(--gray-50);
-    border: 1px solid var(--gray-200);
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
 }
 
 .info-box-warning {
-    background: var(--amber-100);
-    border: 1px solid var(--amber-300);
+    background: #fef3c7;
+    border: 1px solid #fcd34d;
 }
 
 .info-box-success {
-    background: var(--emerald-100);
-    border: 1px solid var(--emerald-300);
+    background: #d1fae5;
+    border: 1px solid #6ee7b7;
 }
 
 .info-box-note {
-    background: var(--green-50);
-    border: 1px solid var(--green-300);
+    background: #f0fdf4;
+    border: 1px solid #86efac;
 }
 
 /* Payment/receipt box */
 .payment-box {
-    background: var(--gray-50);
+    background: #f8fafc;
     padding: 20px;
     border-radius: 8px;
     margin: 20px 0;
-    border: 1px solid var(--gray-border);
+    border: 1px solid #e5e7eb;
 }
 
 .payment-box h3 {
@@ -209,7 +212,7 @@ a:hover {
 /* Credit display. Premium subscription credit, so blue. */
 .credit-display {
     background: #3f63e8;
-    color: var(--white);
+    color: #ffffff;
     padding: 30px;
     border-radius: 12px;
     margin: 25px 0;
@@ -229,10 +232,7 @@ a:hover {
 }
 
 /* Button variations */
-/* Premium subscription accents. Literal hex, not var(--premium-*): this file
-   is inlined into a bare <style> block with no :root, so custom properties
-   never resolve in a mail client. Values match --premium-500/600 in
-   resources/styles/custom-colors.css. */
+/* Premium subscription accents (--premium-500/600). */
 .button-premium {
     background: #3f63e8;
 }
@@ -249,8 +249,8 @@ a:hover {
 }
 
 .status-active {
-    background: var(--emerald-100);
-    color: var(--emerald-800);
+    background: #d1fae5;
+    color: #065f46;
 }
 
 /* Lists */
@@ -266,7 +266,7 @@ a:hover {
 }
 
 .styled-list {
-    color: var(--gray-700);
+    color: #334155;
     line-height: 1.8;
 }
 
@@ -275,8 +275,8 @@ a:hover {
     text-align: center;
     margin-top: 30px;
     padding-top: 20px;
-    border-top: 1px solid var(--gray-border);
-    color: var(--gray-500);
+    border-top: 1px solid #e5e7eb;
+    color: #64748b;
     font-size: 14px;
 }
 
@@ -287,7 +287,7 @@ a:hover {
 
 /* Text colors */
 .text-muted {
-    color: var(--gray-500);
+    color: #64748b;
 }
 
 /* Mobile responsive */
@@ -302,7 +302,7 @@ a:hover {
     .content {
         padding: 20px;
     }
-    
+
     .header img {
         width: 120px;
     }

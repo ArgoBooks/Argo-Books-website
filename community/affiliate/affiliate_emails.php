@@ -69,7 +69,7 @@ if (!function_exists('send_affiliate_approved_email')) {
         $link = htmlspecialchars($referral_url, ENT_QUOTES, 'UTF-8');
         $dash = htmlspecialchars($dashboard_url, ENT_QUOTES, 'UTF-8');
         $body = <<<HTML
-            <h1>You're in! Welcome to the Argo Books affiliate program</h1>
+            <h1>Your affiliate application is approved</h1>
             <p>Hi {$name},</p>
             <p>Your application is approved. Here's your unique referral link, share it anywhere you like:</p>
             <p style="font-size:16px;"><strong><a href="{$link}">{$link}</a></strong></p>
