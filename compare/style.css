@@ -122,11 +122,11 @@ h1, h2, h3, h4, h5, h6 {
    Scoped under .compare-page (set on the <body> of every comparison page)
    so these rules never leak into other pages that share this stylesheet.
    ======================================== */
-/* Same construction as the homepage hero: the dark band stops short of the
-   section's bottom edge and the framed app window hangs over into the light
-   section below. The hub page (.compare-hub-page) overrides this further down. */
+/* The framed app window sits fully inside the dark band. Bottom padding must
+   exceed the frame shadow's reach (~75px) or .hero's overflow clips it.
+   The hub page (.compare-hub-page) overrides this further down. */
 .compare-page .hero {
-  padding: 148px 0 56px;
+  padding: 148px 0 112px;
   text-align: left;
   background: var(--white);
 }
@@ -134,7 +134,7 @@ h1, h2, h3, h4, h5, h6 {
 .compare-page .hero::before {
   content: "";
   position: absolute;
-  inset: 0 0 206px 0;
+  inset: 0;
   background:
     radial-gradient(52% 60% at 74% 44%, rgba(120, 150, 220, 0.18), transparent 72%),
     linear-gradient(160deg, var(--hero-gradient-start) 0%, var(--hero-gradient-end) 100%);
@@ -145,11 +145,7 @@ h1, h2, h3, h4, h5, h6 {
   display: grid;
   grid-template-columns: minmax(0, 0.88fr) minmax(0, 1.12fr);
   gap: 64px;
-  align-items: end;
-}
-
-.compare-page .hero-content {
-  padding-bottom: 210px;
+  align-items: center;
 }
 
 /* Runs past the content edge on wide screens; .hero clips it at the viewport. */
@@ -834,22 +830,14 @@ section.faq {
 
   /* Split hero stacks: text over product shot, both centered */
   .compare-page .hero {
-    padding: 128px 0 40px;
+    padding: 128px 0 96px;
     text-align: center;
-  }
-
-  .compare-page .hero::before {
-    bottom: 150px;
   }
 
   .compare-page .hero .container {
     grid-template-columns: minmax(0, 1fr);
     gap: 48px;
     max-width: 640px;
-  }
-
-  .compare-page .hero-content {
-    padding-bottom: 0;
   }
 
   .compare-page .hero-visual {
