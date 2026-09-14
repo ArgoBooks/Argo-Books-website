@@ -78,6 +78,7 @@ include __DIR__ . '/../../docs-header.php';
                 <li>Enter how much of the deposit to refund. The whole deposit is filled in; enter less to keep part of it.</li>
                 <li>Tick "Mark as Paid" if the customer has paid</li>
                 <li>Click "Confirm Return". The units go back into stock automatically.</li>
+                <li>If the rental was invoiced and the invoice was paid online, the refund window opens with the deposit ready, so it goes back to the customer through Stripe or Square</li>
             </ol>
 
             <div class="info-box">
@@ -97,7 +98,7 @@ include __DIR__ . '/../../docs-header.php';
                 <li><strong>Total Rentals:</strong> All rental records</li>
                 <li><strong>Active:</strong> Currently rented out</li>
                 <li><strong>Overdue:</strong> Rentals past their return date</li>
-                <li><strong>Total Revenue:</strong> Revenue from completed rentals</li>
+                <li><strong>Total Charged:</strong> What returned rentals charged, including extra charges, whether or not they've been paid</li>
             </ul>
 
             <div class="page-navigation">
