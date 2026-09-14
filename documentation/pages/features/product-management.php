@@ -68,7 +68,7 @@ include __DIR__ . '/../../docs-header.php';
                 <li><strong>Unit Price:</strong> The default price used when you add this item to a transaction or invoice</li>
                 <li><strong>Cost Price:</strong> What the item costs you, as a reference figure</li>
                 <li><strong>Tax Rate:</strong> The default tax rate applied when the item is used</li>
-                <li><strong>Track Inventory:</strong> Whether stock levels are kept for this item</li>
+                <li><strong>Track Inventory:</strong> Whether stock levels are kept for this item. Turning it on doesn't add any stock by itself: add it on Stock Levels or record a purchase. See <a class="link" href="inventory.php">Inventory Management</a>.</li>
                 <li><strong>Reorder Point:</strong> Minimum stock level before a low-stock alert is triggered</li>
                 <li><strong>Overstock Threshold:</strong> Maximum stock level before an overstock alert appears</li>
                 <li><strong>Status:</strong> Active or inactive, so retired items stay in your history without cluttering the picker</li>

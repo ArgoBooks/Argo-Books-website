@@ -19,17 +19,16 @@ include __DIR__ . '/../../docs-header.php';
             </ul>
 
             <h2>Setting Up Inventory</h2>
+            <p>Stock is kept per product and per location. A product has stock only once it has a stock record, so setting up takes two steps:</p>
             <ol class="steps-list">
-                <li>Go to "Expense products" or "Revenue products" in the sidebar</li>
-                <li>Select a product or create a new one</li>
-                <li>Enable inventory tracking in the product settings</li>
-                <li>Enter your current stock quantity</li>
-                <li>Set your minimum stock level (reorder point)</li>
+                <li>Go to "Expense products" or "Revenue products", open or create the product, and turn on "Track Inventory". You can also set its unit, reorder point and overstock threshold there. See <a class="link" href="product-management.php">Product Management</a>.</li>
+                <li>Go to "Stock Levels" under Inventory, click "Add Item", pick the product and a location, and enter the "Initial Quantity" you have on hand</li>
             </ol>
-            <p>Once inventory tracking is enabled, you can monitor stock levels from the "Stock Levels" page and make manual adjustments from the "Adjustments" page, both under the Inventory section in the sidebar.</p>
+            <p>Stock Levels needs a location. A new company has none, so add one on the <a class="link" href="locations.php">Locations</a> page, or use the "Create one" link in the location picker.</p>
+            <p>You don't have to add the stock record by hand. Recording a purchase of a tracked product, receiving a <a class="link" href="purchase-orders.php">purchase order</a> for it, or importing an Inventory sheet creates one for you.</p>
 
             <div class="info-box">
-                <strong>Note:</strong> The Balance Sheet values your stock on hand at its current unit cost. Buying stock is still recorded as an expense at the time of purchase, so adding inventory does not change your profit. See <a class="link" href="../reference/how-numbers-are-calculated.php#inventory-balance-sheet">How Numbers Are Calculated</a>.
+                <strong>Note:</strong> For a product with Track Inventory on, buying stock adds to your stock instead of counting as an expense, and what that stock cost comes off your profit when it sells. The Balance Sheet values what's on hand. See <a class="link" href="../reference/how-numbers-are-calculated.php#inventory-balance-sheet">How Numbers Are Calculated</a>.
             </div>
 
             <h2>Reorder Points</h2>
@@ -47,20 +46,27 @@ include __DIR__ . '/../../docs-header.php';
             </ul>
 
             <h2>Inventory Adjustments</h2>
-            <p>Make manual adjustments when needed:</p>
+            <p>To change stock by hand, click "New Adjustment" on the "Adjustments" page, or the adjust button on a row in Stock Levels. Pick one of three types:</p>
             <ul>
-                <li><strong>Stock Count:</strong> Update quantities after physical inventory counts</li>
-                <li><strong>Damage/Loss:</strong> Record items lost to damage, theft, or expiration</li>
-                <li><strong>Adjustments:</strong> Correct discrepancies with notes for audit trail</li>
+                <li><strong>Add:</strong> Increase stock, such as after finding extra units</li>
+                <li><strong>Remove:</strong> Decrease stock, such as for damaged, lost or expired items</li>
+                <li><strong>Set:</strong> Replace the count with what a physical stock count found</li>
             </ul>
+            <p>Each adjustment keeps a reason and an optional reference number, so the Adjustments page doubles as an audit trail.</p>
+
+            <h2>Moving Stock Between Locations</h2>
+            <p>Click the transfer button on a row in Stock Levels, choose the location to move it to, and enter the quantity.</p>
 
             <h2>Automatic Stock Updates</h2>
-            <p>Inventory is automatically adjusted when you:</p>
+            <p>For products with Track Inventory on, stock is adjusted automatically when you:</p>
             <ul>
                 <li>Record a revenue transaction (stock decreases)</li>
-                <li>Record an expense/purchase transaction (stock increases)</li>
-                <li>Process a return (stock adjusts accordingly)</li>
+                <li>Record an expense transaction (stock increases)</li>
+                <li>Receive a purchase order (stock increases)</li>
+                <li>Bring in sales or purchases from Stripe or the Argo Books API</li>
+                <li>Rent items out or take them back (see <a class="link" href="rental.php">Rental Management</a>)</li>
             </ul>
+            <p><a class="link" href="returns.php">Returns</a> and <a class="link" href="lost-damaged.php">lost or damaged</a> records don't change stock. Record an adjustment if the items should come off or go back on the shelf.</p>
 
             <h2>Inventory Dashboard</h2>
             <p>Monitor your inventory at a glance with key metrics:</p>
@@ -77,9 +83,9 @@ include __DIR__ . '/../../docs-header.php';
                     <span class="nav-label">Previous</span>
                     <span class="nav-title">&larr; Supplier Management</span>
                 </a>
-                <a href="purchase-orders.php" class="nav-button next">
+                <a href="locations.php" class="nav-button next">
                     <span class="nav-label">Next</span>
-                    <span class="nav-title">Purchase Orders &rarr;</span>
+                    <span class="nav-title">Locations &rarr;</span>
                 </a>
             </div>
         </div>

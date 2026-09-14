@@ -64,7 +64,7 @@ include __DIR__ . '/../../docs-header.php';
             </ul>
 
             <div class="info-box">
-                <strong>Tip:</strong> Transactions automatically update your analytics dashboard and inventory stock levels, so your reports and stock counts always stay current.
+                <strong>Tip:</strong> Transactions automatically update your analytics dashboard, and the stock of any product with Track Inventory on. When that product is stocked at more than one location, the line asks which <a class="link" href="locations.php">location</a> to take stock from or add it to. See <a class="link" href="inventory.php">Inventory Management</a>.
             </div>
 
             <div class="page-navigation">

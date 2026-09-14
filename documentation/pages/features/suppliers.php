@@ -34,10 +34,10 @@ include __DIR__ . '/../../docs-header.php';
             </ul>
 
             <h2>Linking Suppliers to Products</h2>
-            <p>When adding or editing a product, you can assign a supplier to it. This helps you track which vendor supplies each product and makes it easier to manage reordering.</p>
+            <p>When adding or editing a product, you can assign a supplier to it. This helps you track which vendor supplies each product and makes it easier to manage reordering. See <a class="link" href="product-management.php">Product Management</a>.</p>
 
             <h2>Linking Suppliers to Transactions</h2>
-            <p>When recording an expense, you can select a supplier to associate with the transaction. This builds a purchase history for each supplier, which you can review from their profile.</p>
+            <p>When recording an expense, you can select a supplier to associate with the transaction. This builds a purchase history for each supplier, which you can review from their profile. See <a class="link" href="sales-tracking.php">Expense/Revenue Tracking</a>.</p>
 
             <h2>Managing Existing Suppliers</h2>
             <p>From the Suppliers page, you can edit or delete any supplier using the action buttons in each row. Editing a supplier updates their information across all linked products and future transactions.</p>

@@ -11,7 +11,7 @@ include __DIR__ . '/../../docs-header.php';
         <div class="docs-content">
             <p>Once your pay runs are recorded, Argo Books produces the forms you have to give employees and
             file with the government: T4 slips, the T4 summary, Quebec RL-1 slips, and the Record of
-            Employment file.</p>
+            Employment file. You need employees and approved pay runs first; see <a class="link" href="payroll.php">Payroll</a>.</p>
 
             <div class="info-box">
                 <p><strong>Note:</strong> Argo Books does not file on your behalf. It generates the slips and the upload file; you submit them through CRA, Revenu Québec or ROE Web yourself.</p>
@@ -26,7 +26,7 @@ include __DIR__ . '/../../docs-header.php';
             <h2>T4 Slips and Summary</h2>
             <p>At year end, Argo Books produces both the slips your employees need and the file CRA needs:</p>
             <ol class="steps-list">
-                <li>Go to "Pay Runs" and open the year-end tool</li>
+                <li>Go to "Pay Runs" and click "Year end"</li>
                 <li>Select the tax year</li>
                 <li>Enter your filing details, including your CRA payroll account number</li>
                 <li>Clear anything listed under "Fix these before filing"</li>

@@ -43,6 +43,7 @@ $sidebarSections = [
             'product-management' => ['title' => 'Product Management'],
             'suppliers' => ['title' => 'Supplier Management'],
             'inventory' => ['title' => 'Inventory Management'],
+            'locations' => ['title' => 'Locations'],
             'purchase-orders' => ['title' => 'Purchase Orders'],
             'returns' => ['title' => 'Returns'],
             'lost-damaged' => ['title' => 'Lost & Damaged Inventory'],

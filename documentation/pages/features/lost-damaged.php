@@ -21,19 +21,18 @@ include __DIR__ . '/../../docs-header.php';
             </ul>
 
             <h2>Recording a Loss</h2>
+            <p>A loss is recorded from the expense or revenue transaction the items came from, so that transaction needs to exist first. See <a class="link" href="sales-tracking.php">Expense/Revenue Tracking</a>.</p>
             <ol class="steps-list">
-                <li>Go to "Lost / Damaged" under the Tracking section in the sidebar</li>
-                <li>Click "Add Record" to create a new entry</li>
-                <li>Select the product affected</li>
-                <li>Enter the date the loss was discovered</li>
-                <li>Select a reason (e.g., Lost, Stolen, Damaged, Expired)</li>
-                <li>Enter the loss value</li>
-                <li>Save the record</li>
+                <li>Go to "Expenses" or "Revenue" in the sidebar</li>
+                <li>Find the transaction and click "Mark as Lost / Damaged" in its action buttons</li>
+                <li>Select a reason. For expenses: Damaged in transit, Defective product, Lost in warehouse, Damaged during storage, Expired, or Other. For revenue, Customer damaged replaces Expired.</li>
+                <li>Add any notes and confirm</li>
             </ol>
+            <p>The record uses the transaction's product and total, and today's date. It then appears on the "Lost / Damaged" page under Tracking.</p>
 
             <h2>What Happens When You Record a Loss</h2>
             <ul>
-                <li><strong>Inventory Update:</strong> Stock levels are reduced automatically to reflect the lost or damaged items</li>
+                <li><strong>Stock:</strong> Stock levels don't change. If the items should come off your stock, record a Remove adjustment on the <a class="link" href="inventory.php">Adjustments</a> page.</li>
                 <li><strong>Financial Tracking:</strong> The loss value is recorded for accurate bookkeeping and reporting</li>
                 <li><strong>Analytics:</strong> Losses appear in the Analytics dashboard under the Losses tab, helping you identify patterns</li>
             </ul>

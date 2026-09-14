@@ -14,9 +14,9 @@ include __DIR__ . '/../../docs-header.php';
             <h2>Creating a Purchase Order</h2>
             <ol class="steps-list">
                 <li>Go to "Purchase Orders" in the navigation menu, under Inventory</li>
-                <li>Click "Add Purchase Order"</li>
-                <li>Select a supplier</li>
-                <li>Add line items by selecting products and entering quantities and unit costs</li>
+                <li>Click "New Order"</li>
+                <li>Select a supplier. Suppliers come from the <a class="link" href="suppliers.php">Suppliers</a> page, or use the "Create one" link.</li>
+                <li>Add line items by selecting products and entering quantities and unit costs. Products come from <a class="link" href="product-management.php">Product Management</a>.</li>
                 <li>Set the order date and expected delivery date</li>
                 <li>Add shipping cost and any notes</li>
                 <li>Save the purchase order</li>
@@ -50,19 +50,19 @@ include __DIR__ . '/../../docs-header.php';
             <h2>Receiving Orders</h2>
             <p>When goods arrive from a supplier, you can record the received quantities:</p>
             <ol class="steps-list">
-                <li>Open the purchase order</li>
+                <li>Click the "Receive Order" button on the order's row</li>
                 <li>Enter the quantity received for each line item</li>
-                <li>Save to update the order</li>
+                <li>Click "Confirm Received"</li>
             </ol>
-            <p>Inventory stock levels are updated automatically when you receive items. If only some items arrive, the order status changes to "Partially Received" until all items are accounted for.</p>
+            <p>For products with Track Inventory on, the received quantities are added to stock, and a stock record is created if the product doesn't have one yet. See <a class="link" href="inventory.php">Inventory Management</a>. If only some items arrive, the order status changes to "Partially Received" until all items are accounted for.</p>
 
             <h2>Managing Purchase Orders</h2>
             <p>From the Purchase Orders page, you can view, edit, or delete existing orders. Use the search and filter options to find specific orders by supplier, date, or product.</p>
 
             <div class="page-navigation">
-                <a href="inventory.php" class="nav-button prev">
+                <a href="locations.php" class="nav-button prev">
                     <span class="nav-label">Previous</span>
-                    <span class="nav-title">&larr; Inventory Management</span>
+                    <span class="nav-title">&larr; Locations</span>
                 </a>
                 <a href="returns.php" class="nav-button next">
                     <span class="nav-label">Next</span>

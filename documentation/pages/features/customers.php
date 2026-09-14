@@ -40,9 +40,9 @@ include __DIR__ . '/../../docs-header.php';
             </div>
 
             <h2>Linking Transactions</h2>
-            <p>When recording a revenue or expense entry, you can link it to a customer profile:</p>
+            <p>When recording a revenue entry, you can link it to a customer profile. Expenses are linked to a <a class="link" href="suppliers.php">supplier</a> instead.</p>
             <ol class="steps-list">
-                <li>Start creating a new transaction</li>
+                <li>Start creating a new revenue entry (see <a class="link" href="sales-tracking.php">Expense/Revenue Tracking</a>)</li>
                 <li>Click the "Customer" field</li>
                 <li>Select an existing customer</li>
                 <li>The transaction will be automatically added to their transaction history</li>

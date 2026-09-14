@@ -37,8 +37,8 @@ include __DIR__ . '/../../docs-header.php';
             <ol class="steps-list">
                 <li>Go to "Invoices" in the navigation menu, under Revenue</li>
                 <li>Click "Create Invoice"</li>
-                <li>Select a customer or create a new one</li>
-                <li>Add line items from your product catalog</li>
+                <li>Select a customer or create a new one (see <a class="link" href="customers.php">Customer Management</a>)</li>
+                <li>Add line items from your product catalog (see <a class="link" href="product-management.php">Product Management</a>)</li>
                 <li>Set payment terms and due date</li>
                 <li>Preview and send</li>
             </ol>

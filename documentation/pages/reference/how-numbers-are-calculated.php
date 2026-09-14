@@ -157,7 +157,8 @@ include __DIR__ . '/../../docs-header.php';
 
             <h2 id="inventory-balance-sheet">Inventory on the Balance Sheet</h2>
             <p>The Balance Sheet lists your stock on hand as a current asset. It values each item at its current unit cost (Argo Books doesn't keep a history of past costs) and works out how much stock you held as of the report date from your recorded stock movements.</p>
-            <p>Buying stock is still recorded as an expense when you purchase it, so adding inventory here doesn't change your profit. Only the Balance Sheet treats unsold stock as something you own.</p>
+            <p>For a product with Track Inventory on, buying stock adds it to your stock instead of counting as an expense. When it sells, what that stock cost comes off your profit, and the Income Statement shows it as Cost of Goods Sold with Gross Profit underneath. The cost is saved on the sale, so changing a cost price later doesn't rewrite past profit.</p>
+            <p>Stock you already had when this started was expensed when you bought it, so it sells at no cost and isn't taken off your profit twice. Tax, shipping and fees on a purchase stay expenses, and the Expenses page still shows every purchase in full, because that money did leave the business.</p>
 
             <h2 id="sales-by-product">Sales by product</h2>
             <p>The Products tab in Analytics and the "Sales by Product" report both break your sales down per product. Two things about these figures surprise people, so they're worth knowing up front.</p>
