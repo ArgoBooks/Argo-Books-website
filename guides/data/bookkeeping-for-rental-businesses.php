@@ -130,7 +130,7 @@ HTML,
 <p>You don't need software to keep good rental books, and anyone who tells you otherwise is selling something. Plenty of small rental businesses run well on a separate bank account, a spreadsheet, and a folder of receipts. If that is where you are, here is an honest read on what works and where the line is.</p>
 <p>A spreadsheet is genuinely enough when you have a manageable number of items and rentals. One tab for rentals with a column for the item, the income, and the deposit. One tab for equipment with each asset's purchase date and price. One tab for maintenance tagged to items. Kept current every week, that setup gives you per-item earnings, a clean deposit trail, and a depreciation-ready asset list. Many owners run this way for years, and it costs nothing.</p>
 <p>The spreadsheet starts to strain as the moving parts multiply: lots of items, frequent rentals, deposits flowing in and out constantly, a calendar of what's booked when, and maintenance piling up across dozens of pieces of gear. At that point the manual typing becomes the bottleneck, and the risk of a deposit or a repair slipping through the cracks grows. That is where software earns its place, by keeping the rental calendar, the per-item income, the deposits, and the accounting in one place instead of three spreadsheets you have to keep in step by hand.</p>
-<p>Argo Books is one option there. It pairs rental management with the bookkeeping in a single app, so the item you rent out, the deposit you took, and the income it earned all live together, and it can scan receipts so maintenance costs land against the right item without manual typing. It's worth a look if you have outgrown the spreadsheet, and you can compare it honestly against the bigger names in our <a href="/best-quickbooks-alternatives/">guide to QuickBooks alternatives</a>. But start with whatever you will actually keep up with. A simple system used every week beats a powerful one you ignore.</p>
+<p>Argo Books is one option there. It pairs rental management with the bookkeeping in a single app, so the item you rent out, the dates it is booked, the deposit you took, and what the rental charged all live together, and it can scan the receipts for maintenance and repairs so you aren't typing them in. It's worth a look if you have outgrown the spreadsheet, and you can compare it honestly against the bigger names in our <a href="/best-quickbooks-alternatives/">guide to QuickBooks alternatives</a>. But start with whatever you will actually keep up with. A simple system used every week beats a powerful one you ignore.</p>
 HTML,
     ],
 
@@ -138,7 +138,7 @@ HTML,
 
   'callout_after_section_index' => 7,
 
-  'tool_callout_text' => 'Argo Books pairs rental management with your accounting, so deposits, per-item income, and maintenance costs all stay in one place.',
+  'tool_callout_text' => 'Argo Books pairs rental management with your accounting, so bookings, deposits, rental income, and maintenance receipts all stay in one place.',
   'tool_callout_cta' => 'See Argo Books for rentals',
   'tool_callout_url' => '/for-rental-businesses/',
 

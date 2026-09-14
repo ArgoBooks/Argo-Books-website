@@ -37,7 +37,7 @@ return [
             'bg' => true,
             'eyebrow' => 'At a glance',
             'h2' => 'Availability you can trust when the phone rings',
-            'lede' => 'The booking calendar shows every item across every date, with what is out, what is reserved and what is free. Because bookings write to it directly there is no second diary to keep in step.',
+            'lede' => 'The booking calendar shows each item across every date, with what is out, what is reserved and what is free. Because bookings write to it directly there is no second diary to keep in step.',
             'list' => [
                 'Every item and every date on one calendar',
                 'Bookings tied to the customer who took the item',
@@ -56,7 +56,7 @@ return [
     'benefits' => [
         ['icon' => 'calendar', 'h3' => 'No more double bookings', 'p' => 'An item that is out cannot be promised to somebody else, because the calendar and the booking are the same record.'],
         ['icon' => 'clock', 'h3' => 'Overdue returns surface themselves', 'p' => 'You see what should have come back yesterday without going looking for it.'],
-        ['icon' => 'dollar', 'h3' => 'Rentals become revenue automatically', 'p' => 'A completed rental lands in your books with the customer attached, rather than as a note to invoice later.'],
+        ['icon' => 'dollar', 'h3' => 'Rentals land in your books', 'p' => 'Mark a rental paid, or invoice it, and the money lands in your revenue with the customer attached.'],
         ['icon' => 'check', 'stroke' => 2.4, 'h3' => 'One answer, not three', 'p' => 'Availability, price and history all come from the same record, so what you tell a customer is what the system knows.'],
     ],
 
@@ -93,7 +93,7 @@ return [
         ['href' => '../customer-management/', 'icon' => 'users', 'h3' => 'Customer management', 'p' => 'Bookings attach to the customer, along with their history and balance.'],
         ['href' => '../invoicing/', 'icon' => 'document', 'h3' => 'Invoicing', 'p' => 'Bill a completed rental without re-entering the dates or the rate.'],
         ['href' => '../inventory-management/', 'icon' => 'package', 'h3' => 'Inventory management', 'p' => 'Track the items you rent alongside the stock you sell.'],
-        ['href' => '../expense-revenue-tracking/', 'icon' => 'dollar', 'h3' => 'Expense & revenue tracking', 'p' => 'Rental income lands in your revenue records automatically.'],
+        ['href' => '../expense-revenue-tracking/', 'icon' => 'dollar', 'h3' => 'Expense & revenue tracking', 'p' => 'Paid rentals land in your revenue records, with or without an invoice.'],
     ],
 
     // Drives both the visible accordion and the FAQPage JSON-LD.
@@ -104,7 +104,7 @@ return [
     ],
     [
         'q' => 'Can I track deposits and payments for rentals?',
-        'a' => 'Yes. You can set deposit amounts per rental item and track whether each deposit has been paid or is still outstanding. When the rental is complete, you can generate a professional invoice directly from the rental record with one click. Customer details and pricing auto-populate, so there\'s no double entry.',
+        'a' => 'Yes. Each rental item has a deposit, and a rental adds it up for every unit. When the item comes back, you refund all of the deposit, part of it, or none, and add any late fee or damage as an extra charge. You can create an invoice straight from the rental record, with the customer, charges and deposit filled in, so there\'s no double entry.',
     ],
     [
         'q' => 'Is rental management included in the Free plan?',
