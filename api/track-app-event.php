@@ -248,15 +248,23 @@ if ($machine_uuid !== '') {
     }
 }
 
+$event_data = [
+    'platform'     => $platform,
+    'app_version'  => $app_version,
+    'machine_uuid' => $machine_uuid,
+    'token_match'  => $visitor_id !== null,
+];
+// Same hash api/data/upload.php files a free install's telemetry under, so the
+// admin user cards can show where that install came from.
+$device_id = (string)($_SERVER['HTTP_X_DEVICE_ID'] ?? '');
+if ($device_id !== '') {
+    $event_data['device_hash'] = hash('sha256', $device_id);
+}
+
 $ok = track_referral_event('app_first_run', [
     'visitor_id'  => $visitor_id,
     'source_code' => $source_code,
-    'event_data'  => [
-        'platform'     => $platform,
-        'app_version'  => $app_version,
-        'machine_uuid' => $machine_uuid,
-        'token_match'  => $visitor_id !== null,
-    ],
+    'event_data'  => $event_data,
     'allow_bot' => true,  // desktop app HTTP client has no browser UA
 ]);
 

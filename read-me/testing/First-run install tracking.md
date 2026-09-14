@@ -10,6 +10,8 @@ The flow has three moving parts:
 
 The admin funnel at `/admin/marketing-funnel/` reads the resulting rows from `referral_events` to populate the "App first run" stage.
 
+The POST also carries the app's `X-Device-Id` header. The server stores its SHA-256 as `device_hash` in `event_data`, which is the same hash free telemetry is filed under (`device:<hash>`). That is how the User Activity cards in `/admin/app-stats/` show a user's referral link and survey answer. Installs reported by app versions older than 2.0.16 have no `device_hash`, so their cards show no referral.
+
 ---
 
 ## Why re-testing from your own machine does nothing

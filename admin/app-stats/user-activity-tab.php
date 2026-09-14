@@ -132,7 +132,6 @@ foreach ($ua_files as $name => $path) {
             'sessions'  => 0,
             'unclean'   => 0,     // sessions that ended without a clean shutdown
             'events'    => 0,
-            'features'  => [],   // featureName => count
             'errors'    => 0,
             'warnings'  => 0,    // severity=Warning events, counted apart from errors
             'company'   => null, // most recent non-sample CompanyProfile, shown on the card
@@ -183,10 +182,6 @@ foreach ($ua_files as $name => $path) {
                 } elseif (array_key_exists('clean', $ev) && $ev['clean'] === false) {
                     $u['unclean']++;
                 }
-                break;
-            case 'FeatureUsage':
-                $f = $ev['featureName'] ?? 'Unknown';
-                $u['features'][$f] = ($u['features'][$f] ?? 0) + 1;
                 break;
             case 'Error':
                 if (ua_is_warning($ev)) {
@@ -262,6 +257,60 @@ foreach ($ua_users as $ua_authId => &$ua_u) {
 }
 unset($ua_u);
 
+// Where a free install came from. api/track-app-event.php stores the same device
+// hash on the install's app_first_run row that upload.php files telemetry under.
+// Installs reported before that field existed carry no hash and show nothing.
+$ua_deviceHashes = [];
+foreach ($ua_users as $ua_authId => $_ua_ignored) {
+    if (strncmp($ua_authId, 'device:', 7) === 0) {
+        $ua_deviceHashes[] = substr($ua_authId, 7);
+    }
+}
+$ua_referrals = [];   // device hash => ['link' =>, 'linkCode' =>, 'survey' =>]
+if ($ua_deviceHashes && isset($pdo)) {
+    try {
+        require_once __DIR__ . '/../../config/survey_options.php';
+        $ua_surveyLabels = [];
+        foreach (get_survey_options() ?? [] as $ua_opt) {
+            $ua_surveyLabels[$ua_opt['key']] = $ua_opt['label'];
+        }
+
+        $ua_ph = implode(',', array_fill(0, count($ua_deviceHashes), '?'));
+        $ua_stmt = $pdo->prepare("
+            SELECT JSON_UNQUOTE(JSON_EXTRACT(e.event_data, '$.device_hash')) AS device_hash,
+                   e.source_code, l.name AS source_name,
+                   e.source_survey_answer, e.source_survey_other_text
+            FROM referral_events e
+            LEFT JOIN referral_links l ON l.source_code = e.source_code
+            WHERE e.event_type = 'app_first_run'
+              AND e.environment = ?
+              AND JSON_UNQUOTE(JSON_EXTRACT(e.event_data, '$.device_hash')) IN ($ua_ph)
+            ORDER BY e.created_at ASC
+        ");
+        $ua_stmt->execute(array_merge([current_environment()], $ua_deviceHashes));
+        foreach ($ua_stmt->fetchAll(PDO::FETCH_ASSOC) as $ua_row) {
+            // A reinstall adds a second row. The first answer found for each part is
+            // kept, so a later bare reinstall can't blank out a known source.
+            $ua_ref =& $ua_referrals[$ua_row['device_hash']];
+            $ua_ref ??= ['link' => null, 'linkCode' => null, 'survey' => null];
+            if ($ua_ref['link'] === null && !empty($ua_row['source_code'])) {
+                $ua_ref['link']     = $ua_row['source_name'] ?: $ua_row['source_code'];
+                $ua_ref['linkCode'] = $ua_row['source_code'];
+            }
+            if ($ua_ref['survey'] === null && !empty($ua_row['source_survey_answer'])) {
+                $ua_answer = $ua_row['source_survey_answer'];
+                $ua_ref['survey'] = $ua_surveyLabels[$ua_answer] ?? $ua_answer;
+                if (!empty($ua_row['source_survey_other_text'])) {
+                    $ua_ref['survey'] .= ': ' . $ua_row['source_survey_other_text'];
+                }
+            }
+            unset($ua_ref);
+        }
+    } catch (PDOException $e) {
+        error_log('user-activity referral lookup failed: ' . $e->getMessage());
+    }
+}
+
 // Sort users: free first (what you care about), then most-recent activity.
 uasort($ua_users, function ($a, $b) {
     if ($a['tier'] !== $b['tier']) return $a['tier'] === 'free' ? -1 : 1;
@@ -287,15 +336,6 @@ if (!function_exists('ua_fmt')) {
         return '<time data-epoch="' . (int)$ts . '"'
             . ($withSeconds ? ' data-epoch-seconds="1"' : '') . '>'
             . gmdate($withSeconds ? 'Y-m-d H:i:s' : 'Y-m-d H:i', $ts) . ' UTC</time>';
-    }
-}
-if (!function_exists('ua_kv')) {
-    function ua_kv($arr) {
-        if (!$arr) return '<span style="color:var(--admin-text)">none</span>';
-        arsort($arr);
-        $out = [];
-        foreach ($arr as $k => $v) $out[] = htmlspecialchars($k) . ' <b>' . $v . '</b>';
-        return implode(', ', $out);
     }
 }
 ?>
@@ -342,7 +382,7 @@ if (!function_exists('ua_kv')) {
 /* Force-quit / OS restart / power loss. Red like an error because it's worth
    noticing, but prose rather than the error rows' monospace: there's no code here. */
 .ua-evt.unclean .ua-evt-text { color:#b91c1c; font-weight:600; }
-.ua-unclean { color:#b91c1c; font-weight:700; }
+.ua-unclean, .ua-err { color:#b91c1c; font-weight:700; }
 /* Warnings are expected, handled conditions. Amber and prose, so they read as
    "worth knowing" rather than sitting in the error rows' red monospace. */
 .ua-evt.warning .ua-evt-text { color:#b45309; }
@@ -366,7 +406,7 @@ if (!function_exists('ua_kv')) {
 [data-theme="dark"] .ua-evt.export .ua-evt-text { color:#38bdf8; }
 [data-theme="dark"] .ua-evt.feature .ua-evt-text { color:#34d399; }
 [data-theme="dark"] .ua-evt.session .ua-evt-text { color:var(--white); }
-[data-theme="dark"] .ua-evt.unclean .ua-evt-text, [data-theme="dark"] .ua-unclean { color:#f87171; }
+[data-theme="dark"] .ua-evt.unclean .ua-evt-text, [data-theme="dark"] .ua-unclean, [data-theme="dark"] .ua-err { color:#f87171; }
 [data-theme="dark"] .ua-evt.warning .ua-evt-text, [data-theme="dark"] .ua-warn { color:#fbbf24; }
 [data-theme="dark"] .ua-dl { background:var(--gray-700); border-color:var(--gray-600); color:var(--white); }
 [data-theme="dark"] .ua-dl:hover { background:var(--gray-600); color:var(--white); }
@@ -443,6 +483,9 @@ if (!function_exists('ua_kv')) {
         $timeline = $u['timeline'];
         $timeline = ua_merge_timeline($timeline);
         usort($timeline, fn($a, $b) => $b['ts'] <=> $a['ts']);
+        $ua_ref = strncmp($u['authId'], 'device:', 7) === 0
+            ? ($ua_referrals[substr($u['authId'], 7)] ?? null)
+            : null;
         // Searchable haystack + filter keys for the client-side filters.
         $ua_haystack = strtolower(trim(
             $u['authId'] . ' ' . $u['country'] . ' ' . $u['region'] . ' ' .
@@ -453,7 +496,9 @@ if (!function_exists('ua_kv')) {
             // And so a promo cohort can be pulled up by name, e.g. "stacksocial".
             (!empty($u['isKeyUser']) ? ' freekey free key promo redeemed ' . ($u['keyBatch'] ?? '') : '') .
             // Pasting a key from a support email should land on the install using it.
-            ' ' . ($u['licenseKey'] ?? '')
+            ' ' . ($u['licenseKey'] ?? '') .
+            // So "youtube" pulls up everyone a video brought in.
+            ' ' . ($ua_ref['link'] ?? '') . ' ' . ($ua_ref['linkCode'] ?? '') . ' ' . ($ua_ref['survey'] ?? '')
         ));
     ?>
     <tr class="ua-user"<?= $u['isFounder'] ? ' data-founder="1"' : '' ?> data-search="<?= htmlspecialchars($ua_haystack) ?>">
@@ -490,11 +535,22 @@ if (!function_exists('ua_kv')) {
                 <span><b>Unclean exits:</b> <span class="ua-unclean"><?= $u['unclean'] ?></span></span>
             <?php endif; ?>
             <span><b>Total events:</b> <?= $u['events'] ?></span>
-            <span><b>Errors:</b> <?= $u['errors'] ?></span>
+            <span><b>Errors:</b> <?php if ($u['errors'] > 0): ?><span class="ua-err"><?= $u['errors'] ?></span><?php else: ?>0<?php endif; ?></span>
             <?php if ($u['warnings'] > 0): ?>
                 <span><b>Warnings:</b> <span class="ua-warn"><?= $u['warnings'] ?></span></span>
             <?php endif; ?>
         </div>
+        <?php if ($ua_ref !== null && ($ua_ref['link'] !== null || $ua_ref['survey'] !== null)): ?>
+            <div class="ua-row"><b>Referral:</b>
+                <?php if ($ua_ref['link'] !== null): ?>
+                    <span title="Referral link <?= htmlspecialchars($ua_ref['linkCode']) ?>"><?= htmlspecialchars($ua_ref['link']) ?></span>
+                <?php endif; ?>
+                <?php if ($ua_ref['link'] !== null && $ua_ref['survey'] !== null): ?> &middot; <?php endif; ?>
+                <?php if ($ua_ref['survey'] !== null): ?>
+                    <span>said "<?= htmlspecialchars($ua_ref['survey']) ?>"</span>
+                <?php endif; ?>
+            </div>
+        <?php endif; ?>
         <?php if (!empty($u['licenseKey'])): ?>
             <?php // The key this install's premium is running on. Support material, so it
                   // renders whole rather than masked: the page is already behind admin 2FA. ?>
@@ -521,7 +577,6 @@ if (!function_exists('ua_kv')) {
                     if ($companyBits): ?> &middot; <?= implode(' &middot; ', $companyBits) ?><?php endif; ?>
             </div>
         <?php endif; ?>
-        <div class="ua-row"><b>Features used:</b> <?= ua_kv($u['features']) ?></div>
 
         <?php if ($timeline): ?>
         <details class="ua-events">
