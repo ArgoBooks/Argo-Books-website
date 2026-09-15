@@ -312,6 +312,12 @@ h3, h4, h5, h6 {
   height: 470px;
 }
 
+/* Three rows of stock cards are taller than 404px, and the vertically centred
+   grid spilled up over the page title and past the bottom edge. */
+.fp-hero-demo[data-feature-demo="inventory"] .app-body {
+  height: auto;
+}
+
 .fp-hero-demo .app-topbar {
   padding: 10px 14px;
 }
