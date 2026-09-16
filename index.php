@@ -164,7 +164,7 @@ if ($update_xml !== false && isset($update_xml->channel->item[0])) {
                     <div class="device-frame">
                         <img src="resources/images/dashboard.webp"
                              srcset="resources/images/dashboard-800.webp 800w, resources/images/dashboard-1200.webp 1200w, resources/images/dashboard-1600.webp 1600w, resources/images/dashboard.webp 2400w"
-                             sizes="(max-width: 768px) 90vw, 600px"
+                             sizes="(max-width: 768px) 90vw, (max-width: 1200px) 760px, 860px"
                              alt="Argo Books Dashboard" class="device-screen" width="2400" height="1528" fetchpriority="high">
                         <button class="hero-play-btn" id="heroPlayBtn" aria-label="Watch demo video">
                             <?= svg_icon('play-filled', 28) ?>
