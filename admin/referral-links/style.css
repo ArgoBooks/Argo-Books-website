@@ -402,3 +402,21 @@ code {
     color: var(--white);
 }
 
+
+/* Download button, matching the marketing funnel's card buttons. */
+.bd-download-btn {
+    margin-left: auto;
+    margin-right: 10px;
+    background: none;
+    border: 1px solid var(--gray-300);
+    border-radius: 6px;
+    padding: 4px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--admin-text);
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+}
+.bd-download-btn:hover { background: var(--gray-100); border-color: var(--gray-400); }
+[data-theme="dark"] .bd-download-btn { border-color: var(--gray-600); color: var(--white); }
+[data-theme="dark"] .bd-download-btn:hover { background: var(--gray-700); border-color: var(--gray-500); }

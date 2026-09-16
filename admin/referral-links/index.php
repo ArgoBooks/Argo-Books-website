@@ -348,6 +348,43 @@ function render_referral_table_bodies()
     return ob_get_clean();
 }
 
+/**
+ * Rows behind the table's Download button, in the table's own order. Sent back with
+ * every AJAX save as well, so a link created or renamed since the page loaded is in it.
+ */
+function referral_download_payload(): string
+{
+    global $category_order, $category_labels, $grouped_links;
+
+    $rows = [];
+    foreach ($category_order as $ckey) {
+        foreach ($grouped_links[$ckey] ?? [] as $link) {
+            $visits = (int)$link['total_visits'];
+            $conversions = (int)$link['conversions'];
+            $rows[] = [
+                $category_labels[$ckey],
+                $link['source_code'],
+                $link['name'],
+                $link['description'],
+                $link['target_url'],
+                $visits,
+                (int)$link['installs'],
+                $conversions,
+                $visits > 0 ? round($conversions / $visits * 100, 1) : 0,
+            ];
+        }
+    }
+
+    return json_encode([
+        'filename' => 'referral-links',
+        'datasets' => [[
+            'title' => 'Referral links',
+            'columns' => ['Category', 'Source code', 'Name', 'Description', 'Target URL', 'Visits', 'Installs', 'Conversions', 'Rate %'],
+            'rows' => $rows,
+        ]],
+    ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+}
+
 // Get statistics
 $referral_links = get_referral_links();
 
@@ -392,6 +429,7 @@ if ($is_ajax) {
         'success' => true,
         'message' => $saved_message,
         'table_html' => render_referral_table_bodies(),
+        'download' => referral_download_payload(),
         'expand' => $saved_category,
     ]);
 }
@@ -570,6 +608,8 @@ include __DIR__ . '/../admin_header.php';
     <div class="table-container">
         <div class="table-header-actions">
             <h2>Manage Referral Links</h2>
+            <button type="button" id="referralDownloadBtn" class="bd-download-btn" title="Download this table as CSV"
+                    data-download="<?php echo htmlspecialchars(referral_download_payload(), ENT_QUOTES); ?>">Download</button>
             <button id="createLinkBtn" class="btn btn-blue">Create New Link</button>
         </div>
 
@@ -956,6 +996,9 @@ include __DIR__ . '/../admin_header.php';
         }
 
         refreshTableBodies(result.table_html, result.expand);
+        if (result.download) {
+            document.getElementById('referralDownloadBtn').setAttribute('data-download', result.download);
+        }
         showPageMessage(result.message, false);
         return true;
     }
@@ -1076,3 +1119,43 @@ include __DIR__ . '/../admin_header.php';
 </script>
 <script>window.ADMIN_PRESERVE_SCROLL = ['a[href^="?period="]', 'a[href^="?group="]'];</script>
 <script src="../preserve-scroll.js" defer></script>
+<script>
+    // Download button: the same client-side CSV as the marketing funnel's cards, built from
+    // the payload already in the page, so there is no extra admin endpoint to secure.
+    (function () {
+        const escapeCell = value => {
+            const s = String(value ?? '');
+            return /[",\r\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+        };
+
+        const btn = document.getElementById('referralDownloadBtn');
+        if (!btn) return;
+        btn.addEventListener('click', () => {
+            let payload;
+            try {
+                payload = JSON.parse(btn.getAttribute('data-download'));
+            } catch (err) {
+                return;
+            }
+
+            const lines = [];
+            (payload.datasets || []).forEach((ds, i) => {
+                if (i > 0) lines.push('');
+                lines.push(escapeCell(ds.title));
+                lines.push((ds.columns || []).map(escapeCell).join(','));
+                (ds.rows || []).forEach(row => lines.push(row.map(escapeCell).join(',')));
+            });
+
+            // BOM so Excel reads UTF-8 rather than the system codepage.
+            const blob = new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = (payload.filename || 'referral-links') + '-' + new Date().toISOString().slice(0, 10) + '.csv';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
+    })();
+</script>
