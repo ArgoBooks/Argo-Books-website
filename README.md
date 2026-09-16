@@ -43,8 +43,6 @@ You can view the live website here: www.argorobots.com.
 
 To run the site on your own machine (Windows with Laragon, or macOS with Homebrew), follow [Local development setup](read-me/setup/Local%20development%20setup.md).
 
-Releasing a new version of the desktop app is covered by [Publishing.md](https://github.com/ArgoBooks/Argo-Books-Avalonia/blob/main/docs/Publishing.md) in the app repo.
-
 ## Documentation
 
 Reference docs live in [read-me/](read-me/).
