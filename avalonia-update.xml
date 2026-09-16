@@ -41,7 +41,7 @@
                        sparkle:version="2.0.16"
                        sparkle:os="macos-arm64"
                        type="application/zip"
-                       length="118840544"
+                       length="0"
                        sparkle:edSignature="7Dp+n1PVhC9CgEZOIQThet5j0NO67+3N6b4VaHs7lp6HZQM21n7UvMCcoDyafUbRH1j2oRFc7tGgSGToDDybBg==" />
         </item>
 
@@ -54,7 +54,7 @@
                        sparkle:version="2.0.16"
                        sparkle:os="macos-x64"
                        type="application/zip"
-                       length="148047275"
+                       length="0"
                        sparkle:edSignature="IGl/kD8j88j/TSkY0y78V4PR4Pny4y1CYAGOKbCV21d92xS6JmmHeXGXwDRj+Fn21bI8REOtiL/XjjQ4AdUIBQ==" />
         </item>
     </channel>
