@@ -1,6 +1,6 @@
 # Marketing situation
 
-Context snapshot for anyone (including Claude) picking up marketing work. Numbers are as of **2026-09-03**. Update this file when the picture changes.
+Context snapshot for anyone (including Claude) picking up marketing work. Numbers are as of **2026-09-03** unless a line says otherwise. Update this file when the picture changes.
 
 Related: [Google Ads economics.md](Google%20Ads%20economics.md), [Email outreach.md](Email%20outreach.md).
 
@@ -8,47 +8,51 @@ Related: [Google Ads economics.md](Google%20Ads%20economics.md), [Email outreach
 
 - Solo founder, bootstrapping. Argo Books has been in development for about 2 years.
 - Windows, macOS, and Linux. The macOS build shipped 2026-09-09, signed and notarized, for Apple Silicon and Intel; see [macOS](#macos).
-- **2 paying customers.** Both signed up around May, both auto-renewed and the subscriptions are still active, although they don't use the app.
+- **3 paying customers: 2 subscriptions and 1 one-time.** The two subscribers signed up around May, both auto-renewed and are still active, although they don't use the app.
   - Customer 1 came from a YouTube video (the receipt scanning one).
   - Customer 2 came from Google search.
+  - Customer 3 bought the lifetime deal through Stack Social in late August, so there is no recurring revenue from them.
 - Pricing: \$15/month or \$150/year. Customer 1 is paying \$10/month with no payment processing fee added, because I increased the price after he signed up.
 - Revenue: **\$77.22 CAD all time**, \$25.74 in the last 30 days. 2 active licenses, 0% churn so far.
+- Running costs: **~\$170 CAD/month.** Claude Code \$140, Azure code signing \$10, Apple Developer Program \$10, website hosting and domain \$10. Against \$25.74 of revenue that is about \$145/month out of pocket, so a \$1,000 spend is roughly seven months of runway.
 - **The "LTV" tile on `/admin/marketing-funnel/` is not lifetime value.** It computes `total_revenue / total_paying` (see `admin/marketing-funnel/index.php`), which is revenue booked to date per customer. It reads low early and drifts up as customers renew. Do not quote it as LTV.
 - **LTV is not known.** Both customers are only a few months in and neither has churned, so there is no retention data to calculate it from.
-- App telemetry (as of 28 Aug 2026, excluding my own device): **35 unique users**, 21 active in the last 30 days, 8 on a Premium identity. Only 9 of the 35 ever came back on a second day.
+- App telemetry, excluding my own device: **40 people have installed and run the app** (2026-09-15). Most open it, spend a few minutes without really doing anything, and leave. From the 28 Aug snapshot, when the count was 35: 21 active in the last 30 days, 8 on a Premium identity, and only 9 ever came back on a second day.
 - **Both paying customers have not opened the app in over a month**, despite still being billed. A feedback email went to both and neither replied. 0% churn is not a retention signal yet, because the numbers are too small and not enough time has passed.
 
 ## Traffic numbers are not trustworthy yet
 
 Read this before drawing any conclusion from the visitor counts below.
 
-Internal analytics reports about 4.9k visitors all time, 82% of them **direct** (4,206), 14% referral (698), 4% organic search (194), 1% organic social (47). Google Search Console over roughly the same window reports **46 clicks** from 12.8K impressions, 0.4% CTR, average position 63.7.
+Internal analytics reports about 4.9k visitors all time (5.1k by 15 Sept), 82% of them **direct** (4,206), 14% referral (698), 4% organic search (194), 1% organic social (47). Google Search Console over roughly the same window reports **46 clicks** from 12.8K impressions, 0.4% CTR, average position 63.7.
 
 Those two pictures do not reconcile, and the internal one is the suspect one:
 
 - 4,206 direct visitors means "no referrer sent". This is a suspicion, not a measurement. Nobody has verified how much of it is bots, so do not state it as settled. For a site with essentially no brand awareness, almost nobody is typing the URL in. Bots, scrapers, uptime checks, and referrer-stripped traffic all land in this bucket. The site's bot filter (`is_likely_bot()` in `statistics.php`) is basic and probably not catching everything.
 - Average position in Search Console is very low. Organic search is indexed but barely being served to anyone.
 
-What **is** trustworthy is app telemetry, because it requires someone to actually install and run a desktop app: 35 unique users. Work backwards from that number, not from 4.8k.
+What **is** trustworthy is app telemetry, because it requires someone to actually install and run a desktop app: 40 unique users as of 2026-09-15. Work backwards from that number, not from 5.1k.
 
 ## Funnel (all traffic, all time)
 
-| Step | Count |
-|---|---|
-| Landing | 4,900 |
-| Downloads page | 411 |
-| Download click | 60 |
-| App first run | 34 |
-| Premium signup | 2 |
-| Premium paid | 2 |
+From `/admin/marketing-funnel/`, 2026-09-15.
 
-The landing figure may be inflated by bots, so the 92% drop from landing to downloads page is not useful. Treat it as unresolved rather than explained. The steps that are real: 60 download clicks produced 34 first runs, and 2 of those 34 became paying customers. Conversion after install is fine. The problem is that only ~34 humans have ever installed it.
+| Step | Count | From previous step |
+|---|---|---|
+| Landing | 5,100 | |
+| Downloads page | 434 | 8.6% |
+| Download click | 72 | 16.6% |
+| App first run | 40 | 55.6% |
+| Premium signup | 2 | 5.0% |
+| Premium paid | 2 | 100% |
+
+The landing figure may be inflated by bots, so the 91% drop from landing to downloads page is not useful. Treat it as unresolved rather than explained. The steps that are real: 72 download clicks produced 40 first runs, and 2 of those 40 became paying customers. Conversion after install is fine. The problem is that only 40 humans have ever installed it.
 
 Top entry pages: `/` (2.34), `/downloads/` (325), `/pricing/` (259), `/features/invoicing/` (224), `/compare/argo-books-vs-quickbooks/` (145).
 
 ### Per-source funnel, and why YouTube traffic is different
 
-From the users-by-source export, 3 Sept 2026. Summing the nine `youtube-*` video CTA sources (excluding the channel bio link):
+From the users-by-source export, 3 Sept 2026. The all-traffic column is that day's snapshot, so it is smaller than the current funnel above; the per-source rates are what matter here, not the totals. Summing the nine `youtube-*` video CTA sources (excluding the channel bio link):
 
 | Step | YouTube video links | All traffic |
 |---|---|---|
@@ -65,13 +69,18 @@ Link CTR for reference: the receipt scanner video has 223 views and produced 26 
 
 ## The reachability gap
 
-Almost everyone who installs Argo Books is anonymous. There is no account requirement at install (deliberately, it is part of the positioning), so:
+The gap is contact, not data.
 
-- Only paying customers hand over an email address.
-- 8 people signed up to the community section on the website, but those accounts are not linked to desktop telemetry, so there is no way to tell which of them ever ran the app.
-- The remaining free users cannot be contacted, surveyed, or re-engaged. Every install is currently a one-shot.
+- **Desktop telemetry** reports on every install: sessions, page views, feature usage, errors, startup timings, company scale. Read it at `/admin/app-stats/`.
+- **Website analytics** cover the whole funnel by source, at `/admin/marketing-funnel/` and `/admin/website-stats/`.
+- **An in-app survey** asks "Where did you hear about Argo Books?" when there is no referral data (`ArgoBooks/Controls/SourceSurveyOverlay.axaml`). Its options are served by the website from `/api/survey-options.php`, so they can be changed without shipping an app update, and answers post back to the site.
 
-This is worth fixing before pushing more traffic in, because it multiplies the value of every future install. The fix is **not** an email gate at first run: "no account, runs on your computer" is a differentiator against the competitors. Better options are an in-app surveys, or an optional email field.
+What is missing:
+
+- **No email address for free users.** Only paying customers hand one over. There is no account requirement at install, deliberately, because "no account, runs on your computer" is part of the positioning, and reduces friction.
+- **Community accounts are not linked to telemetry.** 8 people signed up on the website, and there is no way to tell which of them ever ran the app.
+
+The cheap ways to narrow it, none of which require an account at install: ask more than the source question in the existing survey (what they came to do, what stopped them), or offer an optional email field in the app for people who want to be told about updates.
 
 ## What has been tried
 
@@ -98,6 +107,8 @@ Subscriber count: 3.
 A Stack Social went live late August, and has resulted in one paying customer so far. Argo Books Premium is being sold as a lifetime deal of $83.99 CAD. My share of the revenue is 45-50%, depending on how they acquired each customer. Stack Social is generally either a hit or a miss, with most companies making almost no sales, while some do very well, with hundreds, or thousands of sales. While ~$40 revenue on each sale is very little considering I also have business expenses, based on my research:
 - Around 80% of people who buy lifetime software deals never use the software, or use it very little. 
 - Lifetime users tend to churn at similar rates as subscription users.
+
+**The first payout was \$18, not the ~\$40 expected** (noted 2026-09-15). Against the \$83.99 CAD listing and a stated 45-50% share, \$18 is about 21%. Unexplained so far. Things that could account for it, worth investigating: the sale price was discounted below the listed price (flash sale or bundle), or the sale came through a partner storefront rather than Stack Social's own, which is what "45-50% depending on how they acquired each customer" implies.
 Plus, this is a great opportunity to get customer reviews, which would be extremely valuable because I currently have no social proof. I could add this social proof to my website's landing page and include it in my outreach emails.
 
 ### Google Ads
@@ -110,7 +121,19 @@ About CA\$300 spent, 0 attributable customers. Details in [Google Ads economics.
 22 emails to blog and article writers who cover accounting/bookkeeping software, started July 20226. Zero responses. Main friction is finding unique targets, and the auto-discovery feature in the admin outreach page does not work well.
 
 ### YouTuber outreach
-82 emails sent starting about a month ago. 2 responses, both rejections (one "schedule is full", one asked which regions Argo Books supports then went quiet). A third response showed interest then said that the email had been forwarded to someone else for consideration. A fourth response gave a quote of $1000 USD as a flat-fee instead of an affiliate, which is currently being negotiated.
+82 emails sent starting about a month ago. 2 responses, both rejections (one "schedule is full", one asked which regions Argo Books supports then went quiet). A third response showed interest then said that the email had been forwarded to someone else for consideration. A fourth response gave a quote of $1000 USD as a flat-fee instead of an affiliate (see below).
+
+**The channel behind the \$1000 USD quote** (checked 2026-09-15):
+
+- **Sponsored software reviews**, which is close to an ideal audience: people who watch software reviews are software buyers, and they are used to clicking a link to try the product.
+- Hundreds of videos, uploading almost daily. 20k to 40k views each, about 30k on average. Well produced, 6 to 7 minutes long, roughly 1,000 likes against 0 to 30 dislikes and about 10 comments per video.
+- Every video is sponsored, and a few sponsors repeat, usually larger companies. Repeat sponsors are a strong signal.
+- Every video carries a tracked link in the description and in a pinned comment.
+- **His published rates:** average link CTR: 1.5-2.3%* which is the share of viewers who click the description link through to the sponsor's site.
+- **Price: \$1000 USD, and he has not moved on it.** I countered on the grounds of being a small company unsure the economics work, and the only thing offered back was \$950 for a 5-minute video instead of the usual 6 to 7 minutes. That is a different product at basically the same rate, not a discount. At 30k views \$1000 is about a \$33 CPM against a \$15-30 norm, and daily uploads with a full sponsor slate mean he has the demand to hold it.
+- **What \$1000 USD buys**, using his link CTR against Argo's own YouTube funnel rates: 450 to 690 link clicks (\$1.45 to \$2.22 per click), 147 to 226 download clicks at 32.7%, and **82 to 126 installs** at 56%.
+- **Break-even.** \$1000 USD is about \$1,370 CAD, roughly 9 subscriptions at \$150 CAD/year, which needs 7 to 11% of those installs to pay. The only two figures available, 6% of all installs and 11% of YouTube installs, sit either side of that. Year-one payback is a coin flip, and the real outcome turns on renewal, which is unknown.
+- **Decision: consider funding it from Avalonia Port Challenge prize money (winners announced 2026-11-06).**
 
 ### Reddit
 0-5 comments a day, roughly 100 total. Posts get auto removed immediately even when they follow the rules and do not mention Argo Books, with no explanation given. Account is 2 months old with 21 karma, which is the likely cause. About 90% of comments get 1 view, and some get 10-100.
@@ -129,31 +152,15 @@ That result is expected, and it clarifies what a listing is actually for. The va
 ### SEO: indexed, but not ranking yet
 Programmatic SEO pages, clean site structure, all pages indexed in Google Search Console, auto-submission to Bing and others. It did produce one of the two paying customers (I assume, given it was unattributed). But 36 clicks in 3 months at average position 64.5 means the pages exist and are indexed without ranking anywhere useful.
 
-## macOS
-
-**Shipped 2026-09-09.** The downloads page offers macOS alongside Windows and Linux, and the launch-notification signup form is gone from it.
-
-What changed since this section was written as a "should we?" question:
-
-- **The hardware was bought.** Development and testing now happen on an Apple Silicon MacBook Air, which is what the build is verified on.
-- **Touch ID is implemented.** It goes through Apple's LocalAuthentication framework, as predicted here, paired with the login keychain for the stored password. Verified on real hardware, which is the one part that could never have been rented or automated.
-- **Two architectures are offered**, Apple Silicon and Intel, so the download page asks which Mac the visitor has rather than guessing. The browser cannot tell them apart: Safari and Chrome both report an Intel user agent on Apple Silicon.
-
-- **Signed, notarized, and updating.** The Apple Developer Program membership is in place, every build is signed and notarized, and the appcast carries a separate macOS item per architecture. Updating from 2.0.13 to 2.0.14 was tested on a real Mac and works.
-- **The waitlist has been told.** The launch announcement was emailed to everyone on it, after which the waitlist admin page and the `platform_waitlist` table were removed.
-- **Install attribution on Mac comes through a welcome page, from 2.0.15.** The token in the downloaded filename cannot survive on a Mac: the browser expands the .zip, and current macOS keeps no record of the source URL. On first launch the app opens `/welcome/`, and the browser's own cookie links that install to the visit that downloaded it. Mac installs before 2.0.15 show as unattributed in the per-source funnel, though they still count in the totals.
-
 ## Honest read
 
 The two things that produced customers are YouTube and organic search. Both are slow, compounding, and free. Everything push-based (cold email, editorial outreach, YouTuber outreach, paid ads) has produced zero customers.
 
-The real constraint is not conversion, it's reach. 34 people have installed and run the app, and 2 of them have paid.
+The real constraint is not conversion, it's reach. 40 people have installed and run the app, and 2 of them have paid for a subscription.
 
 The second problem is retention. Both paying customers have gone a month without opening the app. Most of the free users use the app for a few minutes, do almost nothing, sometimes come back a few days later, do nothing, then leave. Not sure why. This could be a problem with the telemetry (unlikely, but possible), normal user behavior, or a real problem.
 
 ## Next steps
-
-Ordered. Everything else is parked (see below).
 
 ### 1. YouTube
 
@@ -175,7 +182,3 @@ Validate every title against YouTube autocomplete before committing. Do not inve
 About a day of work. The Store accepts unpackaged Win32 apps, so the existing installer can be listed without repackaging as MSIX. Mostly forms: description, screenshots, age rating, privacy policy, then certification review. Individual developer account is a one-time fee, around \$19 USD (confirm current pricing).
 
 Expect very little traffic. Store search volume for accounting software is thin and the Store skews toward games and big-name apps. The reasons to do it anyway are that it is permanent for one day of work, and that a Store listing is a trust signal for a small-business owner deciding whether to run an unknown `.exe` on the machine holding their financial records.
-
-### 3. Close the reachability gap in the app
-
-See [The reachability gap](#the-reachability-gap). An in-app prompt, not an email gate. Worth doing before the YouTube push lands rather than after.
