@@ -89,6 +89,49 @@ $pricing = get_pricing_config();
     <div class="container">
         <div class="version-grid">
 
+            <!-- Version 2.0.16 -->
+            <div class="version-card">
+                <div class="version-header">
+                    <div class="version-info">
+                        <span class="version-tag">Version 2.0.16</span>
+                        <span class="date-tag">September 16 2026</span>
+                    </div>
+                    <?= svg_icon('chevron-down', 24, 'dropdown-arrow', null, 'stroke-linecap="round" stroke-linejoin="round"') ?>
+                </div>
+
+                <div class="version-content">
+                    <div class="changelog">
+                        <div class="changelog-section">
+                            <h4 class="section-label feature">New Features</h4>
+                            <ul class="changelog-list">
+                                <li><strong>Your stock counts as stock, not spending:</strong> Buying stock for a product you track adds to your inventory, and its cost comes off your profit on the day it sells. A month where you restocked heavily no longer looks like a loss, and your Income Statement now shows Cost of Goods Sold and Gross Profit.</li>
+                                <li><strong>Book rentals ahead:</strong> A rental that starts later is saved as a reservation and leaves the units on your shelf until you check it out. The same units can't be promised twice for dates that overlap, and you can cancel a reservation in one click.</li>
+                                <li><strong>Give back as much of a deposit as you choose:</strong> When a rental comes back, enter how much of the security deposit to return. Whatever you keep is recorded as revenue. If the customer paid the rental invoice online, the refund opens with that amount already filled in, ready to send back through Stripe or Square.</li>
+                                <li><strong>Charge for late returns and damage:</strong> Add an extra charge on the return, with a note saying what it is for, and it is added to what the rental comes to.</li>
+                                <li><strong>Stock in more than one place:</strong> Move stock between a shop and a storage unit right from Stock Levels page, and choose the location on a sale or purchase when a product is stocked in more than one.</li>
+                                <li><strong>Stock by weight and volume:</strong> Choose the unit a product is stocked in, such as kilograms, litres or boxes, and keep part units like 2.5 kg.</li>
+                                <li><strong>Add a category, customer or supplier as you type:</strong> Type a name that isn't on the list yet and Argo Books creates it when you save, so you don't have to stop and set it up first.</li>
+                                <li><strong>Provinces, states and counties from a list:</strong> Thirteen countries now pick their region from a list, each with its flag, and the label matches the country.</li>
+                            </ul>
+                        </div>
+                        <div class="changelog-section">
+                            <h4 class="section-label enhancement">Enhancements</h4>
+                            <ul class="changelog-list">
+                                <li><strong>Search by ID:</strong> Typing 20 finds PRD-020, on the products, customers and suppliers pages.</li>
+                                <li><strong>Know about the payment portal up front:</strong> Creating an invoice from the rentals page tells you right away when the payment portal isn't set up yet, instead of at the moment you try to send.</li>
+                            </ul>
+                        </div>
+                        <div class="changelog-section">
+                            <h4 class="section-label fix">Fixes</h4>
+                            <ul class="changelog-list">
+                                <li>Editing or deleting a sale or purchase returns exactly the stock it moved.</li>
+                                <li>Revenue and expenses brought in from Stripe or the Argo Books API now move stock too.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Version 2.0.15 -->
             <div class="version-card">
                 <div class="version-header">
