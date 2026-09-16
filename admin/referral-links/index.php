@@ -115,13 +115,22 @@ function get_referral_links()
         SELECT
             rl.*,
             COUNT(DISTINCT rv.id) as total_visits,
+            COALESCE(MAX(inst.installs), 0) as installs,
             SUM(CASE WHEN rv.converted = 1 THEN 1 ELSE 0 END) as conversions
         FROM referral_links rl
         LEFT JOIN referral_visits rv ON rl.source_code = rv.source_code
+        LEFT JOIN (
+            SELECT source_code, COUNT(*) AS installs
+            FROM referral_events
+            WHERE event_type = 'app_first_run' AND environment = ?
+            GROUP BY source_code
+        ) inst ON inst.source_code = rl.source_code
         GROUP BY rl.id
         ORDER BY total_visits DESC, rl.created_at DESC";
 
-    $stmt = $pdo->query($query);
+    // referral_events is shared with sandbox, so only this environment's installs count.
+    $stmt = $pdo->prepare($query);
+    $stmt->execute([current_environment()]);
 
     $data = [];
     while ($row = $stmt->fetch()) {
@@ -290,7 +299,7 @@ function referral_category_key($source_code)
  */
 function render_referral_table_bodies()
 {
-    global $category_order, $category_labels, $grouped_links, $category_visits, $category_conversions;
+    global $category_order, $category_labels, $grouped_links, $category_visits, $category_installs, $category_conversions;
 
     ob_start();
     foreach ($category_order as $ckey) {
@@ -299,16 +308,18 @@ function render_referral_table_bodies()
             continue;
         }
         $cvisits = $category_visits[$ckey];
+        $cinst   = $category_installs[$ckey];
         $cconv   = $category_conversions[$ckey];
         $crate   = $cvisits > 0 ? round(($cconv / $cvisits) * 100, 1) : 0;
         ?>
         <tbody class="category-group collapsed" data-cat="<?php echo htmlspecialchars($ckey); ?>">
             <tr class="category-header" role="button" tabindex="0" aria-expanded="false">
-                <td colspan="8">
+                <td colspan="9">
                     <span class="cat-caret" aria-hidden="true">&#9656;</span>
                     <span class="cat-name"><?php echo htmlspecialchars($category_labels[$ckey]); ?></span>
                     <span class="cat-meta"><?php echo count($clinks); ?> source<?php echo count($clinks) === 1 ? '' : 's'; ?>
                         &middot; <?php echo number_format($cvisits); ?> visits
+                        &middot; <?php echo number_format($cinst); ?> installs
                         &middot; <?php echo number_format($cconv); ?> conversions
                         &middot; <?php echo $crate; ?>%</span>
                 </td>
@@ -321,6 +332,7 @@ function render_referral_table_bodies()
                     <td><?php echo htmlspecialchars(substr($link['description'], 0, 50)) . (strlen($link['description']) > 50 ? '...' : ''); ?></td>
                     <td><a href="<?php echo htmlspecialchars($link['target_url']); ?>" target="_blank" class="link-preview"><?php echo htmlspecialchars(substr($link['target_url'], 0, 30)) . (strlen($link['target_url']) > 30 ? '...' : ''); ?></a></td>
                     <td><?php echo number_format($link['total_visits']); ?></td>
+                    <td><?php echo number_format($link['installs']); ?></td>
                     <td><?php echo number_format($link['conversions']); ?></td>
                     <td><?php echo $conv_rate; ?>%</td>
                     <td class="actions-cell">
@@ -358,15 +370,18 @@ $category_order = ['paid', 'website', 'invgen', 'outreach', 'social', 'youtube',
 // Bucket every referral link by category and tally per-category subtotals.
 $grouped_links = [];
 $category_visits = [];
+$category_installs = [];
 $category_conversions = [];
 foreach ($category_order as $k) {
     $category_visits[$k] = 0;
+    $category_installs[$k] = 0;
     $category_conversions[$k] = 0;
 }
 foreach ($referral_links as $link) {
     $k = referral_category_key($link['source_code']);
     $grouped_links[$k][] = $link;
     $category_visits[$k] += (int)$link['total_visits'];
+    $category_installs[$k] += (int)$link['installs'];
     $category_conversions[$k] += (int)$link['conversions'];
 }
 
@@ -567,6 +582,7 @@ include __DIR__ . '/../admin_header.php';
                         <th>Description</th>
                         <th>Target URL</th>
                         <th>Visits</th>
+                        <th>Installs</th>
                         <th>Conversions</th>
                         <th>Rate</th>
                         <th>Actions</th>
