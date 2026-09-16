@@ -1,0 +1,40 @@
+name: Verify release signatures
+
+# Downloads every file listed in avalonia-update.xml from argorobots.com and checks its
+# Ed25519 signature, the same check the desktop app runs before installing an update.
+#
+# On push the XML usually lands before the FileZilla upload finishes, so the run keeps
+# rechecking for up to 45 minutes. Run it manually after the upload for an immediate answer.
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - avalonia-update.xml
+      - .github/scripts/verify_release_signatures.py
+      - .github/workflows/verify-release.yml
+  workflow_dispatch:
+
+concurrency:
+  group: verify-release
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - run: pip install cryptography
+
+      - name: Verify signatures
+        run: |
+          WAIT=0
+          if [ "${{ github.event_name }}" = "push" ]; then WAIT=45; fi
+          python .github/scripts/verify_release_signatures.py avalonia-update.xml --wait-minutes "$WAIT"
