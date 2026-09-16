@@ -1,5 +1,6 @@
-# Unpacks the Windows installer listed in avalonia-update.xml and checks that every Argo Books
-# DLL and EXE inside it carries the release version. 2.0.15 shipped ArgoBooks.Core.dll and
+# Checks the Windows installer listed in avalonia-update.xml has a valid, timestamped Authenticode
+# signature, then unpacks it and checks that every Argo Books DLL and EXE inside it carries the
+# release version. 2.0.15 shipped ArgoBooks.Core.dll and
 # ArgoBooks.dll from 2.0.14, and the app exited at launch without showing anything.
 #
 # Usage: verify_windows_installer.ps1 -AppcastPath avalonia-update.xml [-InstallerPath local.exe]
@@ -27,6 +28,23 @@ if (-not $InstallerPath) {
     $InstallerPath = "$work\installer.exe"
     Invoke-WebRequest $enclosure.url -OutFile $InstallerPath -UserAgent 'ArgoBooks-release-verifier (GitHub Actions)'
 }
+
+# Without a valid Authenticode signature SmartScreen warns every user who downloads it.
+$authenticode = Get-AuthenticodeSignature $InstallerPath
+$signer = $authenticode.SignerCertificate.Subject
+if ($authenticode.Status -ne 'Valid') {
+    Write-Host "::error::Installer Authenticode signature is $($authenticode.Status): $($authenticode.StatusMessage)"
+    exit 1
+}
+if ($signer -notmatch '^CN=Evan Di Placido,') {
+    Write-Host "::error::Installer is signed by '$signer', expected Evan Di Placido"
+    exit 1
+}
+if (-not $authenticode.TimeStamperCertificate) {
+    Write-Host "::error::Installer signature has no timestamp, so it stops validating when the certificate expires"
+    exit 1
+}
+Write-Host "Authenticode OK: $signer, issued by $($authenticode.SignerCertificate.Issuer)"
 
 $extract = Start-Process $InstallerPath -ArgumentList "/extract:`"$work\msi`"" -Wait -PassThru
 $cabs = Get-ChildItem "$work\msi" -Filter *.cab

@@ -2,7 +2,9 @@ name: Verify release signatures
 
 # Downloads every file listed in avalonia-update.xml from argorobots.com and checks its
 # Ed25519 signature, the same check the desktop app runs before installing an update. Once those
-# pass, it unpacks the Windows installer and checks every Argo Books DLL and EXE is the release version.
+# pass, it checks the operating-system signing: the Windows installer's Authenticode signature
+# (plus every Argo Books DLL and EXE inside being the release version), and each Mac app's
+# Developer ID signature, notarization, architecture and version.
 #
 # On push the XML usually lands before the FileZilla upload finishes, so the run keeps
 # rechecking for up to 45 minutes. Run it manually after the upload for an immediate answer.
@@ -15,6 +17,7 @@ on:
       - avalonia-update.xml
       - .github/scripts/verify_release_signatures.py
       - .github/scripts/verify_windows_installer.ps1
+      - .github/scripts/verify_macos_apps.sh
       - .github/workflows/verify-release.yml
   workflow_dispatch:
 
@@ -48,6 +51,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Check app file versions inside the installer
+      - name: Check Authenticode signature and app file versions
         shell: pwsh
         run: ./.github/scripts/verify_windows_installer.ps1 -AppcastPath avalonia-update.xml
+
+  macos-apps:
+    needs: verify
+    runs-on: macos-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check Developer ID signature, notarization, architecture and version
+        run: bash .github/scripts/verify_macos_apps.sh avalonia-update.xml
