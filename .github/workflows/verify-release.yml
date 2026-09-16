@@ -1,7 +1,8 @@
 name: Verify release signatures
 
 # Downloads every file listed in avalonia-update.xml from argorobots.com and checks its
-# Ed25519 signature, the same check the desktop app runs before installing an update.
+# Ed25519 signature, the same check the desktop app runs before installing an update. Once those
+# pass, it unpacks the Windows installer and checks every Argo Books DLL and EXE is the release version.
 #
 # On push the XML usually lands before the FileZilla upload finishes, so the run keeps
 # rechecking for up to 45 minutes. Run it manually after the upload for an immediate answer.
@@ -13,6 +14,7 @@ on:
     paths:
       - avalonia-update.xml
       - .github/scripts/verify_release_signatures.py
+      - .github/scripts/verify_windows_installer.ps1
       - .github/workflows/verify-release.yml
   workflow_dispatch:
 
@@ -38,3 +40,14 @@ jobs:
           WAIT=0
           if [ "${{ github.event_name }}" = "push" ]; then WAIT=45; fi
           python .github/scripts/verify_release_signatures.py avalonia-update.xml --wait-minutes "$WAIT"
+
+  windows-installer:
+    needs: verify
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check app file versions inside the installer
+        shell: pwsh
+        run: ./.github/scripts/verify_windows_installer.ps1 -AppcastPath avalonia-update.xml
