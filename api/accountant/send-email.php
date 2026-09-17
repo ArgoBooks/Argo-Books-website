@@ -78,6 +78,19 @@ if (is_rate_limited($rateLimitKey, $rateLimitMax, 3600, 'accountant_email')) {
 }
 record_rate_limit_attempt($rateLimitKey, 'accountant_email', 3600);
 
+// The X-Device-Id of a free request is self-asserted, so rotating the header would get past
+// the limit above. An IP cannot be rotated the same way, so a per-IP ceiling bounds what one
+// origin can send however many device IDs it invents. That matters more here than server load:
+// mail sent from this domain by a stranger costs the reputation invoice email depends on.
+// Premium requests are exempt, their key is checked against the database.
+if (!$license) {
+    $clientIp = get_client_ip();
+    if (is_rate_limited($clientIp, 20, 3600, 'accountant_email_ip')) {
+        accountant_pack_fail(429, 'RATE_LIMITED', 'Email rate limit exceeded. Please try again later.');
+    }
+    record_rate_limit_attempt($clientIp, 'accountant_email_ip', 3600);
+}
+
 $input = file_get_contents('php://input');
 
 // PHP drops a body larger than post_max_size, which would otherwise read as invalid JSON.
