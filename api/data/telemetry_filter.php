@@ -57,7 +57,8 @@ const TELEMETRY_FEATURE_NAMES = [
     'RoeXmlGenerated',
     // The dashboard editor.
     'DashboardCustomized',
-    'DashboardReset'
+    'DashboardReset',
+    'AccountantPackSent'
 ];
 
 // Business descriptors on a CompanyProfile event. Free text, not enum-checked: these
