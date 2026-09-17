@@ -152,6 +152,11 @@ That result is expected, and it clarifies what a listing is actually for. The va
 ### SEO: indexed, but not ranking yet
 Programmatic SEO pages, clean site structure, all pages indexed in Google Search Console, auto-submission to Bing and others. It did produce one of the two paying customers (I assume, given it was unattributed). But 36 clicks in 3 months at average position 64.5 means the pages exist and are indexed without ranking anywhere useful.
 
+### Invoice growth loop
+Built 2026-09-16. Every invoice a user sends carries a tracked link to Argo Books: on the portal after paying, in the portal footer, at the bottom of the invoice email, and in the invoice generator's PDF, Word and Excel downloads. Recipients are often small businesses that invoice too, so some install and send invoices of their own.
+
+Sources are `loop-*`, grouped as "Invoice loop" on `/admin/referral-links/`. Check installs per source after 30 days before investing more, or deciding whether Premium removes the branding.
+
 ## Honest read
 
 The two things that produced customers are YouTube and organic search. Both are slow, compounding, and free. Everything push-based (cold email, editorial outreach, YouTuber outreach, paid ads) has produced zero customers.
@@ -182,3 +187,19 @@ Validate every title against YouTube autocomplete before committing. Do not inve
 About a day of work. The Store accepts unpackaged Win32 apps, so the existing installer can be listed without repackaging as MSIX. Mostly forms: description, screenshots, age rating, privacy policy, then certification review. Individual developer account is a one-time fee, around \$19 USD (confirm current pricing).
 
 Expect very little traffic. Store search volume for accounting software is thin and the Store skews toward games and big-name apps. The reasons to do it anyway are that it is permanent for one day of work, and that a Store listing is a trust signal for a small-business owner deciding whether to run an unknown `.exe` on the machine holding their financial records.
+
+### 3. Linux app stores: Flathub and Snapcraft
+
+A few hours each, and free. Linux users go to these stores to find apps, and they are the audience most likely to want software that runs locally with no account, which is exactly Argo Books' positioning.
+
+- **Flathub** is the main one. Submission is a pull request to Flathub's GitHub with a Flatpak manifest, followed by a human review. Flathub accepts proprietary apps, so the license is not a blocker. The manifest wraps the existing Linux build and has to declare the file access the app needs, because Flatpak apps run sandboxed.
+- **Snapcraft** (the Snap Store, built into Ubuntu) is the second. Register the name, write a `snapcraft.yaml` around the Linux build, and publish with the `snapcraft` command. Review is mostly automated.
+
+Expect small numbers: Linux is 3 of the 46 devices in the 2026-09-16 activity export. The reasons to do it anyway are the same as the Microsoft Store: permanent for little work, and a store listing reads as more trustworthy than a download from a site nobody has heard of.
+
+### 4. Mac: Homebrew cask and the Mac App Store
+
+- **Homebrew cask** is the cheap one: a pull request to the `homebrew-cask` repository pointing at the signed, notarized download. Free, and Mac users who install from the terminal look there first. Homebrew reviews new casks for notability, so a young app with few users may be turned down until it has more of a following.
+- **The Mac App Store** is a real project, not a listing. The developer account is already paid for. The work is App Sandbox, which limits where the app can read and write files and would need testing against how company files are opened and saved, plus Apple's review. Apple also generally requires Premium to be sold through in-app purchase in a store app, which takes a 15 to 30% cut and needs its own implementation. Check Apple's current rules before committing, since they have been changing.
+
+Expect Homebrew to be small. The Mac App Store is the store in this list most likely to reach non-technical Mac users, which is why it is worth scoping properly rather than dismissing, even though it is the most work.
