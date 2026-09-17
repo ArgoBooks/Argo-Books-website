@@ -432,7 +432,7 @@ ArgoBooks.Desktop/
 
 <p>Everything else, all 170,971 lines of the UI project and 69,506 lines of core logic, is shared verbatim across every platform it targets.</p>
 
-<p>Where platforms genuinely differ, they differ behind one interface. <code>IPlatformService</code> has 20 members and four implementations: Windows, Linux, macOS and browser. That’s the entire surface where the operating system leaks into the application.</p>
+<p>Where platforms genuinely differ, they differ behind one interface. <code>IPlatformService</code> has 23 members and three implementations: Windows, macOS and Linux. That’s the entire surface where the operating system leaks into the application.</p>
 
 <div class="wfa-callout wfa-callout-warn">
   <p class="wfa-callout-head">Smaller than it sounds</p>
@@ -447,7 +447,7 @@ HTML,
       'html'   => <<<'HTML'
 <p>Both versions ship in <strong>54 languages</strong>, and both download the same kind of per-version JSON file from the server. What changed is everything that happens after the file arrives.</p>
 
-<p>Version 1 translated by walking every control on a form at runtime, looking each one up by a key built from its name, and replacing its text. That part worked. The trouble was that a WinForms layout is fixed pixels, and translated text is rarely the length of the English it replaces. So <code>LanguageManager.cs</code> grew to 962 lines that also repaired the layout after every translation: caching each label’s original bounds and its form’s original size so the label could be re-centred by hand, and binary-searching each button’s font size downward, as small as 3pt, until the translated text fitted a button that couldn’t get wider. Controls that needed a different alignment, or shouldn’t be translated at all, were flagged by writing a marker into their <code>AccessibleDescription</code>, a property meant for screen readers, in 90 places.</p>
+<p>Version 1 translated by walking every control on a form at runtime, looking each one up by a key built from its name, and replacing its text. That part worked. The trouble was that a WinForms layout is fixed pixels, and translated text is rarely the length of the English it replaces. So <code>LanguageManager.cs</code> grew to 962 lines that also repaired the layout after every translation: caching each label’s original bounds and its form’s original size so the label could be re-centred by hand, and binary-searching each button’s font size downward until the translated text fitted a button that couldn’t get wider. Controls that needed a different alignment, or shouldn’t be translated at all, were flagged by writing a marker into their <code>AccessibleDescription</code>, a property meant for screen readers, in 90 places.</p>
 
 <p>Version 2 has none of that repair work. Text is bound in markup, 2,556 times across the views, and Avalonia measures content before it arranges it, so a longer translation makes its button wider instead of its font smaller. Adding a language is a data change, not a layout risk.</p>
 
@@ -465,7 +465,7 @@ HTML,
 
 <p>The clearest case is the report generator. In version 1 it was 29 files and 17,730 lines: a drag-and-drop layout designer with its own undo and redo stack. It is the most intricate code in the old application, and almost none of what makes it intricate is a framework question. Page geometry, element positioning, the undo stack, template serialisation, PDF export. The framework draws the canvas. It doesn’t decide what a page is.</p>
 
-<p>I want to be precise here, because this is easy to oversell in both directions. Very little of that code survives byte for byte. I rewrote most of it as it came across, because I’m a better programmer now than I was when I first wrote it and it was worth improving while I had it open. But <strong>rewriting because you have got better at the job is a different cost from rewriting because the framework has left you no choice.</strong> The first is optional and you can stop at any point. The second is the migration.</p>
+<p>Very little of that code survives byte for byte. I rewrote most of it as it came across, because I’m a better programmer now than I was when I first wrote it and it was worth improving while I had it open. But <strong>rewriting because you have got better at the job is a different cost from rewriting because the framework has left you no choice.</strong> The first is optional and you can stop at any point. The second is the migration.</p>
 
 <p>So the honest rule, and the one I’d give anyone scoping this work: the code that ported cleanly is the code that never knew what a <code>Form</code> was. That is also why my nine months is useless to you as a number. The cost isn’t proportional to how large your application is. It’s proportional to how much of your logic is sitting inside your window classes.</p>
 HTML,
@@ -496,7 +496,7 @@ HTML,
   </table>
 </div>
 
-<p class="wfa-note">Version 2 is a much larger application, not a reskin. Invoicing, an online payment portal, Canadian payroll, bank statement import and revenue forecasting have no equivalent in version 1 at all, so most of the growth in C# is new product rather than migrated code. Windows, macOS, and Linux all ship from the same source.</p>
+<p class="wfa-note">Version 2 is also a much bigger product than version 1. Invoicing, an online payment portal, Canadian payroll, bank statement import and revenue forecasting have no equivalent in version 1 at all, so most of the growth in C# is new product rather than migrated code. Windows, macOS, and Linux all ship from the same source.</p>
 HTML,
     ],
 
@@ -504,15 +504,15 @@ HTML,
       'h2'     => 'The order I would do it in',
       'anchor' => 'how-to',
       'html'   => <<<'HTML'
-<p>If you are looking at the same move, the ordering matters more than anything else, and it is the one thing I would change about how I did it.</p>
+<p>If you are looking at the same move, the ordering matters more than anything else.</p>
 
 <p><strong>Do the hardest part before you switch frameworks.</strong> The slow half of this migration was never learning Avalonia. It was separating business logic from the window classes it had grown into, and you can do that today, in WinForms, without touching your UI framework at all. Move the calculations into a plain class library that references no UI assembly. Nothing stops you, and every hour spent there is an hour you do not spend twice.</p>
 
-<p><strong>Then get that library under test while you still have a working app.</strong> This is the part I did in the wrong order. I extracted the logic and rebuilt the interface at the same time, which meant that for a long stretch I had no version I could trust and no tests to tell me so. Extract, test, confirm the old app still behaves, and only then start on the new UI. The tests you write against the old behaviour are also your specification for the new one, which is worth more than it sounds when you are reimplementing a tax calculation you wrote two years ago.</p>
+<p><strong>Then get that library under test while you still have a working app.</strong> Extract, test, confirm the old app still behaves, and only then start on the new UI. The tests you write against the old behaviour are also your specification for the new one, which is worth more than it sounds when you are reimplementing a tax calculation you wrote two years ago. Version 2 kept that order inside its own repository: the data models, file handling and encryption were written before the app shell or any page, and the first of them were under test within a week.</p>
 
 <p><strong>Rebuild the shell before any individual screen.</strong> Navigation, theming, the window chrome, then one real page end to end. Getting a single screen fully working teaches you most of what the framework expects, and every screen after it is faster.</p>
 
-<p>By all means put something trivial on screen first to prove the toolchain works, that it builds, runs, themes and ships. That is worth an afternoon. But do not count it as your first screen, because a page with a label and a button teaches you almost nothing about the framework you have to live in: no binding, no lists, no resizing behaviour, no charts. You finish it, feel like you have started, and meet every actual problem on the page after it.</p>
+<p>By all means put something trivial on screen first to prove the toolchain works, that it builds, runs, themes and ships. That's worth an afternoon. But do not count it as your first screen, because a page with a label and a button teaches you almost nothing about the framework you have to live in: no binding, no lists, no resizing behaviour, no charts. You finish it, feel like you have started, and meet every actual problem on the page after it.</p>
 
 <p>Pick something with a list, a form and a chart on it instead. Not your most complicated page, but one that is genuinely representative, so the framework has a chance to show you what it actually expects.</p>
 
@@ -536,8 +536,6 @@ HTML,
       'h2'     => 'What it cost',
       'anchor' => 'costs',
       'html'   => <<<'HTML'
-<p>I want to be precise here, because migration write-ups tend to skip this part.</p>
-
 <p><strong>It was a rewrite, not a port.</strong> I started intending to carry code across, and tens of thousands of lines did come over early on, pasted in more or less as they were. Almost none of it is still in that form. It got rewritten afterwards, a piece at a time, as the architecture settled and as I noticed how much better I could write it than when I first wrote it in WinForms. A lot of it could have been left alone and would have worked. Between the rewriting and the logic leaving the window classes for view models and a UI-free core, calling the result a port would be generous. Nine months, one developer, alongside running the business. That figure is not a migration estimate, though, and I would not quote it as one: most of those nine months went into features version 1 never had.</p>
 
 <p><strong>And it was a rewrite because the app was WinForms.</strong> If you are coming from WPF, almost none of this applies to you. WPF already has the concepts Avalonia is built on: XAML markup, data binding, MVVM, styles and control templates, resource dictionaries, and resolution independence. Moving that to Avalonia is a translation between two dialects of the same language, and Avalonia’s own documentation has a migration guide for it. There is even <a href="https://avaloniaui.net/xpf" target="_blank" rel="noopener nofollow">Avalonia XPF</a>, a commercial drop-in that swaps the rendering layer underneath WPF while keeping API and binary compatibility, so most WPF apps compile against it unchanged and third-party control suites keep working.</p>
