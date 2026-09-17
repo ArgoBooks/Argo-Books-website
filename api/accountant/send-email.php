@@ -160,7 +160,9 @@ $subject = $companyName . ' books for ' . $period;
 $greeting = $toName !== '' ? 'Hi ' . $toName . ',' : 'Hi,';
 $intro = $companyName . ' has sent you their books for ' . $period . '.';
 $omitted = 'The receipts were too large to email. Ask ' . $companyName . ' to share the full pack.';
-$replyLine = 'Reply to this email to reach ' . $companyName . '.';
+// The From address is always ours, so naming the address is clearer than
+// telling someone to reply to a message that appears to come from noreply@.
+$replyLine = 'Replies go to ' . $companyName . ' at ' . (string) $sender['replyTo'] . '.';
 
 $fileListHtml = '';
 $fileListText = '';
