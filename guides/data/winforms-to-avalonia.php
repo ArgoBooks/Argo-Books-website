@@ -46,7 +46,7 @@ return [
   'hub_weight' => 10,
 
   'published' => '2026-09-04',
-  'updated'   => '2026-09-04',
+  'updated'   => '2026-09-16',
   'stylesheet' => 'winforms-to-avalonia.css',
 
   'intro_html' => <<<'HTML'
@@ -442,14 +442,16 @@ HTML,
     ],
 
     [
-      'h2'     => 'The ceiling nobody mentions',
+      'h2'     => 'Translating a layout that can’t grow',
       'anchor' => 'localisation',
       'html'   => <<<'HTML'
-<p>Version 1 shipped in English. Not as a decision, but because localising a WinForms app means satellite <code>.resx</code> files per window, and with 53 windows and 57 resource files already in play the cost was never worth paying. The version 1 repository contains zero localised resource files.</p>
+<p>Both versions ship in <strong>54 languages</strong>, and both download the same kind of per-version JSON file from the server. What changed is everything that happens after the file arrives.</p>
 
-<p>Version 2 ships in <strong>54 languages</strong>, one more than version 1 had windows. The strings are JSON, generated and translated by a tool in the repository, and downloaded per version rather than compiled into satellite assemblies.</p>
+<p>Version 1 translated by walking every control on a form at runtime, looking each one up by a key built from its name, and replacing its text. That part worked. The trouble was that a WinForms layout is fixed pixels, and translated text is rarely the length of the English it replaces. So <code>LanguageManager.cs</code> grew to 962 lines that also repaired the layout after every translation: caching each label’s original bounds and its form’s original size so the label could be re-centred by hand, and binary-searching each button’s font size downward, as small as 3pt, until the translated text fitted a button that couldn’t get wider. Controls that needed a different alignment, or shouldn’t be translated at all, were flagged by writing a marker into their <code>AccessibleDescription</code>, a property meant for screen readers, in 90 places.</p>
 
-<p>That wasn’t an Avalonia feature. It became possible because the rewrite pulled the strings out of the UI layer in the first place, which is the same structural change that made the code testable. One decision, two payoffs.</p>
+<p>Version 2 has none of that repair work. Text is bound in markup, 2,556 times across the views, and Avalonia measures content before it arranges it, so a longer translation makes its button wider instead of its font smaller. Adding a language is a data change, not a layout risk.</p>
+
+<p>That isn’t a translation feature. It’s the same property that removed the scaling bugs: a layout that measures what it holds instead of trusting pixel positions someone chose in English at 150%.</p>
 HTML,
     ],
 
@@ -490,13 +492,11 @@ HTML,
       <tr><th>Theming code</th><td>845 lines of C#</td><td>415 lines of XAML</td></tr>
       <tr class="wfa-row-hi"><th>Test suite</th><td>2,141 lines</td><td>49,943 lines</td></tr>
       <tr><th>View models</th><td>n/a</td><td>129</td></tr>
-      <tr><th>Third-party UI control suite</th><td>2,142 references, $82 USD/year with charts</td><td>none, free and open source</td></tr>
-      <tr><th>Languages</th><td>1</td><td>54</td></tr>
-    </tbody>
+      <tr><th>Third-party UI control suite</th><td>2,142 references, $82 USD/year with charts</td><td>none, free and open source</td></tr>    </tbody>
   </table>
 </div>
 
-<p class="wfa-note">Version 2 is a much larger application, not a reskin. Invoicing, an online payment portal, Canadian payroll, bank statement import, revenue forecasting and 54 languages have no equivalent in version 1 at all, so most of the growth in C# is new product rather than migrated code. Windows, macOS, and Linux all ship from the same source.</p>
+<p class="wfa-note">Version 2 is a much larger application, not a reskin. Invoicing, an online payment portal, Canadian payroll, bank statement import and revenue forecasting have no equivalent in version 1 at all, so most of the growth in C# is new product rather than migrated code. Windows, macOS, and Linux all ship from the same source.</p>
 HTML,
     ],
 
