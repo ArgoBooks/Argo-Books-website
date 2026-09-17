@@ -274,6 +274,9 @@ function referral_category_key($source_code)
     if (strncmp($code, 'invgen-', 7) === 0) {
         return 'invgen';
     }
+    if (strncmp($code, 'loop-', 5) === 0) {
+        return 'loop';
+    }
     if (strncmp($code, 'outreach-', 9) === 0) {
         return 'outreach';
     }
@@ -395,6 +398,7 @@ $category_labels = [
     'paid'    => 'Paid ads',
     'website' => 'My website (guides & articles)',
     'invgen'  => 'Invoice generator',
+    'loop'    => 'Invoice loop (sent invoices)',
     'outreach' => 'Outreach',
     'social'  => 'Social media',
     'youtube' => 'YouTube',
@@ -402,7 +406,7 @@ $category_labels = [
     'directory' => 'Directories (launch & SaaS sites)',
     'other'     => 'Other',
 ];
-$category_order = ['paid', 'website', 'invgen', 'outreach', 'social', 'youtube', 'ai', 'directory', 'other'];
+$category_order = ['paid', 'website', 'invgen', 'loop', 'outreach', 'social', 'youtube', 'ai', 'directory', 'other'];
 
 // Bucket every referral link by category and tally per-category subtotals.
 $grouped_links = [];

@@ -591,7 +591,10 @@ function buildDocument(state, totals, taxLabel, d) {
       footers: {
         default: new Footer({
           children: [new Paragraph({
-            children: [new TextRun({ text: 'Made with argorobots.com', size: 18, color: '999999' })],
+            children: [new window.docx.ExternalHyperlink({
+              link: 'https://argorobots.com/downloads/?source=loop-invgen-word',
+              children: [new TextRun({ text: 'Made with argorobots.com', size: 18, color: '999999' })],
+            })],
             alignment: AlignmentType.CENTER,
           })],
         }),

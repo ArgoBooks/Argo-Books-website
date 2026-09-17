@@ -200,7 +200,10 @@ export async function downloadPdf(state) {
 
     pdf.setFontSize(8);
     pdf.setTextColor(140);
-    pdf.text('Made with argorobots.com', pageWidthMm / 2, pageHeightMm - 5, { align: 'center' });
+    // A link rather than plain text, so installs from it show on the referral links page.
+    const footerText = 'Made with argorobots.com';
+    const footerW = pdf.getTextWidth(footerText);
+    pdf.textWithLink(footerText, (pageWidthMm - footerW) / 2, pageHeightMm - 5, { url: 'https://argorobots.com/downloads/?source=loop-invgen-pdf' });
 
     const number = (state.invoiceNumber || '').toString().trim() || 'draft';
     pdf.save(`${FILENAME_PREFIX}-${number}.pdf`);

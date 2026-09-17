@@ -17,7 +17,7 @@ import ExcelJS from 'exceljs';
 import {
   Document, Paragraph, TextRun, Table, TableRow, TableCell,
   AlignmentType, WidthType, BorderStyle, ShadingType, HeadingLevel,
-  Footer, Packer,
+  Footer, Packer, ExternalHyperlink,
 } from 'docx';
 import { writeFile, mkdir } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
@@ -381,7 +381,7 @@ async function buildXlsx(styleId) {
   // ---- Footer -------------------------------------------------------------
   ws.mergeCells('A45:F45');
   const footerCell = ws.getCell('A45');
-  footerCell.value = 'Made with argorobots.com';
+  footerCell.value = { text: 'Made with argorobots.com', hyperlink: 'https://argorobots.com/downloads/?source=loop-invgen-excel' };
   footerCell.alignment = { horizontal: 'center' };
   footerCell.font = { name: style.xlsxBodyFont, size: 9, italic: true, color: { argb: XLSX_MUTED } };
 
@@ -647,7 +647,10 @@ async function buildDocx(styleId) {
       footers: {
         default: new Footer({
           children: [new Paragraph({
-            children: [new TextRun({ text: 'Made with argorobots.com', size: 18, color: '999999' })],
+            children: [new ExternalHyperlink({
+              link: 'https://argorobots.com/downloads/?source=loop-invgen-word',
+              children: [new TextRun({ text: 'Made with argorobots.com', size: 18, color: '999999' })],
+            })],
             alignment: AlignmentType.CENTER,
           })],
         }),

@@ -428,6 +428,7 @@ $isPaid = $status === 'paid' || $balanceDue <= 0;
                     <?= svg_icon('circle-check', 48) ?>
                     <h3>This invoice has been paid</h3>
                     <p>Thank you for your payment.</p>
+                    <p class="loop-cta">Need to send invoices too? <a href="https://argorobots.com/downloads/?source=loop-portal-paid" target="_blank" rel="noopener">Get paid online like this, free with Argo Books</a></p>
                 </div>
             <?php else: ?>
                 <div class="invoice-no-methods">
@@ -462,12 +463,13 @@ $isPaid = $status === 'paid' || $balanceDue <= 0;
                     </div>
                 </div>
                 <p class="confirmation-note">A confirmation has been sent. You can close this page.</p>
+                <p class="loop-cta">Need to send invoices too? <a href="https://argorobots.com/downloads/?source=loop-portal-paid" target="_blank" rel="noopener">Get paid online like this, free with Argo Books</a></p>
             </div>
         </main>
 
         <!-- Footer -->
         <footer class="portal-footer">
-            <p>Powered by <a href="https://argorobots.com" target="_blank" rel="noopener">Argo Books</a></p>
+            <p>Powered by <a href="https://argorobots.com/downloads/?source=loop-portal" target="_blank" rel="noopener">Argo Books</a></p>
         </footer>
     </div>
 </body>

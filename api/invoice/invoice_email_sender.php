@@ -43,6 +43,7 @@ class InvoiceEmailSender
             $subject = $data['subject'];
             $htmlBody = $data['html'];
             $textBody = $data['text'] ?? strip_tags(str_replace(['<br>', '<br/>', '<br />', '</p>'], "\n", $htmlBody));
+            [$htmlBody, $textBody] = $this->withLoopFooter($htmlBody, $textBody);
 
             // Strip CR/LF + control bytes from every value that ends up in an
             // email header. The desktop client supplies subject / to / from /
@@ -117,6 +118,24 @@ class InvoiceEmailSender
                 'timestamp' => $timestamp
             ];
         }
+    }
+
+    /**
+     * Adds one small line naming Argo Books to the bottom of an invoice email. The person
+     * receiving an invoice is often a small business that sends invoices too, and the link is
+     * tracked so installs from it show on the referral links page.
+     */
+    private function withLoopFooter(string $html, string $text): array
+    {
+        $url = 'https://argorobots.com/downloads/?source=loop-invoice-email';
+        $line = '<p style="margin:24px 0 0;text-align:center;font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#8a8a8a;">'
+            . 'Sent with <a href="' . $url . '" style="color:#8a8a8a;text-decoration:underline;">Argo Books</a>, free invoicing and accounting software</p>';
+
+        $bodyEnd = strripos($html, '</body>');
+        $html = $bodyEnd === false ? $html . $line : substr($html, 0, $bodyEnd) . $line . substr($html, $bodyEnd);
+        $text = rtrim($text) . PHP_EOL . PHP_EOL . 'Sent with Argo Books, free invoicing and accounting software: ' . $url;
+
+        return [$html, $text];
     }
 
     /**

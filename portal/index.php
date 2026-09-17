@@ -47,13 +47,13 @@ if (empty($token) || !preg_match('/^[a-fA-F0-9]{48}$/', $token)) {
                 <p style="margin-top: 12px; color: var(--gray-600); font-size: 15px; max-width: 480px; margin-left: auto; margin-right: auto;">
                     To view and pay your invoices, please use the link provided in your invoice email.
                 </p>
-                <a href="https://argorobots.com" style="display: inline-block; margin-top: 24px; color: var(--primary-blue); text-decoration: none; font-weight: 500;">
+                <a href="https://argorobots.com/?source=loop-portal" style="display: inline-block; margin-top: 24px; color: var(--primary-blue); text-decoration: none; font-weight: 500;">
                     &larr; Back to Argo Books
                 </a>
             </div>
         </main>
         <footer class="portal-footer">
-            <p>Secure payments powered by <a href="https://argorobots.com" target="_blank" rel="noopener">Argo Books</a></p>
+            <p>Secure payments powered by <a href="https://argorobots.com/downloads/?source=loop-portal" target="_blank" rel="noopener">Argo Books</a></p>
         </footer>
     </div>
 </body>
@@ -291,7 +291,7 @@ $currencySymbol = argo_currency_display_symbol($currency);
 
         <!-- Footer -->
         <footer class="portal-footer">
-            <p>Powered by <a href="https://argorobots.com" target="_blank" rel="noopener">Argo Books</a></p>
+            <p>Powered by <a href="https://argorobots.com/downloads/?source=loop-portal" target="_blank" rel="noopener">Argo Books</a></p>
         </footer>
     </div>
 
