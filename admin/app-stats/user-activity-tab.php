@@ -26,6 +26,18 @@ require_once __DIR__ . '/../../telemetry_environment.php'; // is_other_environme
 require_once __DIR__ . '/user-activity-events.php';
 require_once __DIR__ . '/telemetry-dedupe.php';       // telemetry_is_duplicate_event()
 
+if (!function_exists('ua_set_language')) {
+    // Newest wins: files are read in name order, not event order. Language comes from
+    // the company profile and from switching it in settings, whichever is later.
+    function ua_set_language(array &$u, $language, $ts): void {
+        if (!is_string($language) || $language === '') return;
+        $ts = $ts === false ? 0 : (int)$ts;
+        if ($u['languageTs'] !== null && $ts < $u['languageTs']) return;
+        $u['language']   = $language;
+        $u['languageTs'] = $ts;
+    }
+}
+
 // Tier and date range come from the page-level control bar, so this tab shows
 // the same slice as the charts. Defaulted here so the partial still renders if
 // it's ever included without them.
@@ -127,6 +139,8 @@ foreach ($ua_files as $name => $path) {
             'country'   => country_name($geo['country'] ?? ''),
             'region'    => $geo['region'] ?? '',
             'timezone'  => $geo['timezone'] ?? '',
+            'language'  => null,
+            'languageTs'=> null, // when 'language' was set, so the newest wins across files
             'first'     => null,
             'last'      => null,
             'sessions'  => 0,
@@ -192,6 +206,12 @@ foreach ($ua_files as $name => $path) {
                 break;
             case 'CompanyProfile':
                 $u['company'] = $ev;
+                ua_set_language($u, $ev['language'] ?? null, $ts);
+                break;
+            case 'FeatureUsage':
+                if (($ev['featureName'] ?? '') === 'LanguageChanged') {
+                    ua_set_language($u, $ev['context'] ?? null, $ts);
+                }
                 break;
         }
 
@@ -488,7 +508,7 @@ if (!function_exists('ua_fmt')) {
             : null;
         // Searchable haystack + filter keys for the client-side filters.
         $ua_haystack = strtolower(trim(
-            $u['authId'] . ' ' . $u['country'] . ' ' . $u['region'] . ' ' .
+            $u['authId'] . ' ' . $u['country'] . ' ' . $u['region'] . ' ' . ($u['language'] ?? '') . ' ' .
             implode(' ', array_keys($u['versions'])) . ' ' .
             implode(' ', array_keys($u['platforms'])) .
             // So "me" / "you" / "founder" all find your own card.
@@ -525,6 +545,7 @@ if (!function_exists('ua_fmt')) {
             <span><b>Country:</b> <?= htmlspecialchars($u['country'] ?: '—') ?></span>
             <span><b>Region:</b> <?= htmlspecialchars($u['region'] ?: '—') ?></span>
             <span><b>Timezone:</b> <?= htmlspecialchars($u['timezone'] ?: '—') ?></span>
+            <span><b>Language:</b> <?= htmlspecialchars($u['language'] ?? '—') ?></span>
             <span><b>Version:</b> <?= htmlspecialchars(implode(', ', array_keys($u['versions'])) ?: '—') ?></span>
         </div>
         <div class="ua-meta">

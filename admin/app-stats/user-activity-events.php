@@ -125,6 +125,7 @@ if (!function_exists('ua_describe_event')) {
                     $ev['businessType'] ?? null,
                     $ev['country'] ?? null,
                     $ev['currency'] ?? null,
+                    $ev['language'] ?? null,
                 ]);
                 $suffix = $bits ? ' — ' . implode(', ', $bits) : '';
                 // The sample company is never reported: the app stopped sending its profile
