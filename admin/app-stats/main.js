@@ -1243,13 +1243,20 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function generateSessionDurationChart(sessionData) {
+    // Active time, not launch-to-quit: the wall clock counts a window left open
+    // overnight as use. Only clean ends from recent builds carry it; older builds
+    // and ends rebuilt after a force-quit send null, which means "not measured",
+    // so those are left out rather than averaged in as zero.
     const sessionEndData = sessionData.filter(
-      (s) => s.action === "SessionEnd" && s.duration > 0
+      (s) =>
+        s.action === "SessionEnd" &&
+        s.activeSeconds !== null &&
+        s.activeSeconds !== undefined
     );
 
     if (sessionEndData.length === 0) {
       document.getElementById("sessionDurationChart").parentElement.innerHTML =
-        '<div class="chart-no-data">No session duration data available</div>';
+        '<div class="chart-no-data">No active time data yet. Only recent app versions record it.</div>';
       return;
     }
 
@@ -1262,7 +1269,7 @@ document.addEventListener("DOMContentLoaded", function () {
           count: 0,
         };
       }
-      dailyStats[date].totalDuration += parseFloat(session.duration);
+      dailyStats[date].totalDuration += parseFloat(session.activeSeconds) || 0;
       dailyStats[date].count++;
     });
 
@@ -1281,7 +1288,7 @@ document.addEventListener("DOMContentLoaded", function () {
         labels: dates,
         datasets: [
           {
-            label: "Average Session Duration (minutes)",
+            label: "Average Active Time (minutes)",
             data: avgDurations,
             backgroundColor: "#3b82f6",
             borderColor: "#2563eb",
@@ -1298,7 +1305,8 @@ document.addEventListener("DOMContentLoaded", function () {
           },
           tooltip: {
             callbacks: {
-              label: (ctx) => ctx.parsed.y + " min",
+              label: (ctx) =>
+                ctx.parsed.y + " min active (" + dailyStats[dates[ctx.dataIndex]].count + " sessions)",
             },
           },
         },
@@ -1307,7 +1315,7 @@ document.addEventListener("DOMContentLoaded", function () {
             beginAtZero: true,
             title: {
               display: true,
-              text: "Duration (minutes)",
+              text: "Active minutes",
             },
           },
           x: {
@@ -1770,8 +1778,6 @@ document.addEventListener("DOMContentLoaded", function () {
         '<div class="chart-no-data">No data</div>';
       document.getElementById("peakHoursChart").parentElement.innerHTML =
         '<div class="chart-no-data">No data</div>';
-      document.getElementById("avgSessionDurationChart").parentElement.innerHTML =
-        '<div class="chart-no-data">No data</div>';
       return;
     }
 
@@ -1973,52 +1979,6 @@ document.addEventListener("DOMContentLoaded", function () {
             beginAtZero: true,
             ticks: { stepSize: 1 },
             title: { display: true, text: "Unique Users" },
-          },
-        },
-        plugins: { legend: { display: false } },
-      },
-    });
-
-    // --- Avg Session Duration bar chart (selected range) ---
-    const sessionDurations = {};
-    const sessionEvents = (rawData.dataPoints.Session || []).filter(
-      // Duration only exists on the end event: processEvent() sets it from
-      // durationSeconds, which is null on SessionStart, so filtering on starts
-      // matched nothing and left every bar at zero.
-      (e) => e.hashedIP && e.action === "SessionEnd" && e.duration > 0
-    );
-    sessionEvents.forEach((e) => {
-      const d = toDateStr(e.timestamp);
-      if (!sessionDurations[d]) sessionDurations[d] = [];
-      sessionDurations[d].push(e.duration);
-    });
-
-    const avgDurationData = rangeDates.map((d) => {
-      const durations = sessionDurations[d];
-      if (!durations || durations.length === 0) return 0;
-      const avg = durations.reduce((a, b) => a + b, 0) / durations.length;
-      return Math.round((avg / 60) * 10) / 10; // convert to minutes, 1 decimal
-    });
-
-    new Chart(document.getElementById("avgSessionDurationChart"), {
-      type: "bar",
-      data: {
-        labels: rangeDates.map((d) => fmtDayLabel(d)),
-        datasets: [
-          {
-            label: "Avg Duration (min)",
-            data: avgDurationData,
-            backgroundColor: "#06b6d4",
-          },
-        ],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          y: {
-            beginAtZero: true,
-            title: { display: true, text: "Minutes" },
           },
         },
         plugins: { legend: { display: false } },

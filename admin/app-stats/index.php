@@ -779,13 +779,6 @@ include __DIR__ . '/../admin_header.php';
                     </div>
                 </div>
 
-                <div class="chart-row">
-                    <div class="chart-container">
-                        <h2>Avg Session Duration (minutes)</h2>
-                        <canvas id="avgSessionDurationChart"></canvas>
-                    </div>
-                </div>
-
                 <h2 class="section-title" style="margin-top: 2rem;">User Details</h2>
                 <div class="error-details-wrapper">
                     <table class="error-details-table" id="activeUsersTable" data-paginate="25" data-paginate-noun="users">
@@ -959,7 +952,7 @@ include __DIR__ . '/../admin_header.php';
 
                 <div class="chart-row">
                     <div class="chart-container">
-                        <h2>Average Session Duration (minutes)</h2>
+                        <h2>Average Active Time per Session (minutes)</h2>
                         <canvas id="sessionDurationChart"></canvas>
                     </div>
                     <div class="chart-container">
