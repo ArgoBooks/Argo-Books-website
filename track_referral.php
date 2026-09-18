@@ -20,6 +20,7 @@ require_once __DIR__ . '/track_referral_event.php';
 // get_auto_referral_sources() lives in referral_sources.php (shared with the
 // marketing-funnel channel classifier).
 require_once __DIR__ . '/referral_sources.php';
+require_once __DIR__ . '/referral_categories.php';
 
 /**
  * Ensure a referral_links row exists for an auto-detected source.
@@ -39,12 +40,13 @@ function ensure_auto_referral_link($source_code, $name)
             return;
         }
         $insert = $pdo->prepare(
-            'INSERT INTO referral_links (source_code, name, description, target_url, is_active)
-             VALUES (?, ?, ?, ?, 1)'
+            'INSERT INTO referral_links (source_code, name, category, description, target_url, is_active)
+             VALUES (?, ?, ?, ?, ?, 1)'
         );
         $insert->execute([
             $source_code,
             $name,
+            referral_default_category($source_code),
             'Auto-detected',
             'https://argorobots.com/'
         ]);

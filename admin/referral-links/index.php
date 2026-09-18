@@ -3,6 +3,7 @@ require_once __DIR__ . '/../admin_session.php';
 require_once __DIR__ . '/../../db_connect.php';
 // Needed for svg_icon() when an AJAX save renders table rows without the header.
 require_once __DIR__ . '/../../resources/icons.php';
+require_once __DIR__ . '/../../referral_categories.php';
 
 // Check if user is logged in
 if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
@@ -58,25 +59,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($action === 'create') {
                 $source_code = trim($_POST['source_code']);
                 $name = trim($_POST['name']);
-                $description = trim($_POST['description']);
+                $category = referral_category_or_other($_POST['category'] ?? null);
                 $target_url = trim($_POST['target_url']);
 
-                $stmt = $pdo->prepare('INSERT INTO referral_links (source_code, name, description, target_url) VALUES (?, ?, ?, ?)');
-                $stmt->execute([$source_code, $name, $description, $target_url]);
+                $stmt = $pdo->prepare('INSERT INTO referral_links (source_code, name, category, target_url) VALUES (?, ?, ?, ?)');
+                $stmt->execute([$source_code, $name, $category, $target_url]);
 
                 $saved_message = 'Referral link created successfully!';
-                $saved_category = referral_category_key($source_code);
+                $saved_category = $category;
             } elseif ($action === 'update') {
                 $id = (int)$_POST['id'];
                 $name = trim($_POST['name']);
-                $description = trim($_POST['description']);
+                $category = referral_category_or_other($_POST['category'] ?? null);
                 $target_url = trim($_POST['target_url']);
 
-                $stmt = $pdo->prepare('UPDATE referral_links SET name = ?, description = ?, target_url = ? WHERE id = ?');
-                $stmt->execute([$name, $description, $target_url, $id]);
+                $stmt = $pdo->prepare('UPDATE referral_links SET name = ?, category = ?, target_url = ? WHERE id = ?');
+                $stmt->execute([$name, $category, $target_url, $id]);
 
                 $saved_message = 'Referral link updated successfully!';
-                $saved_category = referral_category_key(trim($_POST['source_code'] ?? ''));
+                $saved_category = $category;
             } else {
                 $id = (int)$_POST['id'];
 
@@ -146,6 +147,8 @@ function get_visits_by_source($limit = 10)
     $query = "
         SELECT
             rv.source_code,
+            MAX(rl.name) as name,
+            MAX(rl.category) as category,
             COUNT(*) as visit_count,
             SUM(CASE WHEN rv.converted = 1 THEN 1 ELSE 0 END) as conversions,
             COUNT(DISTINCT rv.ip_address) as unique_visitors
@@ -226,45 +229,6 @@ function get_visits_over_time($period = 'day', $limit = 30, $source_code = null)
     }
 
     return $data;
-}
-
-/**
- * Map a source_code to a category from its naming-convention prefix. No DB
- * column needed: auto-registered sources (guide-*, social-*, ai-*, ...) sort
- * themselves into the right bucket, so the list never needs hand-filing.
- */
-function referral_category_key($source_code)
-{
-    $code = strtolower($source_code);
-    if (strncmp($code, 'google-ads-', 11) === 0 || strncmp($code, 'ads-', 4) === 0
-        || strncmp($code, 'paid-', 5) === 0 || strncmp($code, 'bing-ads-', 9) === 0) {
-        return 'paid';
-    }
-    if (strncmp($code, 'guide-', 6) === 0 || $code === 'guides-hub') {
-        return 'website';
-    }
-    if (strncmp($code, 'invgen-', 7) === 0) {
-        return 'invgen';
-    }
-    if (strncmp($code, 'loop-', 5) === 0) {
-        return 'loop';
-    }
-    if (strncmp($code, 'outreach-', 9) === 0) {
-        return 'outreach';
-    }
-    if (strncmp($code, 'social-', 7) === 0) {
-        return 'social';
-    }
-    if (strncmp($code, 'youtube-', 8) === 0) {
-        return 'youtube';
-    }
-    if (strncmp($code, 'ai-', 3) === 0) {
-        return 'ai';
-    }
-    if (strncmp($code, 'dir-', 4) === 0) {
-        return 'directory';
-    }
-    return 'other';
 }
 
 /**
@@ -364,19 +328,8 @@ $referral_links = get_referral_links();
 // Group-by toggle: 'source' (per-link, default) or 'category' (rolled up).
 $group_mode = (($_GET['group'] ?? 'source') === 'category') ? 'category' : 'source';
 
-$category_labels = [
-    'paid'    => 'Paid ads',
-    'website' => 'My website (guides & articles)',
-    'invgen'  => 'Invoice generator',
-    'loop'    => 'Growth loops (documents users send)',
-    'outreach' => 'Outreach',
-    'social'  => 'Social media',
-    'youtube' => 'YouTube',
-    'ai'        => 'AI assistants',
-    'directory' => 'Directories (launch & SaaS sites)',
-    'other'     => 'Other',
-];
-$category_order = ['paid', 'website', 'invgen', 'loop', 'outreach', 'social', 'youtube', 'ai', 'directory', 'other'];
+$category_labels = referral_categories();
+$category_order = array_keys($category_labels);
 
 // Bucket every referral link by category and tally per-category subtotals.
 $grouped_links = [];
@@ -389,7 +342,7 @@ foreach ($category_order as $k) {
     $category_conversions[$k] = 0;
 }
 foreach ($referral_links as $link) {
-    $k = referral_category_key($link['source_code']);
+    $k = referral_category_or_other($link['category'] ?? null);
     $grouped_links[$k][] = $link;
     $category_visits[$k] += (int)$link['total_visits'];
     $category_installs[$k] += (int)$link['installs'];
@@ -423,7 +376,7 @@ $source_visit_counts = [];
 $source_conversion_counts = [];
 
 foreach ($visits_by_source as $item) {
-    $source_labels[] = $item['source_code'];
+    $source_labels[] = referral_display_name($item['category'], $item['name'], $item['source_code']);
     $source_visit_counts[] = (int)$item['visit_count'];
     $source_conversion_counts[] = (int)$item['conversions'];
 }
@@ -598,20 +551,24 @@ include __DIR__ . '/../admin_header.php';
 
             <div class="form-group">
                 <label for="source_code">Source Code *</label>
-                <input type="text" name="source_code" id="source_code" required pattern="[a-zA-Z0-9_-]+" title="Only letters, numbers, hyphens, and underscores allowed">
+                <input type="text" name="source_code" id="source_code" required pattern="[a-zA-Z0-9_\-]+" title="Only letters, numbers, hyphens, and underscores allowed">
                 <small>Used in URL: ?source=CODE (alphanumeric, hyphens, underscores only)</small>
+            </div>
+
+            <div class="form-group">
+                <label for="category">Category *</label>
+                <select name="category" id="category" required>
+                    <option value="">Choose a category</option>
+                    <?php foreach (referral_categories() as $ckey => $clabel): ?>
+                        <option value="<?php echo htmlspecialchars($ckey); ?>"><?php echo htmlspecialchars($clabel); ?></option>
+                    <?php endforeach; ?>
+                </select>
             </div>
 
             <div class="form-group">
                 <label for="name">Display Name *</label>
                 <input type="text" name="name" id="name" required>
-                <small>A friendly name for this referral source</small>
-            </div>
-
-            <div class="form-group">
-                <label for="description">Description</label>
-                <textarea name="description" id="description" rows="3"></textarea>
-                <small>Optional notes about this referral source</small>
+                <small>Shown as "Category - Display Name", e.g. "YouTube - Desktop accounting"</small>
             </div>
 
             <div class="form-group">
@@ -816,7 +773,7 @@ include __DIR__ . '/../admin_header.php';
         document.getElementById('source_code').value = link.source_code;
         document.getElementById('source_code').setAttribute('readonly', 'readonly');
         document.getElementById('name').value = link.name;
-        document.getElementById('description').value = link.description;
+        document.getElementById('category').value = link.category || 'other';
         document.getElementById('target_url').value = link.target_url;
         document.getElementById('modalTitle').textContent = 'Edit Referral Link';
         openModal();

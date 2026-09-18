@@ -498,7 +498,7 @@ if (!function_exists('affiliate_normalize_code')) {
 if (!function_exists('affiliate_code_has_reserved_prefix')) {
     /**
      * True if a source_code starts with a prefix the referral system uses to
-     * auto-categorize traffic (see referral_category_key + track_referral.php).
+     * auto-categorize traffic (see referral_default_category + track_referral.php).
      * Affiliate codes must not masquerade as those, and google-ads-* also trips
      * a gclid gate.
      */

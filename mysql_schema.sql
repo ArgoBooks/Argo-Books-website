@@ -248,6 +248,7 @@ CREATE TABLE IF NOT EXISTS referral_links (
     id INT PRIMARY KEY AUTO_INCREMENT,
     source_code VARCHAR(50) NOT NULL UNIQUE,
     name VARCHAR(255) NOT NULL,
+    category VARCHAR(20) NOT NULL DEFAULT 'other' COMMENT 'A key from referral_categories() in referral_categories.php',
     description TEXT,
     target_url VARCHAR(500) NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,

@@ -290,6 +290,7 @@ $ua_referrals = [];   // device hash => ['link' =>, 'linkCode' =>, 'survey' =>]
 if ($ua_deviceHashes && isset($pdo)) {
     try {
         require_once __DIR__ . '/../../config/survey_options.php';
+        require_once __DIR__ . '/../../referral_categories.php';
         $ua_surveyLabels = [];
         foreach (get_survey_options() ?? [] as $ua_opt) {
             $ua_surveyLabels[$ua_opt['key']] = $ua_opt['label'];
@@ -298,7 +299,7 @@ if ($ua_deviceHashes && isset($pdo)) {
         $ua_ph = implode(',', array_fill(0, count($ua_deviceHashes), '?'));
         $ua_stmt = $pdo->prepare("
             SELECT JSON_UNQUOTE(JSON_EXTRACT(e.event_data, '$.device_hash')) AS device_hash,
-                   e.source_code, l.name AS source_name,
+                   e.source_code, l.name AS source_name, l.category AS source_category,
                    e.source_survey_answer, e.source_survey_other_text
             FROM referral_events e
             LEFT JOIN referral_links l ON l.source_code = e.source_code
@@ -314,7 +315,10 @@ if ($ua_deviceHashes && isset($pdo)) {
             $ua_ref =& $ua_referrals[$ua_row['device_hash']];
             $ua_ref ??= ['link' => null, 'linkCode' => null, 'survey' => null];
             if ($ua_ref['link'] === null && !empty($ua_row['source_code'])) {
-                $ua_ref['link']     = $ua_row['source_name'] ?: $ua_row['source_code'];
+                // A source code with no referral_links row has no category to show.
+                $ua_ref['link']     = $ua_row['source_name'] !== null
+                    ? referral_display_name($ua_row['source_category'], $ua_row['source_name'], $ua_row['source_code'])
+                    : $ua_row['source_code'];
                 $ua_ref['linkCode'] = $ua_row['source_code'];
             }
             if ($ua_ref['survey'] === null && !empty($ua_row['source_survey_answer'])) {

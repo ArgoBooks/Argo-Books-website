@@ -36,10 +36,12 @@ function ensure_affiliate_referral_link(string $source_code, string $username): 
         $pdo->prepare('UPDATE referral_links SET is_active = 1 WHERE source_code = ?')->execute([$source_code]);
         return;
     }
-    $stmt = $pdo->prepare('INSERT INTO referral_links (source_code, name, description, target_url, is_active) VALUES (?, ?, ?, ?, 1)');
+    // The category already says "Affiliates", so the name is just the username.
+    $stmt = $pdo->prepare('INSERT INTO referral_links (source_code, name, category, description, target_url, is_active) VALUES (?, ?, ?, ?, ?, 1)');
     $stmt->execute([
         $source_code,
-        'Affiliate: ' . $username,
+        $username,
+        'affiliate',
         'Affiliate referral link',
         'https://argorobots.com/',
     ]);

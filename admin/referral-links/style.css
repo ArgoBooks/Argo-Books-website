@@ -285,6 +285,7 @@ code {
 
 .form-group input[type="text"],
 .form-group input[type="url"],
+.form-group select,
 .form-group textarea {
     width: 100%;
     padding: 10px 12px;
@@ -300,6 +301,7 @@ code {
 }
 
 .form-group input:focus,
+.form-group select:focus,
 .form-group textarea:focus {
     outline: none;
     border-color: var(--blue-500);

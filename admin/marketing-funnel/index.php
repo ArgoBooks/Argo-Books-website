@@ -3,6 +3,7 @@ require_once __DIR__ . '/../admin_session.php';
 require_once __DIR__ . '/../../db_connect.php';
 require_once __DIR__ . '/../../country_names.php';
 require_once __DIR__ . '/analytics.php';
+require_once __DIR__ . '/../../referral_categories.php';
 
 /**
  * ISO 3166-1 alpha-2 code -> flag emoji (regional indicator symbols).
@@ -292,10 +293,10 @@ function get_active_referral_links(): array
 {
     global $pdo;
     $stmt = $pdo->query(
-        'SELECT id, source_code, name, is_active
+        'SELECT id, source_code, name, category, is_active
            FROM referral_links
           WHERE is_active = 1
-          ORDER BY name ASC'
+          ORDER BY category ASC, name ASC'
     );
     return $stmt->fetchAll();
 }
@@ -462,6 +463,7 @@ function get_funnel_per_source(?string $period_start, string $environment): arra
         SELECT
           rl.source_code,
           rl.name,
+          rl.category,
           COALESCE(ev.landings,    0)      AS landings,
           COALESCE(ev.dl_pages,    0)      AS dl_pages,
           COALESCE(ev.dl_clicks,   0)      AS dl_clicks,
@@ -960,7 +962,7 @@ include __DIR__ . '/../admin_header.php';
         $stage_sources   = $analytics['stage_sources'];
         $name_by_source_code = [];
         foreach ($referral_links as $rl) {
-            $name_by_source_code[$rl['source_code']] = $rl['name'];
+            $name_by_source_code[$rl['source_code']] = referral_display_name($rl['category'], $rl['name'], $rl['source_code']);
         }
         $fmt_stage_rows = function (array $bucket, bool $is_country) use ($name_by_source_code): array {
             $out = [];
@@ -1390,7 +1392,7 @@ include __DIR__ . '/../admin_header.php';
                 // for slicing elsewhere, and an export that silently mirrors a checkbox
                 // is the kind of thing you only notice after trusting a total.
                 $install_export[] = [
-                    (string)($r['name'] ?: $r['source_code']),
+                    referral_display_name($r['category'], $r['name'], $r['source_code']),
                     (string)$r['source_code'],
                     (int)$r['landings'],
                     (int)$r['dl_clicks'],
@@ -1450,7 +1452,7 @@ include __DIR__ . '/../admin_header.php';
                                 ?>
                                 <tr<?php echo $no_users ? ' data-no-installs="1"' : ''; ?>>
                                     <td>
-                                        <?php echo htmlspecialchars($row['name'] ?: $row['source_code']); ?>
+                                        <?php echo htmlspecialchars(referral_display_name($row['category'], $row['name'], $row['source_code'])); ?>
                                         <span class="subtext"><?php echo htmlspecialchars($row['source_code']); ?></span>
                                     </td>
                                     <td><?php echo number_format((int)$row['landings']); ?></td>
@@ -1839,7 +1841,7 @@ include __DIR__ . '/../admin_header.php';
                     <option value="">-- choose a source --</option>
                     <?php foreach ($referral_links as $rl): ?>
                         <option value="<?php echo htmlspecialchars($rl['source_code']); ?>">
-                            <?php echo htmlspecialchars($rl['source_code']) . ' (' . htmlspecialchars($rl['name']) . ')'; ?>
+                            <?php echo htmlspecialchars(referral_display_name($rl['category'], $rl['name'], $rl['source_code']) . ' (' . $rl['source_code'] . ')'); ?>
                         </option>
                     <?php endforeach; ?>
                 </select>
