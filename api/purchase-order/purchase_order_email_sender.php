@@ -45,6 +45,12 @@ class PurchaseOrderEmailSender
             $subject = $data['subject'];
             $textBody = $data['text'];
 
+            // A purchase order goes to another business that keeps its own books, so the body
+            // ends with one line naming Argo Books, tracked like the other document links.
+            $textBody = rtrim($textBody) . PHP_EOL . PHP_EOL
+                . 'Sent with Argo Books, free accounting software for small businesses: '
+                . 'https://argorobots.com/downloads/?source=loop-po-email';
+
             // Strip CR/LF and control bytes from any value that ends up in a
             // header (Subject, To, From, Reply-To, Cc, Bcc) to prevent header
             // injection via the mail() fallback path.
