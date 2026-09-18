@@ -152,10 +152,14 @@ That result is expected, and it clarifies what a listing is actually for. The va
 ### SEO: indexed, but not ranking yet
 Programmatic SEO pages, clean site structure, all pages indexed in Google Search Console, auto-submission to Bing and others. It did produce one of the two paying customers (I assume, given it was unattributed). But 36 clicks in 3 months at average position 64.5 means the pages exist and are indexed without ranking anywhere useful.
 
-### Invoice growth loop
-Built 2026-09-16. Every invoice a user sends carries a tracked link to Argo Books: on the portal after paying, in the portal footer, at the bottom of the invoice email, and in the invoice generator's PDF, Word and Excel downloads. Recipients are often small businesses that invoice too, so some install and send invoices of their own.
+### Growth loops
+Documents users send to other businesses carry a tracked link to Argo Books. The people receiving them are often small businesses too, so some install and send documents of their own.
 
-Sources are `loop-*`, grouped as "Invoice loop" on `/admin/referral-links/`. Check installs per source after 30 days before investing more, or deciding whether Premium removes the branding.
+- **Invoices** (built 2026-09-16): on the portal after paying, in the portal footer, at the bottom of the invoice email, and in the invoice generator's PDF, Word and Excel downloads.
+- **Accountant pack** (built 2026-09-17): the year-end pack emailed from the app, and the readme inside it. Accountants see many small businesses, so one install can recommend it to others.
+- **Purchase orders** (built 2026-09-17): the footer of the PO email and the PO PDF. Suppliers keep books of their own.
+
+Sources are `loop-*`, grouped as "Growth loops (documents users send)" on `/admin/referral-links/`. Check installs per source after 30 days before investing more, or deciding whether Premium removes the branding.
 
 ## Honest read
 
