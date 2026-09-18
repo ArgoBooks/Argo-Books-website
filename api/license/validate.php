@@ -18,11 +18,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Rate limit per IP. Generous, since the app validates on launch, but still
     // caps abusive enumeration.
     $client_ip = get_client_ip();
-    if (is_rate_limited($client_ip, 60, 600, 'license_validate')) {
-        echo json_encode(['success' => false, 'status' => 'rate_limited', 'message' => 'Too many requests. Please try again shortly.']);
+    if (rate_limit_exceeded('license_validate', $client_ip)) {
+        http_response_code(429);
+        header('Retry-After: ' . rate_limit_window('license_validate'));
+        echo json_encode([
+            'success' => false,
+            'status' => 'rate_limited',
+            'message' => 'Too many requests. Please try again in ' . rate_limit_wait_phrase('license_validate') . '.'
+        ]);
         exit;
     }
-    record_rate_limit_attempt($client_ip, 'license_validate');
 
     // Get the request data
     $data = json_decode(file_get_contents('php://input'), true);
@@ -38,6 +43,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ];
     } else {
         $response = validate_license($license_key, $device_id);
+    }
+
+    // The app validates on every launch, so counting successes would mean normal use
+    // filling the budget meant for someone working through a list of keys.
+    if (empty($response['success'])) {
+        rate_limit_record('license_validate', $client_ip);
+    } else {
+        rate_limit_clear('license_validate', $client_ip);
     }
 }
 

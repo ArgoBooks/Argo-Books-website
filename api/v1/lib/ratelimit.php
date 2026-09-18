@@ -2,7 +2,8 @@
 declare(strict_types=1);
 
 /**
- * Fixed-window rate limiting, per key, per minute.
+ * Fixed-window rate limiting, per key. The window is RL_API_V1_PER_MINUTE_WINDOW,
+ * one minute by default.
  *
  * A fixed window rather than a sliding one: it is a single upsert instead of a
  * per-request log, and the failure mode (a caller getting up to 2x the limit
@@ -18,8 +19,10 @@ function api_enforce_rate_limit(int $keyId): void
 {
     global $pdo;
 
-    $windowStart = gmdate('Y-m-d H:i:00');
-    $resetAt = strtotime($windowStart . ' UTC') + 60;
+    $window = rate_limit_window('api_v1_per_minute');
+    $windowStartTs = intdiv(time(), $window) * $window;
+    $windowStart = gmdate('Y-m-d H:i:s', $windowStartTs);
+    $resetAt = $windowStartTs + $window;
 
     try {
         $pdo->prepare(
@@ -50,15 +53,18 @@ function api_enforce_rate_limit(int $keyId): void
             429,
             'rate_limit_error',
             'rate_limit_exceeded',
-            'Too many requests. The limit is ' . API_RATE_LIMIT_PER_MINUTE . ' requests per minute per API key.'
+            'Too many requests. The limit is ' . API_RATE_LIMIT_PER_MINUTE . ' requests per '
+                . api_rate_limit_window_phrase() . ' per API key.'
         );
     }
 }
 
 /**
- * Drop counter rows older than an hour. Called opportunistically on a small
+ * Drop counter rows well past their window. Called opportunistically on a small
  * fraction of requests so the table cannot grow without bound, and without
- * needing a cron entry for something this trivial.
+ * needing a cron entry for something this trivial. The floor of an hour keeps the
+ * cleanup from chasing a shortened window, and the doubling keeps it clear of a
+ * lengthened one, whose current row must survive.
  */
 function api_rate_limit_gc(): void
 {
@@ -67,10 +73,26 @@ function api_rate_limit_gc(): void
     if (random_int(1, 200) !== 1) {
         return;
     }
+    $keepSeconds = max(3600, rate_limit_window('api_v1_per_minute') * 2);
     try {
-        $pdo->prepare('DELETE FROM api_rate_limits WHERE window_started_at < (UTC_TIMESTAMP() - INTERVAL 1 HOUR)')
-            ->execute();
+        $pdo->prepare('DELETE FROM api_rate_limits WHERE window_started_at < (UTC_TIMESTAMP() - INTERVAL ? SECOND)')
+            ->execute([$keepSeconds]);
     } catch (PDOException $e) {
         error_log('api/v1: rate limit GC failed: ' . $e->getMessage());
     }
+}
+
+/**
+ * The window as a phrase for an error message: 'minute' when it is the default.
+ */
+function api_rate_limit_window_phrase(): string
+{
+    $window = rate_limit_window('api_v1_per_minute');
+
+    return match (true) {
+        $window === 60 => 'minute',
+        $window % 3600 === 0 => ($window / 3600) . ' hours',
+        $window % 60 === 0 => ($window / 60) . ' minutes',
+        default => $window . ' seconds',
+    };
 }

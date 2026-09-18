@@ -16,10 +16,9 @@ if (!$device) {
 }
 
 $ip = get_client_ip();
-if (is_rate_limited($ip, 120, 900, 'sync_push')) {
-    send_error_response(429, 'Too many uploads. Try again later.', 'RATE_LIMITED');
+if (rate_limit_hit('sync_push', $ip)) {
+    send_rate_limited_response('sync_push');
 }
-record_rate_limit_attempt($ip, 'sync_push', 900);
 
 $data = json_decode(file_get_contents('php://input'), true);
 if (json_last_error() !== JSON_ERROR_NONE) {

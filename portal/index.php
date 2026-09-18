@@ -64,9 +64,10 @@ if (empty($token) || !preg_match('/^[a-fA-F0-9]{48}$/', $token)) {
 
 // Rate limiting
 $clientIp = get_client_ip();
-if (is_rate_limited($clientIp)) {
+if (rate_limit_exceeded('portal_lookup', $clientIp, 'portal')) {
     http_response_code(429);
-    echo '<!DOCTYPE html><html><head><title>Too Many Requests</title></head><body><h1>Too many requests. Please try again later.</h1></body></html>';
+    header('Retry-After: ' . rate_limit_window('portal_lookup'));
+    include __DIR__ . '/../error-pages/429.html';
     exit;
 }
 

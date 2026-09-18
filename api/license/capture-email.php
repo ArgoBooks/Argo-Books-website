@@ -30,15 +30,16 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 $client_ip = get_client_ip();
-if (is_rate_limited($client_ip, 20, 600, 'license_capture_email')) {
+if (rate_limit_hit('license_capture_email', $client_ip)) {
+    http_response_code(429);
+    header('Retry-After: ' . rate_limit_window('license_capture_email'));
     echo json_encode([
         'success' => false,
         'status' => 'rate_limited',
-        'message' => 'Too many attempts. Please try again in a few minutes.'
+        'message' => 'Too many attempts. Please try again in ' . rate_limit_wait_phrase('license_capture_email') . '.'
     ]);
     exit;
 }
-record_rate_limit_attempt($client_ip, 'license_capture_email');
 
 $data = json_decode(file_get_contents('php://input'), true);
 

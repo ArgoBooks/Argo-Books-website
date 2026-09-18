@@ -11,10 +11,8 @@ declare(strict_types=1);
  */
 
 /** Failed authentications allowed from one address before it is shut out. */
-const API_AUTH_FAILURE_LIMIT = 20;
 
 /** Window for that count, in seconds. */
-const API_AUTH_FAILURE_WINDOW = 900;
 
 /** Pull the presented secret from either accepted header, or '' if absent. */
 function api_presented_secret(): string
@@ -47,8 +45,8 @@ function api_authenticate(): array
     // attacker can spend our database on unlimited key lookups for free.
     // Only failures count, so a busy legitimate integration never trips it.
     $ip = get_client_ip();
-    if (is_rate_limited($ip, API_AUTH_FAILURE_LIMIT, API_AUTH_FAILURE_WINDOW, 'apiauth')) {
-        header('Retry-After: ' . API_AUTH_FAILURE_WINDOW);
+    if (rate_limit_exceeded('api_auth_failure', $ip, 'apiauth')) {
+        header('Retry-After: ' . rate_limit_window('api_auth_failure'));
         api_error(
             429,
             'rate_limit_error',
@@ -70,7 +68,7 @@ function api_authenticate(): array
     // Reject anything not shaped like one of our keys before touching the
     // database, so a scanner spraying random bearer tokens costs us nothing.
     if (!preg_match('/^ab_[0-9a-f]{48}$/', $secret)) {
-        record_rate_limit_attempt($ip, 'apiauth', API_AUTH_FAILURE_WINDOW);
+        rate_limit_record('api_auth_failure', $ip, 'apiauth');
         api_error(401, 'authentication_error', 'invalid_api_key', 'The API key provided is not valid.');
     }
 
@@ -87,7 +85,7 @@ function api_authenticate(): array
     $row = $stmt->fetch();
 
     if (!$row) {
-        record_rate_limit_attempt($ip, 'apiauth', API_AUTH_FAILURE_WINDOW);
+        rate_limit_record('api_auth_failure', $ip, 'apiauth');
         api_error(401, 'authentication_error', 'invalid_api_key', 'The API key provided is not valid.');
     }
     if ($row['revoked_at'] !== null) {

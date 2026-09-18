@@ -26,13 +26,13 @@ if (!$authContext) {
     send_error_response(401, 'Missing device identifier.', 'UNAUTHORIZED');
 }
 
-// Rate limiting: 30 exports per 15 minutes
+// Counted per device and IP together. The device hash used to be passed as the bucket
+// prefix, which gave every device its own namespace, so rotating the header reset the count.
 $ip = get_client_ip();
-$rateLimitId = 'sheets_' . substr($authContext['device_id_hash'], 0, 16);
-if (is_rate_limited($ip, 30, 900, $rateLimitId)) {
-    send_error_response(429, 'Rate limit exceeded. Please try again later.', 'RATE_LIMITED');
+$rateLimitId = substr($authContext['device_id_hash'], 0, 16) . ':' . $ip;
+if (rate_limit_hit('sheets_export', $rateLimitId)) {
+    send_rate_limited_response('sheets_export');
 }
-record_rate_limit_attempt($ip, $rateLimitId);
 
 $tokenRow = get_google_tokens($authContext);
 

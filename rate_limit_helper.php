@@ -25,18 +25,19 @@
  */
 
 require_once __DIR__ . '/env_helper.php';
+require_once __DIR__ . '/config/rate_limits.php';
 
 /**
  * Drop counter rows older than a day. Called opportunistically on a small
  * fraction of requests so the table can't grow without bound, and without
  * needing a cron entry for something this trivial.
  *
- * A day is far longer than the longest window any caller uses (1 hour), and
- * stale rows are harmless in the meantime: every read filters on the window
- * and every write resets an expired bucket. The generous margin means adding
- * a longer window later can't silently break anything.
+ * Two days is twice the longest window any caller uses (24 hours), and stale rows
+ * are harmless in the meantime: every read filters on the window and every write
+ * resets an expired bucket. Keep the margin if a longer window is ever added, or
+ * the cleanup will reset a live bucket early.
  */
-const RATE_LIMIT_GC_INTERVAL = '1 DAY';
+const RATE_LIMIT_GC_INTERVAL = '2 DAY';
 
 /**
  * Resolve the client IP, trusting X-Forwarded-For only when the request
@@ -277,4 +278,81 @@ function clear_rate_limit_attempts(string $ip, string $prefix, int $windowSecond
     } catch (PDOException $e) {
         error_log('rate_limit_helper: clear failed for prefix ' . $prefix . ': ' . $e->getMessage());
     }
+}
+
+/**
+ * The named-limit API. Prefer these four over the functions above: the ceiling and the window
+ * both come from one entry in config/rate_limits.php, so a check and its record cannot disagree
+ * about the window, and changing a limit is an .env edit rather than a hunt through call sites.
+ *
+ * $name is the entry in config/rate_limits.php and doubles as the bucket prefix. Pass $prefix only
+ * where an existing bucket name has to be kept.
+ */
+function rate_limit_exceeded(string $name, string $identifier, ?string $prefix = null): bool
+{
+    $limit = rate_limit($name);
+    return is_rate_limited($identifier, $limit['max'], $limit['window'], $prefix ?? $name);
+}
+
+function rate_limit_record(string $name, string $identifier, ?string $prefix = null): void
+{
+    record_rate_limit_attempt($identifier, $prefix ?? $name, rate_limit_window($name));
+}
+
+/**
+ * Check and count in one atomic step. Returns true when the caller is over the limit.
+ */
+function rate_limit_hit(string $name, string $identifier, ?string $prefix = null): bool
+{
+    $limit = rate_limit($name);
+    return check_and_record_rate_limit($identifier, $limit['max'], $limit['window'], $prefix ?? $name);
+}
+
+function rate_limit_clear(string $name, string $identifier, ?string $prefix = null): void
+{
+    clear_rate_limit_attempts($identifier, $prefix ?? $name, rate_limit_window($name));
+}
+
+/**
+ * How long the caller has to wait, in words, for a message like "try again in 15 minutes".
+ * The window is the honest answer only for a caller who just filled the bucket, which is who
+ * sees this: a bucket that filled earlier expires sooner.
+ */
+function rate_limit_wait_phrase(string $name): string
+{
+    $seconds = rate_limit_window($name);
+
+    return match (true) {
+        $seconds >= 86400 => intdiv($seconds, 86400) === 1 ? 'a day' : intdiv($seconds, 86400) . ' days',
+        $seconds >= 3600 => intdiv($seconds, 3600) === 1 ? 'an hour' : intdiv($seconds, 3600) . ' hours',
+        $seconds >= 60 => intdiv($seconds, 60) === 1 ? 'a minute' : intdiv($seconds, 60) . ' minutes',
+        default => $seconds . ' seconds',
+    };
+}
+
+/**
+ * When this bucket's window opened, as a unix timestamp, or null if it is not currently
+ * counting. Lets a caller show a countdown instead of a flat "try again later".
+ */
+function rate_limit_started_at(string $name, string $identifier, ?string $prefix = null): ?int
+{
+    $pdo = rate_limit_pdo();
+    if ($pdo === null) {
+        return null;
+    }
+
+    try {
+        $stmt = $pdo->prepare(
+            'SELECT UNIX_TIMESTAMP(first_attempt_at) FROM rate_limit_counters
+             WHERE bucket_key = ?
+               AND first_attempt_at >= (UTC_TIMESTAMP() - INTERVAL ? SECOND)'
+        );
+        $stmt->execute([rate_limit_bucket_key($identifier, $prefix ?? $name), rate_limit_window($name)]);
+        $startedAt = $stmt->fetchColumn();
+    } catch (PDOException $e) {
+        error_log('rate_limit_helper: window lookup failed for ' . $name . ': ' . $e->getMessage());
+        return null;
+    }
+
+    return $startedAt === false ? null : (int) $startedAt;
 }

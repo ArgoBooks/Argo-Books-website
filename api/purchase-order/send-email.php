@@ -52,25 +52,44 @@ if (!$license && !$deviceHash) {
 // discourage abuse without penalising real small-business usage. Both windows
 // are 1 hour.
 if ($license) {
+    $rateLimitName = 'purchase_order_email';
     $rateLimitKey = 'po_email_' . ($license['license_key_hash'] ?? get_client_ip());
-    $rateLimitMax = 500;
 } else {
+    $rateLimitName = 'purchase_order_email_device';
     $rateLimitKey = 'po_email_dev_' . $deviceHash;
-    $rateLimitMax = 50;
 }
 
-if (is_rate_limited($rateLimitKey, $rateLimitMax, 3600, 'purchase_order_email')) {
+if (rate_limit_hit($rateLimitName, $rateLimitKey, 'purchase_order_email')) {
     http_response_code(429);
+    header('Retry-After: ' . rate_limit_window($rateLimitName));
     echo json_encode([
         'success' => false,
-        'message' => 'Email rate limit exceeded. Please try again later.',
+        'message' => 'Email rate limit exceeded. Please try again in ' . rate_limit_wait_phrase($rateLimitName) . '.',
         'messageId' => null,
         'errorCode' => 'RATE_LIMITED',
         'timestamp' => date('c')
     ]);
     exit;
 }
-record_rate_limit_attempt($rateLimitKey, 'purchase_order_email', 3600);
+
+// The X-Device-Id of a free request is self-asserted, so rotating the header would get past
+// the limit above. An IP cannot be rotated the same way, and mail sent from this domain by a
+// stranger costs the sending reputation invoice delivery depends on.
+if (!$license) {
+    $clientIp = get_client_ip();
+    if (rate_limit_hit('purchase_order_email_ip', $clientIp)) {
+        http_response_code(429);
+        header('Retry-After: ' . rate_limit_window('purchase_order_email_ip'));
+        echo json_encode([
+            'success' => false,
+            'message' => 'Email rate limit exceeded. Please try again in ' . rate_limit_wait_phrase('purchase_order_email_ip') . '.',
+            'messageId' => null,
+            'errorCode' => 'RATE_LIMITED',
+            'timestamp' => date('c')
+        ]);
+        exit;
+    }
+}
 
 $input = file_get_contents('php://input');
 $data = json_decode($input, true);

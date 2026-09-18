@@ -298,7 +298,7 @@ namespace {
         global $pdo;
 
         // Keyed on the address, not the IP, so the form can't flood one inbox from many IPs
-        if (check_and_record_rate_limit(strtolower(trim($email)), PASSWORD_RESET_EMAIL_MAX, PASSWORD_RESET_EMAIL_WINDOW, PASSWORD_RESET_EMAIL_PREFIX)) {
+        if (rate_limit_hit('community_password_reset_email', strtolower(trim($email)), PASSWORD_RESET_EMAIL_PREFIX)) {
             return false;
         }
 
@@ -363,8 +363,6 @@ namespace {
         return $success;
     }
 
-    const PASSWORD_RESET_EMAIL_MAX = 3;
-    const PASSWORD_RESET_EMAIL_WINDOW = 3600;
     const PASSWORD_RESET_EMAIL_PREFIX = 'community_password_reset_email';
 
     // A six-digit code is only safe with few guesses and a short life

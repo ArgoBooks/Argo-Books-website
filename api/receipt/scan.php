@@ -49,7 +49,6 @@ if (empty($_FILES) && empty($_POST) && (int)($_SERVER['CONTENT_LENGTH'] ?? 0) > 
 $cfg = get_pricing_config();
 $perVisitor = $cfg['web_receipt_scan_daily_limit'];
 $globalCap  = $cfg['web_receipt_scan_global_daily_cap'];
-$ipMax      = max($perVisitor * 20, 60); // lenient per-IP ceiling for shared networks
 
 $ip = get_client_ip();
 // Use REMOTE_ADDR (real TCP peer), not get_client_ip(), for the local-dev
@@ -141,7 +140,8 @@ if (!$isLocal) {
         rs_fail(429, 'rate_limited', "You've used your free scans for today. Get Argo Books free to keep scanning and save them as expenses.",
             ['cta' => '/downloads/?source=receipt-scanner-limit&utm_source=receipt-scanner&utm_medium=tool', 'scan_pass' => $authPass]);
     }
-    if (check_and_record_rate_limit($ip, $ipMax, RS_WINDOW, 'web_receipt_ip')) {
+    if (rate_limit_hit('web_receipt_ip', $ip)) {
+        header('Retry-After: ' . rate_limit_window('web_receipt_ip'));
         rs_fail(429, 'rate_limited', "You've used your free scans for today. Get Argo Books free to keep scanning.",
             ['cta' => '/downloads/?source=receipt-scanner-limit', 'scan_pass' => $authPass]);
     }

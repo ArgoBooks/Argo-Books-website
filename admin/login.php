@@ -45,8 +45,8 @@ if (isset($_SESSION['awaiting_2fa']) && $_SESSION['awaiting_2fa'] === true) {
         // an attacker holding valid credentials could brute-force the 6-digit
         // code at full speed. Atomic check+record so concurrent requests can't
         // slip past the cap.
-        if (check_and_record_rate_limit($clientIp, 5, 900, 'admin_2fa')) {
-            $error = 'Too many verification attempts. Please wait 15 minutes before trying again.';
+        if (rate_limit_hit('admin_2fa', $clientIp)) {
+            $error = 'Too many verification attempts. Please wait ' . rate_limit_wait_phrase('admin_2fa') . ' before trying again.';
         } else {
             $verification_code = $_POST['verification_code'] ?? '';
 
@@ -64,8 +64,8 @@ if (isset($_SESSION['awaiting_2fa']) && $_SESSION['awaiting_2fa'] === true) {
                     unset($_SESSION['temp_username']);
 
                     // Successful login resets the failed-attempt counters.
-                    clear_rate_limit_attempts($clientIp, 'admin_2fa');
-                    clear_rate_limit_attempts($clientIp, 'admin_login');
+                    rate_limit_clear('admin_2fa', $clientIp);
+                    rate_limit_clear('admin_login', $clientIp);
 
                     // If the user ticked "Trust this device for 30 days",
                     // issue a token so subsequent logins from this browser
@@ -97,8 +97,8 @@ if (isset($_SESSION['awaiting_2fa']) && $_SESSION['awaiting_2fa'] === true) {
 elseif ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
     // Atomic check+record so concurrent requests can't slip past the cap
     // (5 per 15 minutes, per IP). Successful logins clear the bucket below.
-    if (check_and_record_rate_limit($clientIp, 5, 900, 'admin_login')) {
-        $error = 'Too many login attempts. Please wait 15 minutes before trying again.';
+    if (rate_limit_hit('admin_login', $clientIp)) {
+        $error = 'Too many login attempts. Please wait ' . rate_limit_wait_phrase('admin_login') . ' before trying again.';
     }
 
     $username = $_POST['username'] ?? '';
@@ -130,8 +130,8 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
                     // (whether by TOTP or trust cookie) resets both buckets so
                     // prior failed 2FA attempts don't bite the user when their
                     // trust cookie eventually expires.
-                    clear_rate_limit_attempts($clientIp, 'admin_2fa');
-                    clear_rate_limit_attempts($clientIp, 'admin_login');
+                    rate_limit_clear('admin_2fa', $clientIp);
+                    rate_limit_clear('admin_login', $clientIp);
 
                     $stmt = $pdo->prepare('UPDATE admin_users SET last_login = CURRENT_TIMESTAMP WHERE username = ?');
                     $stmt->execute([$actual_username]);
@@ -152,7 +152,7 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
                 $_SESSION['admin_logged_in'] = true;
                 $_SESSION['admin_username'] = $actual_username;
 
-                clear_rate_limit_attempts($clientIp, 'admin_login');
+                rate_limit_clear('admin_login', $clientIp);
 
                 $stmt = $pdo->prepare('UPDATE admin_users SET last_login = CURRENT_TIMESTAMP WHERE username = ?');
                 $stmt->execute([$actual_username]);

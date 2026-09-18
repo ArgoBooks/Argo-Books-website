@@ -17,10 +17,9 @@ require_method(['POST']);
 
 // Rate limiting: 10 registration attempts per 15 minutes per IP
 $ip = get_client_ip();
-if (is_rate_limited($ip, 10, 900, 'register')) {
-    send_error_response(429, 'Too many registration attempts. Please try again later.', 'RATE_LIMITED');
+if (rate_limit_hit('portal_register', $ip, 'register')) {
+    send_rate_limited_response('portal_register');
 }
-record_rate_limit_attempt($ip, 'register');
 
 // Parse request body
 $input = file_get_contents('php://input');

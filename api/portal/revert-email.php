@@ -9,13 +9,26 @@ declare(strict_types=1);
  */
 
 require_once __DIR__ . '/../../db_connect.php';
+require_once __DIR__ . '/../../rate_limit_helper.php';
 require_once __DIR__ . '/_audit.php';
 require_once __DIR__ . '/../../email_sender.php';
 
 global $pdo;
 $token = (string)($_GET['token'] ?? $_POST['token'] ?? '');
 
+// Only failed lookups are counted, as on the other public token pages: a real owner
+// following their own link once never comes near it.
+$clientIp = get_client_ip();
+if (rate_limit_exceeded('portal_revert_email', $clientIp)) {
+    http_response_code(429);
+    header('Retry-After: ' . rate_limit_window('portal_revert_email'));
+    echo revert_layout('Too many attempts', '<p>Please try again in '
+        . rate_limit_wait_phrase('portal_revert_email') . '.</p>');
+    exit;
+}
+
 if (!$token || !preg_match('/^[a-f0-9]{64}$/', $token)) {
+    rate_limit_record('portal_revert_email', $clientIp);
     http_response_code(400);
     echo revert_layout('Invalid link', '<p>This revert link is malformed or expired.</p>');
     exit;
@@ -25,6 +38,7 @@ $stmt = $pdo->prepare("SELECT * FROM email_change_requests WHERE cancel_token = 
 $stmt->execute([$token]);
 $row = $stmt->fetch(PDO::FETCH_ASSOC);
 if (!$row) {
+    rate_limit_record('portal_revert_email', $clientIp);
     http_response_code(404);
     echo revert_layout('Not found', '<p>This revert link is no longer valid (it may have been used or the 30-day window passed).</p>');
     exit;

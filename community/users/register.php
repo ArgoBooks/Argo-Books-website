@@ -78,6 +78,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'Passwords do not match';
     } elseif (!$terms_agreed) {
         $error = 'You must agree to the Terms and Privacy Policy';
+    } elseif (rate_limit_hit('community_register', get_client_ip())) {
+        $error = 'Too many sign-ups from this connection. Please try again in '
+            . rate_limit_wait_phrase('community_register') . '.';
     } else {
         // Attempt to register user
         $result = register_user($username, $email, $password, $email_marketing_consent);

@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="description" content="Too many requests from this connection. Please wait a few minutes and try again.">
+  <meta name="author" content="Argo">
+  <link rel="shortcut icon" type="image/x-icon" href="https://argorobots.com/resources/images/argo-logo/argo-icon.ico">
+  <title>Too Many Requests | Argo Books</title>
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      height: 100%;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      background: #f9fafb;
+      color: #0f172a;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      line-height: 1.5;
+    }
+
+    .page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 2.5rem 1.5rem 2rem;
+    }
+
+    .logo-link {
+      display: inline-block;
+    }
+    .logo-link img {
+      height: 36px;
+      width: auto;
+      display: block;
+    }
+
+    .content {
+      width: 100%;
+      max-width: 520px;
+      text-align: center;
+      margin: 2rem 0;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.4rem 0.85rem;
+      background: #dbeafe;
+      color: #1d4ed8;
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      border-radius: 9999px;
+      margin-bottom: 1.5rem;
+    }
+
+    h1 {
+      font-size: clamp(1.875rem, 4.5vw, 2.5rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: #0f172a;
+      margin-bottom: 0.75rem;
+    }
+
+    .description {
+      font-size: 1.0625rem;
+      color: #475569;
+      margin-bottom: 2rem;
+    }
+
+    .primary-action {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      padding: 0.75rem 1.5rem;
+      background: #3b82f6;
+      color: #ffffff;
+      font-size: 0.95rem;
+      font-weight: 600;
+      letter-spacing: 0.005em;
+      text-decoration: none;
+      border-radius: 8px;
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05),
+                  0 1px 3px rgba(59, 130, 246, 0.15);
+      transition: background 0.15s ease, transform 0.05s ease, box-shadow 0.15s ease;
+    }
+    .primary-action:hover {
+      background: #2563eb;
+      box-shadow: 0 2px 4px rgba(15, 23, 42, 0.06),
+                  0 4px 12px rgba(59, 130, 246, 0.22);
+    }
+    .primary-action:active {
+      transform: translateY(1px);
+    }
+    .primary-action:focus-visible {
+      outline: 2px solid #3b82f6;
+      outline-offset: 3px;
+    }
+    .primary-action svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin: 2.5rem auto 1.5rem;
+      max-width: 360px;
+      color: #94a3b8;
+      font-size: 0.8rem;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .divider::before,
+    .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: #e2e8f0;
+    }
+
+    .quick-links {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.25rem 1.25rem;
+      font-size: 0.95rem;
+    }
+    .quick-links a {
+      color: #3b82f6;
+      text-decoration: none;
+      padding: 0.4rem 0.25rem;
+      border-bottom: 1px solid transparent;
+      transition: color 0.15s ease, border-color 0.15s ease;
+    }
+    .quick-links a:hover,
+    .quick-links a:focus-visible {
+      color: #1d4ed8;
+      border-bottom-color: #1d4ed8;
+      outline: none;
+    }
+
+    .footer-note {
+      font-size: 0.825rem;
+      color: #94a3b8;
+    }
+    .footer-note a {
+      color: #475569;
+      text-decoration: none;
+      transition: color 0.15s ease;
+    }
+    .footer-note a:hover {
+      color: #0f172a;
+    }
+
+    @media (max-width: 480px) {
+      .page {
+        padding: 1.75rem 1.25rem 1.5rem;
+      }
+      .description {
+        font-size: 1rem;
+      }
+      .primary-action {
+        width: 100%;
+        max-width: 280px;
+      }
+      .quick-links {
+        gap: 0.25rem 0.9rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <main class="page">
+
+    <a href="/" class="logo-link" aria-label="Argo Books home">
+      <img src="https://argorobots.com/resources/images/argo-logo/argo-logo-black.png" alt="Argo Books">
+    </a>
+
+    <section class="content">
+      <span class="badge">429 Error</span>
+      <h1>Too many requests</h1>
+      <p class="description">
+        We've had a lot of requests from your connection in a short time. Please wait a few
+        minutes and try again.
+      </p>
+
+      <a href="/" class="primary-action">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="19" y1="12" x2="5" y2="12"/>
+          <polyline points="12 19 5 12 12 5"/>
+        </svg>
+        Return to homepage
+      </a>
+
+      <div class="divider">Or try one of these</div>
+
+      <nav class="quick-links" aria-label="Popular pages">
+        <a href="/features/">Features</a>
+        <a href="/pricing/">Pricing</a>
+        <a href="/downloads/">Download</a>
+        <a href="/contact-us/">Contact</a>
+      </nav>
+    </section>
+
+    <p class="footer-note">
+      Need help? <a href="/contact-us/">Get in touch</a>
+    </p>
+
+  </main>
+
+</body>
+
+</html>

@@ -22,12 +22,7 @@ define('MAX_FILE_SIZE_PREMIUM', 10 * 1024 * 1024); // 10MB max for Premium uploa
 define('MAX_FILE_SIZE_FREE', 256 * 1024);          // 256KB max for free-tier uploads
 define('ALLOWED_MIME_TYPES', ['application/json', 'text/plain']);
 define('DATA_DIR', __DIR__ . '/../../admin/data-logs/telemetry');
-define('MAX_UPLOADS_PER_HOUR_PREMIUM', 100);
-define('MAX_UPLOADS_PER_HOUR_FREE', 6);
-// Coarse per-IP cap for free tier so rotating X-Device-Id values from a single IP
-// cannot bypass the per-(device,IP) limit. Set high enough to cover legitimate
-// shared NATs (a household, a small office) but low enough to block abuse.
-define('MAX_UPLOADS_PER_HOUR_FREE_PER_IP', 60);
+
 define('MAX_FILENAME_LENGTH', 255);
 // The founder's own installs (FOUNDER_AUTH_IDS in .env) upload on exactly the same
 // path as everyone else. Their data is kept so it can be reviewed on the app-stats
@@ -39,7 +34,7 @@ define('MAX_FILENAME_LENGTH', 255);
  * succeed past it. Returns true if the bump was accepted, false if the bucket
  * is full.
  */
-function checkBucket(string $bucketKey, int $maxPerHour): bool
+function checkBucket(string $bucketKey, int $max, int $windowSeconds): bool
 {
     $rate_file = sys_get_temp_dir() . '/upload_rate_' . hash('sha256', $bucketKey);
     $handle = fopen($rate_file, 'c+');
@@ -58,11 +53,11 @@ function checkBucket(string $bucketKey, int $maxPerHour): bool
         $uploads = json_decode($content ?: '[]', true) ?: [];
 
         $current_time = time();
-        $uploads = array_values(array_filter($uploads, function ($timestamp) use ($current_time) {
-            return ($current_time - $timestamp) < 3600;
+        $uploads = array_values(array_filter($uploads, function ($timestamp) use ($current_time, $windowSeconds) {
+            return ($current_time - $timestamp) < $windowSeconds;
         }));
 
-        if (count($uploads) >= $maxPerHour) {
+        if (count($uploads) >= $max) {
             return false;
         }
 
@@ -86,14 +81,15 @@ function checkBucket(string $bucketKey, int $maxPerHour): bool
  * (subscription,IP) since license keys are server-verified and can't be rotated
  * the same way.
  */
-function checkRateLimit(string $authIdentifier, int $maxPerHour, ?int $ipMaxPerHour = null): bool
+function checkRateLimit(string $authIdentifier, string $limitName, ?string $ipLimitName = null): bool
 {
     $ip = get_client_ip();
 
-    if (!checkBucket($authIdentifier . '|' . $ip, $maxPerHour)) {
+    if (!checkBucket($authIdentifier . '|' . $ip, rate_limit_max($limitName), rate_limit_window($limitName))) {
         return false;
     }
-    if ($ipMaxPerHour !== null && !checkBucket('ip:' . $ip, $ipMaxPerHour)) {
+    if ($ipLimitName !== null
+        && !checkBucket('ip:' . $ip, rate_limit_max($ipLimitName), rate_limit_window($ipLimitName))) {
         return false;
     }
     return true;
@@ -250,14 +246,15 @@ try {
     $authId = $auth['authId'];
 
     $maxFileSize = $tier === 'premium' ? MAX_FILE_SIZE_PREMIUM : MAX_FILE_SIZE_FREE;
-    $maxPerHour = $tier === 'premium' ? MAX_UPLOADS_PER_HOUR_PREMIUM : MAX_UPLOADS_PER_HOUR_FREE;
+    $limitName = $tier === 'premium' ? 'telemetry_upload_premium' : 'telemetry_upload_free';
     // Free tier also gets a coarse per-IP cap so device-ID rotation can't bypass the per-device limit.
-    $ipMaxPerHour = $tier === 'free' ? MAX_UPLOADS_PER_HOUR_FREE_PER_IP : null;
+    $ipLimitName = $tier === 'free' ? 'telemetry_upload_free_ip' : null;
 
     // Rate limiting check (bucket keyed on tier-specific authId, with optional per-IP secondary)
-    if (!checkRateLimit($authId, $maxPerHour, $ipMaxPerHour)) {
+    if (!checkRateLimit($authId, $limitName, $ipLimitName)) {
         http_response_code(429);
-        echo json_encode(['error' => 'Rate limit exceeded']);
+        header('Retry-After: ' . rate_limit_window($limitName));
+        echo json_encode(['error' => 'Rate limit exceeded', 'errorCode' => 'RATE_LIMITED']);
         logSecurityEvent('rate_limit_exceeded', $tier);
         exit;
     }

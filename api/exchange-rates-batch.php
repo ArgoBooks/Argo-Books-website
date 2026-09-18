@@ -30,15 +30,13 @@ $deviceId = authenticate_device_request();
 if ($deviceId) {
     $rateLimitId = 'dev_' . substr($deviceId, 0, 16);
 } else {
-    $rateLimitId = 'ip_' . substr(hash('sha256', $_SERVER['REMOTE_ADDR'] ?? 'unknown'), 0, 16);
+    $rateLimitId = 'ip_' . substr(hash('sha256', get_client_ip()), 0, 16);
 }
-$rateLimitKey = 'rates_' . $rateLimitId;
 // Generous limit: a normal import is a single batch request, so 1000 per 15 minutes is far beyond
 // any legitimate use while still guarding the OpenExchangeRates quota against a runaway client.
-if (is_rate_limited($rateLimitId, 1000, 900, $rateLimitKey)) {
-    send_error_response(429, 'Rate limit exceeded. Please try again later.', 'RATE_LIMITED');
+if (rate_limit_hit('exchange_rates', $rateLimitId, 'rates')) {
+    send_rate_limited_response('exchange_rates');
 }
-record_rate_limit_attempt($rateLimitId, $rateLimitKey);
 
 // Validate server configuration
 $apiKey = $_ENV['OPENEXCHANGERATES_API_KEY'] ?? '';

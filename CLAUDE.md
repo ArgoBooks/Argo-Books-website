@@ -25,6 +25,7 @@ PHP/MySQL website for [Argo Books](https://argorobots.com/) accounting software.
 | `track_referral.php` / `track_referral_event.php` | Referral attribution + full-funnel event log |
 | `mysql_schema.sql` | Source of truth for the schema. Update when adding tables |
 | `config/pricing.php` | Pricing config (reads `.env`) |
+| `config/rate_limits.php` | Every abuse limit, name => [max, window], overridable with `RL_*` in `.env` |
 | `config/plans.json` | Free vs Premium feature definitions |
 
 ## Database access

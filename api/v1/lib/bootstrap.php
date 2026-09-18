@@ -33,7 +33,7 @@ const API_VERSION = '2026-08-18';
 const API_DOC_BASE = 'https://argorobots.com/documentation/pages/api';
 
 /** Requests per minute, per key. */
-const API_RATE_LIMIT_PER_MINUTE = 120;
+define('API_RATE_LIMIT_PER_MINUTE', rate_limit_max('api_v1_per_minute'));
 
 require_once __DIR__ . '/ids.php';
 require_once __DIR__ . '/net.php';

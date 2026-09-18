@@ -52,6 +52,17 @@ if (!in_array($violation_type, $valid_violations)) {
     exit;
 }
 
+if (rate_limit_hit('community_report', (string) $_SESSION['user_id'])) {
+    http_response_code(429);
+    header('Retry-After: ' . rate_limit_window('community_report'));
+    echo json_encode([
+        'success' => false,
+        'message' => "You've sent a lot of reports recently. Please try again in "
+            . rate_limit_wait_phrase('community_report') . '.'
+    ]);
+    exit;
+}
+
 try {
     // Get reporter info
     $reporter_user_id = $_SESSION['user_id'];

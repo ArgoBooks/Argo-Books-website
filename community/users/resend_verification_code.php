@@ -29,6 +29,11 @@ if ($user['email_verified'] == 1) {
     exit;
 }
 
+if (rate_limit_hit('community_resend_verification', (string) $user_id)) {
+    header('Location: verify_code.php?error=too_many_resends');
+    exit;
+}
+
 $new_verification_code = generate_verification_code();
 
 // Update the database with the new verification code

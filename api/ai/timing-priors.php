@@ -29,15 +29,16 @@ set_portal_headers();
 require_method(['GET']);
 
 // Optional identity, used ONLY to bucket the rate limit (no auth required to read).
-$deviceHash = authenticate_device_request();
-$license = $deviceHash ? null : authenticate_license_request();
+// The licence is checked against the database; the device header is whatever the caller
+// typed, so a licensed request must not end up in the bucket its own header names.
+$license = authenticate_license_request();
+$deviceHash = $license ? null : authenticate_device_request();
 $rateLimitId = $license
     ? substr($license['license_key_hash'], 0, 16)
     : ($deviceHash ? substr($deviceHash, 0, 16) : substr(hash('sha256', get_client_ip()), 0, 16));
-if (is_rate_limited($rateLimitId, 120, 900, 'ai_priors')) {
-    send_error_response(429, 'Rate limit exceeded. Please try again later.', 'RATE_LIMITED');
+if (rate_limit_hit('ai_priors', $rateLimitId)) {
+    send_rate_limited_response('ai_priors');
 }
-record_rate_limit_attempt($rateLimitId, 'ai_priors');
 
 $model = $_ENV['GEMINI_MODEL'] ?? 'gemini-3.1-flash-lite';
 

@@ -38,10 +38,9 @@ if (!$license) {
 
 // --- 2. Rate limit per license: 30 PDF extractions per 15 minutes. ---
 $rateLimitId = substr($license['license_key_hash'], 0, 16);
-if (is_rate_limited($rateLimitId, 30, 900, 'bank_extract')) {
-    send_error_response(429, 'Rate limit exceeded. Please try again later.', 'RATE_LIMITED');
+if (rate_limit_hit('bank_extract', $rateLimitId)) {
+    send_rate_limited_response('bank_extract');
 }
-record_rate_limit_attempt($rateLimitId, 'bank_extract');
 
 // PHP empties $_FILES when the body exceeds post_max_size; surface a clear message.
 if (empty($_FILES) && (int)($_SERVER['CONTENT_LENGTH'] ?? 0) > 1024 * 1024) {

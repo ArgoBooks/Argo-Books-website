@@ -17,11 +17,16 @@ $response = [
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Rate limit per IP to slow brute-force / repeated takeover attempts.
     $client_ip = get_client_ip();
-    if (is_rate_limited($client_ip, 20, 600, 'license_redeem')) {
-        echo json_encode(['success' => false, 'status' => 'rate_limited', 'message' => 'Too many attempts. Please try again in a few minutes.']);
+    if (rate_limit_exceeded('license_redeem', $client_ip)) {
+        http_response_code(429);
+        header('Retry-After: ' . rate_limit_window('license_redeem'));
+        echo json_encode([
+            'success' => false,
+            'status' => 'rate_limited',
+            'message' => 'Too many attempts. Please try again in ' . rate_limit_wait_phrase('license_redeem') . '.'
+        ]);
         exit;
     }
-    record_rate_limit_attempt($client_ip, 'license_redeem');
 
     // Get the request data
     $data = json_decode(file_get_contents('php://input'), true);
@@ -43,6 +48,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ];
     } else {
         $response = redeem_premium_key($premium_key, $device_id);
+    }
+
+    // Only a rejected key spends the budget: redeeming on a second machine is normal.
+    if (empty($response['success'])) {
+        rate_limit_record('license_redeem', $client_ip);
+    } else {
+        rate_limit_clear('license_redeem', $client_ip);
     }
 }
 

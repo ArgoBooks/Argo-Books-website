@@ -23,8 +23,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'Please enter your email address';
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $error = 'Please enter a valid email address';
-    } elseif (check_and_record_rate_limit(get_client_ip(), 5, 900, 'community_password_reset')) {
-        $error = 'Too many reset requests. Please wait a few minutes and try again.';
+    } elseif (rate_limit_hit('community_password_reset', get_client_ip())) {
+        $error = 'Too many reset requests. Please wait ' . rate_limit_wait_phrase('community_password_reset') . ' and try again.';
     } else {
         // Attempt to send password reset link
         $result = request_password_reset($email);

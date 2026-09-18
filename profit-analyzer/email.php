@@ -50,8 +50,10 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
 
 // Light anti-abuse: cap emails per IP.
 $ip = get_client_ip();
-if (check_and_record_rate_limit($ip, 5, 3600, 'profit_analyzer_email')) {
-    pae_fail(429, 'Too many emails from this address right now. Please try again later.');
+if (rate_limit_hit('profit_analyzer_email', $ip)) {
+    header('Retry-After: ' . rate_limit_window('profit_analyzer_email'));
+    pae_fail(429, 'Too many emails from this address right now. Please try again in '
+        . rate_limit_wait_phrase('profit_analyzer_email') . '.');
 }
 
 // Use the client-held analyzed data when present; otherwise the sample fixture

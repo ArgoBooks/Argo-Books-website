@@ -28,15 +28,13 @@ $deviceId = authenticate_device_request();
 if ($deviceId) {
     $rateLimitId = 'dev_' . substr($deviceId, 0, 16);
 } else {
-    $rateLimitId = 'ip_' . substr(hash('sha256', $_SERVER['REMOTE_ADDR'] ?? 'unknown'), 0, 16);
+    $rateLimitId = 'ip_' . substr(hash('sha256', get_client_ip()), 0, 16);
 }
-$rateLimitKey = 'rates_' . $rateLimitId;
 // Shares the 'rates_' bucket with the batch endpoint; kept generous so the per-date fallback never
 // trips it during a legitimate import (the app no longer fans out on a rate-limit).
-if (is_rate_limited($rateLimitId, 1000, 900, $rateLimitKey)) {
-    send_error_response(429, 'Rate limit exceeded. Please try again later.', 'RATE_LIMITED');
+if (rate_limit_hit('exchange_rates', $rateLimitId, 'rates')) {
+    send_rate_limited_response('exchange_rates');
 }
-record_rate_limit_attempt($rateLimitId, $rateLimitKey);
 
 // Validate server configuration
 $apiKey = $_ENV['OPENEXCHANGERATES_API_KEY'] ?? '';

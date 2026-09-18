@@ -48,8 +48,8 @@ final class PasswordResetTest extends DatabaseTestCase
     {
         $email = 'flood_' . bin2hex(random_bytes(4)) . '@example.test';
         $userId = $this->seedCommunityUser(null, $email);
-        for ($i = 0; $i < PASSWORD_RESET_EMAIL_MAX; $i++) {
-            record_rate_limit_attempt($email, PASSWORD_RESET_EMAIL_PREFIX, PASSWORD_RESET_EMAIL_WINDOW);
+        for ($i = 0; $i < rate_limit_max('community_password_reset_email'); $i++) {
+            rate_limit_record('community_password_reset_email', $email, PASSWORD_RESET_EMAIL_PREFIX);
         }
 
         $this->assertFalse(request_password_reset(strtoupper($email)));

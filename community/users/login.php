@@ -41,8 +41,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Atomic IP-based rate limit (5 per 15 minutes). The previous session-keyed
     // counter was trivially bypassed by dropping the session cookie between
     // attempts. Successful logins clear the bucket below.
-    if (check_and_record_rate_limit($clientIp, 5, 900, 'community_login')) {
-        $error = 'Too many login attempts. Please wait 15 minutes before trying again.';
+    if (rate_limit_hit('community_login', $clientIp)) {
+        $error = 'Too many login attempts. Please wait ' . rate_limit_wait_phrase('community_login') . ' before trying again.';
     }
 
     // Get form data
@@ -73,7 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             session_regenerate_id(true);
 
             // Clear rate limit counter on successful login
-            clear_rate_limit_attempts($clientIp, 'community_login');
+            rate_limit_clear('community_login', $clientIp);
 
             // Set session data
             $_SESSION['user_id'] = $user['id'];

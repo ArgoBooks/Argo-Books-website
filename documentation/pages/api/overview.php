@@ -1,6 +1,11 @@
 <?php
 require_once __DIR__ . '/../../../resources/icons.php';
 require_once __DIR__ . '/../../../partials/code-block.php';
+// The published limit has to be the enforced one, so read it from the same config.
+require_once __DIR__ . '/../../../vendor/autoload.php';
+Dotenv\Dotenv::createImmutable(__DIR__ . '/../../../')->safeLoad();
+require_once __DIR__ . '/../../../config/rate_limits.php';
+require_once __DIR__ . '/../../../api/v1/lib/ratelimit.php';
 $pageTitle = 'API Overview';
 $pageDescription = 'The Argo Books API lets your app send sales, expenses, customers, suppliers, products, categories and refunds into a merchant\'s books, with their permission.';
 $currentPage = 'overview';
@@ -209,7 +214,7 @@ CODE],
             <p>Send <code>Argo-Version: 2026-08-18</code> to pin. Omit it to track the current version. An unrecognised value is a <code>400</code> rather than a silent fallback to something you did not ask for.</p>
 
             <h3>Rate limits</h3>
-            <p>120 requests per minute per key. Every response carries <code>X-RateLimit-Limit</code>, <code>X-RateLimit-Remaining</code> and <code>X-RateLimit-Reset</code>. Over the limit returns <code>429</code> with <code>Retry-After</code>.</p>
+            <p><?= rate_limit_max('api_v1_per_minute') ?> requests per <?= api_rate_limit_window_phrase() ?> per key. Every response carries <code>X-RateLimit-Limit</code>, <code>X-RateLimit-Remaining</code> and <code>X-RateLimit-Reset</code>. Over the limit returns <code>429</code> with <code>Retry-After</code>.</p>
 
             <h3>Server-side only</h3>
             <p>The API answers no CORS preflight, and <code>OPTIONS</code> returns <code>405</code>. A secret key must never be in a browser, and refusing cross-origin requests is the cheapest way to stop that happening by accident.</p>

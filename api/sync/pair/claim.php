@@ -14,8 +14,8 @@ set_portal_headers();
 require_method(['POST']);
 
 $ip = get_client_ip();
-if (check_and_record_rate_limit($ip, 10, 900, 'sync_claim')) {
-    send_error_response(429, 'Too many attempts. Try again later.', 'RATE_LIMITED');
+if (rate_limit_hit('sync_claim', $ip)) {
+    send_rate_limited_response('sync_claim');
 }
 
 $data = json_decode(file_get_contents('php://input'), true);

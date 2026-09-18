@@ -25,7 +25,11 @@ $email = $_SESSION['email'] ?? '';
 $premium_subscription = get_user_premium_subscription($user_id);
 
 // Handle form submission
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && $premium_subscription) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && $premium_subscription
+    && rate_limit_hit('community_resend_key', (string) $user_id)) {
+    $error_message = 'Your license key was sent recently. Please check your inbox and spam folder, or try again in '
+        . rate_limit_wait_phrase('community_resend_key') . '.';
+} elseif ($_SERVER['REQUEST_METHOD'] === 'POST' && $premium_subscription) {
     $subscription_id = $premium_subscription['subscription_id'];
     $billing_cycle = $premium_subscription['billing_cycle'];
     $end_date = $premium_subscription['end_date'];

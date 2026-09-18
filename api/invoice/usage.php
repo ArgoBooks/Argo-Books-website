@@ -14,10 +14,9 @@ require_method(['POST']);
 
 // Rate limit: 30 requests per 15 minutes per IP to prevent abuse
 $ip = get_client_ip();
-if (is_rate_limited($ip, 30, 900, 'invoice_usage')) {
-    send_error_response(429, 'Too many requests. Please try again later.', 'RATE_LIMITED');
+if (rate_limit_hit('invoice_usage', $ip)) {
+    send_rate_limited_response('invoice_usage');
 }
-record_rate_limit_attempt($ip, 'invoice_usage');
 
 // Get JSON input
 $rawInput = file_get_contents('php://input');

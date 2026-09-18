@@ -1,46 +1,22 @@
 <?php
 
 require_once __DIR__ . '/../email_sender.php';
+require_once __DIR__ . '/../rate_limit_helper.php';
 
 /**
  * Processes the contact form submission and sends an email
  *
  * @return array Result with 'success', 'message', and 'form_data' keys
  */
-function check_rate_limit()
-{
-    if (session_status() === PHP_SESSION_NONE) {
-        session_start();
-    }
-
-    $max_submissions = 3;
-    $window_seconds = 600; // 10 minutes
-    $now = time();
-
-    if (!isset($_SESSION['contact_submissions'])) {
-        $_SESSION['contact_submissions'] = [];
-    }
-
-    // Remove entries older than the window
-    $_SESSION['contact_submissions'] = array_filter(
-        $_SESSION['contact_submissions'],
-        function ($timestamp) use ($now, $window_seconds) {
-            return ($now - $timestamp) < $window_seconds;
-        }
-    );
-
-    if (count($_SESSION['contact_submissions']) >= $max_submissions) {
-        return false;
-    }
-
-    $_SESSION['contact_submissions'][] = $now;
-    return true;
-}
-
 function process_contact_form()
 {
-    if (!check_rate_limit()) {
-        return ['success' => false, 'message' => 'Too many submissions. Please wait a few minutes before trying again.', 'form_data' => []];
+    // Per IP: the session counter this replaced reset whenever the cookie was dropped.
+    if (rate_limit_hit('contact_form', get_client_ip())) {
+        return [
+            'success' => false,
+            'message' => 'Too many submissions. Please wait ' . rate_limit_wait_phrase('contact_form') . ' before trying again.',
+            'form_data' => []
+        ];
     }
 
     // Get form data

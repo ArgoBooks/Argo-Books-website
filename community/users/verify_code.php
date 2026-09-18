@@ -20,6 +20,9 @@ if (isset($_GET['error'])) {
         $error = 'Failed to send verification email. Please try again.';
     } elseif ($_GET['error'] === 'update_failed') {
         $error = 'Failed to generate new verification code. Please try again.';
+    } elseif ($_GET['error'] === 'too_many_resends') {
+        $error = 'We have sent several codes already. Please check your inbox and spam folder, or try again in '
+            . rate_limit_wait_phrase('community_resend_verification') . '.';
     }
 }
 

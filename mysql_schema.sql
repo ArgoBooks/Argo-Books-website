@@ -183,17 +183,6 @@ CREATE TABLE IF NOT EXISTS post_edit_history (
     FOREIGN KEY (user_id) REFERENCES community_users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Create rate limits table
-CREATE TABLE IF NOT EXISTS rate_limits (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    user_id INT NOT NULL,
-    action_type VARCHAR(20) NOT NULL,
-    count INT DEFAULT 1,
-    period_start DATETIME DEFAULT CURRENT_TIMESTAMP,
-    last_action_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES community_users(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
 -- Create remember tokens table
 CREATE TABLE IF NOT EXISTS remember_tokens (
     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -434,7 +423,6 @@ CREATE INDEX idx_comment_votes_comment_id ON comment_votes(comment_id);
 CREATE INDEX idx_comment_votes_user_id ON comment_votes(user_id);
 CREATE INDEX idx_comment_votes_user_email ON comment_votes(user_email);
 CREATE INDEX idx_post_edit_history_post_id ON post_edit_history(post_id);
-CREATE INDEX idx_rate_limits_user_action ON rate_limits(user_id, action_type);
 CREATE INDEX idx_remember_tokens_token ON remember_tokens(token);
 CREATE INDEX idx_remember_tokens_user_id ON remember_tokens(user_id);
 
@@ -1736,10 +1724,9 @@ CREATE TABLE IF NOT EXISTS api_rate_limits (
 -- exclusive file lock. One row per bucket means requests only contend when
 -- they are the same bucket.
 --
--- Distinct from the two other counter tables, which key off a real record:
--- `rate_limits` is per community user, `api_rate_limits` is per API key. This
--- one keys off whatever the caller has, usually an IP with no account behind
--- it, so there is no foreign key to hang it on.
+-- Distinct from api_rate_limits, which keys off a real API key. This one keys
+-- off whatever the caller has, usually an IP with no account behind it (or a
+-- community user id for posting limits), so there is no foreign key to hang it on.
 --
 -- bucket_key is '<environment>:<prefix>_<sha256(identifier)>'. The identifier
 -- is normally an IP but can be any opaque string (a license key, a browser
@@ -1749,7 +1736,7 @@ CREATE TABLE IF NOT EXISTS api_rate_limits (
 --
 -- Windows are anchored at first_attempt_at rather than clock-aligned, so a
 -- bucket stays tripped until its own window elapses. Rows are deleted
--- opportunistically once they are over a day old; stale rows are harmless
+-- opportunistically once they are over two days old; stale rows are harmless
 -- before then because reads filter on the window.
 CREATE TABLE IF NOT EXISTS rate_limit_counters (
     bucket_key VARCHAR(120) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,

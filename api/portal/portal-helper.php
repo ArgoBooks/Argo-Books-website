@@ -160,25 +160,27 @@ function authenticate_device_request(): ?string
 }
 
 /**
- * Backwards-compatible alias for record_rate_limit_attempt().
+ * Records a failed token lookup against the caller's IP.
  * Used by portal/invoice.php and portal/index.php for failed token lookups.
  */
 function record_failed_lookup(string $ip): void
 {
-    record_rate_limit_attempt($ip, 'portal');
+    rate_limit_record('portal_lookup', $ip, 'portal');
 }
 
 /**
- * Check and enforce rate limiting for payment endpoints.
+ * Check and enforce rate limiting for payment endpoints, per IP (RL_PAYMENT_* in .env).
  * Atomically checks the limit and records the attempt in one statement so
  * concurrent requests can't bypass the limit.
- * Allows 20 payment attempts per IP per 15 minutes.
  * Sends a 429 response and exits if rate limited.
  */
 function enforce_payment_rate_limit(): void
 {
-    if (check_and_record_rate_limit(get_client_ip(), 20, 900, 'payment')) {
-        send_error_response(429, 'Too many payment attempts. Please try again later.', 'RATE_LIMITED');
+    if (rate_limit_hit('payment', get_client_ip())) {
+        send_rate_limited_response(
+            'payment',
+            'Too many payment attempts. Please try again in ' . rate_limit_wait_phrase('payment') . '.'
+        );
     }
 }
 
@@ -538,6 +540,20 @@ function send_error_response(int $statusCode, string $message, string $errorCode
         'errorCode' => $errorCode,
         'timestamp' => date('c')
     ]);
+}
+
+/**
+ * The one 429 for JSON endpoints: the same body shape as every other error, a Retry-After
+ * a client can act on, and a message that says how long the wait is rather than "later".
+ */
+function send_rate_limited_response(string $limitName, ?string $message = null): void
+{
+    header('Retry-After: ' . rate_limit_window($limitName));
+    send_error_response(
+        429,
+        $message ?? ('Too many requests. Please try again in ' . rate_limit_wait_phrase($limitName) . '.'),
+        'RATE_LIMITED'
+    );
 }
 
 /**

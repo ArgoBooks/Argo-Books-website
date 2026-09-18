@@ -13,10 +13,9 @@ set_portal_headers();
 require_method(['POST']);
 
 $ip = get_client_ip();
-if (is_rate_limited($ip, 30, 900, 'sync_redeem')) {
-    send_error_response(429, 'Too many attempts. Try again later.', 'RATE_LIMITED');
+if (rate_limit_hit('sync_redeem', $ip)) {
+    send_rate_limited_response('sync_redeem');
 }
-record_rate_limit_attempt($ip, 'sync_redeem', 900);
 
 $data = json_decode(file_get_contents('php://input'), true);
 if (json_last_error() !== JSON_ERROR_NONE) {

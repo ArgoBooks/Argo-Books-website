@@ -29,13 +29,11 @@ if (!$license) {
     }
 }
 
-// Rate limiting: 60 requests per 15 minutes per identity
+// Rate limiting per identity: see RL_AI_COMPLETIONS_* in .env
 $rateLimitId = $license ? substr($license['license_key_hash'], 0, 16) : substr($deviceIdHash, 0, 16);
-$rateLimitKey = 'ai_license';
-if (is_rate_limited($rateLimitId, 60, 900, $rateLimitKey)) {
-    send_error_response(429, 'Rate limit exceeded. Please try again later.', 'RATE_LIMITED');
+if (rate_limit_hit('ai_completions', $rateLimitId, 'ai_license')) {
+    send_rate_limited_response('ai_completions');
 }
-record_rate_limit_attempt($rateLimitId, $rateLimitKey);
 
 // Per-IP ceiling for the free (device) path only.
 // The X-Device-Id of a free request is self-asserted and not checked against any
@@ -45,17 +43,14 @@ record_rate_limit_attempt($rateLimitId, $rateLimitKey);
 // are sent. Premium (license-validated) requests are exempt because their key is
 // verified in the database and is not the abuse vector. This reuses the same
 // get_client_ip() that the license-validation and payment endpoints already rely
-// on in production. The ceiling is generous (well above the 60/identity limit) so
+// on in production. The ceiling is generous (well above the per-identity limit) so
 // genuine shared networks (offices/households behind one NAT) are not affected;
-// raise AI_IP_MAX if a large shared deployment ever legitimately hits it.
+// raise RL_AI_COMPLETIONS_IP_MAX if a large shared deployment ever legitimately hits it.
 if (!$license) {
     $clientIp = get_client_ip();
-    $ipRateKey = 'ai_ip';
-    $aiIpMax = 200; // requests per 15 minutes per IP
-    if (is_rate_limited($clientIp, $aiIpMax, 900, $ipRateKey)) {
-        send_error_response(429, 'Rate limit exceeded. Please try again later.', 'RATE_LIMITED');
+    if (rate_limit_hit('ai_completions_ip', $clientIp, 'ai_ip')) {
+        send_rate_limited_response('ai_completions_ip');
     }
-    record_rate_limit_attempt($clientIp, $ipRateKey);
 }
 
 // Parse request body

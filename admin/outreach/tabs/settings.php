@@ -153,7 +153,7 @@ function settings_tab_render($pdo)
     if (!in_array($autoSendMode, ['auto', 'review'], true)) $autoSendMode = 'auto';
 
     $dailyLimit = (int) ($_ENV['OUTREACH_DAILY_SEND_LIMIT'] ?? 10);
-    $followupLimit = (int) ($_ENV['OUTREACH_DAILY_FOLLOWUP_LIMIT'] ?? 30);
+    $followupLimit = (int) ($_ENV['OUTREACH_DAILY_FOLLOWUP_LIMIT'] ?? 75);
 
     // Tail today's pipeline log (last 40 lines) for a quick health check.
     $logLines = [];

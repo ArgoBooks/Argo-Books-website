@@ -22,16 +22,12 @@ define('CRASH_DIR', __DIR__ . '/../../admin/data-logs/crashes');
 define('CRASH_MAX_SIZE_PREMIUM', 1 * 1024 * 1024);   // 1MB
 define('CRASH_MAX_SIZE_FREE', 256 * 1024);           // 256KB
 define('CRASH_ALLOWED_MIME', ['application/json', 'text/plain']);
-define('CRASH_MAX_PER_HOUR_PREMIUM', 60);
-define('CRASH_MAX_PER_HOUR_FREE', 20);
-// Coarse per-IP cap for free tier so rotating device IDs from one IP can't spam.
-define('CRASH_MAX_PER_HOUR_FREE_PER_IP', 120);
 
 /**
  * Atomic check-and-bump on a single rate-limit bucket, held under an exclusive
  * lock so two concurrent requests can't both pass a nearly-full bucket.
  */
-function crashCheckBucket(string $bucketKey, int $maxPerHour): bool
+function crashCheckBucket(string $bucketKey, int $max, int $windowSeconds): bool
 {
     $rate_file = sys_get_temp_dir() . '/crash_rate_' . hash('sha256', $bucketKey);
     $handle = fopen($rate_file, 'c+');
@@ -46,8 +42,8 @@ function crashCheckBucket(string $bucketKey, int $maxPerHour): bool
         $content = stream_get_contents($handle);
         $hits = json_decode($content ?: '[]', true) ?: [];
         $now = time();
-        $hits = array_values(array_filter($hits, fn ($t) => ($now - $t) < 3600));
-        if (count($hits) >= $maxPerHour) {
+        $hits = array_values(array_filter($hits, fn ($t) => ($now - $t) < $windowSeconds));
+        if (count($hits) >= $max) {
             return false;
         }
         $hits[] = $now;
@@ -62,13 +58,14 @@ function crashCheckBucket(string $bucketKey, int $maxPerHour): bool
     }
 }
 
-function crashCheckRateLimit(string $authId, int $maxPerHour, ?int $ipMaxPerHour = null): bool
+function crashCheckRateLimit(string $authId, string $limitName, ?string $ipLimitName = null): bool
 {
     $ip = get_client_ip();
-    if (!crashCheckBucket($authId . '|' . $ip, $maxPerHour)) {
+    if (!crashCheckBucket($authId . '|' . $ip, rate_limit_max($limitName), rate_limit_window($limitName))) {
         return false;
     }
-    if ($ipMaxPerHour !== null && !crashCheckBucket('ip:' . $ip, $ipMaxPerHour)) {
+    if ($ipLimitName !== null
+        && !crashCheckBucket('ip:' . $ip, rate_limit_max($ipLimitName), rate_limit_window($ipLimitName))) {
         return false;
     }
     return true;
@@ -164,12 +161,13 @@ try {
     $authId = $auth['authId'];
 
     $maxSize = $tier === 'premium' ? CRASH_MAX_SIZE_PREMIUM : CRASH_MAX_SIZE_FREE;
-    $maxPerHour = $tier === 'premium' ? CRASH_MAX_PER_HOUR_PREMIUM : CRASH_MAX_PER_HOUR_FREE;
-    $ipMaxPerHour = $tier === 'free' ? CRASH_MAX_PER_HOUR_FREE_PER_IP : null;
+    $limitName = $tier === 'premium' ? 'crash_upload_premium' : 'crash_upload_free';
+    $ipLimitName = $tier === 'free' ? 'crash_upload_free_ip' : null;
 
-    if (!crashCheckRateLimit($authId, $maxPerHour, $ipMaxPerHour)) {
+    if (!crashCheckRateLimit($authId, $limitName, $ipLimitName)) {
         http_response_code(429);
-        echo json_encode(['error' => 'Rate limit exceeded']);
+        header('Retry-After: ' . rate_limit_window($limitName));
+        echo json_encode(['error' => 'Rate limit exceeded', 'errorCode' => 'RATE_LIMITED']);
         crashLog('rate_limit_exceeded', $tier);
         exit;
     }

@@ -60,8 +60,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         // Each request resets the code's guess count, so requests are capped too
-        if (check_and_record_rate_limit((string) $user_id, 5, 3600, 'community_email_change')) {
-            $_SESSION['change_email_error'] = 'Too many email change requests. Please try again later.';
+        if (rate_limit_hit('community_email_change', (string) $user_id)) {
+            $_SESSION['change_email_error'] = 'Too many email change requests. Please try again in ' . rate_limit_wait_phrase('community_email_change') . '.';
             header('Location: change_email.php');
             exit;
         }

@@ -23,8 +23,6 @@ require_once __DIR__ . '/lib/analytics.php';
 require_once __DIR__ . '/lib/import/pipeline.php';
 
 const PA_MAX_BYTES = 5 * 1024 * 1024;       // 5 MB
-const PA_DAILY_LIMIT = 5;                    // analyses per IP per day
-const PA_WINDOW = 86400;                     // 24h
 const PA_ALLOWED_EXT = ['xlsx', 'csv'];
 
 function pa_fail(int $code, string $error, string $message, array $extra = []): void
@@ -44,7 +42,8 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
 // testing isn't capped — real visitors are never on 127.0.0.1. ---
 $ip = get_client_ip();
 $paLocal = in_array($ip, ['127.0.0.1', '::1'], true);
-if (!$paLocal && is_rate_limited($ip, PA_DAILY_LIMIT, PA_WINDOW, 'profit_analyzer')) {
+if (!$paLocal && rate_limit_exceeded('profit_analyzer', $ip)) {
+    header('Retry-After: ' . rate_limit_window('profit_analyzer'));
     pa_fail(429, 'rate_limited',
         "You've used your free analyses for today. Want unlimited? Try Argo Books free.",
         ['cta' => '/downloads/?source=profit-analyzer-limit&utm_source=profit-analyzer&utm_medium=tool']);
@@ -86,7 +85,7 @@ try {
 
 // Only successful analyses count toward the daily quota (local dev exempt).
 if (!$paLocal) {
-    record_rate_limit_attempt($ip, 'profit_analyzer', PA_WINDOW);
+    rate_limit_record('profit_analyzer', $ip);
 }
 
 // Return both the chart-ready analytics and the full NormalizedData. Under
