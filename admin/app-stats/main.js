@@ -1768,8 +1768,6 @@ document.addEventListener("DOMContentLoaded", function () {
         '<div class="chart-no-data">No active user data available</div>';
       document.getElementById("platformBreakdownChart").parentElement.innerHTML =
         '<div class="chart-no-data">No data</div>';
-      document.getElementById("newVsReturningChart").parentElement.innerHTML =
-        '<div class="chart-no-data">No data</div>';
       document.getElementById("peakHoursChart").parentElement.innerHTML =
         '<div class="chart-no-data">No data</div>';
       document.getElementById("avgSessionDurationChart").parentElement.innerHTML =
@@ -1831,7 +1829,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const allUsers = Object.keys(userMap);
 
-    // --- Daily Active Users line chart (selected range) ---
+    // Users active per day, drawn below as new and returning stacked, so each bar's
+    // height is that day's active users.
     const dailyUsers = {};
     eventsWithUser.forEach((e) => {
       const dateStr = toDateStr(e.timestamp);
@@ -1842,40 +1841,6 @@ document.addEventListener("DOMContentLoaded", function () {
     // The server already drops events outside the selected range, so these charts
     // cover exactly that range with no trailing-days cutoff of their own.
     const rangeDates = rangeDays(rawData, toLocalDateStr);
-    const dauData = rangeDates.map((d) =>
-      dailyUsers[d] ? dailyUsers[d].size : 0
-    );
-
-    new Chart(document.getElementById("dauChart"), {
-      type: "line",
-      data: {
-        labels: rangeDates.map((d) => fmtDayLabel(d)),
-        datasets: [
-          {
-            label: "Unique Users",
-            data: dauData,
-            borderColor: "#3b82f6",
-            backgroundColor: "rgba(59, 130, 246, 0.1)",
-            fill: true,
-            tension: 0.3,
-            pointRadius: 3,
-          },
-        ],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          y: {
-            beginAtZero: true,
-            ticks: { stepSize: 1 },
-            title: { display: true, text: "Unique Users" },
-          },
-        },
-        plugins: { legend: { display: false } },
-      },
-    });
-
     // --- Platform Breakdown doughnut (selected range) ---
     const platformCounts = {};
     allUsers.forEach((ip) => {
@@ -1905,7 +1870,7 @@ document.addEventListener("DOMContentLoaded", function () {
       },
     });
 
-    // --- New vs Returning Users bar chart (selected range) ---
+    // --- Daily Active Users, split into new and returning (selected range) ---
     // A user is "new" on the day of their first event ever, "returning" on any later
     // day. The server's all-time first sighting is used where it has one: the events
     // here start at the range, so the earliest of them would make everyone active on
@@ -1935,7 +1900,7 @@ document.addEventListener("DOMContentLoaded", function () {
       });
     });
 
-    new Chart(document.getElementById("newVsReturningChart"), {
+    new Chart(document.getElementById("dauChart"), {
       type: "bar",
       data: {
         labels: rangeDates.map((d) => fmtDayLabel(d)),
@@ -1961,10 +1926,18 @@ document.addEventListener("DOMContentLoaded", function () {
             stacked: true,
             beginAtZero: true,
             ticks: { stepSize: 1 },
-            title: { display: true, text: "Users" },
+            title: { display: true, text: "Active Users" },
           },
         },
-        plugins: { legend: { position: "bottom" } },
+        plugins: {
+          legend: { position: "bottom" },
+          tooltip: {
+            mode: "index",
+            callbacks: {
+              footer: (items) => "Total: " + items.reduce((sum, i) => sum + i.raw, 0),
+            },
+          },
+        },
       },
     });
 

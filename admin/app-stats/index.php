@@ -763,7 +763,7 @@ include __DIR__ . '/../admin_header.php';
 
                 <div class="chart-row">
                     <div class="chart-container" style="flex: 1;">
-                        <h2>Daily Active Users</h2>
+                        <h2>Daily Active Users (New vs Returning)</h2>
                         <canvas id="dauChart"></canvas>
                     </div>
                 </div>
@@ -774,16 +774,12 @@ include __DIR__ . '/../admin_header.php';
                         <canvas id="platformBreakdownChart"></canvas>
                     </div>
                     <div class="chart-container">
-                        <h2>New vs Returning Users</h2>
-                        <canvas id="newVsReturningChart"></canvas>
+                        <h2>Peak Usage Hours</h2>
+                        <canvas id="peakHoursChart"></canvas>
                     </div>
                 </div>
 
                 <div class="chart-row">
-                    <div class="chart-container">
-                        <h2>Peak Usage Hours</h2>
-                        <canvas id="peakHoursChart"></canvas>
-                    </div>
                     <div class="chart-container">
                         <h2>Avg Session Duration (minutes)</h2>
                         <canvas id="avgSessionDurationChart"></canvas>
