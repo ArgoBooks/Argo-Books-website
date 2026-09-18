@@ -93,7 +93,6 @@ document.addEventListener("DOMContentLoaded", function () {
     sessionData,
     errorData
   );
-  generateVersionPerformanceChart(exportData, geminiData, exchangeRatesData);
   generateVersionSessionChart(sessionData);
   generateVersionErrorChart(
     errorData,
@@ -648,8 +647,7 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
 
-    const sortedDates = Object.keys(versionByDate).sort();
-    const recentDates = sortedDates.slice(-30);
+    const recentDates = Object.keys(versionByDate).sort();
     const topVersions = Array.from(versions).slice(0, 5);
 
     const datasets = topVersions.map((version, index) => ({
@@ -694,105 +692,6 @@ document.addEventListener("DOMContentLoaded", function () {
           x: {
             ticks: {
               maxRotation: 45,
-            },
-          },
-        }
-      },
-    });
-  }
-
-  function generateVersionPerformanceChart(
-    exportData,
-    geminiData,
-    exchangeRatesData
-  ) {
-    const performanceData = {};
-
-    [...exportData, ...geminiData, ...exchangeRatesData].forEach((item) => {
-      const version = item.appVersion || "Unknown";
-      const duration = parseFloat(item.DurationMS || 0);
-
-      if (version !== "Unknown" && duration > 0) {
-        if (!performanceData[version]) {
-          performanceData[version] = [];
-        }
-        performanceData[version].push(duration);
-      }
-    });
-
-    if (Object.keys(performanceData).length === 0) {
-      document.getElementById(
-        "versionPerformanceChart"
-      ).parentElement.innerHTML =
-        '<div class="chart-no-data">No version performance data available</div>';
-      return;
-    }
-
-    const versionAverages = Object.entries(performanceData)
-      .map(([version, durations]) => ({
-        version,
-        avgDuration:
-          durations.reduce((sum, d) => sum + d, 0) / durations.length,
-        count: durations.length,
-      }))
-      .filter((item) => item.count >= 10)
-      .sort((a, b) => a.avgDuration - b.avgDuration)
-      .slice(0, 8);
-
-    const labels = versionAverages.map((item) => `v${item.version}`);
-    const averages = versionAverages.map((item) =>
-      Math.round(item.avgDuration)
-    );
-    const colors = versionAverages.map(
-      (_, index) =>
-        [
-          "#10b981",
-          "#3b82f6",
-          "#f59e0b",
-          "#ef4444",
-          "#1e40af",
-          "#06b6d4",
-          "#84cc16",
-          "#f97316",
-        ][index]
-    );
-
-    new Chart(document.getElementById("versionPerformanceChart"), {
-      type: "bar",
-      data: {
-        labels: labels,
-        datasets: [
-          {
-            label: "Avg Duration (ms)",
-            data: averages,
-            backgroundColor: colors,
-            borderColor: colors,
-            borderWidth: 1,
-          },
-        ],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            display: false,
-          },
-          tooltip: {
-            callbacks: {
-              label: function (context) {
-                const versionData = versionAverages[context.dataIndex];
-                return `${context.label}: ${context.raw}ms avg (${versionData.count} operations)`;
-              },
-            },
-          },
-        },
-        scales: {
-          y: {
-            beginAtZero: true,
-            title: {
-              display: true,
-              text: "Average Duration (ms)",
             },
           },
         }
@@ -1815,8 +1714,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const cards = {
       kpiTotalUsers: kpis.totalUsers,
       kpiDAU: kpis.dau,
-      kpiWAU: kpis.wau,
       kpiMAU: kpis.mau,
+      kpiNewUsers: kpis.newUsers,
     };
     for (const id of Object.keys(cards)) {
       const el = document.getElementById(id);
@@ -1824,13 +1723,29 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  // End of the selected range as a local Date, for charts that draw a fixed
-  // number of trailing days. Falls back to today if the range is missing.
-  function rangeEndDate(rawData) {
-    const end = rawData.range && rawData.range.end;
-    if (!end) return new Date();
-    const d = new Date(end + "T00:00:00");
-    return isNaN(d.getTime()) ? new Date() : d;
+  // Every day of the selected range as local YYYY-MM-DD strings, so a day with no
+  // activity still gets its zero. The server reports "All Time" as the day of the
+  // oldest event. The end is capped at today so a range ending later has no empty tail.
+  function rangeDays(rawData, toLocalDateStr) {
+    const parse = (s) => {
+      const d = s ? new Date(s + "T00:00:00") : null;
+      return d && !isNaN(d.getTime()) ? d : null;
+    };
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    let end = parse(rawData.range && rawData.range.end) || today;
+    if (end > today) end = today;
+    let start = parse(rawData.range && rawData.range.start);
+    if (!start || start > end) {
+      start = new Date(end);
+      start.setDate(start.getDate() - 29);
+    }
+    const days = [];
+    // setDate rather than adding 24h, which skips or repeats a day across DST.
+    for (const d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+      days.push(toLocalDateStr(d));
+    }
+    return days;
   }
 
   function generateActiveUsersTab(rawData) {
@@ -1861,8 +1776,6 @@ document.addEventListener("DOMContentLoaded", function () {
         '<div class="chart-no-data">No data</div>';
       return;
     }
-
-    const msPerDay = 86400000;
 
     // Local date string YYYY-MM-DD (not UTC). This dashboard is read in the
     // admin's own timezone, so "today" and the day buckets must be local.
@@ -1918,7 +1831,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const allUsers = Object.keys(userMap);
 
-    // --- Daily Active Users line chart (last 30 days) ---
+    // --- Daily Active Users line chart (selected range) ---
     const dailyUsers = {};
     eventsWithUser.forEach((e) => {
       const dateStr = toDateStr(e.timestamp);
@@ -1926,26 +1839,17 @@ document.addEventListener("DOMContentLoaded", function () {
       dailyUsers[dateStr].add(e.hashedIP);
     });
 
-    // Build last 30 days labels, anchored to the end of the selected range rather
-    // than to today, so a past range renders its own 30 days instead of an empty
-    // chart. With the default range the anchor is today and nothing changes.
-    const axisEnd = rangeEndDate(rawData);
-    // Cutoff for the trailing-30-day charts further down (platform breakdown,
-    // peak usage hours), from the same anchor as the axis above.
-    const thirtyDaysAgo = axisEnd.getTime() - 30 * msPerDay;
-    const last30Dates = [];
-    for (let i = 29; i >= 0; i--) {
-      const d = new Date(axisEnd.getTime() - i * msPerDay);
-      last30Dates.push(toLocalDateStr(d));
-    }
-    const dauData = last30Dates.map((d) =>
+    // The server already drops events outside the selected range, so these charts
+    // cover exactly that range with no trailing-days cutoff of their own.
+    const rangeDates = rangeDays(rawData, toLocalDateStr);
+    const dauData = rangeDates.map((d) =>
       dailyUsers[d] ? dailyUsers[d].size : 0
     );
 
     new Chart(document.getElementById("dauChart"), {
       type: "line",
       data: {
-        labels: last30Dates.map((d) => fmtDayLabel(d)),
+        labels: rangeDates.map((d) => fmtDayLabel(d)),
         datasets: [
           {
             label: "Unique Users",
@@ -1972,14 +1876,11 @@ document.addEventListener("DOMContentLoaded", function () {
       },
     });
 
-    // --- Platform Breakdown doughnut (last 30 days) ---
+    // --- Platform Breakdown doughnut (selected range) ---
     const platformCounts = {};
     allUsers.forEach((ip) => {
-      const u = userMap[ip];
-      if (u.lastSeen >= thirtyDaysAgo) {
-        const p = u.platform;
-        platformCounts[p] = (platformCounts[p] || 0) + 1;
-      }
+      const p = userMap[ip].platform;
+      platformCounts[p] = (platformCounts[p] || 0) + 1;
     });
 
     const platformLabels = Object.keys(platformCounts);
@@ -2004,21 +1905,26 @@ document.addEventListener("DOMContentLoaded", function () {
       },
     });
 
-    // --- New vs Returning Users bar chart (last 30 days) ---
-    // A user is "new" on their firstSeen date, "returning" on any subsequent day
+    // --- New vs Returning Users bar chart (selected range) ---
+    // A user is "new" on the day of their first event ever, "returning" on any later
+    // day. The server's all-time first sighting is used where it has one: the events
+    // here start at the range, so the earliest of them would make everyone active on
+    // its first day look new.
+    const serverFirstSeen = rawData.userFirstSeen || {};
     const globalFirstSeen = {};
     allUsers.forEach((ip) => {
-      globalFirstSeen[ip] = toDateStr(new Date(userMap[ip].firstSeen));
+      const first = serverFirstSeen[ip] ? serverFirstSeen[ip] * 1000 : userMap[ip].firstSeen;
+      globalFirstSeen[ip] = toDateStr(new Date(first));
     });
 
     const newPerDay = {};
     const returningPerDay = {};
-    last30Dates.forEach((d) => {
+    rangeDates.forEach((d) => {
       newPerDay[d] = 0;
       returningPerDay[d] = 0;
     });
 
-    last30Dates.forEach((d) => {
+    rangeDates.forEach((d) => {
       if (!dailyUsers[d]) return;
       dailyUsers[d].forEach((ip) => {
         if (globalFirstSeen[ip] === d) {
@@ -2032,16 +1938,16 @@ document.addEventListener("DOMContentLoaded", function () {
     new Chart(document.getElementById("newVsReturningChart"), {
       type: "bar",
       data: {
-        labels: last30Dates.map((d) => fmtDayLabel(d)),
+        labels: rangeDates.map((d) => fmtDayLabel(d)),
         datasets: [
           {
             label: "New",
-            data: last30Dates.map((d) => newPerDay[d]),
+            data: rangeDates.map((d) => newPerDay[d]),
             backgroundColor: "#10b981",
           },
           {
             label: "Returning",
-            data: last30Dates.map((d) => returningPerDay[d]),
+            data: rangeDates.map((d) => returningPerDay[d]),
             backgroundColor: "#3b82f6",
           },
         ],
@@ -2062,14 +1968,11 @@ document.addEventListener("DOMContentLoaded", function () {
       },
     });
 
-    // --- Peak Usage Hours bar chart (last 30 days) ---
+    // --- Peak Usage Hours bar chart (selected range) ---
     const hourlyUsers = {};
     for (let h = 0; h < 24; h++) hourlyUsers[h] = new Set();
     eventsWithUser.forEach((e) => {
-      const ts = new Date(e.timestamp);
-      if (ts.getTime() >= thirtyDaysAgo) {
-        hourlyUsers[ts.getHours()].add(e.hashedIP);
-      }
+      hourlyUsers[new Date(e.timestamp).getHours()].add(e.hashedIP);
     });
 
     const hourLabels = Array.from({ length: 24 }, (_, i) =>
@@ -2103,7 +2006,7 @@ document.addEventListener("DOMContentLoaded", function () {
       },
     });
 
-    // --- Avg Session Duration bar chart (last 30 days) ---
+    // --- Avg Session Duration bar chart (selected range) ---
     const sessionDurations = {};
     const sessionEvents = (rawData.dataPoints.Session || []).filter(
       // Duration only exists on the end event: processEvent() sets it from
@@ -2117,7 +2020,7 @@ document.addEventListener("DOMContentLoaded", function () {
       sessionDurations[d].push(e.duration);
     });
 
-    const avgDurationData = last30Dates.map((d) => {
+    const avgDurationData = rangeDates.map((d) => {
       const durations = sessionDurations[d];
       if (!durations || durations.length === 0) return 0;
       const avg = durations.reduce((a, b) => a + b, 0) / durations.length;
@@ -2127,7 +2030,7 @@ document.addEventListener("DOMContentLoaded", function () {
     new Chart(document.getElementById("avgSessionDurationChart"), {
       type: "bar",
       data: {
-        labels: last30Dates.map((d) => fmtDayLabel(d)),
+        labels: rangeDates.map((d) => fmtDayLabel(d)),
         datasets: [
           {
             label: "Avg Duration (min)",
@@ -2262,7 +2165,7 @@ document.addEventListener("DOMContentLoaded", function () {
         (categoryByDate[date][category] || 0) + 1;
     });
 
-    const dates = Object.keys(categoryByDate).sort().slice(-30);
+    const dates = Object.keys(categoryByDate).sort();
 
     const categoryColors = [
       "#ef4444",
@@ -2434,7 +2337,7 @@ document.addEventListener("DOMContentLoaded", function () {
       dailyCounts[date] = (dailyCounts[date] || 0) + 1;
     });
 
-    const dates = Object.keys(dailyCounts).sort().slice(-30);
+    const dates = Object.keys(dailyCounts).sort();
     const counts = dates.map((date) => dailyCounts[date]);
 
     new Chart(document.getElementById("featureTimelineChart"), {
@@ -2552,7 +2455,7 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     });
 
-    const dates = Object.keys(dailyStats).sort().slice(-30);
+    const dates = Object.keys(dailyStats).sort();
     const successRates = dates.map((date) =>
       dailyStats[date].total > 0
         ? Math.round((dailyStats[date].success / dailyStats[date].total) * 100)
@@ -2693,7 +2596,7 @@ document.addEventListener("DOMContentLoaded", function () {
       dailyCounts[date] = (dailyCounts[date] || 0) + 1;
     });
 
-    const dates = Object.keys(dailyCounts).sort().slice(-30);
+    const dates = Object.keys(dailyCounts).sort();
     const counts = dates.map((date) => dailyCounts[date]);
 
     new Chart(document.getElementById("receiptScanTrendChart"), {
@@ -2877,7 +2780,7 @@ document.addEventListener("DOMContentLoaded", function () {
       dailyCounts[date] = (dailyCounts[date] || 0) + 1;
     });
 
-    const dates = Object.keys(dailyCounts).sort().slice(-30);
+    const dates = Object.keys(dailyCounts).sort();
     const counts = dates.map((date) => dailyCounts[date]);
 
     new Chart(document.getElementById("aiImportTrendChart"), {
@@ -2945,7 +2848,7 @@ document.addEventListener("DOMContentLoaded", function () {
       dailyDurations[date].count++;
     });
 
-    const dates = Object.keys(dailyDurations).sort().slice(-30);
+    const dates = Object.keys(dailyDurations).sort();
     const avgDurations = dates.map((d) =>
       Math.round(dailyDurations[d].total / dailyDurations[d].count)
     );
@@ -3131,7 +3034,7 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     });
 
-    const dates = Object.keys(dailyByType).sort().slice(-30);
+    const dates = Object.keys(dailyByType).sort();
 
     new Chart(document.getElementById("aiImportTypeTimeChart"), {
       type: "bar",

@@ -71,7 +71,10 @@ $aggregatedData = [
         'premium' => ['files' => 0, 'mauUsers' => 0, 'totalUsers' => 0],
     ],
     // Active Users KPI cards. Respect the tier filter, ignore the date range.
-    'fixedKpis' => ['totalUsers' => 0, 'dau' => 0, 'wau' => 0, 'mau' => 0],
+    'fixedKpis' => ['totalUsers' => 0, 'dau' => 0, 'mau' => 0, 'newUsers' => 0],
+    // User key => first event ever, as a timestamp. Lets the New vs Returning chart call
+    // someone new only on their real first day, not on the first day of the chosen range.
+    'userFirstSeen' => [],
     // Selected range, so the charts can build their axes from it instead of "today".
     'range' => ['preset' => $selectedRange, 'start' => null, 'end' => null],
 ];
@@ -261,12 +264,12 @@ if (empty($dataDirs)) {
         ];
         $mauThreshold = time() - 30 * 86400;
 
-        // Last-seen per user for the Active Users KPI cards: tier-filtered like the
-        // rest of the page, but never date-range filtered, so DAU/WAU/MAU keep
-        // measuring against today no matter which range is selected.
-        $kpiLastSeen = [];
+        // First- and last-seen per user for the Active Users KPI cards: tier-filtered like
+        // the rest of the page, but never date-range filtered, so the cards keep measuring
+        // against today no matter which range is selected.
+        $kpiLastSeen  = [];
+        $kpiFirstSeen = [];
         $dauThreshold = strtotime('today');
-        $wauThreshold = time() - 7 * 86400;
 
         // Process all JSON files and aggregate the data
         foreach ($dataFiles as $file) {
@@ -373,6 +376,9 @@ if (empty($dataDirs)) {
                         if (!isset($kpiLastSeen[$kpiKey]) || $eventTs > $kpiLastSeen[$kpiKey]) {
                             $kpiLastSeen[$kpiKey] = $eventTs;
                         }
+                        if (!isset($kpiFirstSeen[$kpiKey]) || $eventTs < $kpiFirstSeen[$kpiKey]) {
+                            $kpiFirstSeen[$kpiKey] = $eventTs;
+                        }
                     }
 
                     // Charts and detail tables respect the selected date range.
@@ -408,9 +414,12 @@ if (empty($dataDirs)) {
         $aggregatedData['fixedKpis']['totalUsers'] = count($kpiLastSeen);
         foreach ($kpiLastSeen as $lastSeen) {
             if ($lastSeen >= $dauThreshold) $aggregatedData['fixedKpis']['dau']++;
-            if ($lastSeen >= $wauThreshold) $aggregatedData['fixedKpis']['wau']++;
             if ($lastSeen >= $mauThreshold) $aggregatedData['fixedKpis']['mau']++;
         }
+        foreach ($kpiFirstSeen as $firstSeen) {
+            if ($firstSeen >= $mauThreshold) $aggregatedData['fixedKpis']['newUsers']++;
+        }
+        $aggregatedData['userFirstSeen'] = $kpiFirstSeen;
 
         // "All Time" had no lower bound during the parse; show the real oldest event.
         if ($selectedRange === 'All Time' && $earliestEventTs !== null) {
@@ -737,65 +746,24 @@ include __DIR__ . '/../admin_header.php';
                         <p class="subtext">Daily Active Users</p>
                     </div>
                     <div class="stat-card">
-                        <h3>Active This Week</h3>
-                        <div class="value" id="kpiWAU">—</div>
-                        <p class="subtext">Last 7 days</p>
-                    </div>
-                    <div class="stat-card">
                         <h3>Active This Month</h3>
                         <div class="value" id="kpiMAU">—</div>
-                        <p class="subtext">Last 30 days</p>
-                    </div>
-                </div>
-
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <h3>Free Users (Monthly Active Users)</h3>
-                        <div class="value"><?= number_format($aggregatedData['tierStats']['free']['mauUsers']) ?></div>
-                        <p class="subtext"><?= number_format($aggregatedData['tierStats']['free']['totalUsers']) ?> total · last 30 days</p>
-                    </div>
-                    <div class="stat-card">
-                        <h3>Premium Users (Monthly Active Users)</h3>
-                        <div class="value"><?= number_format($aggregatedData['tierStats']['premium']['mauUsers']) ?></div>
-                        <p class="subtext"><?= number_format($aggregatedData['tierStats']['premium']['totalUsers']) ?> total · last 30 days</p>
-                    </div>
-                    <?php
-                    // Share of sessions the app didn't shut down normally: force-quit, OS
-                    // restart, power loss. Deliberately NOT counted as crashes (those have
-                    // their own tab and an actual stack trace); most of these are the user
-                    // or the OS, not a fault. The signal worth watching is the rate moving,
-                    // and short unclean sessions in particular, which read as a hang.
-                    //
-                    // Denominator is ends, not starts: only an end can carry the flag, and
-                    // ends from builds predating it have clean === null and so count as
-                    // clean rather than skewing the rate.
-                    $sessionEnds = array_filter(
-                        $aggregatedData['dataPoints']['Session'],
-                        fn($s) => ($s['action'] ?? '') === 'SessionEnd'
-                    );
-                    $uncleanEnds = array_filter($sessionEnds, fn($s) => ($s['clean'] ?? null) === false);
-                    $endCount = count($sessionEnds);
-                    $uncleanCount = count($uncleanEnds);
-                    $uncleanPct = $endCount > 0 ? ($uncleanCount / $endCount) * 100 : 0;
-                    // A hang or a broken install shows up as a kill within a couple of
-                    // minutes of launch, which the overall rate alone would hide.
-                    $uncleanShort = count(array_filter($uncleanEnds, fn($s) => (int)($s['duration'] ?? 0) < 120));
-                    ?>
-                    <div class="stat-card">
-                        <h3>Unclean Exits</h3>
-                        <div class="value"><?= $endCount > 0 ? number_format($uncleanPct, 1) . '%' : '—' ?></div>
                         <p class="subtext">
-                            <?= number_format($uncleanCount) ?> of <?= number_format($endCount) ?> sessions
-                            <?php if ($uncleanShort > 0): ?>
-                                · <?= number_format($uncleanShort) ?> under 2 min
-                            <?php endif; ?>
+                            <?= number_format($aggregatedData['tierStats']['free']['mauUsers']) ?> free
+                            · <?= number_format($aggregatedData['tierStats']['premium']['mauUsers']) ?> premium
+                            · last 30 days
                         </p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>New Users</h3>
+                        <div class="value" id="kpiNewUsers">—</div>
+                        <p class="subtext">First seen in the last 30 days</p>
                     </div>
                 </div>
 
                 <div class="chart-row">
                     <div class="chart-container" style="flex: 1;">
-                        <h2>Daily Active Users (Last 30 Days)</h2>
+                        <h2>Daily Active Users</h2>
                         <canvas id="dauChart"></canvas>
                     </div>
                 </div>
@@ -894,13 +862,6 @@ include __DIR__ . '/../admin_header.php';
                     <div class="chart-container">
                         <h2>Version Usage Over Time</h2>
                         <canvas id="versionTimeChart"></canvas>
-                    </div>
-                </div>
-
-                <div class="chart-row">
-                    <div class="chart-container">
-                        <h2>Version Performance Comparison</h2>
-                        <canvas id="versionPerformanceChart"></canvas>
                     </div>
                 </div>
 
