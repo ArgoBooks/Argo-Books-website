@@ -1,7 +1,6 @@
 <?php
 require_once __DIR__ . '/../admin_session.php';
 require_once __DIR__ . '/../../db_connect.php';
-require_once __DIR__ . '/../../country_names.php';
 // Needed for svg_icon() when an AJAX save renders table rows without the header.
 require_once __DIR__ . '/../../resources/icons.php';
 
@@ -229,33 +228,6 @@ function get_visits_over_time($period = 'day', $limit = 30, $source_code = null)
     return $data;
 }
 
-// Function to get geographic distribution
-function get_referral_countries($limit = 10)
-{
-    global $pdo;
-    $query = "
-        SELECT
-            rv.country_code,
-            COUNT(*) as visit_count,
-            SUM(CASE WHEN rv.converted = 1 THEN 1 ELSE 0 END) as conversions
-        FROM referral_visits rv
-        INNER JOIN referral_links rl ON rl.source_code = rv.source_code
-        WHERE rv.country_code IS NOT NULL AND rv.country_code != ''
-        GROUP BY rv.country_code
-        ORDER BY visit_count DESC
-        LIMIT ?";
-
-    $stmt = $pdo->prepare($query);
-    $stmt->execute([$limit]);
-
-    $data = [];
-    while ($row = $stmt->fetch()) {
-        $data[] = $row;
-    }
-
-    return $data;
-}
-
 /**
  * Map a source_code to a category from its naming-convention prefix. No DB
  * column needed: auto-registered sources (guide-*, social-*, ai-*, ...) sort
@@ -317,7 +289,7 @@ function render_referral_table_bodies()
         ?>
         <tbody class="category-group collapsed" data-cat="<?php echo htmlspecialchars($ckey); ?>">
             <tr class="category-header" role="button" tabindex="0" aria-expanded="false">
-                <td colspan="9">
+                <td colspan="8">
                     <span class="cat-caret" aria-hidden="true">&#9656;</span>
                     <span class="cat-name"><?php echo htmlspecialchars($category_labels[$ckey]); ?></span>
                     <span class="cat-meta"><?php echo count($clinks); ?> source<?php echo count($clinks) === 1 ? '' : 's'; ?>
@@ -332,7 +304,6 @@ function render_referral_table_bodies()
                 <tr class="source-row">
                     <td><code><?php echo htmlspecialchars($link['source_code']); ?></code></td>
                     <td><?php echo htmlspecialchars($link['name']); ?></td>
-                    <td><?php echo htmlspecialchars(substr($link['description'], 0, 50)) . (strlen($link['description']) > 50 ? '...' : ''); ?></td>
                     <td><a href="<?php echo htmlspecialchars($link['target_url']); ?>" target="_blank" class="link-preview"><?php echo htmlspecialchars(substr($link['target_url'], 0, 30)) . (strlen($link['target_url']) > 30 ? '...' : ''); ?></a></td>
                     <td><?php echo number_format($link['total_visits']); ?></td>
                     <td><?php echo number_format($link['installs']); ?></td>
@@ -368,7 +339,6 @@ function referral_download_payload(): string
                 $category_labels[$ckey],
                 $link['source_code'],
                 $link['name'],
-                $link['description'],
                 $link['target_url'],
                 $visits,
                 (int)$link['installs'],
@@ -382,7 +352,7 @@ function referral_download_payload(): string
         'filename' => 'referral-links',
         'datasets' => [[
             'title' => 'Referral links',
-            'columns' => ['Category', 'Source code', 'Name', 'Description', 'Target URL', 'Visits', 'Installs', 'Conversions', 'Rate %'],
+            'columns' => ['Category', 'Source code', 'Name', 'Target URL', 'Visits', 'Installs', 'Conversions', 'Rate %'],
             'rows' => $rows,
         ]],
     ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
@@ -446,7 +416,6 @@ if (!in_array($period, $allowed_periods)) {
 }
 
 $visits_over_time = get_visits_over_time($period, 30);
-$referral_countries = get_referral_countries();
 
 // Prepare data for charts
 $source_labels = [];
@@ -487,17 +456,6 @@ foreach ($visits_over_time as $item) {
     $time_labels[] = isset($item['display_period']) ? $item['display_period'] : $item['period'];
     $time_visit_counts[] = (int)$item['count'];
     $time_conversion_counts[] = (int)$item['conversions'];
-}
-
-// Prepare country data
-$country_labels = [];
-$country_visit_counts = [];
-$country_conversion_counts = [];
-
-foreach ($referral_countries as $country) {
-    $country_labels[] = country_name($country['country_code']);
-    $country_visit_counts[] = (int)$country['visit_count'];
-    $country_conversion_counts[] = (int)$country['conversions'];
 }
 
 // Calculate total stats across ALL sources (every category), so the cards read
@@ -597,17 +555,6 @@ include __DIR__ . '/../admin_header.php';
         </div>
     </div>
 
-    <div class="chart-row">
-        <div class="chart-container">
-            <h2>Top Countries</h2>
-            <canvas id="countriesChart"></canvas>
-        </div>
-        <div class="chart-container">
-            <h2>Conversion Rate by <?php echo $breakdown_noun; ?></h2>
-            <canvas id="conversionRateChart"></canvas>
-        </div>
-    </div>
-
     <!-- Referral Links Management -->
     <div class="table-container">
         <div class="table-header-actions">
@@ -623,7 +570,6 @@ include __DIR__ . '/../admin_header.php';
                     <tr>
                         <th>Source Code</th>
                         <th>Name</th>
-                        <th>Description</th>
                         <th>Target URL</th>
                         <th>Visits</th>
                         <th>Installs</th>
@@ -689,8 +635,6 @@ include __DIR__ . '/../admin_header.php';
     const timeLabels = <?php echo json_encode($time_labels); ?>;
     const timeVisitCounts = <?php echo json_encode($time_visit_counts); ?>;
     const timeConversionCounts = <?php echo json_encode($time_conversion_counts); ?>;
-    const countryLabels = <?php echo json_encode($country_labels); ?>;
-    const countryVisitCounts = <?php echo json_encode($country_visit_counts); ?>;
     const csrfToken = <?php echo json_encode($_SESSION['csrf_token']); ?>;
 
     document.addEventListener('DOMContentLoaded', function() {
@@ -845,90 +789,6 @@ include __DIR__ . '/../admin_header.php';
                 plugins: {
                     legend: {
                         position: 'top'
-                    }
-                }
-            }
-        });
-
-        // Countries Chart
-        const ctxCountries = document.getElementById('countriesChart').getContext('2d');
-        new Chart(ctxCountries, {
-            type: 'bar',
-            data: {
-                labels: countryLabels,
-                datasets: [{
-                    label: 'Visits',
-                    data: countryVisitCounts,
-                    backgroundColor: 'rgba(59, 130, 246, 0.7)',
-                    borderColor: 'rgba(59, 130, 246, 1)',
-                    borderWidth: 1,
-                    borderRadius: 5
-                }]
-            },
-            options: {
-                indexAxis: 'y',
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    x: {
-                        beginAtZero: true,
-                        ticks: {
-                            precision: 0
-                        }
-                    }
-                },
-                plugins: {
-                    legend: {
-                        display: false
-                    }
-                }
-            }
-        });
-
-        // Conversion Rate by Source Chart
-        const conversionRates = sourceLabels.map((label, index) => {
-            const visits = sourceVisitCounts[index];
-            const conversions = sourceConversionCounts[index];
-            return visits > 0 ? (conversions / visits) * 100 : 0;
-        });
-
-        const ctxConversionRate = document.getElementById('conversionRateChart').getContext('2d');
-        new Chart(ctxConversionRate, {
-            type: 'bar',
-            data: {
-                labels: sourceLabels,
-                datasets: [{
-                    label: 'Conversion Rate (%)',
-                    data: conversionRates,
-                    backgroundColor: 'rgba(14, 165, 233, 0.7)',
-                    borderColor: 'rgba(14, 165, 233, 1)',
-                    borderWidth: 1,
-                    borderRadius: 5
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            callback: function(value) {
-                                return value.toFixed(1) + '%';
-                            }
-                        }
-                    }
-                },
-                plugins: {
-                    legend: {
-                        display: false
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return `Conversion Rate: ${context.raw.toFixed(2)}%`;
-                            }
-                        }
                     }
                 }
             }
