@@ -56,6 +56,16 @@ function rate_limits(): array
         'accountant_email' => [_rl_env('RL_ACCOUNTANT_EMAIL_MAX', 30), _rl_env('RL_ACCOUNTANT_EMAIL_WINDOW', 3600)],
         'accountant_email_device' => [_rl_env('RL_ACCOUNTANT_EMAIL_DEVICE_MAX', 10), _rl_env('RL_ACCOUNTANT_EMAIL_DEVICE_WINDOW', 3600)],
         'accountant_email_ip' => [_rl_env('RL_ACCOUNTANT_EMAIL_IP_MAX', 20), _rl_env('RL_ACCOUNTANT_EMAIL_IP_WINDOW', 3600)],
+        'quote_email' => [_rl_env('RL_QUOTE_EMAIL_MAX', 500), _rl_env('RL_QUOTE_EMAIL_WINDOW', 3600)],
+        'quote_email_company' => [_rl_env('RL_QUOTE_EMAIL_COMPANY_MAX', 50), _rl_env('RL_QUOTE_EMAIL_COMPANY_WINDOW', 3600)],
+        'quote_email_ip' => [_rl_env('RL_QUOTE_EMAIL_IP_MAX', 20), _rl_env('RL_QUOTE_EMAIL_IP_WINDOW', 3600)],
+
+        // The hourly IP ceilings above still allow hundreds of messages a day from one
+        // connection, and a spammer runs around the clock, so each free path also has a
+        // daily one.
+        'quote_email_ip_daily' => [_rl_env('RL_QUOTE_EMAIL_IP_DAILY_MAX', 100), _rl_env('RL_QUOTE_EMAIL_IP_DAILY_WINDOW', 86400)],
+        'purchase_order_email_ip_daily' => [_rl_env('RL_PURCHASE_ORDER_EMAIL_IP_DAILY_MAX', 100), _rl_env('RL_PURCHASE_ORDER_EMAIL_IP_DAILY_WINDOW', 86400)],
+        'accountant_email_ip_daily' => [_rl_env('RL_ACCOUNTANT_EMAIL_IP_DAILY_MAX', 100), _rl_env('RL_ACCOUNTANT_EMAIL_IP_DAILY_WINDOW', 86400)],
 
         // AI work we pay for per call. Sized for the largest legitimate import: spreadsheet
         // import sends up to 100 rows per call, ten at a time, and the rescue path can reach
@@ -83,6 +93,7 @@ function rate_limits(): array
         'portal_register' => [_rl_env('RL_PORTAL_REGISTER_MAX', 10), _rl_env('RL_PORTAL_REGISTER_WINDOW', 900)],
         'portal_lookup' => [_rl_env('RL_PORTAL_LOOKUP_MAX', 10), _rl_env('RL_PORTAL_LOOKUP_WINDOW', 900)],
         'portal_revert_email' => [_rl_env('RL_PORTAL_REVERT_EMAIL_MAX', 10), _rl_env('RL_PORTAL_REVERT_EMAIL_WINDOW', 900)],
+        'quote_respond' => [_rl_env('RL_QUOTE_RESPOND_MAX', 20), _rl_env('RL_QUOTE_RESPOND_WINDOW', 900)],
         'payment' => [_rl_env('RL_PAYMENT_MAX', 20), _rl_env('RL_PAYMENT_WINDOW', 900)],
 
         // Mobile sync pairing.

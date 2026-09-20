@@ -577,6 +577,36 @@ CREATE TABLE IF NOT EXISTS portal_invoices (
     FOREIGN KEY (company_id) REFERENCES portal_companies(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Quotes published to the portal by Argo Books businesses.
+-- Deliberately not rows in portal_invoices: a quote is not money owed, and the reminder
+-- cron, the customer portal totals and the admin payment pages all read that table.
+CREATE TABLE IF NOT EXISTS portal_quotes (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    company_id INT NOT NULL,
+    quote_id VARCHAR(100) NOT NULL COMMENT 'Quote ID from Argo Books (e.g., QUO-2026-00001)',
+    quote_token VARCHAR(48) NOT NULL UNIQUE COMMENT '48-char hex token for the customer link',
+    customer_name VARCHAR(255) NOT NULL,
+    customer_email VARCHAR(255) DEFAULT NULL,
+    quote_data JSON COMMENT 'Full quote data (line items, totals, notes, rendered HTML)',
+    status ENUM('sent', 'accepted', 'declined', 'cancelled') NOT NULL DEFAULT 'sent',
+    total_amount DECIMAL(12,2) NOT NULL DEFAULT 0.00,
+    currency VARCHAR(3) NOT NULL DEFAULT 'USD',
+    valid_until DATE DEFAULT NULL,
+    responded_at DATETIME DEFAULT NULL COMMENT 'When the customer accepted or declined',
+    response_note TEXT DEFAULT NULL COMMENT 'Optional reason the customer gave when declining',
+    synced_to_argo TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'Set to 0 on a customer answer, back to 1 once the desktop app confirms it',
+    environment VARCHAR(10) DEFAULT 'sandbox' COMMENT 'sandbox or production',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY unique_company_quote (company_id, quote_id),
+    INDEX idx_quote_token (quote_token),
+    INDEX idx_company_id (company_id),
+    INDEX idx_status (status),
+    INDEX idx_synced_to_argo (synced_to_argo),
+    INDEX idx_environment (environment),
+    FOREIGN KEY (company_id) REFERENCES portal_companies(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- Payments received through the portal
 CREATE TABLE IF NOT EXISTS portal_payments (
     id INT PRIMARY KEY AUTO_INCREMENT,

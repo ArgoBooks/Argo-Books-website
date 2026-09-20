@@ -58,7 +58,9 @@ const TELEMETRY_FEATURE_NAMES = [
     // The dashboard editor.
     'DashboardCustomized',
     'DashboardReset',
-    'AccountantPackSent'
+    'AccountantPackSent',
+    // Quotes
+    'QuoteCreated', 'QuoteSent', 'QuoteConverted'
 ];
 
 // Business descriptors on a CompanyProfile event. Free text, not enum-checked: these

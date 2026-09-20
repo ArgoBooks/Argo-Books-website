@@ -134,4 +134,25 @@ abstract class DatabaseTestCase extends TestCase
             $currency,
         ]);
     }
+
+    /** @return array{id: int, token: string} The new portal_quotes row */
+    protected function seedPortalQuote(
+        int $companyId,
+        string $quoteId,
+        float $totalAmount = 100.00,
+        string $status = 'sent',
+        ?string $validUntil = null,
+        int $syncedToArgo = 1
+    ): array {
+        $token = bin2hex(random_bytes(24));
+        $stmt = $this->pdo->prepare(
+            "INSERT INTO portal_quotes
+             (company_id, quote_id, quote_token, customer_name, customer_email, quote_data,
+              status, total_amount, currency, valid_until, synced_to_argo, environment, created_at)
+             VALUES (?, ?, ?, 'Test Customer', 'customer@example.test', '{}', ?, ?, 'USD', ?, ?, 'sandbox', NOW())"
+        );
+        $stmt->execute([$companyId, $quoteId, $token, $status, $totalAmount, $validUntil, $syncedToArgo]);
+
+        return ['id' => (int) $this->pdo->lastInsertId(), 'token' => $token];
+    }
 }

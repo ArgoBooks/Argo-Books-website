@@ -301,6 +301,9 @@ php_value upload_max_filesize 10M
     # Customer portal: /portal/{48-char-hex-token}
     RewriteRule ^portal/([a-fA-F0-9]{48})/?$ portal/index.php?token=$1 [L,QSA]
 
+    # Quote view: /quote/{48-char-hex-token}
+    RewriteRule ^quote/([a-fA-F0-9]{48})/?$ portal/quote.php?token=$1 [L,QSA]
+
     # Portal API: registration
     RewriteRule ^api/portal/register/?$ api/portal/register.php [L,QSA]
 
@@ -338,6 +341,14 @@ php_value upload_max_filesize 10M
     # Portal API: payment sync (GET = pull, POST = confirm; confirm path also routes here)
     RewriteRule ^api/portal/payments/sync/confirm/?$ api/portal/payments-sync.php [L,QSA]
     RewriteRule ^api/portal/payments/sync/?$ api/portal/payments-sync.php [L,QSA]
+
+    # Portal API: quote answers back to Argo Books (GET = pull, POST = confirm).
+    # Both sync paths must stay above the publishing rule, which is end-anchored.
+    RewriteRule ^api/portal/quotes/sync/confirm/?$ api/portal/quotes-sync.php [L,QSA]
+    RewriteRule ^api/portal/quotes/sync/?$ api/portal/quotes-sync.php [L,QSA]
+
+    # Portal API: quote publishing
+    RewriteRule ^api/portal/quotes/?$ api/portal/quotes.php [L,QSA]
 
     # Provider OAuth callback: /api/portal/connect/callback/{provider}
     RewriteRule ^api/portal/connect/callback/(stripe|paypal|square)/?$ api/portal/connect-callback.php?provider=$1 [L,QSA]

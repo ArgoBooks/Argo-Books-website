@@ -772,6 +772,56 @@ body {
 }
 
 /* A quiet pointer to Argo Books for someone who has just paid an invoice. */
+/* Quote answer form */
+.quote-response-form textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--border-color, #d1d5db);
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 0.95rem;
+    color: var(--text-primary, #111827);
+    background: var(--bg-primary, #ffffff);
+    resize: vertical;
+}
+
+.quote-note-label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+    color: var(--text-secondary, #6b7280);
+}
+
+.quote-response-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 16px;
+}
+
+.btn-decline {
+    padding: 14px 28px;
+    border: 1px solid var(--border-color, #d1d5db);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-secondary, #6b7280);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.btn-decline:hover {
+    background: var(--bg-secondary, #f3f4f6);
+    color: var(--text-primary, #111827);
+}
+
+.quote-response-error {
+    margin-bottom: 12px;
+    color: var(--error-color, #dc2626);
+    font-size: 0.95rem;
+}
+
 .loop-cta {
     margin-top: 20px;
     font-size: 13px;
