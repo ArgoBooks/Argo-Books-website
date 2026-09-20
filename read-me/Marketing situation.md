@@ -141,6 +141,8 @@ About CA\$300 spent, 0 attributable customers. Details in [Google Ads economics.
 ### LinkedIn
 16 connections, 53 profile views, 943 post impressions (879 of those from the latest post), 4 posts. Messaged startup/business/accounting influencers about the affiliate program. Nothing has come of it, at least that we can measure.
 
+The WinForms to Avalonia article post (published 2026-09-15, Avalonia UI tagged in the first sentence) reached 1901 impressions, 34 reactions, 1 comment and 4 reposts in three days, twice the amount as the other 2 posts. One repost was from Jumar Macato, a software engineer at Avalonia UI.
+
 ### Directory listings: done, no measurable traffic
 Already listed on G2, Capterra, Product Hunt, and roughly 30 cheap Product Hunt copycats. None of it brought traffic. G2 and the other main listings were updated in September 2026 to include macOS.
 
