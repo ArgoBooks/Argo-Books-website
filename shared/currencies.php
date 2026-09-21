@@ -6,8 +6,6 @@
 // name) and ArgoBooks/Data/Currencies.cs (which of them appear in a picker,
 // and the "Common" group pinned to the top).
 //
-// Before this file the list was copy-pasted into three places on the website
-// and two in the desktop app, and INR had already drifted out of two of them.
 // Anything on the website that offers a currency choice reads from here.
 //
 // 'locale' is the Intl.NumberFormat fallback locale for that currency, so

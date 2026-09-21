@@ -264,7 +264,7 @@ if ($ua_subIds && isset($pdo)) {
         }
     } catch (PDOException $e) {
         // Neither the key nor the badge is worth failing the page over. Without them
-        // these users render as plain premium, which is what happened before this existed.
+        // these users render as plain premium.
         error_log('user-activity subscription lookup failed: ' . $e->getMessage());
     }
 }
