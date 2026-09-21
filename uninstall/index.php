@@ -13,8 +13,11 @@
 require_once __DIR__ . '/../db_connect.php';
 require_once __DIR__ . '/../rate_limit_helper.php';
 
+// Trimmed: the uninstaller's URL field keeps a trailing line break, which would otherwise
+// arrive as part of the platform and match nothing.
 $version = isset($_GET['v']) ? substr(preg_replace('/[^0-9A-Za-z.\-]/', '', $_GET['v']), 0, 20) : '';
-$platform = isset($_GET['p']) && in_array($_GET['p'], ['windows', 'mac'], true) ? $_GET['p'] : '';
+$platform = strtolower(trim((string) ($_GET['p'] ?? '')));
+$platform = in_array($platform, ['windows', 'mac'], true) ? $platform : '';
 
 // The reasons someone actually leaves over, in the order they are worth knowing about. The value
 // is stored; the label is what gets read.
