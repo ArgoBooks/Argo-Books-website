@@ -1,6 +1,8 @@
 <?php
 require_once __DIR__ . '/../resources/icons.php';
 require_once __DIR__ . '/../partials/fonts.php';
+// Counted rather than typed: this card said 28 while the list held 29.
+require_once __DIR__ . '/../shared/currencies.php';
 $pageTitle = 'Documentation & User Guide';
 $pageDescription = 'Complete Argo Books documentation and user guide. Learn installation, expense and revenue tracking, invoicing, payroll, analytics, imports and exports, and security settings.';
 $currentPage = 'index';
@@ -449,7 +451,7 @@ $isDocsLanding = true;
                         <?= svg_icon('dollar', 20) ?>
                     </div>
                     <h3>Supported Currencies</h3>
-                    <p>28 currencies available</p>
+                    <p><?= count(argo_currencies_all()) ?> currencies available</p>
                 </a>
                 <a href="pages/reference/supported-languages.php" class="doc-card">
                     <div class="card-icon">

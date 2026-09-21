@@ -2,6 +2,8 @@
 // invoice-template/data/modern-pdf.php
 // /invoice-template/modern-pdf/
 
+require_once __DIR__ . '/../../shared/currencies.php';
+
 return [
   'slug' => 'modern-pdf',
   'kind' => 'style-format',
@@ -20,7 +22,7 @@ return [
 
   'faqs' => [
     ['q' => 'Can I use the Modern template for a freelance invoice?', 'a' => 'Yes. The Modern style works for any business, freelance or otherwise. Fill in your name in the From block, set your terms, and download.'],
-    ['q' => 'How do I change the currency on the Modern PDF template?', 'a' => 'Open the generator and pick a currency from the toolbar. The generator covers 27 currencies and the change applies to every total on the invoice.'],
+    ['q' => 'How do I change the currency on the Modern PDF template?', 'a' => 'Open the generator and pick a currency from the toolbar. The generator covers ' . count(argo_currencies_all()) . ' currencies and the change applies to every total on the invoice.'],
     ['q' => 'Will my logo fit in the Modern header?', 'a' => 'Yes. The generator resizes large logos automatically to keep the saved draft under the local-storage quota. PNG and JPG both work.'],
   ],
 
