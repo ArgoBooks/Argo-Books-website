@@ -94,6 +94,10 @@ function rate_limits(): array
         'portal_lookup' => [_rl_env('RL_PORTAL_LOOKUP_MAX', 10), _rl_env('RL_PORTAL_LOOKUP_WINDOW', 900)],
         'portal_revert_email' => [_rl_env('RL_PORTAL_REVERT_EMAIL_MAX', 10), _rl_env('RL_PORTAL_REVERT_EMAIL_WINDOW', 900)],
         'quote_respond' => [_rl_env('RL_QUOTE_RESPOND_MAX', 20), _rl_env('RL_QUOTE_RESPOND_WINDOW', 900)],
+
+        // Uninstall survey. One person uninstalling answers once; the ceiling is only here so the
+        // open form cannot be used to fill the table.
+        'uninstall_feedback' => [_rl_env('RL_UNINSTALL_FEEDBACK_MAX', 5), _rl_env('RL_UNINSTALL_FEEDBACK_WINDOW', 3600)],
         'payment' => [_rl_env('RL_PAYMENT_MAX', 20), _rl_env('RL_PAYMENT_WINDOW', 900)],
 
         // Mobile sync pairing.

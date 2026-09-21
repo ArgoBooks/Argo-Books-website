@@ -728,6 +728,7 @@ include __DIR__ . '/../admin_header.php';
                 <button class="section-tab" data-tab="api">API Usage</button>
                 <button class="section-tab" data-tab="errors">Errors</button>
                 <button class="section-tab" data-tab="crashes">Crashes</button>
+                <button class="section-tab" data-tab="uninstalls">Uninstalls</button>
             </div>
 
             <!-- Active Users Tab -->
@@ -1086,6 +1087,11 @@ include __DIR__ . '/../admin_header.php';
             <!-- Crashes Tab -->
             <div id="crashes" class="tab-content">
                 <?php include __DIR__ . '/crashes-tab.php'; ?>
+            </div>
+
+            <!-- Uninstall Survey Tab -->
+            <div id="uninstalls" class="tab-content">
+                <?php include __DIR__ . '/uninstalls-tab.php'; ?>
             </div>
 
         </div>

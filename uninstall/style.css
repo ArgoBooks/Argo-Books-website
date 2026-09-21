@@ -1,0 +1,68 @@
+/* The survey itself. Everything around it comes from unsubscribe/style.css. */
+
+.uninstall-form {
+  margin-top: 24px;
+}
+
+.uninstall-reason {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  margin-bottom: 6px;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.uninstall-reason:hover {
+  border-color: var(--primary-blue);
+  background: var(--whiteBackground);
+}
+
+.uninstall-reason input {
+  accent-color: var(--primary-blue);
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.uninstall-reason span {
+  color: var(--gray-800);
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+.uninstall-comment-label {
+  display: block;
+  margin: 20px 0 6px;
+  color: var(--gray-600);
+  font-size: 14px;
+}
+
+.uninstall-form textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+  background: var(--white);
+  color: var(--gray-800);
+  font-family: inherit;
+  font-size: 15px;
+  resize: vertical;
+}
+
+.uninstall-form textarea:focus {
+  outline: none;
+  border-color: var(--primary-blue);
+}
+
+.uninstall-error {
+  margin: 16px 0 0;
+  padding: 10px 12px;
+  border: 1px solid var(--red-600);
+  border-radius: var(--radius-sm);
+  color: var(--red-600);
+  font-size: 14px;
+}

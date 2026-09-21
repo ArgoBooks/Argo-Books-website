@@ -607,6 +607,22 @@ CREATE TABLE IF NOT EXISTS portal_quotes (
     FOREIGN KEY (company_id) REFERENCES portal_companies(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Answers to the one-question survey shown when Argo Books is uninstalled.
+-- Nothing identifies the person: no account, no licence, no device id, and the page asks for
+-- none. The version and platform come from the uninstaller's link.
+CREATE TABLE IF NOT EXISTS uninstall_feedback (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    reason VARCHAR(40) NOT NULL COMMENT 'One of the offered choices',
+    comment TEXT DEFAULT NULL COMMENT 'Optional free text, capped at 1000 characters',
+    app_version VARCHAR(20) DEFAULT NULL COMMENT 'Version being uninstalled, from the link',
+    platform VARCHAR(20) DEFAULT NULL COMMENT 'windows or mac, from the link',
+    environment VARCHAR(10) DEFAULT 'sandbox' COMMENT 'sandbox or production',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_created_at (created_at),
+    INDEX idx_reason (reason),
+    INDEX idx_environment (environment)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- Payments received through the portal
 CREATE TABLE IF NOT EXISTS portal_payments (
     id INT PRIMARY KEY AUTO_INCREMENT,
