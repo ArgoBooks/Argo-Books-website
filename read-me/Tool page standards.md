@@ -6,11 +6,13 @@ Conventions every free tool under `/tools/` follows, so a visitor moving between
 
 ### The canonical list
 
-One supported currency list, 29 codes. On the website it lives in `shared/currencies.php`, which every page offering a currency choice reads from. Nothing else on the site defines a currency list.
+One supported currency list, 55 codes. On the website it lives in `shared/currencies.php`, which every page offering a currency choice reads from. Nothing else on the site defines a currency list.
 
 ```
-ALL AUD BAM BGN BRL BYN CAD CHF CNY CZK DKK EUR GBP HUF INR
-ISK JPY KRW MKD NOK PLN RON RSD RUB SEK TRY TWD UAH USD
+AED ALL ARS AUD BAM BDT BGN BRL BYN CAD CHF CLP CNY COP CZK
+DKK EGP EUR GBP GHS HKD HUF IDR ILS INR ISK JPY KES KRW LKR
+MAD MKD MXN MYR NGN NOK NZD PEN PHP PKR PLN QAR RON RSD RUB
+SAR SEK SGD THB TRY TWD UAH USD VND ZAR
 ```
 
 USD, EUR, CAD, AUD are pinned to the top of every picker as the "Common" group, in that order.
@@ -21,7 +23,7 @@ The website list mirrors two files in the desktop app, which must agree with eac
 
 Every tool is one of three tiers. Pick the tier when you start the tool and name it in the file header comment.
 
-**Tier 1, the full list.** The default: the user types their own numbers and currency is presentation only. All 29 codes, Common group on top. Invoice, estimate, and purchase order generators, craft pricing calculator, profit analyzer.
+**Tier 1, the full list.** The default: the user types their own numbers and currency is presentation only. All 55 codes, Common group on top. Invoice, estimate, and purchase order generators, craft pricing calculator, profit analyzer.
 
 **Tier 2, data-constrained.** The math depends on published jurisdiction figures (tax rates, platform fees, thresholds), so only countries with verified numbers are offered. The picker is a *country* selector and the currency follows from it. Adding a country means adding verified rates and a source URL to the tool's data file, never a UI-only change. Etsy fee calculator (US, Canada, UK, Australia), self-employed tax calculator (US, Canada).
 
