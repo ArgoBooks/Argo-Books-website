@@ -930,9 +930,8 @@ body.docs-page .account-avatar {
   color: var(--black);
 }
 
-.comparison-table th:first-child,
+/* Body cells only: a header here would lose the 600 the other headers carry. */
 .comparison-table td:first-child {
-  text-align: left;
   font-weight: 500;
 }
 
