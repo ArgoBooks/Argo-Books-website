@@ -11,6 +11,7 @@ include __DIR__ . '/../../docs-header.php';
         <div class="docs-content">
             <h2>Application Shortcuts</h2>
             <p>These shortcuts are available throughout the application. On a Mac, use <strong>Cmd</strong> (&#8984;) wherever Windows and Linux use <strong>Ctrl</strong>.</p>
+            <p>Undo, redo and new stay out of the way while you are typing: in a text box they do what they do in any text box, so Ctrl + Z takes back the last thing you typed rather than the last thing you saved.</p>
             <div class="comparison-table-wrapper">
                 <table class="comparison-table">
                     <thead>
@@ -23,6 +24,11 @@ include __DIR__ . '/../../docs-header.php';
                     <tbody>
                         <tr><td><strong>Ctrl + K</strong></td><td><strong>Cmd + K</strong></td><td>Open search / quick actions</td></tr>
                         <tr><td><strong>Ctrl + S</strong></td><td><strong>Cmd + S</strong></td><td>Save your company</td></tr>
+                        <tr><td><strong>Ctrl + Z</strong></td><td><strong>Cmd + Z</strong></td><td>Undo your last change</td></tr>
+                        <tr><td><strong>Ctrl + Y</strong></td><td><strong>Cmd + Y</strong></td><td>Redo the change you undid</td></tr>
+                        <tr><td><strong>Ctrl + Shift + Z</strong></td><td><strong>Cmd + Shift + Z</strong></td><td>Redo the change you undid (alternative)</td></tr>
+                        <tr><td><strong>Ctrl + F</strong></td><td><strong>Cmd + F</strong></td><td>Jump to the search box on the page you are on</td></tr>
+                        <tr><td><strong>Ctrl + N</strong></td><td><strong>Cmd + N</strong></td><td>Create a new one of whatever the page lists, such as an invoice on Invoices</td></tr>
                         <tr><td><strong>Ctrl + Shift + S</strong></td><td><strong>Cmd + Shift + S</strong></td><td>Save your company under a new name or in a new place (Save As)</td></tr>
                         <tr><td><strong>Ctrl + Scroll</strong></td><td><strong>Cmd + Scroll</strong>, or pinch on the trackpad</td><td>Zoom a chart or an invoice preview</td></tr>
                         <tr><td><strong>F11</strong></td><td>The green button at the top left of the window</td><td>Enter or leave full screen</td></tr>
