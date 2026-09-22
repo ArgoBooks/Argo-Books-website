@@ -559,7 +559,7 @@ document.addEventListener("DOMContentLoaded", function () {
       ([, a], [, b]) => b - a
     );
 
-    const labels = sortedVersions.map(([version]) => `v${version}`);
+    const labels = sortedVersions.map(([version]) => `V.${version}`);
     const data = sortedVersions.map(([, count]) => count);
     const colors = [
       "#3b82f6",
@@ -651,7 +651,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const topVersions = Array.from(versions).slice(0, 5);
 
     const datasets = topVersions.map((version, index) => ({
-      label: `v${version}`,
+      label: `V.${version}`,
       data: recentDates.map((date) => versionByDate[date]?.[version] || 0),
       borderColor: ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#1e40af"][
         index
@@ -731,7 +731,7 @@ document.addEventListener("DOMContentLoaded", function () {
       .filter((item) => item.count >= 3)
       .sort((a, b) => b.avgDuration - a.avgDuration);
 
-    const labels = versionAverages.map((item) => `v${item.version}`);
+    const labels = versionAverages.map((item) => `V.${item.version}`);
     const averages = versionAverages.map((item) =>
       Math.round(item.avgDuration)
     );
@@ -826,7 +826,7 @@ document.addEventListener("DOMContentLoaded", function () {
       .filter((item) => item.operations >= 10)
       .sort((a, b) => b.errorRate - a.errorRate);
 
-    const labels = versionErrorRates.map((item) => `v${item.version}`);
+    const labels = versionErrorRates.map((item) => `V.${item.version}`);
     const errorRates = versionErrorRates.map((item) =>
       item.errorRate.toFixed(2)
     );
@@ -856,7 +856,7 @@ document.addEventListener("DOMContentLoaded", function () {
             callbacks: {
               label: function (context) {
                 const item = versionErrorRates[context.dataIndex];
-                return `v${item.version}: ${item.errorRate.toFixed(2)}% (${item.errors
+                return `V.${item.version}: ${item.errorRate.toFixed(2)}% (${item.errors
                   }/${item.operations})`;
               },
             },

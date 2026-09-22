@@ -251,7 +251,7 @@ if (!function_exists('crash_fmt')) {
                 Handler: <?= htmlspecialchars($sample['handler'] ?? '-') ?> &middot;
                 <?= htmlspecialchars($sampleMeta['platform'] ?? '-') ?>
                 <?php if (!empty($sample['osVersion'])): ?> (<?= htmlspecialchars($sample['osVersion']) ?>)<?php endif; ?> &middot;
-                v<?= htmlspecialchars($sampleMeta['appVersion'] ?? '-') ?> &middot;
+                V.<?= htmlspecialchars($sampleMeta['appVersion'] ?? '-') ?> &middot;
                 <?= crash_fmt($g['last']) ?>
             </div>
 
