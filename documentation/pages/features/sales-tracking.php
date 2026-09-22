@@ -72,9 +72,9 @@ include __DIR__ . '/../../docs-header.php';
                     <span class="nav-label">Previous</span>
                     <span class="nav-title">&larr; Report Generator</span>
                 </a>
-                <a href="invoicing.php" class="nav-button next">
+                <a href="payment-portal.php" class="nav-button next">
                     <span class="nav-label">Next</span>
-                    <span class="nav-title">Invoicing & Payments &rarr;</span>
+                    <span class="nav-title">Payment Portal &rarr;</span>
                 </a>
             </div>
         </div>

@@ -205,6 +205,20 @@ $isDocsLanding = true;
                     <h3>Expense/Revenue Tracking</h3>
                     <p>Track all business transactions</p>
                 </a>
+                <a href="pages/features/payment-portal.php" class="doc-card">
+                    <div class="card-icon">
+                        <?= svg_icon('dollar', 20) ?>
+                    </div>
+                    <h3>Payment Portal</h3>
+                    <p>Connect Stripe or Square so customers can pay and answer online</p>
+                </a>
+                <a href="pages/features/quotes.php" class="doc-card">
+                    <div class="card-icon">
+                        <?= svg_icon('document-lines', 20) ?>
+                    </div>
+                    <h3>Quotes</h3>
+                    <p>Price work up front, then turn it into an invoice</p>
+                </a>
                 <a href="pages/features/invoicing.php" class="doc-card">
                     <div class="card-icon">
                         <?= svg_icon('document', 20) ?>
@@ -336,6 +350,13 @@ $isDocsLanding = true;
                     </div>
                     <h3>Spreadsheet Export</h3>
                     <p>Export data to Excel for backup</p>
+                </a>
+                <a href="pages/features/send-to-accountant.php" class="doc-card">
+                    <div class="card-icon">
+                        <?= svg_icon('mail', 20) ?>
+                    </div>
+                    <h3>Send to Accountant</h3>
+                    <p>A year of books as one package, saved or emailed</p>
                 </a>
                 <a href="pages/features/history-modal.php" class="doc-card">
                     <div class="card-icon">

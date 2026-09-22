@@ -46,9 +46,9 @@ include __DIR__ . '/../../docs-header.php';
                     <span class="nav-label">Previous</span>
                     <span class="nav-title">&larr; Spreadsheet Import</span>
                 </a>
-                <a href="history-modal.php" class="nav-button next">
+                <a href="send-to-accountant.php" class="nav-button next">
                     <span class="nav-label">Next</span>
-                    <span class="nav-title">Version History &rarr;</span>
+                    <span class="nav-title">Send to Accountant &rarr;</span>
                 </a>
             </div>
         </div>

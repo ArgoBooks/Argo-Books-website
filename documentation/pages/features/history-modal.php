@@ -34,9 +34,9 @@ include __DIR__ . '/../../docs-header.php';
             </div>
 
             <div class="page-navigation">
-                <a href="spreadsheet-export.php" class="nav-button prev">
+                <a href="send-to-accountant.php" class="nav-button prev">
                     <span class="nav-label">Previous</span>
-                    <span class="nav-title">&larr; Spreadsheet Export</span>
+                    <span class="nav-title">&larr; Send to Accountant</span>
                 </a>
                 <a href="../integrations/stripe-integration.php" class="nav-button next">
                     <span class="nav-label">Next</span>

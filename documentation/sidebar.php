@@ -33,6 +33,8 @@ $sidebarSections = [
             'predictive-analytics' => ['title' => 'Predictive Analytics'],
             'report-generator' => ['title' => 'Report Generator'],
             'sales-tracking' => ['title' => 'Expense/Revenue Tracking'],
+            'payment-portal' => ['title' => 'Payment Portal'],
+            'quotes' => ['title' => 'Quotes'],
             'invoicing' => ['title' => 'Invoicing & Payments'],
             'payroll' => ['title' => 'Payroll'],
             'payroll-year-end' => ['title' => 'Payroll Year-End'],
@@ -51,6 +53,7 @@ $sidebarSections = [
             'receipt-scanning' => ['title' => 'AI Receipt Scanning'],
             'spreadsheet-import' => ['title' => 'AI Spreadsheet Import'],
             'spreadsheet-export' => ['title' => 'Spreadsheet Export'],
+            'send-to-accountant' => ['title' => 'Send to Accountant'],
             'history-modal' => ['title' => 'Version History']
         ]
     ],
