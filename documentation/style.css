@@ -935,6 +935,17 @@ body.docs-page .account-avatar {
   font-weight: 500;
 }
 
+/* An arrow key is drawn rather than typed: the text arrows are hairline beside bold
+   words, and the vertical pair fell back to a symbol font that coloured them. One icon,
+   turned, keeps all four identical. */
+.key-arrow {
+  vertical-align: -0.2em;
+}
+
+.key-arrow.left { transform: rotate(180deg); }
+.key-arrow.up { transform: rotate(-90deg); }
+.key-arrow.down { transform: rotate(90deg); }
+
 .comparison-table tbody tr:last-child td {
   border-bottom: none;
 }

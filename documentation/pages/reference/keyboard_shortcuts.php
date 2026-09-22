@@ -26,10 +26,10 @@ include __DIR__ . '/../../docs-header.php';
                         <tr><td><strong>Ctrl + S</strong></td><td><strong>&#8984; + S</strong></td><td>Save your company</td></tr>
                         <tr><td><strong>Ctrl + Z</strong></td><td><strong>&#8984; + Z</strong></td><td>Undo your last change</td></tr>
                         <tr><td><strong>Ctrl + Y</strong></td><td><strong>&#8984; + Y</strong></td><td>Redo the change you undid</td></tr>
-                        <tr><td><strong>Ctrl + Shift + Z</strong></td><td><strong>&#8984; + Shift + Z</strong></td><td>Redo the change you undid (alternative)</td></tr>
+                        <tr><td><strong>Ctrl + Shift + Z</strong></td><td><strong>&#8984; + &#8679; + Z</strong></td><td>Redo the change you undid (alternative)</td></tr>
                         <tr><td><strong>Ctrl + F</strong></td><td><strong>&#8984; + F</strong></td><td>Jump to the search box on the page you are on</td></tr>
                         <tr><td><strong>Ctrl + N</strong></td><td><strong>&#8984; + N</strong></td><td>Create a new one of whatever the page lists, such as an invoice on the Invoices page</td></tr>
-                        <tr><td><strong>Ctrl + Shift + S</strong></td><td><strong>&#8984; + Shift + S</strong></td><td>Save your company under a new name or in a new place (Save As)</td></tr>
+                        <tr><td><strong>Ctrl + Shift + S</strong></td><td><strong>&#8984; + &#8679; + S</strong></td><td>Save your company under a new name or in a new place (Save As)</td></tr>
                         <tr><td><strong>Ctrl + Scroll</strong></td><td><strong>&#8984; + Scroll</strong>, or pinch on the trackpad</td><td>Zoom a chart or an invoice preview</td></tr>
                         <tr><td><strong>F11</strong></td><td>The green button at the top left of the window</td><td>Enter or leave full screen</td></tr>
                         <tr><td><strong>Esc</strong></td><td><strong>Esc</strong></td><td>Close the open dialog or panel, or leave full screen</td></tr>
@@ -38,7 +38,7 @@ include __DIR__ . '/../../docs-header.php';
             </div>
 
             <div class="info-box">
-                <strong>In the quick actions panel:</strong> type to search, use <strong>&uarr;</strong> and <strong>&darr;</strong> to move through the results, <strong>Enter</strong> to run the highlighted one, and <strong>Esc</strong> to close.
+                <strong>In the quick actions panel:</strong> type to search, use <strong><?= svg_icon('arrow-right', 15, 'key-arrow up', '2.5') ?></strong> and <strong><?= svg_icon('arrow-right', 15, 'key-arrow down', '2.5') ?></strong> to move through the results, <strong>Enter</strong> to run the highlighted one, and <strong>Esc</strong> to close.
             </div>
 
             <div class="info-box">
@@ -61,7 +61,7 @@ include __DIR__ . '/../../docs-header.php';
                     <tbody>
                         <tr><td><strong>Ctrl + Z</strong></td><td><strong>&#8984; + Z</strong></td><td>Undo last action</td></tr>
                         <tr><td><strong>Ctrl + Y</strong></td><td><strong>&#8984; + Y</strong></td><td>Redo last undone action</td></tr>
-                        <tr><td><strong>Ctrl + Shift + Z</strong></td><td><strong>&#8984; + Shift + Z</strong></td><td>Redo last undone action (alternative)</td></tr>
+                        <tr><td><strong>Ctrl + Shift + Z</strong></td><td><strong>&#8984; + &#8679; + Z</strong></td><td>Redo last undone action (alternative)</td></tr>
                         <tr><td><strong>Ctrl + S</strong></td><td><strong>&#8984; + S</strong></td><td>Save the current layout as a template</td></tr>
                         <tr><td><strong>Ctrl + G</strong></td><td><strong>&#8984; + G</strong></td><td>Show or hide the alignment grid</td></tr>
                     </tbody>
@@ -88,7 +88,7 @@ include __DIR__ . '/../../docs-header.php';
             </div>
 
             <div class="info-box">
-                <strong>Note:</strong> The canvas shortcuts above act on the current selection, so click an element first. Ctrl + A (&#8984; + A on a Mac) extends a selection to everything on the page rather than starting one from nothing.
+                <strong>Note:</strong> The canvas shortcuts above act on the current selection, so click an element first. The exception is Ctrl + A (&#8984; + A on a Mac), which selects everything on the page whether or not anything is selected already.
             </div>
 
             <h3>Element Movement (Fine Control)</h3>
@@ -101,10 +101,10 @@ include __DIR__ . '/../../docs-header.php';
                         </tr>
                     </thead>
                     <tbody>
-                        <tr><td><strong>&larr;</strong></td><td>Move element 1 pixel left</td></tr>
-                        <tr><td><strong>&rarr;</strong></td><td>Move element 1 pixel right</td></tr>
-                        <tr><td><strong>&uarr;</strong></td><td>Move element 1 pixel up</td></tr>
-                        <tr><td><strong>&darr;</strong></td><td>Move element 1 pixel down</td></tr>
+                        <tr><td><strong><?= svg_icon('arrow-right', 15, 'key-arrow left', '2.5') ?></strong></td><td>Move element 1 pixel left</td></tr>
+                        <tr><td><strong><?= svg_icon('arrow-right', 15, 'key-arrow', '2.5') ?></strong></td><td>Move element 1 pixel right</td></tr>
+                        <tr><td><strong><?= svg_icon('arrow-right', 15, 'key-arrow up', '2.5') ?></strong></td><td>Move element 1 pixel up</td></tr>
+                        <tr><td><strong><?= svg_icon('arrow-right', 15, 'key-arrow down', '2.5') ?></strong></td><td>Move element 1 pixel down</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -119,10 +119,10 @@ include __DIR__ . '/../../docs-header.php';
                         </tr>
                     </thead>
                     <tbody>
-                        <tr><td><strong>Shift + &larr;</strong></td><td>Move element 10 pixels left</td></tr>
-                        <tr><td><strong>Shift + &rarr;</strong></td><td>Move element 10 pixels right</td></tr>
-                        <tr><td><strong>Shift + &uarr;</strong></td><td>Move element 10 pixels up</td></tr>
-                        <tr><td><strong>Shift + &darr;</strong></td><td>Move element 10 pixels down</td></tr>
+                        <tr><td><strong>Shift + <?= svg_icon('arrow-right', 15, 'key-arrow left', '2.5') ?></strong></td><td>Move element 10 pixels left</td></tr>
+                        <tr><td><strong>Shift + <?= svg_icon('arrow-right', 15, 'key-arrow', '2.5') ?></strong></td><td>Move element 10 pixels right</td></tr>
+                        <tr><td><strong>Shift + <?= svg_icon('arrow-right', 15, 'key-arrow up', '2.5') ?></strong></td><td>Move element 10 pixels up</td></tr>
+                        <tr><td><strong>Shift + <?= svg_icon('arrow-right', 15, 'key-arrow down', '2.5') ?></strong></td><td>Move element 10 pixels down</td></tr>
                     </tbody>
                 </table>
             </div>
