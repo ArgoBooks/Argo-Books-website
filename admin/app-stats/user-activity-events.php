@@ -195,6 +195,8 @@ if (!function_exists('ua_merge_timeline')) {
      * keeps one row per event because it is the raw record, and collapsing rows there
      * would blank the feature_name column on the row that survived.
      *
+     * Also folds each EmptyStateShown into the page visit it describes.
+     *
      * @param array $timeline Rows of ['ts' => int, 'type' => string, 'text' => string]
      * @return array The same rows, merged, original order preserved.
      */
@@ -262,6 +264,51 @@ if (!function_exists('ua_merge_timeline')) {
                 $timeline[$j]['text'] = 'Opened company: ' . $rest;
             }
             $lastDetails[$name] = $details;
+        }
+
+        // An empty state describes one page visit, so it belongs in that visit's row. The app
+        // reports it on open and the visit on close, so the match is the next row of that name.
+        $pagesByName = [];
+        foreach ($timeline as $i => $row) {
+            if (($row['type'] ?? '') !== 'page') continue;
+            if (preg_match('/^Page:\s*(\S+?)(?:\s*\(|$)/', (string)($row['text'] ?? ''), $m)) {
+                $pagesByName[$m[1]][] = $i;
+            }
+        }
+        foreach ($pagesByName as &$indices) {
+            usort($indices, fn($a, $b) => ((int)$timeline[$a]['ts'] <=> (int)$timeline[$b]['ts']) ?: ($a <=> $b));
+        }
+        unset($indices);
+
+        $emptyClaimed = [];
+        foreach ($timeline as $i => $row) {
+            if (($row['type'] ?? '') !== 'feature') continue;
+            if (!preg_match('/^EmptyStateShown(?:\s*\((.+)\))?$/', (string)($row['text'] ?? ''), $m)) continue;
+
+            $page = $m[1] ?? '';
+            if ($page === '') {
+                $timeline[$i]['text'] = 'Empty page shown';
+                continue;
+            }
+
+            $ts = (int)($row['ts'] ?? 0);
+            $target = null;
+            foreach ($pagesByName[$page] ?? [] as $j) {
+                if (isset($emptyClaimed[$j])) continue;
+                if ((int)$timeline[$j]['ts'] >= $ts) { $target = $j; break; }
+                $target ??= $j;
+            }
+            if ($target === null) {
+                $timeline[$i]['text'] = "Empty page shown: {$page}";
+                continue;
+            }
+
+            $text = (string)$timeline[$target]['text'];
+            $timeline[$target]['text'] = str_ends_with($text, ')')
+                ? substr($text, 0, -1) . ', empty)'
+                : $text . ' (empty)';
+            $emptyClaimed[$target] = true;
+            $drop[$i] = true;
         }
 
         if (!$drop) return $timeline;

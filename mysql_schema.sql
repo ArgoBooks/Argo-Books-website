@@ -246,7 +246,7 @@ CREATE TABLE IF NOT EXISTS statistics (
 -- Create referral_links table for tracking ad/sponsor sources
 CREATE TABLE IF NOT EXISTS referral_links (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    source_code VARCHAR(50) NOT NULL UNIQUE,
+    source_code VARCHAR(100) NOT NULL UNIQUE,
     name VARCHAR(255) NOT NULL,
     category VARCHAR(20) NOT NULL DEFAULT 'other' COMMENT 'A key from referral_categories() in referral_categories.php',
     description TEXT,
@@ -260,7 +260,7 @@ CREATE TABLE IF NOT EXISTS referral_links (
 -- Create referral_visits table to track visits from referral sources
 CREATE TABLE IF NOT EXISTS referral_visits (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    source_code VARCHAR(50) NOT NULL,
+    source_code VARCHAR(100) NOT NULL,
     page_url VARCHAR(500),
     ip_address VARCHAR(45),
     user_agent VARCHAR(255),
@@ -1265,7 +1265,7 @@ CREATE TABLE IF NOT EXISTS cron_runs (
 CREATE TABLE IF NOT EXISTS referral_events (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     visitor_id CHAR(36) DEFAULT NULL COMMENT 'UUID from argo_visitor_id cookie; NULL for unattributed app_first_run events',
-    source_code VARCHAR(50) DEFAULT NULL,
+    source_code VARCHAR(100) DEFAULT NULL,
     event_type ENUM(
         'landing','downloads_page','download_click','app_first_run',
         'premium_signup','premium_paid','premium_churned'
@@ -1301,7 +1301,7 @@ CREATE TABLE IF NOT EXISTS referral_events (
 -- granularity is one calendar month; period_start is always YYYY-MM-01.
 CREATE TABLE IF NOT EXISTS campaign_spend (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    source_code VARCHAR(50) NOT NULL,
+    source_code VARCHAR(100) NOT NULL,
     period_start DATE NOT NULL COMMENT 'First day of month (YYYY-MM-01)',
     amount DECIMAL(10,2) NOT NULL,
     currency VARCHAR(3) NOT NULL DEFAULT 'CAD',
@@ -1324,7 +1324,7 @@ CREATE TABLE IF NOT EXISTS campaign_spend (
 CREATE TABLE IF NOT EXISTS affiliates (
     id INT PRIMARY KEY AUTO_INCREMENT,
     user_id INT NOT NULL,
-    source_code VARCHAR(50) NOT NULL UNIQUE COMMENT 'The referral_links.source_code this affiliate owns (e.g. aff-username)',
+    source_code VARCHAR(100) NOT NULL UNIQUE COMMENT 'The referral_links.source_code this affiliate owns (e.g. aff-username)',
     status ENUM('pending', 'approved', 'rejected', 'suspended') NOT NULL DEFAULT 'pending',
     commission_rate DECIMAL(5,4) NOT NULL DEFAULT 0.5000 COMMENT '0.5000 = 50%. Per-affiliate so terms can be overridden later.',
     commission_window_months INT NOT NULL DEFAULT 12 COMMENT 'Months from each subscription start_date during which payments earn commission',
