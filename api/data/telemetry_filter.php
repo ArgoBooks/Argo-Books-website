@@ -30,7 +30,7 @@ const TELEMETRY_FEATURE_NAMES = [
     'ReportGenerated',
     'ReceiptScanned',
     'DataImported', 'BackupCreated', 'BackupRestored',
-    'InvoiceCreated', 'ExpenseCreated', 'RevenueCreated', 'PaymentRecorded',
+    'InvoiceCreated', 'InvoiceSent', 'ExpenseCreated', 'RevenueCreated', 'PaymentRecorded',
     'BankMatchConfirmed',
     'ProductCreated', 'CategoryCreated', 'LocationCreated', 'StockAdjusted',
     'PurchaseOrderCreated', 'ReturnRecorded', 'LostDamagedRecorded',
@@ -60,7 +60,11 @@ const TELEMETRY_FEATURE_NAMES = [
     'DashboardReset',
     'AccountantPackSent',
     // Quotes
-    'QuoteCreated', 'QuoteSent', 'QuoteConverted'
+    'QuoteCreated', 'QuoteSent', 'QuoteConverted',
+    // Updates, with the version in the context
+    'UpdateOffered', 'UpdateApplied',
+    'RecurringScheduleCreated', 'RecurringTransactionsGenerated',
+    'PaymentProviderConnected', 'PhonePaired', 'CompanyPasswordSet'
 ];
 
 // Business descriptors on a CompanyProfile event. Free text, not enum-checked: these
