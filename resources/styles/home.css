@@ -1305,8 +1305,23 @@ a {
     .color-panel { display: none; }
     .studio-panel.panel-hidden { transform: translateY(12px); }
 
-    .scan-stage { grid-template-columns: 1fr; gap: 20px; height: auto; justify-items: center; }
-    .scan-form { max-width: 340px; width: 100%; }
+    .scan-stage { grid-template-columns: minmax(0, 1fr); gap: 20px; height: auto; justify-items: center; }
+    .scan-receipt { min-width: 0; }
+    .scan-form { min-width: 0; max-width: 340px; width: 100%; }
+
+    /* The category pill is nowrap, so it floors the middle track and pushes the
+       tick past the card edge. Narrower label, and the pill may wrap if it must. */
+    .ef-field { grid-template-columns: 58px minmax(0, 1fr) auto; gap: 6px; }
+    .ef-pill { white-space: normal; }
+
+    /* Three across does not fit a phone, and the third was being cut in half. */
+    .fc-kpis { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+    .fc-kpi:last-child { display: none; }
+
+    /* Two across leaves ~103px a card, and the chip, name and badge need ~137px
+       before the badge is pushed out. One across, and three of them, not six. */
+    .inv-grid { grid-template-columns: minmax(0, 1fr); }
+    .inv-card:nth-child(n+4) { display: none; }
 
     .exp-stage { align-items: stretch; }
     .exp-inner { display: flex; flex-direction: column; gap: 14px; }
@@ -1839,7 +1854,7 @@ a {
     }
 
     .features-tabs {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
     }
 
     .features-tabs-content { height: auto; }
@@ -1850,8 +1865,14 @@ a {
     .invoice-studio-card,
     .app-body { height: auto; }
 
+    .features-tabs-nav,
+    .features-tabs-content,
+    .tab-content-inner,
+    .tab-content-inner--solo .tab-content-visual,
+    .feature-visual-card { min-width: 0; max-width: 100%; }
+
     .tab-content-inner {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
     }
 
     .ai-import-points {

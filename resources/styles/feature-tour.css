@@ -960,9 +960,8 @@
     .feature-visual-card { padding: 16px; }
 }
 
-/* Prevent the stacked feature grid from being stretched to the mockup's
-   min-content width on narrow screens (fixes a horizontal-overflow quirk that
-   the landing page also has). */
+/* Stops the stacked feature grid being stretched to the mockup's min-content width
+   on narrow screens, which pushes the page sideways. */
 @media (max-width: 1200px) {
     .features-tabs { grid-template-columns: minmax(0, 1fr); }
     .features-tabs-nav,
