@@ -140,6 +140,10 @@ function processEvent($event, $sourceFile, $sessionMeta = []) {
             $normalized['clean'] = $event['clean'] ?? null;
             $normalized['activeSeconds'] = $event['activeSeconds'] ?? null;
             $normalized['lastPage'] = $event['lastPage'] ?? null;
+            // Null rather than 0 when absent, so a session that never measured memory
+            // cannot drag a median down as though it had used none.
+            $normalized['PeakManagedMemoryMb'] = isset($event['peakManagedMemoryMb']) ? (int)$event['peakManagedMemoryMb'] : null;
+            $normalized['PeakWorkingSetMb'] = isset($event['peakWorkingSetMb']) ? (int)$event['peakWorkingSetMb'] : null;
             return ['category' => 'Session', 'data' => $normalized];
 
         case 'Export':
@@ -937,6 +941,30 @@ include __DIR__ . '/../admin_header.php';
                         <h3>Time to Ready (90th pct)</h3>
                         <div class="value" id="kpiReadyP90">—</div>
                         <p class="subtext" id="kpiStartupSample">—</p>
+                    </div>
+                </div>
+
+                <h3 class="section-subtitle">Memory Use</h3>
+                <div class="stats-grid" id="memoryKpiGrid">
+                    <div class="stat-card">
+                        <h3>Peak Memory (median)</h3>
+                        <div class="value" id="kpiMemoryP50">&mdash;</div>
+                        <p class="subtext">Highest the app reached in a session</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Peak Memory (90th pct)</h3>
+                        <div class="value" id="kpiMemoryP90">&mdash;</div>
+                        <p class="subtext">1 in 10 sessions reaches at least this</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Largest Peak</h3>
+                        <div class="value" id="kpiMemoryMax">&mdash;</div>
+                        <p class="subtext">Worst single session on record</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Managed Heap (median)</h3>
+                        <div class="value" id="kpiHeapP50">&mdash;</div>
+                        <p class="subtext" id="kpiMemorySample">&mdash;</p>
                     </div>
                 </div>
 

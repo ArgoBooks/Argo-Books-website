@@ -180,6 +180,12 @@ function filter_telemetry_event(array $event): ?array
                 // power loss. Absent on SessionStart, and on ends from builds predating
                 // the flag, so readers must treat a missing value as clean.
                 'clean' => isset($event['clean']) ? (bool)$event['clean'] : null,
+                // High-water memory marks in MB, sampled once a minute while the app ran.
+                // Absent on SessionStart, on ends reconstructed after a force-quit, and on
+                // builds predating the fields. Capped at 256GB so a garbled payload cannot
+                // skew an average.
+                'peakManagedMemoryMb' => telemetry_clean_int($event['peakManagedMemoryMb'] ?? null, 262144),
+                'peakWorkingSetMb' => telemetry_clean_int($event['peakWorkingSetMb'] ?? null, 262144),
             ];
 
         case 'FeatureUsage':

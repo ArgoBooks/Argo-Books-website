@@ -128,6 +128,7 @@ document.addEventListener("DOMContentLoaded", function () {
   generateAIImportDurationByTypeChart(featureUsageData);
 
   generateStartupCharts(startupData);
+  generateMemoryKpis(sessionData);
   generateSessionDurationChart(sessionData);
   generateExportTypesBreakdown(exportData);
   generateExportDurationByTypeChart(exportData);
@@ -1084,6 +1085,47 @@ document.addEventListener("DOMContentLoaded", function () {
    * files from the OS cache, so blending them pulls the average down exactly
    * when a slow first launch is what we are trying to see.
    */
+  /**
+   * Peak memory per session. Sessions predating the fields, and ends reconstructed
+   * after a force-quit, carry no measurement and are left out rather than counted
+   * as zero.
+   */
+  function generateMemoryKpis(sessionData) {
+    const setText = (id, text) => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = text;
+    };
+
+    const nums = (key) =>
+      sessionData
+        .map((r) => r[key])
+        .filter((v) => typeof v === "number" && isFinite(v) && v > 0)
+        .sort((a, b) => a - b);
+
+    const percentile = (sorted, p) => {
+      if (sorted.length === 0) return null;
+      const rank = Math.ceil((p / 100) * sorted.length);
+      return sorted[Math.min(sorted.length - 1, Math.max(0, rank - 1))];
+    };
+
+    const fmtMb = (mb) =>
+      mb === null ? "—" : mb < 1024 ? mb + " MB" : (mb / 1024).toFixed(1) + " GB";
+
+    const working = nums("PeakWorkingSetMb");
+    const heap = nums("PeakManagedMemoryMb");
+
+    setText("kpiMemoryP50", fmtMb(percentile(working, 50)));
+    setText("kpiMemoryP90", fmtMb(percentile(working, 90)));
+    setText("kpiMemoryMax", fmtMb(working.length ? working[working.length - 1] : null));
+    setText("kpiHeapP50", fmtMb(percentile(heap, 50)));
+    setText(
+      "kpiMemorySample",
+      working.length === 0
+        ? "No sessions have reported memory yet"
+        : "From " + working.length + " session" + (working.length === 1 ? "" : "s")
+    );
+  }
+
   function generateStartupCharts(startupData) {
     const setText = (id, text) => {
       const el = document.getElementById(id);
