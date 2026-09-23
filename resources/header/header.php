@@ -100,9 +100,6 @@ $show_header_cta = empty($hide_header_cta);
 <div id="menu" class="hamburger-nav-menu">
   <nav aria-label="Mobile navigation">
     <ul>
-      <?php if ($show_header_cta): ?>
-      <li class="hamburger-cta"><a href="<?= $base ?>downloads/">Download</a></li>
-      <?php endif; ?>
       <li><a href="<?= $base ?>features/">Features</a></li>
       <li><a href="<?= $base ?>pricing/">Pricing</a></li>
       <li><a href="<?= $base ?>whats-new/">What's new</a></li>
