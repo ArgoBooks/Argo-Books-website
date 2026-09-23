@@ -35,12 +35,25 @@ $page_schema_json = json_encode([
   'url' => 'https://argorobots.com/invoice-generator/',
 ], JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
 
+require_once __DIR__ . '/../shared/_base.php';
+require_once __DIR__ . '/../partials/tool-email-capture.php';
+
 ob_start();
 include __DIR__ . '/_fragment.php';
+// Opt-in only: the invoice is built in the browser and never reaches the
+// server, so there is no document to mail and nothing to attach.
+tool_email_capture([
+    'source' => 'invoice_generator',
+    'mode'   => 'optin',
+    'title'  => 'Get occasional Argo Books updates',
+    'blurb'  => 'Your invoice stays in your browser and is never sent to us. This is just the mailing list: new features, and tips for keeping books without an accountant.',
+    'cta'    => 'Sign me up',
+]);
 $body_content = ob_get_clean();
 
-require_once __DIR__ . '/../shared/_base.php';
-$extra_scripts = '<script type="module" src="' . INVGEN_BASE . '/invoice-generator/scripts/main.js"></script>';
+$extra_head = tool_email_capture_head();
+$extra_scripts = '<script type="module" src="' . INVGEN_BASE . '/invoice-generator/scripts/main.js"></script>'
+    . tool_email_capture_scripts();
 $tools_back = ['href' => INVGEN_BASE . '/tools/', 'label' => 'All tools'];
 
 include __DIR__ . '/../shared/layout.php';

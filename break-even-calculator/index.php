@@ -7,6 +7,7 @@ require_once __DIR__ . '/../shared/_base.php';
 require_once __DIR__ . '/../shared/currencies.php';
 require_once __DIR__ . '/../partials/faq.php';
 require_once __DIR__ . '/../partials/schema.php';
+require_once __DIR__ . '/../partials/tool-email-capture.php';
 
 if (PHP_SAPI !== 'cli') {
     require_once __DIR__ . '/../statistics.php';
@@ -78,8 +79,10 @@ $breadcrumb_schema_json = argo_breadcrumb_schema([
 ]);
 
 $extra_head = '<link rel="stylesheet" href="' . INVGEN_BASE . '/shared/styles/calculator.css">'
+    . tool_email_capture_head()
     . '<script>window.ARGO_CURRENCY_LOCALES = ' . json_encode(argo_currency_locales(), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) . ';</script>';
-$extra_scripts = '<script type="module" src="' . INVGEN_BASE . '/break-even-calculator/scripts/main.js"></script>';
+$extra_scripts = '<script type="module" src="' . INVGEN_BASE . '/break-even-calculator/scripts/main.js"></script>'
+    . tool_email_capture_scripts();
 
 ob_start();
 ?>
@@ -139,24 +142,24 @@ ob_start();
     <div class="calc-results" data-be-results aria-live="polite">
       <div class="calc-headline">
         <span class="calc-headline-label">Break even after</span>
-        <span class="calc-headline-amount" data-be="units">0</span>
+        <span class="calc-headline-amount" data-tec-row="Break-even point (units)" data-be="units">0</span>
         <span class="calc-headline-sub" data-be="unitsSub">Enter your costs and price</span>
       </div>
 
       <dl class="calc-breakdown">
-        <div class="calc-breakdown-row"><dt>Revenue at break-even</dt><dd data-be="revenue">$0.00</dd></div>
+        <div class="calc-breakdown-row"><dt>Revenue at break-even</dt><dd data-tec-row="Revenue at break-even" data-be="revenue">$0.00</dd></div>
         <div class="calc-group">Per sale</div>
         <div class="calc-breakdown-row calc-row-cost"><dt>Price</dt><dd data-be="price">$0.00</dd></div>
         <div class="calc-breakdown-row calc-row-cost"><dt>Variable cost</dt><dd data-be="variable">$0.00</dd></div>
-        <div class="calc-breakdown-row calc-row-subtotal"><dt>Contribution</dt><dd data-be="contribution">$0.00</dd></div>
-        <div class="calc-breakdown-row calc-row-rate"><dt>Contribution margin</dt><dd data-be="contributionMargin">0%</dd></div>
+        <div class="calc-breakdown-row calc-row-subtotal"><dt>Contribution</dt><dd data-tec-row="Contribution" data-be="contribution">$0.00</dd></div>
+        <div class="calc-breakdown-row calc-row-rate"><dt>Contribution margin</dt><dd data-tec-row="Contribution margin" data-be="contributionMargin">0%</dd></div>
       </dl>
 
       <div class="calc-callout" data-be-expected hidden>
         <span class="calc-headline-label" data-be="expectedLabel">At your expected volume</span>
         <dl class="calc-breakdown">
           <div class="calc-breakdown-row calc-row-profit"><dt data-be="outcomeLabel">Profit</dt><dd data-be="outcome">$0.00</dd></div>
-          <div class="calc-breakdown-row"><dt>Margin of safety</dt><dd data-be="safety">0%</dd></div>
+          <div class="calc-breakdown-row"><dt>Margin of safety</dt><dd data-tec-row="Margin of safety" data-be="safety">0%</dd></div>
         </dl>
         <p data-be="expectedText"></p>
       </div>
@@ -166,6 +169,12 @@ ob_start();
       </div>
     </div>
   </div>
+
+  <?php tool_email_capture([
+      'source' => 'break_even_calculator',
+      'title'  => 'Email these figures to yourself',
+      'blurb'  => 'Your break-even point and the margins behind it, so you have them when you next price something.',
+  ]); ?>
 
   <article class="calc-content">
 

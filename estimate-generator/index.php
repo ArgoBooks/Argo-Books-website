@@ -9,6 +9,7 @@
 // for the full config and the consolidation rationale.
 
 require_once __DIR__ . '/../shared/_base.php';
+require_once __DIR__ . '/../partials/tool-email-capture.php';
 require_once __DIR__ . '/../invoice-generator/doc-config.php';
 
 $doc_type = 'estimate';
@@ -52,9 +53,20 @@ $extra_head = '<script>window.DOC_CONFIG = '
 
 ob_start();
 include __DIR__ . '/../invoice-generator/_fragment.php';
+// Opt-in only: the estimate is built in the browser and never reaches the
+// server, so there is no document to mail and nothing to attach.
+tool_email_capture([
+    'source' => 'estimate_generator',
+    'mode'   => 'optin',
+    'title'  => 'Get occasional Argo Books updates',
+    'blurb'  => 'Your estimate stays in your browser and is never sent to us. This is just the mailing list: new features, and tips for keeping books without an accountant.',
+    'cta'    => 'Sign me up',
+]);
 $body_content = ob_get_clean();
 
-$extra_scripts = '<script type="module" src="' . INVGEN_BASE . '/invoice-generator/scripts/main.js"></script>';
+$extra_head .= tool_email_capture_head();
+$extra_scripts = '<script type="module" src="' . INVGEN_BASE . '/invoice-generator/scripts/main.js"></script>'
+    . tool_email_capture_scripts();
 $tools_back = ['href' => INVGEN_BASE . '/tools/', 'label' => 'All tools'];
 
 include __DIR__ . '/../shared/layout.php';

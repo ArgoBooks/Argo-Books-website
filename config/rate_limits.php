@@ -114,6 +114,9 @@ function rate_limits(): array
         'profit_analyzer' => [_rl_env('RL_PROFIT_ANALYZER_MAX', 5), _rl_env('RL_PROFIT_ANALYZER_WINDOW', 86400)],
         'profit_analyzer_email' => [_rl_env('RL_PROFIT_ANALYZER_EMAIL_MAX', 5), _rl_env('RL_PROFIT_ANALYZER_EMAIL_WINDOW', 3600)],
 
+        // Shared by every free tool's "email me these results" box (api/tool-email.php).
+        'tool_email' => [_rl_env('RL_TOOL_EMAIL_MAX', 5), _rl_env('RL_TOOL_EMAIL_WINDOW', 3600)],
+
         // Sign in and anything that emails a code. Five wrong tries in fifteen minutes.
         'admin_login' => [_rl_env('RL_ADMIN_LOGIN_MAX', 5), _rl_env('RL_ADMIN_LOGIN_WINDOW', 900)],
         'admin_2fa' => [_rl_env('RL_ADMIN_2FA_MAX', 5), _rl_env('RL_ADMIN_2FA_WINDOW', 900)],

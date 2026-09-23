@@ -11,6 +11,7 @@ require_once __DIR__ . '/../shared/_base.php';
 require_once __DIR__ . '/../shared/currencies.php';
 require_once __DIR__ . '/../partials/faq.php';
 require_once __DIR__ . '/../partials/schema.php';
+require_once __DIR__ . '/../partials/tool-email-capture.php';
 
 if (PHP_SAPI !== 'cli') {
     require_once __DIR__ . '/../statistics.php';
@@ -90,8 +91,10 @@ $breadcrumb_schema_json = argo_breadcrumb_schema([
 ]);
 
 $extra_head = '<link rel="stylesheet" href="' . INVGEN_BASE . '/shared/styles/calculator.css">'
+    . tool_email_capture_head()
     . '<script>window.ARGO_CURRENCY_LOCALES = ' . json_encode(argo_currency_locales(), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) . ';</script>';
-$extra_scripts = '<script type="module" src="' . INVGEN_BASE . '/hourly-rate-calculator/scripts/main.js"></script>';
+$extra_scripts = '<script type="module" src="' . INVGEN_BASE . '/hourly-rate-calculator/scripts/main.js"></script>'
+    . tool_email_capture_scripts();
 
 ob_start();
 ?>
@@ -173,21 +176,21 @@ ob_start();
     <div class="calc-results" data-hr-results aria-live="polite">
       <div class="calc-headline">
         <span class="calc-headline-label">Charge at least</span>
-        <span class="calc-headline-amount" data-hr="rate">$0.00</span>
+        <span class="calc-headline-amount" data-tec-row="Charge at least (per billable hour)" data-hr="rate">$0.00</span>
         <span class="calc-headline-sub" data-hr="rateSub">per billable hour</span>
       </div>
 
       <dl class="calc-breakdown">
-        <div class="calc-breakdown-row"><dt>Day rate (8 hours)</dt><dd data-hr="dayRate">$0.00</dd></div>
+        <div class="calc-breakdown-row"><dt>Day rate (8 hours)</dt><dd data-tec-row="Day rate (8 hours)" data-hr="dayRate">$0.00</dd></div>
         <div class="calc-group">To make that work</div>
-        <div class="calc-breakdown-row calc-row-cost"><dt>Take-home target</dt><dd data-hr="takeHome">$0.00</dd></div>
+        <div class="calc-breakdown-row calc-row-cost"><dt>Take-home target</dt><dd data-tec-row="Take-home target" data-hr="takeHome">$0.00</dd></div>
         <div class="calc-breakdown-row calc-row-cost"><dt>Income before tax</dt><dd data-hr="preTax">$0.00</dd></div>
-        <div class="calc-breakdown-row calc-row-cost"><dt>Business costs</dt><dd data-hr="expenses">$0.00</dd></div>
-        <div class="calc-breakdown-row calc-row-subtotal"><dt>Revenue you must bill</dt><dd data-hr="revenue">$0.00</dd></div>
+        <div class="calc-breakdown-row calc-row-cost"><dt>Business costs</dt><dd data-tec-row="Business costs" data-hr="expenses">$0.00</dd></div>
+        <div class="calc-breakdown-row calc-row-subtotal"><dt>Revenue you must bill</dt><dd data-tec-row="Revenue you must bill" data-hr="revenue">$0.00</dd></div>
         <div class="calc-group">Your year</div>
         <div class="calc-breakdown-row calc-row-cost"><dt>Weeks worked</dt><dd data-hr="weeks">0</dd></div>
-        <div class="calc-breakdown-row calc-row-cost"><dt>Hours worked</dt><dd data-hr="hoursWorked">0</dd></div>
-        <div class="calc-breakdown-row calc-row-cost"><dt>Hours you can bill</dt><dd data-hr="billableHours">0</dd></div>
+        <div class="calc-breakdown-row calc-row-cost"><dt>Hours worked</dt><dd data-tec-row="Hours worked" data-hr="hoursWorked">0</dd></div>
+        <div class="calc-breakdown-row calc-row-cost"><dt>Hours you can bill</dt><dd data-tec-row="Hours you can bill" data-hr="billableHours">0</dd></div>
         <div class="calc-breakdown-row calc-row-rate"><dt>Unbillable hours</dt><dd data-hr="unbillable">0</dd></div>
       </dl>
 
@@ -208,6 +211,12 @@ ob_start();
       </div>
     </div>
   </div>
+
+  <?php tool_email_capture([
+      'source' => 'hourly_rate_calculator',
+      'title'  => 'Email these figures to yourself',
+      'blurb'  => 'Your rate and the breakdown behind it, so you have them when you next quote.',
+  ]); ?>
 
   <article class="calc-content">
 

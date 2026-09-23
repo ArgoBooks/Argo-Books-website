@@ -7,6 +7,7 @@
 // is client-side (scripts/main.js + calc.js + data/tax-rates-2026.js).
 
 require_once __DIR__ . '/../shared/_base.php';
+require_once __DIR__ . '/../partials/tool-email-capture.php';
 
 if (PHP_SAPI !== 'cli') {
     require_once __DIR__ . '/../statistics.php';
@@ -30,8 +31,10 @@ $page_schema_json = json_encode([
 
 $tools_back = ['href' => INVGEN_BASE . '/tools/', 'label' => 'All tools'];
 
-$extra_head = '<link rel="stylesheet" href="' . INVGEN_BASE . '/self-employed-tax-calculator/styles/calculator.css">';
-$extra_scripts = '<script type="module" src="' . INVGEN_BASE . '/self-employed-tax-calculator/scripts/main.js"></script>';
+$extra_head = '<link rel="stylesheet" href="' . INVGEN_BASE . '/self-employed-tax-calculator/styles/calculator.css">'
+    . tool_email_capture_head();
+$extra_scripts = '<script type="module" src="' . INVGEN_BASE . '/self-employed-tax-calculator/scripts/main.js"></script>'
+    . tool_email_capture_scripts();
 
 // Conversion-pitch CTA target: a self-employed tax tool funnels naturally into
 // year-round expense tracking.
@@ -89,34 +92,40 @@ ob_start();
     <div class="taxcalc-results" data-tc-results aria-live="polite">
       <div class="taxcalc-headline">
         <span class="taxcalc-headline-label">Set aside about</span>
-        <span class="taxcalc-headline-amount" data-tc="setaside">$0</span>
+        <span class="taxcalc-headline-amount" data-tec-row="Set aside for tax" data-tc="setaside">$0</span>
         <span class="taxcalc-headline-sub"><span data-tc="setaside-pct">0%</span> of your income &middot; roughly <span data-tc="quarterly">$0</span> per quarter</span>
       </div>
 
       <dl class="taxcalc-breakdown">
         <div class="taxcalc-breakdown-row">
           <dt>Taxable profit</dt>
-          <dd data-tc="netprofit">$0</dd>
+          <dd data-tec-row="Net profit" data-tc="netprofit">$0</dd>
         </div>
         <div class="taxcalc-breakdown-row">
           <dt data-tc="contribution-label">Self-employment tax</dt>
-          <dd data-tc="contribution">$0</dd>
+          <dd data-tec-row="Contributions" data-tc="contribution">$0</dd>
         </div>
         <div class="taxcalc-breakdown-row">
           <dt>Income tax</dt>
-          <dd data-tc="incometax">$0</dd>
+          <dd data-tec-row="Income tax" data-tc="incometax">$0</dd>
         </div>
         <div class="taxcalc-breakdown-row taxcalc-breakdown-total">
           <dt>Total estimated tax</dt>
-          <dd data-tc="total">$0</dd>
+          <dd data-tec-row="Total owed" data-tc="total">$0</dd>
         </div>
         <div class="taxcalc-breakdown-row taxcalc-breakdown-rate">
           <dt>Effective tax rate</dt>
-          <dd data-tc="effrate">0%</dd>
+          <dd data-tec-row="Effective rate" data-tc="effrate">0%</dd>
         </div>
       </dl>
     </div>
   </div>
+
+  <?php tool_email_capture([
+      'source' => 'self_employed_tax',
+      'title'  => 'Email this estimate to yourself',
+      'blurb'  => 'The figures above, so you know what to put aside before the next instalment is due.',
+  ]); ?>
 
   <p class="taxcalc-disclaimer">
     <strong>Estimate only &mdash; not tax advice.</strong> This is a simplified 2026 estimate for a single, basic filer using the standard deduction (US) or basic personal amount (Canada). It leaves out credits, other deductions, and (for the US) state income tax, so your actual tax will differ. Check with a tax professional before making decisions.
