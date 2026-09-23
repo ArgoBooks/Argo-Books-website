@@ -259,6 +259,29 @@ function send_feedback_request_email(int $licenseId, string $email): bool
  * /unsubscribe/marketing.php?s=<token>.
  * ========================================================================= */
 
+/**
+ * Display names for marketing_subscribers.source. The endpoint that accepts a sign-up keeps its
+ * own allowlist of what it will take; this is only what to call each one on screen and in mail.
+ */
+function marketing_source_labels(): array
+{
+    return [
+        'profit_analyzer'          => 'Profit Analyzer',
+        'hourly_rate_calculator'   => 'Hourly Rate Calculator',
+        'break_even_calculator'    => 'Break-Even Calculator',
+        'self_employed_tax'        => 'Self-Employed Tax Calculator',
+        'invoice_generator'        => 'Invoice Generator',
+        'estimate_generator'       => 'Estimate Generator',
+        'purchase_order_generator' => 'Purchase Order Generator',
+        'desktop_app'              => 'Desktop app',
+    ];
+}
+
+function marketing_source_label(string $source): string
+{
+    return marketing_source_labels()[$source] ?? $source;
+}
+
 /** Absolute URL a subscriber clicks to confirm their opt-in. */
 function subscriber_confirm_url(string $token): string
 {

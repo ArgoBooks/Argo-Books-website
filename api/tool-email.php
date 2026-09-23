@@ -29,17 +29,19 @@ require_once __DIR__ . '/../env_helper.php';
  * Sources allowed to use this endpoint. An allowlist rather than a free string,
  * following api/invoice-generator/track.php, so the subscriber table cannot be
  * sprayed with invented sources and every row stays attributable to a page.
+ *
+ * Narrower than marketing_source_labels(), which names every source the list has
+ * ever held: profit_analyzer posts to its own endpoint and has no business here.
  */
 const TOOL_EMAIL_SOURCES = [
-    'hourly_rate_calculator'    => 'Hourly Rate Calculator',
-    'break_even_calculator'     => 'Break-Even Calculator',
-    'self_employed_tax'         => 'Self-Employed Tax Calculator',
-    'invoice_generator'         => 'Invoice Generator',
-    'estimate_generator'        => 'Estimate Generator',
-    'purchase_order_generator'  => 'Purchase Order Generator',
-    // The desktop app's optional "email me about updates". Opt-in only: it never
-    // posts summary rows, so it takes the confirmation-only branch below.
-    'desktop_app'               => 'Argo Books',
+    'hourly_rate_calculator',
+    'break_even_calculator',
+    'self_employed_tax',
+    'invoice_generator',
+    'estimate_generator',
+    'purchase_order_generator',
+    // Opt-in only: never posts summary rows, so it takes the confirmation-only branch below.
+    'desktop_app',
 ];
 
 const TOOL_EMAIL_MAX_ROWS = 20;
@@ -69,10 +71,10 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
 }
 
 $source = (string) ($body['source'] ?? '');
-if (!isset(TOOL_EMAIL_SOURCES[$source])) {
+if (!in_array($source, TOOL_EMAIL_SOURCES, true)) {
     tool_email_fail(400, 'Unknown tool.');
 }
-$toolName = TOOL_EMAIL_SOURCES[$source];
+$toolName = marketing_source_label($source);
 
 $subscribe = !empty($body['subscribe']);
 

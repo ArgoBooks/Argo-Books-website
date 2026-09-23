@@ -18,7 +18,7 @@ require_once __DIR__ . '/../../email_marketing.php'; // pulls in db_connect, ema
 function broadcast_audiences(): array
 {
     return [
-        'newsletter'      => 'Profit Analyzer subscribers (opt-in list)',
+        'newsletter'      => 'Free tool and app subscribers (opt-in list)',
         'product_updates' => 'Community members — product updates',
         'tips_onboarding' => 'Community members — tips & onboarding',
         'promotions'      => 'Community members — promotions & offers',

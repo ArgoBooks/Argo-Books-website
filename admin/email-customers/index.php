@@ -245,6 +245,21 @@ foreach (array_keys($audiences) as $key) {
     $audienceCounts[$key] = count(broadcast_audience_emails($pdo, $key));
 }
 
+// Which surface each subscriber came from. The whole point of putting the capture box on some
+// tools and not others is being able to see which ones earn it before doing the rest.
+$sourceRows = $pdo->query(
+    "SELECT source,
+            SUM(status = 'confirmed')    AS confirmed,
+            SUM(status = 'pending')      AS pending,
+            SUM(status = 'unsubscribed') AS unsubscribed,
+            COUNT(*)                     AS total,
+            MAX(created_at)              AS latest
+     FROM marketing_subscribers
+     WHERE context = 'newsletter'
+     GROUP BY source
+     ORDER BY confirmed DESC, total DESC"
+)->fetchAll();
+
 $recent = $pdo->query(
     "SELECT id, subject, audience, status, total_recipients, sent_count, failed_count, skipped_count, created_at
      FROM marketing_broadcasts ORDER BY id DESC LIMIT 20"
@@ -294,7 +309,39 @@ include __DIR__ . '/../admin_header.php';
         </div>
     </div>
 
-    <h2 class="mkt-section-head">Compose a broadcast</h2>
+    <h2 class="mkt-section-head" style="margin-top:36px">Where they signed up</h2>
+    <?php if (!$sourceRows): ?>
+        <p class="empty-state">No subscribers yet.</p>
+    <?php else: ?>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Source</th>
+                        <th>Confirmed</th>
+                        <th>Pending</th>
+                        <th>Unsubscribed</th>
+                        <th>Total</th>
+                        <th>Most recent</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($sourceRows as $s): ?>
+                        <tr>
+                            <td><?= htmlspecialchars(marketing_source_label((string) $s['source'])) ?></td>
+                            <td><?= number_format((int) $s['confirmed']) ?></td>
+                            <td><?= number_format((int) $s['pending']) ?></td>
+                            <td><?= number_format((int) $s['unsubscribed']) ?></td>
+                            <td><?= number_format((int) $s['total']) ?></td>
+                            <td><?= $s['latest'] ? htmlspecialchars(date('Y-m-d', strtotime((string) $s['latest']))) : '&mdash;' ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+    <?php endif; ?>
+
+    <h2 class="mkt-section-head" style="margin-top:36px">Compose a broadcast</h2>
     <p class="mkt-hint" style="margin:0 auto 16px;max-width:760px;text-align:center">
         The body accepts HTML and is wrapped in the standard Argo email template. An unsubscribe
         footer is appended automatically. Always send yourself a test first. Queuing hands the send
