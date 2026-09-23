@@ -5,6 +5,8 @@ require_once __DIR__ . '/../track_referral.php';
 require_once __DIR__ . '/../partials/fonts.php';
 
 track_referral_event('downloads_page');
+
+$hide_header_cta = true;
 /**
  * macOS-only download-link suffix carrying the visitor's install token.
  *

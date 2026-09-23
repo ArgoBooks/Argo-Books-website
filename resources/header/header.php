@@ -1,4 +1,10 @@
-<?php require_once __DIR__ . '/../includes/site-base-path.php'; $base = site_base_path(); ?>
+<?php
+require_once __DIR__ . '/../includes/site-base-path.php';
+$base = site_base_path();
+
+// Pages that are themselves the download destination set $hide_header_cta = true.
+$show_header_cta = empty($hide_header_cta);
+?>
 <!-- BURGER MENU -->
 <input class="menu-btn" type="checkbox" id="menu-btn" onclick="headerToggleMenu()">
 <label class="menu-icon" id="menu-icon" for="menu-btn"><span class="nav-icon"></span></label>
@@ -76,6 +82,9 @@
 
   <!-- Account Button -->
   <div class="right-container">
+    <?php if ($show_header_cta): ?>
+    <a class="header-cta" href="<?= $base ?>downloads/">Download</a>
+    <?php endif; ?>
     <a id="account-button" class="account-button" href="<?= $base ?>community/users/profile.php">
       <div class="account-avatar">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
@@ -91,6 +100,9 @@
 <div id="menu" class="hamburger-nav-menu">
   <nav aria-label="Mobile navigation">
     <ul>
+      <?php if ($show_header_cta): ?>
+      <li class="hamburger-cta"><a href="<?= $base ?>downloads/">Download</a></li>
+      <?php endif; ?>
       <li><a href="<?= $base ?>features/">Features</a></li>
       <li><a href="<?= $base ?>pricing/">Pricing</a></li>
       <li><a href="<?= $base ?>whats-new/">What's new</a></li>

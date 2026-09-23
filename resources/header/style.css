@@ -196,6 +196,25 @@ header .hamburger-nav-menu ul li a:hover {
   text-decoration: underline;
 }
 
+header .hamburger-nav-menu ul li.hamburger-cta {
+  border-top: none;
+}
+
+header .hamburger-nav-menu ul li.hamburger-cta a {
+  background: var(--primary-blue);
+  color: var(--white);
+  font-weight: 600;
+  text-align: center;
+  margin: 14px 30px;
+  padding: 14px 20px;
+  border-radius: var(--radius-md);
+}
+
+header .hamburger-nav-menu ul li.hamburger-cta a:hover {
+  background: var(--primary-blue-dark);
+  text-decoration: none;
+}
+
 header .header-inner {
   margin: auto;
   height: 50px;
@@ -408,6 +427,23 @@ header .header-inner .menu-container ul li a:hover::after {
   transform: translateX(3px);
 }
 
+/* Seven nav items plus the CTA is the widest the row gets, so tighten it here
+   rather than let it wrap. */
+@media (max-width: 1150px) {
+  header .header-inner .menu-container ul li a {
+    padding-inline: 5px;
+  }
+
+  .header-cta {
+    padding: 8px 12px;
+    font-size: var(--text-xs);
+  }
+
+  .account-button {
+    margin-left: 12px;
+  }
+}
+
 @media (max-width: 1100px) {
   header .header-inner {
     width: 95vw;
@@ -424,6 +460,11 @@ header .header-inner .menu-container ul li a:hover::after {
   }
 
   header .header-inner .menu-container {
+    display: none;
+  }
+
+  /* No room beside the avatar once the logo is centred; the mobile menu carries it. */
+  .header-cta {
     display: none;
   }
 
@@ -450,6 +491,28 @@ header .header-inner .menu-container ul li a:hover::after {
   display: flex;
   align-items: center;
   justify-content: flex-end;
+}
+
+/* Legible on both the dark hero and the white sticky bar, so it never has to
+   swap colours mid-scroll the way the nav links do. */
+.header-cta {
+  display: inline-flex;
+  align-items: center;
+  padding: 9px 18px;
+  border-radius: var(--radius-md);
+  background: var(--primary-blue);
+  color: var(--white);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.header-cta:hover {
+  background: var(--primary-blue-dark);
+  transform: translateY(-1px);
 }
 
 .account-button {
