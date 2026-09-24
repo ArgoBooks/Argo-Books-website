@@ -296,6 +296,52 @@ body {
   transform: translateX(4px);
 }
 
+/* The /features/ grid only. Twelve tiles two-across made the page mostly
+   scrolling, so it goes three-across on desktop with a tighter tile. The same
+   classes are used on About, Integrations and the subscription page, which
+   have far fewer tiles and are left alone. */
+.features-overview .features-grid {
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+
+.features-overview .feature-card {
+  padding: 18px;
+}
+
+.features-overview .feature-card-icon {
+  width: 36px;
+  height: 36px;
+  margin-bottom: 12px;
+}
+
+.features-overview .feature-card-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.features-overview .feature-card h3 {
+  font-size: var(--text-md);
+  margin-bottom: 6px;
+}
+
+.features-overview .feature-card p {
+  line-height: 1.55;
+  margin-bottom: 10px;
+}
+
+@media (max-width: 1100px) {
+  .features-overview .features-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .features-overview .features-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* ========================================
    Why Argo Books Section (Overview)
    ======================================== */
