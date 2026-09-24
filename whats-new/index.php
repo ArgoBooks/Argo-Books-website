@@ -89,6 +89,50 @@ $pricing = get_pricing_config();
     <div class="container">
         <div class="version-grid">
 
+            <!-- Version 2.0.17 -->
+            <div class="version-card">
+                <div class="version-header">
+                    <div class="version-info">
+                        <span class="version-tag">Version 2.0.17</span>
+                        <span class="date-tag">September 23 2026</span>
+                    </div>
+                    <?= svg_icon('chevron-down', 24, 'dropdown-arrow', null, 'stroke-linecap="round" stroke-linejoin="round"') ?>
+                </div>
+
+                <div class="version-content">
+                    <div class="changelog">
+                        <div class="changelog-section">
+                            <h4 class="section-label feature">New Features</h4>
+                            <ul class="changelog-list">
+                                <li><strong>Quotes:</strong> Price up work before you invoice it. Quotes have their own page and use the same templates as your invoices. Email one and your customer gets a link where they can accept or decline it, with room for a note. Their answer comes back into the app, and an accepted quote becomes a draft invoice in one click.</li>
+                                <li><strong>Send your accountant the year in one go:</strong> The main financial statements as PDFs, every transaction as a spreadsheet, and the receipts. Save it all as a zip or email it straight to them. It's in the File menu and on the Reports page.</li>
+                                <li><strong>55 currencies instead of 29:</strong> Sri Lanka, Singapore, the UAE, Mexico, Nigeria, New Zealand, South Africa and more.</li>
+                                <li><strong>Update easier:</strong> Opening a company saved by a newer version now offers an 'Update Now' button, and reopens that file once the update is done.</li>
+                            </ul>
+                        </div>
+                        <div class="changelog-section">
+                            <h4 class="section-label enhancement">Enhancements</h4>
+                            <ul class="changelog-list">
+                                <li><strong>Your company logo looks the same everywhere:</strong> The welcome screen, the sidebar, the File menu and the switcher all show the same tile, and a company without a logo gets two initials the way customers and suppliers already do.</li>
+                                <li><strong>A clearer 'Switch Company' panel:</strong> Better organised and easier to find your way around.</li>
+                                <li><strong>More keyboard shortcuts:</strong> Ctrl+Z and Ctrl+Y for undo and redo, Ctrl+F to jump into the page's search box, and Ctrl+N to add a new item on whichever page you are on.</li>
+                                <li><strong>Sorting on more pages:</strong> Receipts, Returns and Lost &amp; Damaged sort by any column, the same as every other list.</li>
+                            </ul>
+                        </div>
+                        <div class="changelog-section">
+                            <h4 class="section-label fix">Fixes</h4>
+                            <ul class="changelog-list">
+                                <li>Changing your logo leaves sent documents alone: A new logo applies to new and unsent invoices and quotes. Anything you have already sent keeps the logo your customer received.</li>
+                                <li>A product made with "create one" button in the Add Item form on the Stock Levels page is stock-tracked straight away, so it appears in the list and gets selected.</li>
+                                <li>Closing an invoice you have not edited no longer asks whether to discard changes.</li>
+                                <li>Closing the app while the app is already closing is ignored.</li>
+                                <li>The File menu always shows its labels.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Version 2.0.16 -->
             <div class="version-card">
                 <div class="version-header">
