@@ -44,7 +44,7 @@ function argo_feature_demo_exists(string $key): bool
  */
 function argo_feature_demo_hero_keys(): array
 {
-    return ['bank-import', 'sheet-import', 'report', 'stripe', 'payroll'];
+    return ['bank-import', 'sheet-import', 'report', 'stripe', 'payroll', 'quotes'];
 }
 
 /** Every demo key, in the order the landing page tabs use. */
@@ -66,6 +66,7 @@ function argo_feature_demo(string $key): string
     switch ($key) {
         case 'ai-receipts': argo_feature_demo_ai_receipts(); break;
         case 'invoices': argo_feature_demo_invoices(); break;
+        case 'quotes': argo_feature_demo_quotes(); break;
         case 'expenses': argo_feature_demo_expenses(); break;
         case 'customers': argo_feature_demo_customers(); break;
         case 'predictive': argo_feature_demo_predictive(); break;
@@ -153,6 +154,83 @@ function argo_feature_demo_ai_receipts(): void
                                         <div class="ef-trow ef-grand" data-field="total"><span>Total</span><span class="ef-total-val">$120.35</span></div>
                                     </div>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+    <?php
+}
+
+/**
+ * Quotes hero. Borrows the invoice document markup, since a quote is the same paper in
+ * the app. Static on purpose: the colour wheel and template switcher are bound by id to
+ * the invoice studio, and a second set of those ids would leave two elements fighting
+ * over one set of handlers.
+ */
+function argo_feature_demo_quotes(): void
+{
+    ?>
+<div class="tab-content-inner tab-content-inner--solo">
+    <div class="tab-content-visual">
+        <div class="feature-visual-card invoice-studio-card">
+            <div class="invoice-studio" id="quoteStudio" style="--inv-accent: 227 79% 58%;">
+                <div class="invoice-window">
+                    <div class="app-topbar">
+                        <span class="app-brand"><img src="<?= argo_feature_demo_base() ?>resources/images/argo-logo/argo-books-icon-transparent.png" alt="" class="app-brand-img">Argo Books</span>
+                    </div>
+                    <div class="app-body">
+                        <div class="app-nav" aria-hidden="true">
+                            <span class="app-nav-btn"><?= svg_icon('grid', 18) ?></span>
+                            <span class="app-nav-btn"><?= svg_icon('calendar', 18) ?></span>
+                            <span class="app-nav-btn"><?= svg_icon('trending-up', 18) ?></span>
+                            <span class="app-nav-btn app-nav-btn--active"><?= svg_icon('document', 18) ?></span>
+                            <span class="app-nav-btn"><?= svg_icon('receipt', 18) ?></span>
+                            <span class="app-nav-btn"><?= svg_icon('dollar', 18) ?></span>
+                            <span class="app-nav-btn"><?= svg_icon('credit-card', 18) ?></span>
+                            <span class="app-nav-btn"><?= svg_icon('users', 18) ?></span>
+                            <span class="app-nav-btn"><?= svg_icon('package', 18) ?></span>
+                        </div>
+                        <div class="app-content">
+                            <div class="app-page-title">New Quote</div>
+                            <div class="invoice-doc theme-contemporary" id="quoteDoc">
+                        <div class="inv-brandbar"></div>
+                        <div class="inv-top inv-anim">
+                            <div class="inv-brand-group">
+                                <div class="inv-brand">
+                                    <span class="inv-mark"><svg viewBox="650 48 2400 2400" fill="currentColor" aria-hidden="true"><path fill-rule="nonzero" d="M 1825.109375 1914.148438 L 1295.769531 2027.972656 C 1292.101562 2028.761719 1288.289062 2027.59375 1285.679688 2024.890625 C 1283.089844 2022.1875 1282.070312 2018.335938 1283 2014.699219 L 1357.828125 1722.378906 L 1361.988281 1733.847656 L 715.601562 1267.910156 C 712.378906 1265.589844 710.6875 1261.691406 711.191406 1257.75 C 711.695312 1253.820312 714.3125 1250.46875 718.011719 1249.03125 L 917.507812 1171.558594 L 911.125 1184.988281 L 789.367188 808.660156 C 788.113281 804.78125 789.140625 800.53125 792.023438 797.660156 C 794.90625 794.78125 799.160156 793.769531 803.035156 795.03125 L 1179.679688 918.160156 L 1166.179688 924.648438 L 1242.941406 720.011719 C 1244.339844 716.28125 1247.671875 713.621094 1251.628906 713.089844 C 1255.570312 712.550781 1259.5 714.230469 1261.839844 717.460938 L 1570.75 1143.378906 L 1551.320312 1151.621094 L 1415.289062 379.421875 C 1414.609375 375.519531 1416.101562 371.558594 1419.191406 369.089844 C 1422.28125 366.621094 1426.46875 366.03125 1430.121094 367.550781 L 1651.171875 459.621094 L 1637.519531 464.410156 L 1838.308594 98.511719 C 1840.210938 95.050781 1843.839844 92.898438 1847.789062 92.890625 C 1851.738281 92.890625 1855.378906 95.03125 1857.28125 98.480469 L 2059.390625 464.289062 L 2045.660156 459.570312 L 2266.378906 365.238281 C 2270.019531 363.679688 2274.230469 364.238281 2277.351562 366.699219 C 2280.460938 369.160156 2281.980469 373.121094 2281.308594 377.03125 L 2148.550781 1148.769531 L 2129.089844 1140.609375 L 2436.378906 714 C 2438.710938 710.769531 2442.628906 709.070312 2446.570312 709.589844 C 2450.519531 710.109375 2453.871094 712.75 2455.289062 716.480469 L 2532.820312 920.359375 L 2519.289062 913.929688 L 2895.609375 789.078125 C 2899.480469 787.800781 2903.738281 788.789062 2906.628906 791.660156 C 2909.53125 794.519531 2910.570312 798.769531 2909.339844 802.648438 L 2788.570312 1180.890625 L 2782.050781 1167.460938 L 2983.929688 1242.929688 C 2987.671875 1244.320312 2990.339844 1247.660156 2990.871094 1251.621094 C 2991.410156 1255.570312 2989.71875 1259.5 2986.488281 1261.839844 L 2341.378906 1728.984375 L 2345.511719 1717.496094 L 2422.128906 2012.820312 C 2423.070312 2016.453125 2422.058594 2020.3125 2419.46875 2023.023438 C 2416.878906 2025.734375 2413.070312 2026.910156 2409.398438 2026.132812 L 1879.988281 1914.027344 L 1893.050781 1902.972656 L 1914.019531 2394.578125 C 1914.140625 2397.527344 1913.058594 2400.398438 1911.019531 2402.53125 C 1908.980469 2404.664062 1906.148438 2405.867188 1903.199219 2405.867188 L 1804.46875 2405.867188 C 1801.519531 2405.867188 1798.710938 2404.671875 1796.671875 2402.554688 C 1794.628906 2400.433594 1793.539062 2397.578125 1793.640625 2394.636719 L 1812.011719 1903.15625 L 1825.109375 1914.148438 Z"/></svg></span>
+                                    <span class="inv-bizname">Maple &amp; Co.</span>
+                                    <div class="inv-status" id="quoteStatus">Accepted</div>
+                                </div>
+                                <div class="inv-docref">QUOTE &middot; #QT-0042</div>
+                            </div>
+                        </div>
+                        <div class="inv-billto inv-anim">
+                            <span class="inv-label">Quote for</span>
+                            <span class="inv-client">Sarah Miller</span>
+                            <span class="inv-client-sub">Valid until 31 October</span>
+                        </div>
+                        <div class="inv-table">
+                            <div class="inv-row inv-row-head inv-anim">
+                                <span>Description</span><span>Qty</span><span>Amount</span>
+                            </div>
+                            <div class="inv-row inv-item">
+                                <span>Logo &amp; brand design</span><span>1</span><span>$600.00</span>
+                            </div>
+                            <div class="inv-row inv-item">
+                                <span>Website build</span><span>1</span><span>$480.00</span>
+                            </div>
+                            <div class="inv-row inv-item">
+                                <span>Hosting (annual)</span><span>1</span><span>$154.00</span>
+                            </div>
+                        </div>
+                        <div class="inv-totals inv-anim">
+                            <div class="inv-subtotal"><span>Subtotal</span><span>$1,234.00</span></div>
+                            <div class="inv-amountdue"><span>Total</span><span class="inv-total-value">$1,234.00</span></div>
+                        </div>
                             </div>
                         </div>
                     </div>

@@ -155,6 +155,16 @@ require_once __DIR__ . '/../partials/fonts.php';
                     <span class="feature-card-link">Learn more <?= svg_icon('arrow-right', 16) ?></span>
                 </a>
 
+                <!-- Quotes -->
+                <a href="quotes/" class="feature-card animate-on-scroll">
+                    <div class="feature-card-icon blue">
+                        <?= svg_icon('check', 24, '', '2.4') ?>
+                    </div>
+                    <h3>Quotes</h3>
+                    <p>Price up the work and send it, then let your customer accept or decline online. A yes becomes an invoice in one click.</p>
+                    <span class="feature-card-link">Learn more <?= svg_icon('arrow-right', 16) ?></span>
+                </a>
+
                 <!-- Invoicing -->
                 <a href="invoicing/" class="feature-card animate-on-scroll">
                     <div class="feature-card-icon blue">

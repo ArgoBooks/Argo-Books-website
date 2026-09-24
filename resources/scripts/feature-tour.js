@@ -143,6 +143,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 case 'rental': animateRental(t); break;
                 case 'customers': animateCustomers(t); break;
                 case 'invoices': animateInvoices(t); break;
+                case 'quotes': animateQuotes(t); break;
                 case 'bank-import': animateBankImport(t); break;
                 case 'sheet-import': animateSheetImport(t); break;
                 case 'report': animateReport(t); break;
@@ -340,6 +341,50 @@ document.addEventListener('DOMContentLoaded', function () {
                 t(run, afterRows + 4600);
             }
             run();
+        }
+
+        // Quotes: the same staggered build as the invoice, ending on the customer's
+        // answer rather than on payment. No colour or template panels, so nothing
+        // here touches the invoice studio's controls.
+        function animateQuotes(t) {
+            const doc = document.getElementById('quoteDoc');
+            if (!doc) return;
+
+            const status = document.getElementById('quoteStatus');
+            const totalVal = doc.querySelector('.inv-total-value');
+
+            function countTo(el, target, duration) {
+                const startTime = performance.now();
+                function update(now) {
+                    const progress = Math.max(0, Math.min((now - startTime) / duration, 1));
+                    const eased = 1 - Math.pow(1 - progress, 3);
+                    el.textContent = '$' + (target * eased).toLocaleString('en-US', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    });
+                    if (progress < 1) requestAnimationFrame(update);
+                }
+                requestAnimationFrame(update);
+            }
+
+            // Reset to the intro state
+            doc.classList.add('intro');
+            doc.querySelectorAll('.inv-anim, .inv-item').forEach(el => el.classList.remove('in'));
+            if (status) status.classList.remove('in');
+
+            const steps = doc.querySelectorAll('.inv-top, .inv-billto, .inv-row-head, .inv-item, .inv-totals');
+            steps.forEach((el, i) => t(() => el.classList.add('in'), 300 + i * 280));
+
+            const lastAt = 300 + (steps.length - 1) * 280;
+
+            if (totalVal) {
+                totalVal.textContent = '$0.00';
+                t(() => countTo(totalVal, 1234, 900), lastAt);
+            }
+
+            // The customer answers last, which is the point the whole page makes.
+            t(() => { if (status) status.classList.add('in'); }, lastAt + 600);
+            t(() => doc.classList.remove('intro'), lastAt + 1700);
         }
 
         // Invoicing animation

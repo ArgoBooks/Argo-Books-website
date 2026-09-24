@@ -312,6 +312,13 @@ h3, h4, h5, h6 {
   height: 470px;
 }
 
+/* The quote document is the same paper as the invoice, so it overruns 404px the
+   same way. A little taller again than the invoice rule, because the invoice one
+   leaves the total sitting on the bottom edge with its padding clipped. */
+.fp-hero-demo[data-feature-demo="quotes"] .app-body {
+  height: 500px;
+}
+
 /* Three rows of stock cards are taller than 404px, and the vertically centred
    grid spilled up over the page title and past the bottom edge. */
 .fp-hero-demo[data-feature-demo="inventory"] .app-body {

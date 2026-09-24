@@ -1,0 +1,132 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 444" fill="none">
+  <defs>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="600" y2="444" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#eff6ff"/>
+      <stop offset="100%" stop-color="#f0fdf4"/>
+    </linearGradient>
+    <filter id="cardShadow" x="-10%" y="-5%" width="120%" height="115%">
+      <feDropShadow dx="0" dy="4" stdDeviation="12" flood-color="#000" flood-opacity="0.08"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="600" height="444" rx="24" fill="url(#bgGrad)"/>
+
+  <!-- Subtle grid -->
+  <g opacity="0.03" stroke="#3b82f6" stroke-width="1">
+    <line x1="0" y1="100" x2="600" y2="100"/><line x1="0" y1="200" x2="600" y2="200"/>
+    <line x1="0" y1="300" x2="600" y2="300"/><line x1="0" y1="400" x2="600" y2="400"/>
+    <line x1="100" y1="0" x2="100" y2="444"/><line x1="200" y1="0" x2="200" y2="444"/>
+    <line x1="300" y1="0" x2="300" y2="444"/><line x1="400" y1="0" x2="400" y2="444"/>
+    <line x1="500" y1="0" x2="500" y2="444"/>
+  </g>
+
+  <!-- Decorative circles -->
+  <circle cx="80" cy="60" r="35" fill="#3b82f6" opacity="0.04"/>
+  <circle cx="530" cy="390" r="40" fill="#10b981" opacity="0.04"/>
+
+  <!-- Main card -->
+  <g filter="url(#cardShadow)">
+    <rect x="32" y="24" width="536" height="396" rx="16" fill="white"/>
+  </g>
+
+  <!-- Page title -->
+  <text x="56" y="62" font-family="system-ui, -apple-system, sans-serif" font-size="18" font-weight="700" fill="#1e293b">Quotes</text>
+
+  <!-- Create Invoice button -->
+  <rect x="456" y="42" width="104" height="32" rx="8" fill="#3b82f6"/>
+  <text x="508" y="62" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="600" fill="white" text-anchor="middle">+ New Quote</text>
+
+  <!-- Table header -->
+  <rect x="46" y="84" width="508" height="28" rx="0" fill="#f8fafc"/>
+  <line x1="46" y1="112" x2="554" y2="112" stroke="#e2e8f0" stroke-width="1"/>
+  <text x="56" y="102" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#94a3b8" font-weight="600">QUOTE #</text>
+  <text x="150" y="102" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#94a3b8" font-weight="600">CUSTOMER</text>
+  <text x="300" y="102" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#94a3b8" font-weight="600">ISSUE DATE</text>
+  <text x="390" y="102" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#94a3b8" font-weight="600">AMOUNT</text>
+  <text x="470" y="102" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#94a3b8" font-weight="600">STATUS</text>
+
+  <!-- Row 1 -->
+  <text x="56" y="136" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#3b82f6" font-weight="500">QT-2026-025</text>
+  <circle cx="162" cy="132" r="12" fill="#8b5cf6"/>
+  <text x="162" y="132" font-family="system-ui, -apple-system, sans-serif" font-size="8" font-weight="700" fill="white" text-anchor="middle" dominant-baseline="central">MT</text>
+  <text x="180" y="136" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#1e293b" font-weight="500">Michael Torres</text>
+  <text x="300" y="136" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#64748b">Feb 25, 2026</text>
+  <text x="390" y="136" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#1e293b" font-weight="600">$8,443.50</text>
+  <rect x="450" y="124" width="64" height="20" rx="4" fill="#fefce8" stroke="#fef08a" stroke-width="1"/>
+  <text x="482" y="134" font-family="system-ui, -apple-system, sans-serif" font-size="9" font-weight="600" fill="#ca8a04" text-anchor="middle" dominant-baseline="central">Draft</text>
+  <line x1="46" y1="150" x2="554" y2="150" stroke="#f1f5f9" stroke-width="1"/>
+
+  <!-- Row 2 -->
+  <text x="56" y="170" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#3b82f6" font-weight="500">QT-2026-024</text>
+  <circle cx="162" cy="166" r="12" fill="#3b82f6"/>
+  <text x="162" y="166" font-family="system-ui, -apple-system, sans-serif" font-size="8" font-weight="700" fill="white" text-anchor="middle" dominant-baseline="central">KL</text>
+  <text x="180" y="170" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#1e293b" font-weight="500">Kevin Lee</text>
+  <text x="300" y="170" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#64748b">Feb 17, 2026</text>
+  <text x="390" y="170" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#1e293b" font-weight="600">$12,448.75</text>
+  <rect x="450" y="158" width="64" height="20" rx="4" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1"/>
+  <text x="482" y="168" font-family="system-ui, -apple-system, sans-serif" font-size="9" font-weight="600" fill="#2563eb" text-anchor="middle" dominant-baseline="central">Sent</text>
+  <line x1="46" y1="184" x2="554" y2="184" stroke="#f1f5f9" stroke-width="1"/>
+
+  <!-- Row 3 -->
+  <text x="56" y="204" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#3b82f6" font-weight="500">QT-2026-023</text>
+  <circle cx="162" cy="200" r="12" fill="#f59e0b"/>
+  <text x="162" y="200" font-family="system-ui, -apple-system, sans-serif" font-size="8" font-weight="700" fill="white" text-anchor="middle" dominant-baseline="central">RK</text>
+  <text x="180" y="204" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#1e293b" font-weight="500">Robert Kim</text>
+  <text x="300" y="204" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#64748b">Feb 12, 2026</text>
+  <text x="390" y="204" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#1e293b" font-weight="600">$8,876.50</text>
+  <rect x="450" y="192" width="64" height="20" rx="4" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1"/>
+  <text x="482" y="202" font-family="system-ui, -apple-system, sans-serif" font-size="9" font-weight="600" fill="#2563eb" text-anchor="middle" dominant-baseline="central">Sent</text>
+  <line x1="46" y1="218" x2="554" y2="218" stroke="#f1f5f9" stroke-width="1"/>
+
+  <!-- Row 4 -->
+  <text x="56" y="238" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#3b82f6" font-weight="500">QT-2026-022</text>
+  <circle cx="162" cy="234" r="12" fill="#10b981"/>
+  <text x="162" y="234" font-family="system-ui, -apple-system, sans-serif" font-size="8" font-weight="700" fill="white" text-anchor="middle" dominant-baseline="central">DM</text>
+  <text x="180" y="238" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#1e293b" font-weight="500">Daniel Martinez</text>
+  <text x="300" y="238" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#64748b">Feb 7, 2026</text>
+  <text x="390" y="238" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#1e293b" font-weight="600">$21,433.50</text>
+  <rect x="450" y="226" width="64" height="20" rx="4" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+  <text x="482" y="236" font-family="system-ui, -apple-system, sans-serif" font-size="9" font-weight="600" fill="#64748b" text-anchor="middle" dominant-baseline="central">Expired</text>
+  <line x1="46" y1="252" x2="554" y2="252" stroke="#f1f5f9" stroke-width="1"/>
+
+  <!-- Row 5 -->
+  <text x="56" y="272" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#3b82f6" font-weight="500">QT-2026-021</text>
+  <circle cx="162" cy="268" r="12" fill="#06b6d4"/>
+  <text x="162" y="268" font-family="system-ui, -apple-system, sans-serif" font-size="8" font-weight="700" fill="white" text-anchor="middle" dominant-baseline="central">SM</text>
+  <text x="180" y="272" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#1e293b" font-weight="500">Sarah Mitchell</text>
+  <text x="300" y="272" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#64748b">Feb 2, 2026</text>
+  <text x="390" y="272" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#1e293b" font-weight="600">$14,613.75</text>
+  <rect x="450" y="260" width="64" height="20" rx="4" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1"/>
+  <text x="482" y="270" font-family="system-ui, -apple-system, sans-serif" font-size="9" font-weight="600" fill="#16a34a" text-anchor="middle" dominant-baseline="central">Accepted</text>
+  <line x1="46" y1="286" x2="554" y2="286" stroke="#f1f5f9" stroke-width="1"/>
+
+  <!-- Row 6 -->
+  <text x="56" y="306" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#3b82f6" font-weight="500">QT-2026-020</text>
+  <circle cx="162" cy="302" r="12" fill="#ec4899"/>
+  <text x="162" y="302" font-family="system-ui, -apple-system, sans-serif" font-size="8" font-weight="700" fill="white" text-anchor="middle" dominant-baseline="central">AF</text>
+  <text x="180" y="306" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#1e293b" font-weight="500">Amanda Foster</text>
+  <text x="300" y="306" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#64748b">Jan 23, 2026</text>
+  <text x="390" y="306" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#1e293b" font-weight="600">$6,711.50</text>
+  <rect x="450" y="294" width="64" height="20" rx="4" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1"/>
+  <text x="482" y="304" font-family="system-ui, -apple-system, sans-serif" font-size="9" font-weight="600" fill="#16a34a" text-anchor="middle" dominant-baseline="central">Accepted</text>
+  <line x1="46" y1="320" x2="554" y2="320" stroke="#f1f5f9" stroke-width="1"/>
+
+  <!-- Row 7 -->
+  <text x="56" y="340" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#3b82f6" font-weight="500">QT-2026-019</text>
+  <circle cx="162" cy="336" r="12" fill="#f97316"/>
+  <text x="162" y="336" font-family="system-ui, -apple-system, sans-serif" font-size="8" font-weight="700" fill="white" text-anchor="middle" dominant-baseline="central">NG</text>
+  <text x="180" y="340" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#1e293b" font-weight="500">Nicole Garcia</text>
+  <text x="300" y="340" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#64748b">Jan 10, 2026</text>
+  <text x="390" y="340" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#1e293b" font-weight="600">$9,201.25</text>
+  <rect x="450" y="328" width="64" height="20" rx="4" fill="#fef2f2" stroke="#fecaca" stroke-width="1"/>
+  <text x="482" y="338" font-family="system-ui, -apple-system, sans-serif" font-size="9" font-weight="600" fill="#dc2626" text-anchor="middle" dominant-baseline="central">Declined</text>
+  <line x1="46" y1="354" x2="554" y2="354" stroke="#f1f5f9" stroke-width="1"/>
+
+  <!-- Pagination -->
+  <text x="56" y="384" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#94a3b8">1-7 of 25 quotes</text>
+  <rect x="490" y="370" width="24" height="24" rx="6" fill="#3b82f6"/>
+  <text x="502" y="382" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="600" fill="white" text-anchor="middle" dominant-baseline="central">1</text>
+  <rect x="518" y="370" width="24" height="24" rx="6" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+  <text x="530" y="382" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="500" fill="#64748b" text-anchor="middle" dominant-baseline="central">2</text>
+</svg>
