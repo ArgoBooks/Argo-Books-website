@@ -131,16 +131,6 @@ For end users, plain language, no jargon. Include only user-visible changes; ski
 
 When writing markdown docs (in `read-me/` or anywhere else in the repo), don't use em dashes (the `—` character). Use a comma, a colon, or a period instead, to match the project's house style. Don't substitute a regular hyphen either: that reads as a compound-word marker, not a clause break.
 
-## Explaining technical work
-
-Every technical explanation ends with an `## In simple terms` section as the very last thing in the response. This applies to all technical explanations: code changes, debugging, architecture, data analysis, "why is X happening" answers. Not just the complicated ones.
-
-The reader is a programmer, so don't dumb it down too much. Standard technical vocabulary (SQL, HTTP headers, indexes, caching, regex) needs no translation or analogy. What the section strips is project-specific detail: file paths, function names, table and column names, and anything that assumes familiarity with this codebase.
-
-Think "explaining it to a developer who has never seen this repo", not "explaining it to a non-technical person". Keep it short, a few sentences to a short paragraph, and cover what happened and why it matters rather than restating the mechanics.
-
-If a response has no technical content (a quick yes/no, or a basic question), skip it.
-
 ## Security
 
 - Admin requires TOTP 2FA. Secret stored in `admin_users.two_factor_secret`
@@ -149,7 +139,7 @@ If a response has no technical content (a quick yes/no, or a basic question), sk
 
 ## Detailed docs
 
-The `read-me/` directory has authoritative reference docs that are kept current. Don't duplicate their content here:
+The `read-me/` directory has authoritative reference docs:
 
 - `read-me/Tool page standards.md`: conventions for the free tools under `/tools/`, including which currencies each tool offers and why
 - `read-me/Cron jobs.md`: every scheduled cron and its frequency
