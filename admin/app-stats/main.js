@@ -1243,26 +1243,43 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const cwCanvas = document.getElementById("startupColdWarmChart");
     if (cwCanvas) {
-      const toSec = (ms) => (ms === null ? 0 : Math.round((ms / 1000) * 10) / 10);
+      // Every mark in timeline order. Builds before a mark existed don't send it,
+      // so a mark with no samples gets no bar rather than a zero, and each bar's
+      // tooltip gives its own sample size since newer marks have fewer launches.
+      const marks = [
+        { key: "ToMainMs", label: "Runtime" },
+        { key: "ToFirstPaintMs", label: "Loading screen" },
+        { key: "ToServicesReadyMs", label: "Services" },
+        { key: "ToShellViewModelMs", label: "Shell" },
+        { key: "ToViewModelsReadyMs", label: "View models" },
+        { key: "ToWindowBuiltMs", label: "Window" },
+        { key: "ToReadyMs", label: "Ready" },
+      ];
+      const toSec = (ms) => (ms === null ? null : Math.round((ms / 1000) * 10) / 10);
+      const series = (rows) => {
+        const perMark = marks.map((m) => nums(rows, m.key));
+        return {
+          data: perMark.map((v) => toSec(percentile(v, 50))),
+          counts: perMark.map((v) => v.length),
+        };
+      };
+      const coldSeries = series(cold);
+      const warmSeries = series(warm);
       new Chart(cwCanvas, {
         type: "bar",
         data: {
-          labels: ["To loading screen", "To ready"],
+          labels: marks.map((m) => m.label),
           datasets: [
             {
               label: "Cold (" + cold.length + ")",
-              data: [
-                toSec(percentile(coldPaint, 50)),
-                toSec(percentile(coldReady, 50)),
-              ],
+              data: coldSeries.data,
+              counts: coldSeries.counts,
               backgroundColor: "#6366f1",
             },
             {
               label: "Warm (" + warm.length + ")",
-              data: [
-                toSec(percentile(nums(warm, "ToFirstPaintMs"), 50)),
-                toSec(percentile(nums(warm, "ToReadyMs"), 50)),
-              ],
+              data: warmSeries.data,
+              counts: warmSeries.counts,
               backgroundColor: "#a5b4fc",
             },
           ],
@@ -1271,7 +1288,23 @@ document.addEventListener("DOMContentLoaded", function () {
           responsive: true,
           maintainAspectRatio: false,
           plugins: {
-            tooltip: { callbacks: { label: (ctx) => ctx.dataset.label + ": " + ctx.parsed.y + " s" } },
+            tooltip: {
+              callbacks: {
+                label: (ctx) => {
+                  const n = ctx.dataset.counts[ctx.dataIndex];
+                  return (
+                    ctx.dataset.label.replace(/ \(\d+\)$/, "") +
+                    ": " +
+                    ctx.parsed.y +
+                    " s (from " +
+                    n +
+                    " launch" +
+                    (n === 1 ? "" : "es") +
+                    ")"
+                  );
+                },
+              },
+            },
           },
           scales: {
             y: {

@@ -293,12 +293,18 @@ function filter_telemetry_event(array $event): ?array
             // scan) and is the part a splash screen cannot cover. Capped at ten minutes:
             // a machine resumed from sleep mid-launch can otherwise report hours.
             return $base + [
+                // toMainMs is the first line of our own code, so everything before it is
+                // the OS and the .NET runtime starting up.
+                'toMainMs' => telemetry_clean_int($event['toMainMs'] ?? null, 600000),
                 'toFirstPaintMs' => telemetry_clean_int($event['toFirstPaintMs'] ?? null, 600000),
-                // Two marks between the splash and the window, so the gap between them can
-                // be attributed instead of guessed at: services first, then view models.
-                // All four are measured from process start, so they nest rather than sum.
+                // Marks between the splash and the window, so the gap between them can be
+                // attributed instead of guessed at: services, shell view model, the other
+                // view models, then the window object before its first layout. All are
+                // measured from process start, so they nest rather than sum.
                 'toServicesReadyMs' => telemetry_clean_int($event['toServicesReadyMs'] ?? null, 600000),
+                'toShellViewModelMs' => telemetry_clean_int($event['toShellViewModelMs'] ?? null, 600000),
                 'toViewModelsReadyMs' => telemetry_clean_int($event['toViewModelsReadyMs'] ?? null, 600000),
+                'toWindowBuiltMs' => telemetry_clean_int($event['toWindowBuiltMs'] ?? null, 600000),
                 'toReadyMs' => telemetry_clean_int($event['toReadyMs'] ?? null, 600000),
                 'coldStart' => isset($event['coldStart']) ? (bool)$event['coldStart'] : null,
             ];

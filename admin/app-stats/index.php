@@ -202,9 +202,12 @@ function processEvent($event, $sourceFile, $sessionMeta = []) {
             // never reached that milestone (or predates the field), and null is kept
             // rather than coerced to 0 so a missing measurement cannot pull an
             // average down as though the launch were instant.
+            $normalized['ToMainMs']            = isset($event['toMainMs']) ? (int)$event['toMainMs'] : null;
             $normalized['ToFirstPaintMs']      = isset($event['toFirstPaintMs']) ? (int)$event['toFirstPaintMs'] : null;
             $normalized['ToServicesReadyMs']   = isset($event['toServicesReadyMs']) ? (int)$event['toServicesReadyMs'] : null;
+            $normalized['ToShellViewModelMs']  = isset($event['toShellViewModelMs']) ? (int)$event['toShellViewModelMs'] : null;
             $normalized['ToViewModelsReadyMs'] = isset($event['toViewModelsReadyMs']) ? (int)$event['toViewModelsReadyMs'] : null;
+            $normalized['ToWindowBuiltMs']     = isset($event['toWindowBuiltMs']) ? (int)$event['toWindowBuiltMs'] : null;
             $normalized['ToReadyMs']           = isset($event['toReadyMs']) ? (int)$event['toReadyMs'] : null;
             $normalized['ColdStart']      = !empty($event['coldStart']);
             return ['category' => 'Startup', 'data' => $normalized];

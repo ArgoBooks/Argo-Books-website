@@ -134,11 +134,14 @@ if (!function_exists('ua_describe_event')) {
 
             case 'Startup':
                 $bits = [];
-                // All four phases, so a slow launch says which stage was slow rather than
-                // only that it was. The app records them and the filter keeps them.
+                // Every phase in timeline order, so a slow launch says which stage was slow
+                // rather than only that it was. The app records them and the filter keeps them.
+                if (isset($ev['toMainMs']))            $bits[] = 'runtime ' . (int)$ev['toMainMs'] . ' ms';
                 if (isset($ev['toFirstPaintMs']))      $bits[] = 'blank screen ' . (int)$ev['toFirstPaintMs'] . ' ms';
                 if (isset($ev['toServicesReadyMs']))   $bits[] = 'services ' . (int)$ev['toServicesReadyMs'] . ' ms';
+                if (isset($ev['toShellViewModelMs']))  $bits[] = 'shell ' . (int)$ev['toShellViewModelMs'] . ' ms';
                 if (isset($ev['toViewModelsReadyMs'])) $bits[] = 'view models ' . (int)$ev['toViewModelsReadyMs'] . ' ms';
+                if (isset($ev['toWindowBuiltMs']))     $bits[] = 'window ' . (int)$ev['toWindowBuiltMs'] . ' ms';
                 if (isset($ev['toReadyMs']))           $bits[] = 'ready ' . (int)$ev['toReadyMs'] . ' ms';
                 if (array_key_exists('coldStart', $ev)) {
                     $bits[] = $ev['coldStart'] ? 'cold' : 'warm';
