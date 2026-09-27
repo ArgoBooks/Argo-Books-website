@@ -31,7 +31,7 @@ include __DIR__ . '/../../docs-header.php';
             </ol>
 
             <div class="info-box">
-                <p><strong>Note:</strong> Employees are archived rather than deleted, and the Employees page has separate "Active employees" and "Archived" views.</p>
+                <p><strong>Note:</strong> Employees are archived rather than deleted. The Archive button on an employee's row archives them, and the same button restores them. Archived employees stay in the list; use the Filter to show only active or only archived employees.</p>
             </div>
 
             <h2>Running Payroll</h2>
