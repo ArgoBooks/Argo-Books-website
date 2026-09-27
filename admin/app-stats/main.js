@@ -46,6 +46,12 @@ document.addEventListener("DOMContentLoaded", function () {
   const sessionData = rawData.dataPoints.Session || [];
   const errorData = rawData.dataPoints.Error || [];
   const featureUsageData = rawData.dataPoints.FeatureUsage || [];
+  // Open and save timings arrive as feature events but measure a wait, not a use.
+  // Autosave alone would put CompanySaved at the top of every feature chart.
+  const TIMING_FEATURES = ["CompanyOpened", "CompanySaved"];
+  const featureUseOnly = featureUsageData.filter(
+    (e) => !TIMING_FEATURES.includes(e.FeatureName)
+  );
   const startupData = rawData.dataPoints.Startup || [];
   const pageViewData = rawData.dataPoints.PageView || [];
 
@@ -108,8 +114,8 @@ document.addEventListener("DOMContentLoaded", function () {
   generateErrorDetailsTable(errorData);
 
   // Feature Usage Charts
-  generateFeatureUsageChart(featureUsageData);
-  generateFeatureTimelineChart(featureUsageData);
+  generateFeatureUsageChart(featureUseOnly);
+  generateFeatureTimelineChart(featureUseOnly);
 
   generatePageViewsTable(pageViewData);
 
@@ -128,6 +134,7 @@ document.addEventListener("DOMContentLoaded", function () {
   generateAIImportDurationByTypeChart(featureUsageData);
 
   generateStartupCharts(startupData);
+  generateCompanyFileTimings(featureUsageData);
   generateMemoryKpis(sessionData);
   generateSessionDurationChart(sessionData);
   generateExportTypesBreakdown(exportData);
@@ -1077,6 +1084,164 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // Usage Charts
+
+  // Percentile by nearest-rank on a sorted array. Small samples are the norm
+  // here, so an interpolating percentile would invent precision we lack.
+  function percentile(sorted, p) {
+    if (sorted.length === 0) return null;
+    const rank = Math.ceil((p / 100) * sorted.length);
+    return sorted[Math.min(sorted.length - 1, Math.max(0, rank - 1))];
+  }
+
+  function fmtMs(ms) {
+    return ms === null ? "—" : ms < 1000 ? ms + " ms" : (ms / 1000).toFixed(1) + " s";
+  }
+
+  /**
+   * Company open and save waits, from the CompanyOpened / CompanySaved feature
+   * events. Context is kind:(plain|encrypted):size band. An event without a
+   * duration is left out, never counted as an instant open or save.
+   */
+  function generateCompanyFileTimings(featureUsageData) {
+    const setText = (id, text) => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = text;
+    };
+
+    const rows = featureUsageData
+      .filter(
+        (e) =>
+          (e.FeatureName === "CompanyOpened" || e.FeatureName === "CompanySaved") &&
+          typeof e.DurationMs === "number" &&
+          isFinite(e.DurationMs) &&
+          e.DurationMs >= 0
+      )
+      .map((e) => {
+        const [kind, mode, band] = String(e.Context || "").split(":");
+        return {
+          op: e.FeatureName === "CompanyOpened" ? "open" : "save",
+          ms: e.DurationMs,
+          kind: kind || null,
+          mode: mode === "plain" || mode === "encrypted" ? mode : null,
+          band: band || null,
+        };
+      });
+
+    const sortedMs = (list) => list.map((r) => r.ms).sort((a, b) => a - b);
+    const plural = (n, word) => n + " " + word + (n === 1 ? "" : "s");
+
+    const opens = sortedMs(rows.filter((r) => r.op === "open"));
+    const saves = sortedMs(rows.filter((r) => r.op === "save"));
+
+    setText("kpiOpenP50", fmtMs(percentile(opens, 50)));
+    setText("kpiOpenP90", fmtMs(percentile(opens, 90)));
+    setText("kpiSaveP50", fmtMs(percentile(saves, 50)));
+    setText("kpiSaveP90", fmtMs(percentile(saves, 90)));
+    setText(
+      "kpiOpenSample",
+      opens.length === 0 ? "No timed opens recorded" : "From " + plural(opens.length, "open")
+    );
+    setText(
+      "kpiSaveSample",
+      saves.length === 0 ? "No timed saves recorded" : "From " + plural(saves.length, "save")
+    );
+
+    const encCanvas = document.getElementById("companyFileEncryptionChart");
+    const sizeCanvas = document.getElementById("companyFileSizeChart");
+    if (rows.length === 0) {
+      [encCanvas, sizeCanvas].forEach((c) => {
+        if (c)
+          c.parentElement.innerHTML =
+            '<div class="chart-no-data">No open or save timings recorded</div>';
+      });
+      return;
+    }
+
+    const toSec = (ms) => (ms === null ? null : Math.round((ms / 1000) * 100) / 100);
+
+    // One grouped bar chart per split. A group with no samples gets no bar rather
+    // than a zero, and each tooltip carries its own sample size.
+    const groupedChart = (canvas, labels, datasets) => {
+      if (!canvas) return;
+      new Chart(canvas, {
+        type: "bar",
+        data: {
+          labels,
+          datasets: datasets.map((d) => {
+            const perLabel = d.groups.map(sortedMs);
+            return {
+              label: d.label,
+              data: perLabel.map((v) => toSec(percentile(v, 50))),
+              counts: perLabel.map((v) => v.length),
+              backgroundColor: d.color,
+            };
+          }),
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            tooltip: {
+              callbacks: {
+                label: (ctx) => {
+                  const n = ctx.dataset.counts[ctx.dataIndex];
+                  return (
+                    ctx.dataset.label + ": " + ctx.parsed.y + " s (from " + plural(n, "event") + ")"
+                  );
+                },
+              },
+            },
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              title: { display: true, text: "Median seconds" },
+            },
+          },
+        },
+      });
+    };
+
+    const ops = [
+      { op: "open", label: "Open" },
+      { op: "save", label: "Save" },
+    ];
+
+    groupedChart(
+      encCanvas,
+      ops.map((o) => o.label),
+      [
+        { mode: "plain", label: "Plain", color: "#6366f1" },
+        { mode: "encrypted", label: "Encrypted", color: "#a5b4fc" },
+      ].map((m) => ({
+        label: m.label,
+        color: m.color,
+        groups: ops.map((o) => rows.filter((r) => r.op === o.op && r.mode === m.mode)),
+      }))
+    );
+
+    // The app's bands, smallest first. Anything else it ever sends is appended
+    // rather than dropped.
+    const knownBands = ["<1MB", "1-10MB", "10-50MB", "50MB+"];
+    const seenBands = new Set(rows.map((r) => r.band).filter(Boolean));
+    const bands = knownBands
+      .filter((b) => seenBands.has(b))
+      .concat([...seenBands].filter((b) => !knownBands.includes(b)).sort());
+
+    groupedChart(
+      sizeCanvas,
+      bands,
+      [
+        { op: "open", label: "Open", color: "#10b981" },
+        { op: "save", label: "Save", color: "#3b82f6" },
+      ].map((o) => ({
+        label: o.label,
+        color: o.color,
+        groups: bands.map((b) => rows.filter((r) => r.op === o.op && r.band === b)),
+      }))
+    );
+  }
+
   /**
    * Startup timings. ToReadyMs contains ToFirstPaintMs rather than continuing
    * from it, so the two are nested and must never be summed.
@@ -1102,12 +1267,6 @@ document.addEventListener("DOMContentLoaded", function () {
         .filter((v) => typeof v === "number" && isFinite(v) && v > 0)
         .sort((a, b) => a - b);
 
-    const percentile = (sorted, p) => {
-      if (sorted.length === 0) return null;
-      const rank = Math.ceil((p / 100) * sorted.length);
-      return sorted[Math.min(sorted.length - 1, Math.max(0, rank - 1))];
-    };
-
     const fmtMb = (mb) =>
       mb === null ? "—" : mb < 1024 ? mb + " MB" : (mb / 1024).toFixed(1) + " GB";
 
@@ -1131,17 +1290,6 @@ document.addEventListener("DOMContentLoaded", function () {
       const el = document.getElementById(id);
       if (el) el.textContent = text;
     };
-
-    // Percentile by nearest-rank on a sorted copy. Small samples are the norm
-    // here, so an interpolating percentile would invent precision we lack.
-    const percentile = (sorted, p) => {
-      if (sorted.length === 0) return null;
-      const rank = Math.ceil((p / 100) * sorted.length);
-      return sorted[Math.min(sorted.length - 1, Math.max(0, rank - 1))];
-    };
-
-    const fmtMs = (ms) =>
-      ms === null ? "—" : ms < 1000 ? ms + " ms" : (ms / 1000).toFixed(1) + " s";
 
     const nums = (rows, key) =>
       rows

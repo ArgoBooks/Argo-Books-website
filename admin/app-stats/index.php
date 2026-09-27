@@ -982,6 +982,41 @@ include __DIR__ . '/../admin_header.php';
                     </div>
                 </div>
 
+                <h3 class="section-subtitle">Company Open and Save Times</h3>
+                <div class="stats-grid" id="companyFileKpiGrid">
+                    <div class="stat-card">
+                        <h3>Open Time (median)</h3>
+                        <div class="value" id="kpiOpenP50">&mdash;</div>
+                        <p class="subtext">Until the company's dashboard is showing</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Open Time (90th pct)</h3>
+                        <div class="value" id="kpiOpenP90">&mdash;</div>
+                        <p class="subtext" id="kpiOpenSample">&mdash;</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Save Time (median)</h3>
+                        <div class="value" id="kpiSaveP50">&mdash;</div>
+                        <p class="subtext">Every kind of save, automatic ones included</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Save Time (90th pct)</h3>
+                        <div class="value" id="kpiSaveP90">&mdash;</div>
+                        <p class="subtext" id="kpiSaveSample">&mdash;</p>
+                    </div>
+                </div>
+
+                <div class="chart-row">
+                    <div class="chart-container">
+                        <h2>Open and Save: Plain vs Encrypted (median)</h2>
+                        <canvas id="companyFileEncryptionChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h2>Open and Save by File Size (median)</h2>
+                        <canvas id="companyFileSizeChart"></canvas>
+                    </div>
+                </div>
+
                 <div class="chart-row">
                     <div class="chart-container">
                         <h2>Average Active Time per Session (minutes)</h2>

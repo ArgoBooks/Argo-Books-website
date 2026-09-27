@@ -69,6 +69,19 @@ if (!function_exists('ua_describe_event')) {
                 // The app sends the enum name. This one lands among real user actions in the
                 // timeline, where "SampleCompanyOpened" reads as a leaked identifier.
                 if ($name === 'SampleCompanyOpened') $name = 'Opened sample company';
+                if ($name === 'CompanyOpened' || $name === 'CompanySaved') {
+                    // Worded as a timing so it does not read as a second copy of the profile
+                    // row's "Opened company: X" for the same open.
+                    $verb = $name === 'CompanyOpened' ? 'Company open' : 'Save';
+                    // A missing duration is left unsaid rather than shown as 0 ms.
+                    if (isset($ev['durationMs']) && is_numeric($ev['durationMs'])) {
+                        $ms = (int)$ev['durationMs'];
+                        $verb .= ' took ' . ($ms < 1000 ? $ms . ' ms' : number_format($ms / 1000, 1) . ' s');
+                    }
+                    // Context is kind:(plain|encrypted):size band.
+                    $parts = array_filter(explode(':', (string)($ev['context'] ?? '')), 'strlen');
+                    return ['feature', $verb . ($parts ? ' (' . implode(', ', $parts) . ')' : '')];
+                }
                 // Without the context the timeline shows "ImportFailed" and no reason.
                 $bits = [];
                 if (!empty($ev['context']))    $bits[] = (string)$ev['context'];

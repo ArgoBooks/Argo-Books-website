@@ -64,7 +64,10 @@ const TELEMETRY_FEATURE_NAMES = [
     // Updates, with the version in the context
     'UpdateOffered', 'UpdateApplied',
     'RecurringScheduleCreated', 'RecurringTransactionsGenerated',
-    'PaymentProviderConnected', 'PhonePaired', 'CompanyPasswordSet'
+    'PaymentProviderConnected', 'PhonePaired', 'CompanyPasswordSet',
+    // Timings rather than feature use: durationMs is the wait, and the context is
+    // kind:(plain|encrypted):size band.
+    'CompanyOpened', 'CompanySaved'
 ];
 
 // Business descriptors on a CompanyProfile event. Free text, not enum-checked: these
