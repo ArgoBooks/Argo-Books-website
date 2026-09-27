@@ -872,7 +872,9 @@
 .bd-panel[data-bd-panel="keyword"], .bd-panel[data-bd-panel="country"],
 .bd-panel[data-bd-panel="region"], .bd-panel[data-bd-panel="city"],
 .bd-panel[data-bd-panel="popular"], .bd-panel[data-bd-panel="entry"],
-.bd-panel[data-bd-panel="exit"] { overflow-y: auto; }
+.bd-panel[data-bd-panel="exit"] { overflow: hidden; }
+/* Only the list scrolls, so "See all details" stays pinned under it. */
+.bd-panel > .bd-list { flex: 1; min-height: 0; overflow-y: auto; }
 
 /* ─── Dual-bar breakdown lists (blue visits + orange revenue) ──────────── */
 
