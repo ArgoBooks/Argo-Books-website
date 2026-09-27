@@ -65,6 +65,8 @@ const TELEMETRY_FEATURE_NAMES = [
     'UpdateOffered', 'UpdateApplied',
     'RecurringScheduleCreated', 'RecurringTransactionsGenerated',
     'PaymentProviderConnected', 'PhonePaired', 'CompanyPasswordSet',
+    // The record type (expense, revenue, invoice) is in the context.
+    'RecordDuplicated',
     // Timings rather than feature use: durationMs is the wait, and the context is
     // kind:(plain|encrypted):size band.
     'CompanyOpened', 'CompanySaved'
