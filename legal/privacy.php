@@ -260,8 +260,9 @@
                 control of it:</p>
             <ul>
                 <li><strong>View your data</strong>: Open the telemetry folder on your device from
-                    <em>Settings &gt; General &gt; Privacy</em> to see exactly which events have been
-                    recorded. The files are plain JSON that you can read or copy</li>
+                    <em>Settings &gt; General &gt; Privacy</em> to see the events waiting to be sent. Events
+                    are removed from the folder once they have been uploaded. The files are plain JSON that you can
+                    read or copy</li>
                 <li><strong>Delete your data</strong>: You can delete all usage data stored on your device at any
                     time from the same panel. Deleting clears the local copy. To also remove data that has already
                     been uploaded to our servers, email
