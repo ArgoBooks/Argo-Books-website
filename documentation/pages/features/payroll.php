@@ -14,11 +14,7 @@ include __DIR__ . '/../../docs-header.php';
             straight into your books as an expense.</p>
 
             <div class="info-box">
-                <p><strong>Note:</strong> Payroll is a Premium feature. <a href="../getting-started/version-comparison.php" class="link">See the version comparison</a> for what each plan includes.</p>
-            </div>
-
-            <div class="info-box">
-                <p><strong>Canada only:</strong> Payroll follows CRA and Revenu Québec rules and produces Canadian forms (T4, RL-1, ROE). It is not designed for employers outside Canada.</p>
+                <p><strong>Note:</strong> Payroll is a Premium feature for Canadian employers. It follows CRA and Revenu Québec rules and produces Canadian forms (T4, RL-1, ROE), so it's not designed for employers outside Canada. <a href="../getting-started/version-comparison.php" class="link">See the version comparison</a> for what each plan includes.</p>
             </div>
 
             <h2>Adding Employees</h2>
@@ -35,7 +31,7 @@ include __DIR__ . '/../../docs-header.php';
             </ol>
 
             <div class="info-box">
-                <p><strong>Note:</strong> Employees are archived rather than deleted, and the Employees page has separate "Active employees" and "Archived" views. A T4 still has to be produceable for someone who left partway through the year, so their history stays intact.</p>
+                <p><strong>Note:</strong> Employees are archived rather than deleted, and the Employees page has separate "Active employees" and "Archived" views.</p>
             </div>
 
             <h2>Running Payroll</h2>
@@ -80,10 +76,6 @@ include __DIR__ . '/../../docs-header.php';
             parses, its identifier matches the one requested, and every derived maximum reproduces from its
             own rate with brackets meeting cleanly at each boundary. Anything that fails those checks is
             discarded and changes nothing.</p>
-
-            <div class="info-box">
-                <p><strong>Note:</strong> If no edition covers your pay date, Argo Books will not calculate the run. It does not fall back to the previous period's rates. A deduction calculated from stale tables looks correct and lands on a real person's pay, so refusing is the safer behaviour.</p>
-            </div>
 
             <h2>Quebec</h2>
             <p>Quebec is calculated separately, because none of its figures appear in CRA's tables. Argo

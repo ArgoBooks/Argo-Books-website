@@ -644,7 +644,7 @@ body.docs-page .account-avatar {
 }
 
 .docs-content h3 {
-  font-size: var(--text-sm);
+  font-size: var(--text-md);
   font-weight: 600;
   color: var(--black);
   margin: 28px 0 12px;
@@ -655,7 +655,7 @@ body.docs-page .account-avatar {
   color: var(--black);
   line-height: 1.7;
   margin-bottom: 16px;
-  font-size: var(--text-xs);
+  font-size: var(--text-sm);
 }
 
 .docs-content ul {
@@ -674,18 +674,18 @@ body.docs-page .account-avatar {
   padding-left: 8px;
   margin-bottom: 12px;
   line-height: 1.7;
-  font-size: var(--text-xs);
+  font-size: var(--text-sm);
 }
 
 .docs-content ul li {
   margin-bottom: 6px;
   line-height: 1.6;
-  font-size: var(--text-xs);
+  font-size: var(--text-sm);
 }
 
 .docs-content li {
   line-height: 1.6;
-  font-size: var(--text-xs);
+  font-size: var(--text-sm);
 }
 
 .docs-content img {
@@ -793,7 +793,7 @@ body.docs-page .account-avatar {
   margin: 24px 0;
   border-radius: var(--radius-md);
   line-height: 1.7;
-  font-size: var(--text-xs);
+  font-size: var(--text-sm);
   color: var(--black);
 }
 
@@ -822,7 +822,7 @@ body.docs-page .account-avatar {
 .info-box p {
   margin: 4px 0;
   color: var(--black);
-  font-size: var(--text-xs);
+  font-size: var(--text-sm);
 }
 
 .warning-box {
@@ -832,7 +832,7 @@ body.docs-page .account-avatar {
   margin: 24px 0;
   border-radius: var(--radius-md);
   line-height: 1.7;
-  font-size: var(--text-xs);
+  font-size: var(--text-sm);
   color: var(--black);
 }
 
@@ -892,7 +892,7 @@ body.docs-page .account-avatar {
   padding-left: 8px;
   margin-bottom: 12px;
   line-height: 1.7;
-  font-size: var(--text-xs);
+  font-size: var(--text-sm);
   color: var(--black);
 }
 
@@ -921,7 +921,7 @@ body.docs-page .account-avatar {
   padding: 12px 16px;
   border-bottom: 1px solid var(--gray-200);
   text-align: left;
-  font-size: var(--text-xs);
+  font-size: var(--text-sm);
 }
 
 .comparison-table th {
@@ -1044,7 +1044,7 @@ body.docs-page .account-avatar {
 
 .requirement-card li {
   color: var(--black);
-  font-size: var(--text-xs);
+  font-size: var(--text-sm);
   margin-bottom: 8px;
   line-height: 1.5;
 }
@@ -1382,7 +1382,7 @@ body.docs-page .account-avatar {
 .docs-content table {
   width: 100%;
   margin: 22px 0;
-  font-size: var(--text-xs);
+  font-size: var(--text-sm);
   /* separate, not collapse: a collapsed table ignores border-radius, so the
      rounded corners would be clipped off the border but not the header fill. */
   border-collapse: separate;
@@ -1396,7 +1396,7 @@ body.docs-page .account-avatar {
   padding: 11px 14px;
   text-align: left;
   font-weight: 600;
-  font-size: var(--text-xs);
+  font-size: var(--text-sm);
   letter-spacing: 0.02em;
   text-transform: uppercase;
   color: var(--gray-600);

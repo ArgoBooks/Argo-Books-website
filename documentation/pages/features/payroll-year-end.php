@@ -14,7 +14,7 @@ include __DIR__ . '/../../docs-header.php';
             Employment file. You need employees and approved pay runs first; see <a class="link" href="payroll.php">Payroll</a>.</p>
 
             <div class="info-box">
-                <p><strong>Note:</strong> Argo Books does not file on your behalf. It generates the slips and the upload file; you submit them through CRA, Revenu Québec or ROE Web yourself.</p>
+                <p><strong>Note:</strong> Argo Books does not file on your behalf. It generates the files, then you submit them through the CRA, Revenu Québec or ROE Web yourself.</p>
             </div>
 
             <h2>Remittance Due</h2>
@@ -75,10 +75,6 @@ include __DIR__ . '/../../docs-header.php';
                 <li>Enter who Service Canada should call about this ROE: someone at your company, not the employee</li>
                 <li>Click "Save ROE XML" and upload the file to ROE Web</li>
             </ol>
-
-            <div class="info-box">
-                <p><strong>Note:</strong> Argo Books never fills in block 16, the reason for issuing. It has no way to know whether someone quit, was let go or went on leave, and that answer affects their benefit claim, so you choose it every time.</p>
-            </div>
 
             <div class="info-box">
                 <p><strong>Tip:</strong> Not ready to submit? "Save as draft" makes a file ROE Web loads without submitting it, so you can check it there first. If you would rather key the figures in by hand, "View worksheet" shows them on one sheet.</p>
