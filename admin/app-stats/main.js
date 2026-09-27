@@ -57,13 +57,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Initialize all charts
   if (isGeoEnabled) {
-    generateCountryDistributionChart(
-      exportData,
-      geminiData,
-      exchangeRatesData,
-      sessionData,
-      errorData
-    );
+    generateCountryDistributionChart(rawData);
     generatePerformanceByCountryChart(
       exportData,
       geminiData,
@@ -148,27 +142,22 @@ document.addEventListener("DOMContentLoaded", function () {
   generateActiveUsersTab(rawData);
 
   // Geographic Charts
-  function generateCountryDistributionChart(
-    exportData,
-    geminiData,
-    exchangeRatesData,
-    sessionData,
-    errorData
-  ) {
-    const allData = [
-      ...exportData,
-      ...geminiData,
-      ...exchangeRatesData,
-      ...sessionData,
-      ...errorData,
-    ];
-    const countryCounts = {};
+  // Counts people, not events: each user (hashed IP, the same key the Active Users tab
+  // uses) is counted once, under the country of their latest event that has one.
+  function generateCountryDistributionChart(rawData) {
+    const latestByUser = {};
+    for (const events of Object.values(rawData.dataPoints)) {
+      (events || []).forEach((e) => {
+        if (!e.hashedIP || !e.country || e.country === "Unknown") return;
+        const ts = new Date(e.timestamp).getTime();
+        const seen = latestByUser[e.hashedIP];
+        if (!seen || ts > seen.ts) latestByUser[e.hashedIP] = { ts, country: e.country };
+      });
+    }
 
-    allData.forEach((item) => {
-      const country = item.country || "Unknown";
-      if (country !== "Unknown") {
-        countryCounts[country] = (countryCounts[country] || 0) + 1;
-      }
+    const countryCounts = {};
+    Object.values(latestByUser).forEach(({ country }) => {
+      countryCounts[country] = (countryCounts[country] || 0) + 1;
     });
 
     if (Object.keys(countryCounts).length === 0) {
@@ -193,7 +182,7 @@ document.addEventListener("DOMContentLoaded", function () {
         labels: labels,
         datasets: [
           {
-            label: "Operations",
+            label: "Users",
             data: data,
             backgroundColor: colors,
             borderColor: colors.map((c) => c.replace("0.8", "1")),
@@ -215,8 +204,9 @@ document.addEventListener("DOMContentLoaded", function () {
             beginAtZero: true,
             title: {
               display: true,
-              text: "Number of Operations",
+              text: "Number of Users",
             },
+            ticks: { precision: 0 },
           },
         }
       },
@@ -532,6 +522,23 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // Version Charts
+  // Orders versions like 2.0.9 < 2.0.10, number by number, so every version chart reads
+  // oldest to newest rather than in text order or by how much data each has.
+  function compareVersions(a, b) {
+    const pa = String(a).split(/[.\-]/);
+    const pb = String(b).split(/[.\-]/);
+    for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+      const na = parseInt(pa[i] ?? "0", 10);
+      const nb = parseInt(pb[i] ?? "0", 10);
+      if (!isNaN(na) && !isNaN(nb) && na !== nb) return na - nb;
+      if (isNaN(na) || isNaN(nb)) {
+        const c = String(pa[i] ?? "").localeCompare(String(pb[i] ?? ""));
+        if (c !== 0) return c;
+      }
+    }
+    return 0;
+  }
+
   function generateVersionDistributionChart(
     exportData,
     geminiData,
@@ -563,8 +570,8 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
 
-    const sortedVersions = Object.entries(versionCounts).sort(
-      ([, a], [, b]) => b - a
+    const sortedVersions = Object.entries(versionCounts).sort(([a], [b]) =>
+      compareVersions(a, b)
     );
 
     const labels = sortedVersions.map(([version]) => `V.${version}`);
@@ -656,7 +663,8 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     const recentDates = Object.keys(versionByDate).sort();
-    const topVersions = Array.from(versions).slice(0, 5);
+    // The five newest versions, oldest first.
+    const topVersions = Array.from(versions).sort(compareVersions).slice(-5);
 
     const datasets = topVersions.map((version, index) => ({
       label: `V.${version}`,
@@ -737,7 +745,7 @@ document.addEventListener("DOMContentLoaded", function () {
         count: durations.length,
       }))
       .filter((item) => item.count >= 3)
-      .sort((a, b) => b.avgDuration - a.avgDuration);
+      .sort((a, b) => compareVersions(a.version, b.version));
 
     const labels = versionAverages.map((item) => `V.${item.version}`);
     const averages = versionAverages.map((item) =>
@@ -832,7 +840,7 @@ document.addEventListener("DOMContentLoaded", function () {
         operations: versionOperations[version] || 0,
       }))
       .filter((item) => item.operations >= 10)
-      .sort((a, b) => b.errorRate - a.errorRate);
+      .sort((a, b) => compareVersions(a.version, b.version));
 
     const labels = versionErrorRates.map((item) => `V.${item.version}`);
     const errorRates = versionErrorRates.map((item) =>
