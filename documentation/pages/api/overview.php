@@ -25,7 +25,7 @@ include __DIR__ . '/../../docs-header.php';
                 <li>Our ids are not their ids. After an import, <code>import.local_ref</code> holds the id the merchant's copy of Argo Books assigned.</li>
                 <li><strong>An object freezes once it is imported.</strong> Update and delete return <code>409 object_not_pending</code>. The merchant already has a copy, so changing the original here would leave two versions of one fact. To correct something after the fact, push a correcting object.</li>
             </ul>
-            <p>There is no fixed timeline for step two. A merchant who opens Argo Books weekly will import your data weekly. <code>GET /v1/account</code> reports how much of yours is still waiting.</p>
+            <p>There is no fixed timeline for the merchant to import what you send. One who opens Argo Books weekly will import your data weekly. <code>GET /v1/account</code> reports how much of yours is still waiting.</p>
 
             <h2>Getting Started</h2>
             <p>Ask the merchant for a key. They create one in Argo Books under <strong>Settings</strong>, then <strong>Integrations</strong>, then <strong>Argo Books API</strong>. Keys start with <code>ab_</code>. See <a href="authentication.php" class="link">Authentication</a>.</p>

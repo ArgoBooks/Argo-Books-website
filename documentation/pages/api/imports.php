@@ -10,7 +10,7 @@ include __DIR__ . '/../../docs-header.php';
 ?>
 
         <div class="docs-content">
-            <p>This is the part with no equivalent in a payments API, and the part most worth reading. Data you send does not become accounting records by itself. A person accepts it.</p>
+            <p>This page covers what happens to data after you send it. Nothing goes straight into the merchant's books. Each object waits until the merchant opens Argo Books, reviews it, and either imports it or rejects it. Below: the statuses an object moves through, how to check them, and how to build your integration so the wait does not cause problems.</p>
 
             <h2>The Lifecycle</h2>
             <table>

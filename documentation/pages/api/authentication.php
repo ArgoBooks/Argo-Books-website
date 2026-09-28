@@ -42,7 +42,7 @@ CODE, 'http', 'Either header') ?>
 
             <h2>Keeping the Key Safe</h2>
             <ul>
-                <li>Server-side only. The API answers no CORS preflight precisely so a key cannot end up in browser JavaScript.</li>
+                <li>Keep it on your server. Never put it in a web page or browser code: the API answers no CORS preflight precisely so a key cannot end up in browser JavaScript.</li>
                 <li>Do not commit it. The <code>ab_</code> prefix exists so automated secret scanners recognise one that leaks into a public repository.</li>
                 <li>Do not log it. Log the <code>Request-Id</code> from the response instead; it identifies the request without exposing the credential.</li>
                 <li>If a key is ever exposed, ask the merchant to revoke it. Rotation is a 10 second job for them.</li>

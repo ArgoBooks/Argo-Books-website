@@ -12,10 +12,7 @@ include __DIR__ . '/../../docs-header.php';
 ?>
 
         <div class="docs-content">
-            <p>Webhooks tell you what the <strong>merchant</strong> did. Polling <code>import_status</code> works, but a webhook means you find out within a minute instead of on your next sweep.</p>
-
-            <h2>There Is No created Event</h2>
-            <p>You will not find <code>revenue.created</code> here, and that is deliberate. You created it; you already know. Every event on this page is something you could not otherwise have learned without asking.</p>
+            <p>Webhooks tell you when the merchant imports, rejects, or undoes the import of data you sent. Polling <code>import_status</code> works, but a webhook means you find out within a minute instead of on your next sweep.</p>
 
             <h2>Event Types</h2>
             <table>
