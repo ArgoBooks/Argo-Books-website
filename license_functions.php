@@ -284,6 +284,38 @@ function redeem_premium_key($key, $device_id) {
  * @param string $subscription_id The subscription ID linked to this key
  * @return array Response array
  */
+/**
+ * Makes a key's subscription belong to this environment, and says whether it can.
+ *
+ * A key carries no environment of its own, so one redeemed on the other site is used here
+ * too. Its subscription is moved across rather than refused: left stamped with the other
+ * environment, every query that filters on environment would miss it, which is what made
+ * the app's launch check clear the key after each switch between dev and production.
+ *
+ * Only a subscription the key itself created, which is what free_key marks. A subscription
+ * paid for by a sandbox checkout must not be dragged into production, because that really
+ * would be premium for test money.
+ */
+function _move_subscription_to_current_environment(array &$subscription): bool {
+    global $pdo;
+
+    if ($subscription['environment'] === current_environment()) {
+        return true;
+    }
+    if (($subscription['payment_method'] ?? '') !== 'free_key') {
+        return false;
+    }
+
+    $stmt = $pdo->prepare("
+        UPDATE premium_subscriptions
+        SET environment = ?
+        WHERE subscription_id = ? AND payment_method = 'free_key'
+    ");
+    $stmt->execute([current_environment(), $subscription['subscription_id']]);
+    $subscription['environment'] = current_environment();
+    return true;
+}
+
 function _handle_re_redemption($key, $device_id, $subscription_id) {
     global $pdo;
 
@@ -300,30 +332,12 @@ function _handle_re_redemption($key, $device_id, $subscription_id) {
             $subscription = $stmt->fetch(PDO::FETCH_ASSOC);
         }
 
-        // A key carries no environment of its own, so one redeemed on the other site
-        // can be redeemed here. Move its subscription across rather than refusing it:
-        // leaving the row stamped with the other environment would let this redemption
-        // succeed while every later query that filters on environment missed it.
-        //
-        // Only a subscription the key itself created, which is what free_key marks. A
-        // subscription paid for by a sandbox checkout must not be dragged into
-        // production, because that really would be premium for test money.
-        if ($subscription && $subscription['environment'] !== current_environment()) {
-            if (($subscription['payment_method'] ?? '') !== 'free_key') {
-                return [
-                    'success' => false,
-                    'status' => 'invalid_key',
-                    'message' => 'Invalid license key.'
-                ];
-            }
-
-            $stmt = $pdo->prepare("
-                UPDATE premium_subscriptions
-                SET environment = ?
-                WHERE subscription_id = ? AND payment_method = 'free_key'
-            ");
-            $stmt->execute([current_environment(), $subscription_id]);
-            $subscription['environment'] = current_environment();
+        if ($subscription && !_move_subscription_to_current_environment($subscription)) {
+            return [
+                'success' => false,
+                'status' => 'invalid_key',
+                'message' => 'Invalid license key.'
+            ];
         }
 
         if (!$subscription) {
@@ -546,14 +560,14 @@ function validate_license($key, $device_id) {
 
         // Look up the linked subscription
         $stmt = $pdo->prepare("
-            SELECT subscription_id, status, end_date
+            SELECT subscription_id, status, end_date, environment, payment_method
             FROM premium_subscriptions
-            WHERE subscription_id = ? AND environment = ?
+            WHERE subscription_id = ?
         ");
-        $stmt->execute([$premium_key['subscription_id'], current_environment()]);
+        $stmt->execute([$premium_key['subscription_id']]);
         $subscription = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if (!$subscription) {
+        if (!$subscription || !_move_subscription_to_current_environment($subscription)) {
             return [
                 'success' => false,
                 'status' => 'invalid_key',

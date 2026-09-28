@@ -60,12 +60,30 @@ final class ValidateLicenseTest extends DatabaseTestCase
         $this->assertSame('valid', $result['status']);
     }
 
-    public function test_rejects_a_key_whose_subscription_belongs_to_the_other_environment(): void
+    public function test_accepts_a_key_subscription_from_the_other_environment_and_moves_it_here(): void
     {
-        // Tests run as sandbox, so a production subscription is the "other" one.
+        // Tests run as sandbox, so a production subscription is the "other" one. Switching
+        // the app between dev and production must not cost the owner their key.
         $subId = 'PREM-TEST-SUB4-GGGG-HHHH';
         $this->seedSubscription($subId, (new \DateTime('+90 days'))->format('Y-m-d H:i:s'));
         $this->pdo->prepare("UPDATE premium_subscriptions SET environment = 'production' WHERE subscription_id = ?")
+            ->execute([$subId]);
+        $key = $this->seedRedeemedKey(self::DEVICE, $subId);
+
+        $result = validate_license($key, self::DEVICE);
+
+        $this->assertTrue($result['success']);
+        $this->assertSame('valid', $result['status']);
+        $stmt = $this->pdo->prepare('SELECT environment FROM premium_subscriptions WHERE subscription_id = ?');
+        $stmt->execute([$subId]);
+        $this->assertSame('sandbox', $stmt->fetch()['environment']);
+    }
+
+    public function test_rejects_a_subscription_paid_for_in_the_other_environment(): void
+    {
+        $subId = 'PREM-TEST-SUB5-GGGG-HHHH';
+        $this->seedSubscription($subId, (new \DateTime('+90 days'))->format('Y-m-d H:i:s'));
+        $this->pdo->prepare("UPDATE premium_subscriptions SET environment = 'production', payment_method = 'stripe' WHERE subscription_id = ?")
             ->execute([$subId]);
         $key = $this->seedRedeemedKey(self::DEVICE, $subId);
 
