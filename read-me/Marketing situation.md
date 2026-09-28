@@ -145,6 +145,21 @@ About CA\$300 spent, 0 attributable customers. Details in [Google Ads economics.
 
 The WinForms to Avalonia article post (published 2026-09-15, Avalonia UI tagged in the first sentence) reached 1901 impressions, 34 reactions, 1 comment and 4 reposts in three days, twice the amount as the other 2 posts. One repost was from Jumar Macato, a software engineer at Avalonia UI.
 
+### Warm introduction to a credit union
+A neighbour, James, works at a credit union, knows Chris, the CEO of Mainstreet Credit Union, and introduced us in a LinkedIn group chat in September 2026. That led to an email, then his executive assistant booking 30 minutes.
+
+**Mainstreet Credit Union**, Strathroy Ontario: 10 branches across Southwestern Ontario, over \$1 billion under administration, a Canadian-owned co-operative with a separate Business and Investment Advice Centre. Chris Inniss, President and CEO.
+
+**The meeting, 2026-09-28.** Booked for 30 minutes, ran about 6 (12:38 to 12:44). Video failed in Teams so it was screen share and audio only. He said very little, asked twice for an email with more information, and closed on the second ask. He ended with "send me an email and I'll see if any of my business members are interested".
+
+**What was learned about their book.** Asked whether the business members are mainly agricultural: no, all sorts. He does loans and investments from \$15,000 to \$15 million.
+
+**The ask.** He asked directly whether I was looking for a referral, and the answer was "yes, open to ideas, trying to get it in front of people". That is defensible: a narrow ask can be declined narrowly, and leaving it open let him offer the thing he was actually willing to do, which he did. The lesson is smaller than it first looked. A specific ask does not have to be a big one, and "ideally an introduction to whoever works with your smaller business members" is just as easy to agree to while saving him the work of inventing the option. Someone with six minutes who is handed that work defaults to the smallest move available, which is asking for an email.
+
+**Follow-up.** One email, written so the middle paragraph can be forwarded to a member untouched, with a single ask for an introduction to someone on their business banking side. Link tagged `?source=mainstreet`, which is the only real measure of whether it went anywhere: he is not going to reply to say he forwarded it.
+
+**Honest read.** A meeting the other side closes twice in six minutes is usually a polite no, although he may have just been busy. The named commitment to look at his members is worth the email, but expect nothing. The value in this one is the lesson about the ask, and the fact that a warm introduction reached a CEO at all, which no amount of cold email has done.
+
 ### Directory listings: done, no measurable traffic
 Already listed on G2, Capterra, Product Hunt, and roughly 30 cheap Product Hunt copycats. None of it brought traffic. G2 and the other main listings were updated in September 2026 to include macOS.
 
