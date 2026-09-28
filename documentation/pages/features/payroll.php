@@ -42,8 +42,9 @@ include __DIR__ . '/../../docs-header.php';
                 <li><strong>Amounts:</strong> Enter hours or pay, plus vacation pay and any other earnings</li>
                 <li><strong>Review:</strong> Check the calculated deductions and net pay, then approve</li>
             </ol>
-            <p>The review step also shows your total cost, meaning gross pay plus your employer share of CPP
-            and EI, and the total to remit.</p>
+            <p>The review step also shows the total net pay, the total to remit to the CRA, your own share of
+            CPP and EI (which you pay on top of wages, matching each employee's CPP and paying 1.4 times their
+            EI), and your total cost: gross pay plus that share.</p>
             <p>Approving the run writes one expense per employee at their <strong>net pay</strong>. The
             withheld amounts are not written as separate expenses, because the money has not left your
             business yet. It leaves when you make your remittance, which keeps the expense from being
