@@ -89,6 +89,57 @@ $pricing = get_pricing_config();
     <div class="container">
         <div class="version-grid">
 
+            <!-- Version 2.0.18 -->
+            <div class="version-card">
+                <div class="version-header">
+                    <div class="version-info">
+                        <span class="version-tag">Version 2.0.18</span>
+                        <span class="date-tag">September 27 2026</span>
+                    </div>
+                    <?= svg_icon('chevron-down', 24, 'dropdown-arrow', null, 'stroke-linecap="round" stroke-linejoin="round"') ?>
+                </div>
+
+                <div class="version-content">
+                    <div class="changelog">
+                        <div class="changelog-section">
+                            <h4 class="section-label feature">New Features</h4>
+                            <ul class="changelog-list">
+                                <li><strong>See when a list is filtered:</strong> While a filter is on, the Filter button shows how many are applied, with a button to clear them. If the filters hide every row, the list tells you.</li>
+                                <li><strong>Bank statements in any layout:</strong> Bank statements saved as a CSV or Excel file now import even when the column headings aren't in English.</li>
+                                <li><strong>Duplicate in one click:</strong> Copy an expense, sale or invoice. A new one opens already filled in and dated today, so you only change what's different.</li>
+                            </ul>
+                        </div>
+                        <div class="changelog-section">
+                            <h4 class="section-label enhancement">Enhancements</h4>
+                            <ul class="changelog-list">
+                                <li><strong>Opens faster:</strong> Argo Books gets to its main window noticeably sooner after you open it, and Premium users no longer see a brief pause once it appears.</li>
+                                <li><strong>Keep working while it saves:</strong> Saving happens in the background, so Argo Books no longer pauses while your company saves.</li>
+                                <li><strong>Fits smaller windows:</strong> Argo Books adjusts better when you make the window smaller. Tables scroll sideways instead of squeezing their columns, the sidebar tucks itself away, and windows, charts and labels resize to fit better.</li>
+                                <li><strong>Your language from the first screen:</strong> If you use Argo Books in another language, it shows in that language immediately.</li>
+                                <li><strong>Remembers your window:</strong> Argo Books reopens at the size and position you left it.</li>
+                                <li><strong>Your stock valued the same everywhere:</strong> Inventory value and cost of goods now agree on the dashboard, the Locations page and your reports.</li>
+                                <li><strong>Clearer tax figures:</strong> Tax counts only sales you've been paid for and takes refunded tax off, so it matches your Tax Summary and Balance Sheet. Tax by category and by product is shared across every line of a sale.</li>
+                                <li><strong>Top Customers follows your date range:</strong> The dashboard widget shows the period you've picked, like every other widget.</li>
+                                <li><strong>Import previews in your currency:</strong> Before bringing in payments from Stripe or the Argo Books API, the total is shown in your company's currency.</li>
+                                <li><strong>Security deposits:</strong> A deposit reads "Refund pending" until the card refund clears. When there's no online payment to refund, Argo Books tells you to return the deposit by hand.</li>
+                                <li><strong>Payroll filing says what it needs:</strong> Filing your T4s or producing a Record of Employment now marks the fields still to be filled in, rather than leaving the button greyed out while you work out which one it meant.</li>
+                            </ul>
+                        </div>
+                        <div class="changelog-section">
+                            <h4 class="section-label fix">Fixes</h4>
+                            <ul class="changelog-list">
+                                <li>Importing a spreadsheet keeps unpaid sales unpaid.</li>
+                                <li>Only invoices that are past due with money still owed count as overdue. Drafts and cancelled invoices never do.</li>
+                                <li>A rental billed through an invoice shows as paid once that invoice is paid, and returning a rental that was already paid keeps it paid.</li>
+                                <li>Returning a rental can't be undone, because a deposit sent back through Stripe or Square can't be taken back.</li>
+                                <li>Online refunds can include the invoice's shipping.</li>
+                                <li>Marking a sale or purchase as returned records what was actually paid for the items.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Version 2.0.17 -->
             <div class="version-card">
                 <div class="version-header">
