@@ -30,7 +30,7 @@ return [
     'steps_h2' => 'Three steps, one file',
     'steps_lede' => 'Typing a statement in by hand is where an afternoon goes. Importing it is where ten minutes goes.',
     'steps' => [
-        ['h3' => 'Export from your bank', 'p' => 'Whatever format they offer. CSV, Excel and the common statement layouts are all read.'],
+        ['h3' => 'Export from your bank', 'p' => 'Whatever format they offer. CSV, Excel, PDF and the common statement layouts are all read.'],
         ['h3' => 'Drop the file in', 'p' => 'Columns are worked out for you, so there is no mapping screen to fight with before anything happens.'],
         ['h3' => 'Confirm what is new', 'p' => 'Anything already in your books is matched and set aside. You review the rest and save.'],
     ],

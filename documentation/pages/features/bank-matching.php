@@ -20,13 +20,13 @@ include __DIR__ . '/../../docs-header.php';
             <h2>How Bank Matching Works</h2>
             <ol class="steps-list">
                 <li>Open <strong>Bank Matching</strong> from the sidebar, under Import</li>
-                <li>Click <strong>Import statement</strong> and choose a CSV or Excel file from your bank</li>
+                <li>Click <strong>Import statement</strong> and choose a CSV, Excel or PDF statement from your bank</li>
                 <li>Argo Books reads the columns and automatically matches each line against your books</li>
                 <li>Review the results: confident matches are confirmed for you, likely matches are suggested for you to accept, and anything left over is flagged as unmatched</li>
             </ol>
 
             <h2>Importing a Statement</h2>
-            <p>The importer reads any CSV or Excel bank statement and maps its columns to the fields Bank Matching needs:</p>
+            <p>The importer reads CSV, Excel and PDF bank statements and maps their columns to the fields Bank Matching needs:</p>
             <div class="two-column-list">
                 <ul>
                     <li>Date</li>
@@ -39,7 +39,7 @@ include __DIR__ . '/../../docs-header.php';
                     <li>Reference</li>
                 </ul>
             </div>
-            <p>Column detection happens locally and instantly, recognizing common header names (and tolerating a few preamble rows). If your statement uses unusual or cryptic headers that can't be recognized, the AI smart importer is used as a backup to map the columns (this counts as one of your monthly AI imports). A statement only needs a date and either an Amount column or Debit/Credit columns.</p>
+            <p>Column detection happens locally and instantly, recognizing common header names (and tolerating a few preamble rows). If your statement uses unusual or cryptic headers that can't be recognized, the AI smart importer is used as a backup to map the columns. A PDF statement is always read with AI. Either way, it counts as one of your monthly bank statement imports. A statement only needs a date and either an Amount column or Debit/Credit columns.</p>
 
             <h2>Match Statuses</h2>
             <ul>
