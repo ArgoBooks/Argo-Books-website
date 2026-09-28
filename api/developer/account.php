@@ -55,6 +55,10 @@ if (!$account && !$isPost) {
 }
 
 if (!$account) {
+    if (rate_limit_hit('api_account_create_ip', get_client_ip())) {
+        send_rate_limited_response('api_account_create_ip');
+    }
+
     $displayName = trim((string) ($body['display_name'] ?? ''));
     $publicId = api_generate_id('acct');
 

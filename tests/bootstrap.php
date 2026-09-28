@@ -29,6 +29,7 @@ require_once PROJECT_ROOT . '/api/portal/webhooks/_stripe_refund_db.php';
 require_once PROJECT_ROOT . '/api/portal/_refund_helpers.php';
 require_once PROJECT_ROOT . '/cron/lib/renewal_helpers.php';
 require_once PROJECT_ROOT . '/cron/lib/purge_helpers.php';
+require_once PROJECT_ROOT . '/cron/lib/api_retention_helpers.php';
 
 // Public API (/v1). API_TESTING must be defined BEFORE the lib loads, so
 // api_json() throws ApiResponseSent instead of ending the process and every

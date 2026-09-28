@@ -215,6 +215,10 @@ CODE],
 
             <h3>Rate limits</h3>
             <p><?= rate_limit_max('api_v1_per_minute') ?> requests per <?= api_rate_limit_window_phrase() ?> per key. Every response carries <code>X-RateLimit-Limit</code>, <code>X-RateLimit-Remaining</code> and <code>X-RateLimit-Reset</code>. Over the limit returns <code>429</code> with <code>Retry-After</code>.</p>
+            <p>Each company can also create <?= number_format(rate_limit_max('api_v1_creates_per_day')) ?> objects per <?= api_rate_limit_window_phrase('api_v1_creates_per_day') ?>, counted across all of its keys. Line items and webhook endpoints count, and so does an object that is later deleted, imported or rejected. Past that, creates return <code>429 daily_create_limit_exceeded</code> with <code>Retry-After</code>, while reads and updates carry on as normal.</p>
+
+            <h3>How long objects are kept</h3>
+            <p>Imported objects are kept, so you can keep reading them and keep pointing new objects at them, like a sale that names a customer imported months ago. Objects you delete, and objects the merchant rejects, are removed 30 days later, unless another object still points at them.</p>
 
             <h3>Server-side only</h3>
             <p>The API answers no CORS preflight, and <code>OPTIONS</code> returns <code>405</code>. A secret key must never be in a browser, and refusing cross-origin requests is the cheapest way to stop that happening by accident.</p>

@@ -87,6 +87,10 @@ if ((int) $activeStmt->fetchColumn() >= 10) {
     );
 }
 
+if (rate_limit_hit('api_key_create_ip', get_client_ip())) {
+    send_rate_limited_response('api_key_create_ip');
+}
+
 $label = substr(trim((string) ($body['label'] ?? '')), 0, 100);
 
 // The name is the only thing telling two keys apart in the app: the secret is never

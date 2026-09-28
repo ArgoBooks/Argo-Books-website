@@ -65,6 +65,16 @@ $cronConfig = [
         ],
         'expected_interval_hours' => 1,
     ],
+    'api_retention' => [
+        'label'     => 'API Retention',
+        'frequency' => 'daily',
+        'description' => "Deletes Argo Books API objects that will never be used again: ones a developer deleted, and ones a merchant rejected in the app, 30 days after that happened. Imported objects are kept, because the app looks them up later when a new sale names an old customer or a refund names its sale, and anything another object still points at is kept for the same reason. Zeros are normal on most days.",
+        'metrics'   => [
+            'objects_deleted'    => 'Objects deleted',
+            'line_items_deleted' => 'Line items deleted',
+        ],
+        'expected_interval_hours' => 48,
+    ],
     'payroll_rate_reminder' => [
         'label'     => 'Payroll Rate Reminder',
         'frequency' => 'daily',

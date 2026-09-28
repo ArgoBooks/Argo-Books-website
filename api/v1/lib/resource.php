@@ -294,6 +294,7 @@ function api_handle_create(array $spec, array $auth): void
     $accountId = $auth['account_id'];
 
     api_with_idempotency($accountId, $raw, static function () use ($spec, $input, $accountId, $pdo) {
+        api_enforce_create_quota($accountId);
         $expand = api_expand_params($input);
         $values = api_validate_input($spec, $input, true, $accountId);
 
@@ -307,6 +308,7 @@ function api_handle_create(array $spec, array $auth): void
         $pdo->prepare(
             'INSERT INTO ' . $spec['table'] . ' (' . implode(', ', $columns) . ') VALUES (' . $placeholders . ')'
         )->execute($bindings);
+        api_count_create($accountId);
 
         $row = api_fetch_object($spec, $publicId, $accountId);
         api_json(201, api_serialize($spec, $row, $expand));
@@ -521,6 +523,7 @@ function api_handle_create_line_item(array $spec, array $auth, string $publicId)
     $accountId = $auth['account_id'];
 
     api_with_idempotency($accountId, $raw, static function () use ($spec, $input, $accountId, $publicId, $pdo) {
+        api_enforce_create_quota($accountId);
         $parent = api_fetch_object($spec, $publicId, $accountId);
         api_require_pending($spec, $parent, 'given new line items');
 
@@ -541,6 +544,7 @@ function api_handle_create_line_item(array $spec, array $auth, string $publicId)
         $pdo->prepare(
             'INSERT INTO api_line_items (' . implode(', ', $columns) . ') VALUES (' . $placeholders . ')'
         )->execute($bindings);
+        api_count_create($accountId);
 
         $stmt = $pdo->prepare('SELECT * FROM api_line_items WHERE public_id = ? LIMIT 1');
         $stmt->execute([$itemId]);

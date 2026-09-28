@@ -147,6 +147,7 @@ function api_handle_create_endpoint(array $auth): void
     $accountId = $auth['account_id'];
 
     api_with_idempotency($accountId, $raw, static function () use ($input, $accountId, $pdo) {
+        api_enforce_create_quota($accountId);
         if (empty($input['url'])) {
             api_error(400, 'invalid_request_error', 'parameter_missing', "Missing required parameter 'url'.", 'url');
         }
@@ -168,6 +169,7 @@ function api_handle_create_endpoint(array $auth): void
             $events,
             substr(trim((string) ($input['description'] ?? '')), 0, 255),
         ]);
+        api_count_create($accountId);
 
         api_json(201, api_serialize_endpoint(api_fetch_endpoint($publicId, $accountId), $secret));
     });

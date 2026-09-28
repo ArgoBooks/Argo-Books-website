@@ -72,9 +72,10 @@ $errorGroups = [
         ],
     ],
     'rate_limit_error' => [
-        'blurb' => 'Too many requests on one key.',
+        'blurb' => 'Too many requests on one key, or too many new objects on one company.',
         'codes' => [
             'rate_limit_exceeded' => ['status' => 429, 'cause' => 'Over ' . rate_limit_max('api_v1_per_minute') . ' requests in a ' . api_rate_limit_window_phrase() . '.', 'fix' => 'Wait for <code>Retry-After</code>. Watch <code>X-RateLimit-Remaining</code> and slow down before you hit this.'],
+            'daily_create_limit_exceeded' => ['status' => 429, 'cause' => 'The company has created ' . rate_limit_max('api_v1_creates_per_day') . ' objects in a ' . api_rate_limit_window_phrase('api_v1_creates_per_day') . ', counting line items and webhook endpoints, across all of its keys.', 'fix' => 'Wait for <code>Retry-After</code>. If a real business needs more, contact us.'],
         ],
     ],
     'api_error' => [

@@ -151,6 +151,15 @@ function rate_limits(): array
 
         // The public API, counted per key per minute and advertised in the account endpoint.
         'api_v1_per_minute' => [_rl_env('RL_API_V1_PER_MINUTE_MAX', 120), _rl_env('RL_API_V1_PER_MINUTE_WINDOW', 60)],
+
+        // What bounds the API's storage. Creates are counted per company rather than per key, and
+        // counted whatever happens to the object afterwards, because a key can import or reject
+        // its own objects and so empty any cap on what is waiting. A free company needs only a
+        // made-up device id, so companies and keys are capped per IP to stop a script multiplying
+        // the daily allowance.
+        'api_v1_creates_per_day' => [_rl_env('RL_API_V1_CREATES_PER_DAY_MAX', 5000), _rl_env('RL_API_V1_CREATES_PER_DAY_WINDOW', 86400)],
+        'api_account_create_ip' => [_rl_env('RL_API_ACCOUNT_CREATE_IP_MAX', 10), _rl_env('RL_API_ACCOUNT_CREATE_IP_WINDOW', 86400)],
+        'api_key_create_ip' => [_rl_env('RL_API_KEY_CREATE_IP_MAX', 30), _rl_env('RL_API_KEY_CREATE_IP_WINDOW', 86400)],
     ];
 
     $limits = [];

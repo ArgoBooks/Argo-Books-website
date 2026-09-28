@@ -83,16 +83,45 @@ function api_rate_limit_gc(): void
 }
 
 /**
- * The window as a phrase for an error message: 'minute' when it is the default.
+ * A limit's window as a phrase to follow "per": 'minute' and 'day' for the defaults.
  */
-function api_rate_limit_window_phrase(): string
+function api_rate_limit_window_phrase(string $name = 'api_v1_per_minute'): string
 {
-    $window = rate_limit_window('api_v1_per_minute');
+    $window = rate_limit_window($name);
 
     return match (true) {
         $window === 60 => 'minute',
+        $window === 86400 => 'day',
+        $window % 86400 === 0 => ($window / 86400) . ' days',
         $window % 3600 === 0 => ($window / 3600) . ' hours',
         $window % 60 === 0 => ($window / 60) . ' minutes',
         default => $window . ' seconds',
     };
+}
+
+/**
+ * Refuse a create once the company has used its daily allowance. Checked before the write and
+ * counted after it by api_count_create(), so a request refused for bad input costs nothing.
+ */
+function api_enforce_create_quota(int $accountId): void
+{
+    $name = 'api_v1_creates_per_day';
+    if (!rate_limit_exceeded($name, (string) $accountId)) {
+        return;
+    }
+
+    $startedAt = rate_limit_started_at($name, (string) $accountId) ?? time();
+    header('Retry-After: ' . max(1, $startedAt + rate_limit_window($name) - time()));
+    api_error(
+        429,
+        'rate_limit_error',
+        'daily_create_limit_exceeded',
+        'This company has reached its limit of ' . rate_limit_max($name) . ' new objects per '
+            . api_rate_limit_window_phrase($name) . '. Retry-After says when it can create more.'
+    );
+}
+
+function api_count_create(int $accountId): void
+{
+    rate_limit_record('api_v1_creates_per_day', (string) $accountId);
 }

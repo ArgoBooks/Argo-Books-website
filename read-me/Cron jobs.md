@@ -544,3 +544,38 @@ There is no `refunded_at` column; a payment row simply flips to `refunded`. Refu
 ### Logs
 
 Daily file at `cron/logs/argo_books_sync-YYYY-MM-DD.log`, plus metrics on `/admin/crons/` and failures in `error_log`.
+
+---
+
+## 15. API Retention
+
+**Script:** `cron/api_retention.php`
+**Schedule:** Daily at 4:30 AM
+
+```bash
+30 4 * * * /usr/bin/php /home/argorobots/public_html/cron/api_retention.php
+```
+
+### What It Does
+
+Deletes Argo Books public API objects that will never be used again, 30 days after they stopped mattering:
+
+1. Objects a developer deleted, counted from when they were deleted
+2. Objects the merchant rejected in the app, counted from when they were rejected
+3. The line items of any expense or revenue deleted in steps 1 and 2
+
+### Behaviour Worth Knowing
+
+Imported objects are never deleted. The app looks them up again later: a new sale can name a customer that was imported months ago, and a refund names the sale it reverses. Deleting them would break those references.
+
+An object that anything else still points at is kept too, even if it is deleted or rejected. The list of references is read from the resource definitions in `api/v1/lib/definitions.php`, so a new reference field is covered without changing this script.
+
+Objects that point at others are processed first, refunds before revenue and revenue before customers, so a dead customer whose only reference was a dead sale goes in the same run instead of the next one.
+
+What stops the API filling the server is the daily create limit (`RL_API_V1_CREATES_PER_DAY_*`), not this cron. The cron only keeps dead rows from piling up over time.
+
+Like API Webhook Delivery, it does not filter on `environment`. Only production runs crons, so filtering would leave dead sandbox rows in place forever.
+
+### Logs
+
+No daily log file. Metrics are on `/admin/crons/`, and failures go to `error_log`.
