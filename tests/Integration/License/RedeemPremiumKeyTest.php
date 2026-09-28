@@ -105,11 +105,11 @@ final class RedeemPremiumKeyTest extends IntegrationTestCase
         $this->assertSame('expired', $stmt->fetch()['status']);
     }
 
-    public function test_re_redemption_refuses_a_key_whose_subscription_belongs_to_the_other_environment(): void
+    public function test_re_redemption_moves_a_key_subscription_into_this_environment(): void
     {
-        // A paid key from the sandbox checkout arrives already redeemed and
-        // linked to its sandbox subscription. Tests run as sandbox, so the
-        // production subscription plays that role here.
+        // A key carries no environment, so one redeemed on the other site can be
+        // redeemed here. Tests run as sandbox, so the production subscription plays
+        // the part of the one redeemed elsewhere.
         $subId = 'PREM-OTHER-ENVS-AAAA-DDDD';
         $this->seedSubscription($subId, (new \DateTime('+30 days'))->format('Y-m-d H:i:s'));
         $this->pdo->prepare("UPDATE premium_subscriptions SET environment = 'production' WHERE subscription_id = ?")
@@ -118,18 +118,49 @@ final class RedeemPremiumKeyTest extends IntegrationTestCase
 
         $result = redeem_premium_key($key, 'new-device');
 
-        $this->assertFalse($result['success']);
-        $this->assertSame('invalid_key', $result['status']);
+        $this->assertTrue($result['success']);
+        $this->assertSame('active', $result['status']);
 
-        // Neither transferred nor re-minted for this environment.
+        // The device moved, and the subscription came with it rather than being
+        // left stamped with the other environment where later queries would miss it.
         $stmt = $this->pdo->prepare('SELECT device_id, subscription_id FROM premium_subscription_keys WHERE subscription_key = ?');
         $stmt->execute([$key]);
         $row = $stmt->fetch();
-        $this->assertSame('original-device', $row['device_id']);
+        $this->assertSame('new-device', $row['device_id']);
         $this->assertSame($subId, $row['subscription_id']);
+
+        $stmt = $this->pdo->prepare('SELECT environment FROM premium_subscriptions WHERE subscription_id = ?');
+        $stmt->execute([$subId]);
+        $this->assertSame('sandbox', $stmt->fetchColumn());
+
+        // Moved, not duplicated.
         $stmt = $this->pdo->prepare('SELECT COUNT(*) FROM premium_subscriptions WHERE transaction_id = ?');
         $stmt->execute([$key]);
         $this->assertSame(0, (int) $stmt->fetchColumn());
+    }
+
+    public function test_re_redemption_refuses_a_subscription_paid_for_in_the_other_environment(): void
+    {
+        // Bought through a sandbox checkout rather than minted by a key. Moving this
+        // one would hand out production premium for test money.
+        $subId = 'PREM-OTHER-PAID-AAAA-DDDD';
+        $this->seedSubscription($subId, (new \DateTime('+30 days'))->format('Y-m-d H:i:s'));
+        $this->pdo->prepare("UPDATE premium_subscriptions SET environment = 'production', payment_method = 'stripe' WHERE subscription_id = ?")
+            ->execute([$subId]);
+        $key = $this->seedRedeemedKey('original-device', $subId);
+
+        $result = redeem_premium_key($key, 'new-device');
+
+        $this->assertFalse($result['success']);
+        $this->assertSame('invalid_key', $result['status']);
+
+        $stmt = $this->pdo->prepare('SELECT device_id FROM premium_subscription_keys WHERE subscription_key = ?');
+        $stmt->execute([$key]);
+        $this->assertSame('original-device', $stmt->fetchColumn());
+
+        $stmt = $this->pdo->prepare('SELECT environment FROM premium_subscriptions WHERE subscription_id = ?');
+        $stmt->execute([$subId]);
+        $this->assertSame('production', $stmt->fetchColumn());
     }
 
     public function test_re_redemption_missing_subscription_recreates_it(): void

@@ -292,7 +292,7 @@ function _handle_re_redemption($key, $device_id, $subscription_id) {
         $subscription = null;
         if ($subscription_id) {
             $stmt = $pdo->prepare("
-                SELECT subscription_id, status, end_date, environment
+                SELECT subscription_id, status, end_date, environment, payment_method
                 FROM premium_subscriptions
                 WHERE subscription_id = ?
             ");
@@ -300,15 +300,30 @@ function _handle_re_redemption($key, $device_id, $subscription_id) {
             $subscription = $stmt->fetch(PDO::FETCH_ASSOC);
         }
 
-        // Paid for on the other site, e.g. a sandbox checkout on dev. Falling
-        // through to the recreate path below would mint a subscription in this
-        // environment for free.
+        // A key carries no environment of its own, so one redeemed on the other site
+        // can be redeemed here. Move its subscription across rather than refusing it:
+        // leaving the row stamped with the other environment would let this redemption
+        // succeed while every later query that filters on environment missed it.
+        //
+        // Only a subscription the key itself created, which is what free_key marks. A
+        // subscription paid for by a sandbox checkout must not be dragged into
+        // production, because that really would be premium for test money.
         if ($subscription && $subscription['environment'] !== current_environment()) {
-            return [
-                'success' => false,
-                'status' => 'invalid_key',
-                'message' => 'Invalid license key.'
-            ];
+            if (($subscription['payment_method'] ?? '') !== 'free_key') {
+                return [
+                    'success' => false,
+                    'status' => 'invalid_key',
+                    'message' => 'Invalid license key.'
+                ];
+            }
+
+            $stmt = $pdo->prepare("
+                UPDATE premium_subscriptions
+                SET environment = ?
+                WHERE subscription_id = ? AND payment_method = 'free_key'
+            ");
+            $stmt->execute([current_environment(), $subscription_id]);
+            $subscription['environment'] = current_environment();
         }
 
         if (!$subscription) {
