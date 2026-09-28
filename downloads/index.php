@@ -3,6 +3,7 @@ require_once __DIR__ . '/../resources/icons.php';
 require_once __DIR__ . '/../resources/format.php';
 require_once __DIR__ . '/../track_referral.php';
 require_once __DIR__ . '/../partials/fonts.php';
+require_once __DIR__ . '/../resources/includes/release-files.php';
 
 track_referral_event('downloads_page');
 
@@ -52,10 +53,12 @@ $avaloniaPatterns = [
     'linux'       => 'ArgoBooks-{version}-linux-x64.AppImage',
 ];
 
-// Get latest version information from filesystem
+// The newest fully uploaded build of each platform. Chosen per platform so that while a
+// release is uploading, each platform keeps offering its previous build until its own file
+// has finished.
 function getLatestVersion()
 {
-    $basePath = '../resources/downloads/';
+    $basePath = __DIR__ . '/../resources/downloads/';
 
     if (!is_dir($basePath)) {
         return null;
@@ -77,26 +80,24 @@ function getLatestVersion()
         return version_compare($b, $a);
     });
 
-    $latest = $versions[0];
-
-    // Gather per-platform file sizes
     global $avaloniaPatterns;
     $platforms = [];
     foreach ($avaloniaPatterns as $platform => $pattern) {
-        $filename = str_replace('{version}', $latest, $pattern);
-        $filepath = $basePath . $latest . '/' . $filename;
-        if (file_exists($filepath)) {
-            $platforms[$platform] = [
-                'filename' => $filename,
-                'filesize' => filesize($filepath),
-            ];
+        foreach ($versions as $version) {
+            $filename = str_replace('{version}', $version, $pattern);
+            $filepath = $basePath . $version . '/' . $filename;
+            if (release_file_ready($version, $filename, $filepath)) {
+                $platforms[$platform] = [
+                    'version'  => $version,
+                    'filename' => $filename,
+                    'filesize' => filesize($filepath),
+                ];
+                break;
+            }
         }
     }
 
-    return [
-        'version'   => $latest,
-        'platforms' => $platforms,
-    ];
+    return ['platforms' => $platforms];
 }
 
 
@@ -251,7 +252,7 @@ $systemRequirements = getSystemRequirements();
                         <p class="platform-desc"><?= $card['desc'] ?></p>
                         <?php if ($available): ?>
                             <div class="version-details">
-                                <span class="version-tag">V.<?php echo htmlspecialchars($latestVersion['version']); ?></span>
+                                <span class="version-tag">V.<?php echo htmlspecialchars($latestVersion['platforms'][$available[0]['key']]['version']); ?></span>
                             </div>
                         <?php endif; ?>
                     </div>
@@ -387,7 +388,7 @@ $systemRequirements = getSystemRequirements();
                 <li>In the <strong>Permissions</strong> tab, check <strong>"Allow executing file as program"</strong> (the wording varies slightly between distros).</li>
                 <li>Double-click the file to launch Argo Books.</li>
             </ol>
-            <p class="install-modal-alt">Prefer the terminal? Run <code>chmod +x ArgoBooks-<?php echo $latestVersion ? htmlspecialchars($latestVersion['version']) : 'X.X.X'; ?>-linux-x64.AppImage</code> instead.</p>
+            <p class="install-modal-alt">Prefer the terminal? Run <code>chmod +x ArgoBooks-<?php echo isset($latestVersion['platforms']['linux']) ? htmlspecialchars($latestVersion['platforms']['linux']['version']) : 'X.X.X'; ?>-linux-x64.AppImage</code> instead.</p>
             <p class="install-modal-note">AppImages are self-contained: there's nothing else to install, and you can keep the file anywhere you like. See the <a href="../documentation/pages/getting-started/installation.php">full installation guide</a> for more.</p>
         </div>
     </div>

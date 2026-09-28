@@ -20,6 +20,7 @@
 session_start();
 require_once __DIR__ . '/statistics.php';
 require_once __DIR__ . '/track_referral_event.php';
+require_once __DIR__ . '/resources/includes/release-files.php';
 
 // Platform file patterns: platform key => filename pattern
 // {version} is replaced at runtime
@@ -86,7 +87,7 @@ function findInstaller(string $version, string $platform): ?array
     $filename = str_replace('{version}', $version, $platformPatterns[$platform]);
     $filepath = __DIR__ . "/resources/downloads/$version/$filename";
 
-    if (!file_exists($filepath)) {
+    if (!release_file_ready($version, $filename, $filepath)) {
         return null;
     }
 

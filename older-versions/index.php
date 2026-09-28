@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../resources/format.php';
 require_once __DIR__ . '/../partials/fonts.php';
+require_once __DIR__ . '/../resources/includes/release-files.php';
 
 // Platform configuration
 $platforms = [
@@ -54,7 +55,7 @@ function getOlderVersions($filePattern)
         $filename = str_replace('{version}', $folder, $filePattern);
         $filepath = $basePath . $folder . '/' . $filename;
 
-        if (file_exists($filepath)) {
+        if (release_file_ready($folder, $filename, $filepath)) {
             $versions[] = [
                 'version' => $folder,
                 'filename' => $filename,
