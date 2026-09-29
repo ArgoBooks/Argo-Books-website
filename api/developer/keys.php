@@ -77,6 +77,10 @@ if (!$isPost) {
 
 // --- create -----------------------------------------------------------------
 
+if (!authenticate_license_request()) {
+    send_error_response(403, 'The Argo Books API is part of Premium.', 'PREMIUM_REQUIRED');
+}
+
 $activeStmt = $pdo->prepare('SELECT COUNT(*) FROM api_keys WHERE account_id = ? AND revoked_at IS NULL');
 $activeStmt->execute([$accountId]);
 if ((int) $activeStmt->fetchColumn() >= 10) {

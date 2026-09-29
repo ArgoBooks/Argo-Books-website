@@ -29,6 +29,7 @@ $errorGroups = [
         'blurb' => 'Something about the request itself is wrong. The <code>param</code> field names the offending parameter whenever one is to blame.',
         'codes' => [
             'account_inactive' => ['status' => 403, 'cause' => 'The Argo Books account behind the key is not active.', 'fix' => 'The merchant needs to re-enable the API in Settings.'],
+            'premium_required' => ['status' => 403, 'cause' => 'The merchant behind the key does not have Argo Books Premium, or it has ended.', 'fix' => 'Ask the merchant to upgrade or renew. The key starts working again as soon as they do.'],
             'insufficient_scope' => ['status' => 403, 'cause' => 'The key lacks <code>read</code> or <code>write</code> for this call.', 'fix' => 'Ask the merchant for a key with the scope you need.'],
             'unknown_route' => ['status' => 404, 'cause' => 'No such path.', 'fix' => 'Check the resource name against the list in Resources.'],
             'resource_missing' => ['status' => 404, 'cause' => 'No object with that id on this account.', 'fix' => 'Confirm the id, and that it belongs to the same merchant as the key.'],

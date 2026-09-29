@@ -7,6 +7,7 @@ require_once __DIR__ . '/../../resources/icons.php';
 require_once __DIR__ . '/../../config/pricing.php';
 require_once __DIR__ . '/../../partials/fonts.php';
 $argo_monthly = (int) get_pricing_config()['premium_monthly_price'];
+$argo_yearly = (int) get_pricing_config()['premium_yearly_price'];
 
 // One array drives both the visible accordion and the FAQPage schema.
 $faqs = [
@@ -28,7 +29,8 @@ $faqs = [
     ],
     [
         'q' => 'Does it cost anything?',
-        'a' => 'No. The API is included on every plan, including the free one. You can hold up to ten active keys per company at a time, and revoking one frees a slot.',
+        'a' => "The API is part of Premium, which is \${$argo_monthly} a month or \${$argo_yearly} a year. You can download Argo Books and try the rest of it free first. You can hold up to ten active keys per company at a time, and revoking one frees a slot.",
+
     ],
 ];
 ?>
@@ -327,7 +329,7 @@ $faqs = [
                         </a>
                         <a href="../../documentation/pages/api/overview.php" class="fp-textlink">Read the developer docs</a>
                     </div>
-                    <p class="fp-hero-facts">Included on every plan, including the free one. Nothing is added to your books until you approve it.</p>
+                    <p class="fp-hero-facts">Part of Premium, $<?= $argo_monthly ?> a month. Nothing is added to your books until you approve it.</p>
                 </div>
 
                 <div class="fp-hero-demo">
@@ -455,7 +457,7 @@ $faqs = [
         <div class="fp-wrap fp-midcta-in">
             <div>
                 <h2>Stop copying numbers between systems</h2>
-                <p>Free plan, no credit card, and your books stay on your own computer.</p>
+                <p>Try Argo Books free, then turn on the API with Premium for $<?= $argo_monthly ?> a month. Your books stay on your own computer.</p>
             </div>
             <a href="../../downloads/" class="fp-btn fp-btn-primary">
                 <span>Download free</span>
@@ -651,7 +653,7 @@ $faqs = [
         <section class="fp-outro-cta cta-section">
             <div class="fp-wrap">
                 <h2>Let your systems do the bookkeeping</h2>
-                <p>Download Argo Books, create a key, and point your tools at it. Free plan, no credit card, and your data stays on your own machine.</p>
+                <p>Download Argo Books, upgrade to Premium, create a key, and point your tools at it. Your data stays on your own machine.</p>
                 <div class="fp-btns">
                     <a href="../../downloads/" class="fp-btn fp-btn-primary">
                         <span>Download free</span>

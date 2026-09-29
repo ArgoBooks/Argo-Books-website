@@ -1478,6 +1478,7 @@ CREATE TABLE IF NOT EXISTS api_accounts (
     public_id VARCHAR(40) NOT NULL COMMENT 'acct_<24 hex>, returned to callers',
     owner_identity_hash CHAR(64) NOT NULL COMMENT 'Same identity as api/sync: sha256 of license key (premium) or device id (free)',
     company_uid VARCHAR(64) NOT NULL COMMENT 'Which company file on the desktop this account feeds',
+    subscription_id VARCHAR(50) DEFAULT NULL COMMENT 'The Premium subscription that pays for it. The API is Premium only, so /v1 refuses keys once this lapses',
     display_name VARCHAR(255) NOT NULL DEFAULT '',
     is_active TINYINT(1) NOT NULL DEFAULT 1,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,

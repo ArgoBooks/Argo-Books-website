@@ -3,6 +3,16 @@
 The Argo Books public API lets third-party developers push accounting data into a
 merchant's books. It lives at `https://argorobots.com/v1`.
 
+## Who can use it
+
+The API is Premium only. Creating a connection or a key needs a valid license, and every
+`/v1` request checks that the subscription recorded on `api_accounts.subscription_id` is
+still active, returning 403 `premium_required` when it is not. The check runs per request
+rather than only when a key is made, so a key minted during one paid month stops working
+when the subscription ends. The desktop app refreshes `subscription_id` whenever it calls
+`/api/developer/account` with its license, since a renewal or a re-redeemed key can move
+the license to a new subscription row.
+
 ## What it is, and what it is not
 
 It is an **ingest store**, not a copy of anyone's books.

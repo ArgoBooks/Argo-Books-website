@@ -13,7 +13,7 @@ include __DIR__ . '/../../docs-header.php';
             <p>There is one credential type: a key the merchant creates and gives you.</p>
 
             <h2>Getting a Key</h2>
-            <p>You cannot create a key yourself. The merchant opens Argo Books, goes to <strong>Settings</strong>, then <strong>Integrations</strong>, then <strong>Argo Books API</strong>, turns it on, and clicks <strong>Create key</strong>. They name it after your app and send you the value.</p>
+            <p>You cannot create a key yourself. The merchant needs Argo Books Premium, which the API is part of. They open Argo Books, goes to <strong>Settings</strong>, then <strong>Integrations</strong>, then <strong>Argo Books API</strong>, turns it on, and clicks <strong>Create key</strong>. They name it after your app and send you the value.</p>
             <p>Keys look like <code>ab_</code> followed by 48 hex characters. The merchant sees the full value exactly once. We store only a SHA-256 fingerprint, so if they lose it nobody can recover it, and they simply revoke and create another.</p>
             <p>Ask for your own key rather than sharing one. The merchant can then switch your app off without breaking everything else they have connected.</p>
 

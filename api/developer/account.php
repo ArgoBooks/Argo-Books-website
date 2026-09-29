@@ -23,7 +23,8 @@ require_once __DIR__ . '/../v1/lib/ids.php';
 set_portal_headers();
 require_method(['GET', 'POST']);
 
-$owner = resolve_owner_identity();
+$license = authenticate_license_request();
+$owner = $license['license_key_hash'] ?? resolve_owner_identity();
 if (!$owner) {
     send_error_response(401, 'Unauthorized.', 'UNAUTHORIZED');
 }
@@ -55,6 +56,9 @@ if (!$account && !$isPost) {
 }
 
 if (!$account) {
+    if (!$license) {
+        send_error_response(403, 'The Argo Books API is part of Premium.', 'PREMIUM_REQUIRED');
+    }
     if (rate_limit_hit('api_account_create_ip', get_client_ip())) {
         send_rate_limited_response('api_account_create_ip');
     }
@@ -63,12 +67,20 @@ if (!$account) {
     $publicId = api_generate_id('acct');
 
     $pdo->prepare(
-        'INSERT INTO api_accounts (public_id, owner_identity_hash, company_uid, display_name)
-         VALUES (?, ?, ?, ?)'
-    )->execute([$publicId, $owner, $companyUid, substr($displayName, 0, 255)]);
+        'INSERT INTO api_accounts (public_id, owner_identity_hash, company_uid, subscription_id, display_name)
+         VALUES (?, ?, ?, ?, ?)'
+    )->execute([$publicId, $owner, $companyUid, $license['subscription_id'], substr($displayName, 0, 255)]);
 
     $stmt->execute([$owner, $companyUid]);
     $account = $stmt->fetch();
+}
+
+// A renewal or a re-redeemed key can move the license to a new subscription row, and /v1 checks
+// the one recorded here, so keep it current whenever the app calls in with its license.
+if ($license && $account['subscription_id'] !== $license['subscription_id']) {
+    $pdo->prepare('UPDATE api_accounts SET subscription_id = ? WHERE id = ?')
+        ->execute([$license['subscription_id'], (int) $account['id']]);
+    $account['subscription_id'] = $license['subscription_id'];
 }
 
 // Rename on a repeat POST, so the merchant can correct the label later.

@@ -28,7 +28,7 @@ include __DIR__ . '/../../docs-header.php';
             <p>There is no fixed timeline for the merchant to import what you send. One who opens Argo Books weekly will import your data weekly. <code>GET /v1/account</code> reports how much of yours is still waiting.</p>
 
             <h2>Getting Started</h2>
-            <p>Ask the merchant for a key. They create one in Argo Books under <strong>Settings</strong>, then <strong>Integrations</strong>, then <strong>Argo Books API</strong>. Keys start with <code>ab_</code>. See <a href="authentication.php" class="link">Authentication</a>.</p>
+            <p>Ask the merchant for a key. The API is part of Argo Books Premium, so they need that first. They create a key in Argo Books under <strong>Settings</strong>, then <strong>Integrations</strong>, then <strong>Argo Books API</strong>. Keys start with <code>ab_</code>. See <a href="authentication.php" class="link">Authentication</a>.</p>
 
             <p>Confirm it works:</p>
             <?= argo_code_tabs([
