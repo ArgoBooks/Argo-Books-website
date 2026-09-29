@@ -8,6 +8,7 @@
         { "key": "email",       "label": "Email" },
         { "key": "capterra",    "label": "Capterra" },
         { "key": "producthunt", "label": "Product Hunt" },
+        { "key": "microsoftstore", "label": "Microsoft Store" },
         { "key": "other",       "label": "Other", "freeform": true }
     ]
 }
