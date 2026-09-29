@@ -13,7 +13,7 @@ Related: [Google Ads economics.md](Google%20Ads%20economics.md), [Email outreach
   - Customer 2 came from Google search.
   - Customers 3 to 6 bought the lifetime deal through Stack Social, one each on 2026-08-27, 2026-09-27, 2026-09-28 and 2026-09-29. None of them produce recurring revenue.
 - Pricing: \$15/month or \$150/year. Customer 1 is paying \$10/month with no payment processing fee added, because I increased the price after he signed up.
-- Revenue: **\$102.96 CAD from subscriptions** all time (2026-09-29), all of it inside the last year, plus **\$95.27 from Stack Social** across four lifetime sales. The two are listed apart because the Stack Social figure comes from a US partner dashboard that labels it only with a dollar sign, so whether it is USD or CAD is unconfirmed and a combined total cannot be stated until it is. Stack Social keys are reseller keys and never touch the site's billing, so they are absent from the admin revenue figures entirely.
+- Revenue: **\$102.96 CAD from subscriptions** all time (2026-09-29), all of it inside the last year, plus **\$95.27 USD from Stack Social** across four lifetime sales. Kept in their own currencies because that is how each is paid. Stack Social keys are reseller keys and never touch the site's billing, so they are absent from the admin revenue figures entirely.
 - **MRR has been flat at \$25.74 since June 2026.** Four months, no growth: all-time subscription revenue is exactly four months of it. 2 active licenses, 0% churn so far.
 - Running costs: **~\$170 CAD/month.** Claude Code \$140, Azure code signing \$10, Apple Developer Program \$10, website hosting and domain \$10. Against \$25.74 of revenue that is about \$145/month out of pocket, so a \$1,000 spend is roughly seven months of runway.
 - **The "LTV" tile on `/admin/marketing-funnel/` is not lifetime value.** It computes `total_revenue / total_paying` (see `admin/marketing-funnel/index.php`), which is revenue booked to date per customer. It reads low early and drifts up as customers renew. Do not quote it as LTV.
@@ -109,19 +109,21 @@ A Stack Social deal went live late August. **Four sales so far, one each on 2026
 - Around 80% of people who buy lifetime software deals never use the software, or use it very little. 
 - Lifetime users tend to churn at similar rates as subscription users.
 
-**The share varies per sale and averages about 28%** (noted 2026-09-29). Net earnings are \$95.27 across four sales, no refunds and no chargebacks:
+**Everything is in US dollars, and the rate is being paid correctly** (confirmed 2026-09-29 from their earnings CSV). The deal sells for \$59.99 USD; \$83.99 CAD is just what a Canadian buyer is shown. Earnings so far are \$95.27 USD across four sales, no refunds and no chargebacks:
 
-| Sale date | Earnings | Of the \$83.99 CAD listing |
-|---|---|---|
-| 2026-08-27 | \$18.41 | 22% |
-| 2026-09-27 | \$27.60 | 33% |
-| 2026-09-28 | \$21.66 | 26% |
-| 2026-09-29 | \$27.60 | 33% |
-| **Total** | **\$95.27** | avg 28% |
+| Sale date | Sold for | Where | Rate | Card fee | Earnings |
+|---|---|---|---|---|---|
+| 2026-08-27 | \$51.00 | Network | 40.1% | \$2.04 | \$18.41 |
+| 2026-09-27 | \$59.99 | Stack O&O | 50% | \$2.40 | \$27.60 |
+| 2026-09-28 | \$59.99 | Network | 40.1% | \$2.40 | \$21.66 |
+| 2026-09-29 | \$59.99 | Stack O&O | 50% | \$2.40 | \$27.60 |
 
-Each sale paid a different amount, so this is not one wrong rate, it is a rate that changes per sale. That is what "45-50% depending on how they acquired each customer" means in practice. Two sales paid \$27.60 exactly and the other two paid less, so \$27.60 is probably the normal rate. Expect about \$24 a sale, not \$40.
+The maths is `sale price x rate, minus a 4% card fee`, and it checks out on all four. The rate depends on where the sale came from, which is what "45-50% depending on how they acquired each customer" meant:
 
-**Check whether they pay in US or Canadian dollars.** Their dashboard just shows a dollar sign. Stack Social is an American company, so it is probably US dollars, and if so the percentages above are too low: they compare US dollars earned against a Canadian price. The same deal is about \$61 USD, which makes the average 39% and puts the two \$27.60 sales inside the promised 45-50%.
+- **Stack O&O**, their own site, pays **50%**, so \$27.60 a sale.
+- **Network**, someone else's storefront, pays **40.1%**, so \$21.66 a sale.
+
+The first sale looked worst because it was both a Network sale and discounted to \$51.00. So there is no shortfall and nothing to query with them. Expect \$27.60 when they sell it themselves and \$21.66 when a partner does, and around \$24 on average. Note that \$40 a sale was never possible at this price: half of \$59.99 is \$30 before fees.
 
 **Redemption so far: 1 of 4** (2026-09-29). Three of the four sold in the last three days, so that number means nothing yet. Check it at `/admin/license/?tab=reseller-batches`. The one person who redeemed gave an email address but never confirmed it, so there are no usable contacts from this deal yet.
 
