@@ -8,12 +8,13 @@ Related: [Google Ads economics.md](Google%20Ads%20economics.md), [Email outreach
 
 - Solo founder, bootstrapping. Argo Books has been in development for about 2 years.
 - Windows, macOS, and Linux. The macOS build shipped 2026-09-09, signed and notarized, for Apple Silicon and Intel; see [macOS](#macos).
-- **5 paying customers: 2 subscriptions and 3 one-time.** The two subscribers signed up around May, both auto-renewed and are still active, although they don't use the app.
+- **6 paying customers: 2 subscriptions and 4 one-time.** The two subscribers signed up around May, both auto-renewed and are still active, although they don't use the app.
   - Customer 1 came from a YouTube video (the receipt scanning one).
   - Customer 2 came from Google search.
-  - Customers 3, 4 and 5 bought the lifetime deal through Stack Social: one in late August, two on 2026-09-27. None of them produce recurring revenue.
+  - Customers 3 to 6 bought the lifetime deal through Stack Social, one each on 2026-08-27, 2026-09-27, 2026-09-28 and 2026-09-29. None of them produce recurring revenue.
 - Pricing: \$15/month or \$150/year. Customer 1 is paying \$10/month with no payment processing fee added, because I increased the price after he signed up.
-- Revenue: **\$126.89 CAD all time**, which was \$77.22 before the two Stack Social sales on 2026-09-27. 2 active subscriptions, 0% churn so far.
+- Revenue: **\$102.96 CAD from subscriptions** all time (2026-09-29), all of it inside the last year, plus **\$95.27 from Stack Social** across four lifetime sales. The two are listed apart because the Stack Social figure comes from a US partner dashboard that labels it only with a dollar sign, so whether it is USD or CAD is unconfirmed and a combined total cannot be stated until it is. Stack Social keys are reseller keys and never touch the site's billing, so they are absent from the admin revenue figures entirely.
+- **MRR has been flat at \$25.74 since June 2026.** Four months, no growth: all-time subscription revenue is exactly four months of it. 2 active licenses, 0% churn so far.
 - Running costs: **~\$170 CAD/month.** Claude Code \$140, Azure code signing \$10, Apple Developer Program \$10, website hosting and domain \$10. Against \$25.74 of revenue that is about \$145/month out of pocket, so a \$1,000 spend is roughly seven months of runway.
 - **The "LTV" tile on `/admin/marketing-funnel/` is not lifetime value.** It computes `total_revenue / total_paying` (see `admin/marketing-funnel/index.php`), which is revenue booked to date per customer. It reads low early and drifts up as customers renew. Do not quote it as LTV.
 - **LTV is not known.** Both customers are only a few months in and neither has churned, so there is no retention data to calculate it from.
@@ -104,14 +105,29 @@ Current view counts, newest first:
 Subscriber count: 3.
 
 ### Stack Social
-A Stack Social deal went live late August. **Three sales so far: one in late August, two on 2026-09-27.** Argo Books Premium is being sold as a lifetime deal of $83.99 CAD. My share of the revenue is 45-50%, depending on how they acquired each customer. Stack Social is generally either a hit or a miss, with most companies making almost no sales, while some do very well, with hundreds, or thousands of sales. While ~$40 revenue on each sale is very little considering I also have business expenses, based on my research:
+A Stack Social deal went live late August. **Four sales so far, one each on 2026-08-27, 2026-09-27, 2026-09-28 and 2026-09-29.** Argo Books Premium is being sold as a lifetime deal of $83.99 CAD. My share of the revenue is 45-50%, depending on how they acquired each customer. Stack Social is generally either a hit or a miss, with most companies making almost no sales, while some do very well, with hundreds, or thousands of sales. While ~$40 revenue on each sale is very little considering I also have business expenses, based on my research:
 - Around 80% of people who buy lifetime software deals never use the software, or use it very little. 
 - Lifetime users tend to churn at similar rates as subscription users.
 
-**The share is about 27%, not the stated 45-50%** (noted 2026-09-28). Total take across all three sales is \$67.67, an average of \$22.56 against the \$83.99 listing. The first payout was \$18, about 21%, and the two sales on 2026-09-27 came to \$49.67 between them, about \$24.84 each or 30%. So the first payout was not a one-off anomaly: budget on roughly \$23 a sale, not \$40. Still worth establishing why. Either the sale price is being discounted below the listed price (flash sale or bundle), or sales are coming through partner storefronts rather than Stack Social's own, which is what "45-50% depending on how they acquired each customer" implies.
+**The share varies per sale and averages about 28%** (noted 2026-09-29). Net earnings are \$95.27 across four sales, no refunds and no chargebacks:
 
-**Redemption so far: 1 of 3** (2026-09-28). The two newest sales were the day before, so it is too early to read anything into those. Redemption is tracked per batch at `/admin/license/?tab=reseller-batches`. Note the Redeemed percentage there divides by all 500 minted keys rather than by keys sold, so it reads 0% regardless; the counts beside it are the usable numbers. Of the one redemption, an email address was captured and has not been verified, so there are currently no confirmed contact details from this channel. Buyer details sit with Stack Social, in the Orders tab of the partner dashboard.
-Plus, this is a great opportunity to get customer reviews, which would be extremely valuable because I currently have no social proof. I could add this social proof to my website's landing page and include it in my outreach emails.
+| Sale date | Earnings | Of the \$83.99 CAD listing |
+|---|---|---|
+| 2026-08-27 | \$18.41 | 22% |
+| 2026-09-27 | \$27.60 | 33% |
+| 2026-09-28 | \$21.66 | 26% |
+| 2026-09-29 | \$27.60 | 33% |
+| **Total** | **\$95.27** | avg 28% |
+
+Each sale paid a different amount, so this is not one wrong rate, it is a rate that changes per sale. That is what "45-50% depending on how they acquired each customer" means in practice. Two sales paid \$27.60 exactly and the other two paid less, so \$27.60 is probably the normal rate. Expect about \$24 a sale, not \$40.
+
+**Check whether they pay in US or Canadian dollars.** Their dashboard just shows a dollar sign. Stack Social is an American company, so it is probably US dollars, and if so the percentages above are too low: they compare US dollars earned against a Canadian price. The same deal is about \$61 USD, which makes the average 39% and puts the two \$27.60 sales inside the promised 45-50%.
+
+**Redemption so far: 1 of 4** (2026-09-29). Three of the four sold in the last three days, so that number means nothing yet. Check it at `/admin/license/?tab=reseller-batches`. The one person who redeemed gave an email address but never confirmed it, so there are no usable contacts from this deal yet.
+
+**Stack Social does not give you the buyers' email addresses.** The only way to reach these customers is by asking them in the app when they enter their key.
+
+Stack Social is a great opportunity to get customer reviews, which would be extremely valuable because I currently have no social proof.
 
 ### Google Ads
 About CA\$300 spent, 0 attributable customers. Details in [Google Ads economics.md](Google%20Ads%20economics.md). Roughly two thirds of spend went to mobile and tablet clicks that cannot install a Windows app, which was a mistake. Even with device exclusions, realistic cost per customer looks like \$300+ against an unproven LTV. Not viable.
