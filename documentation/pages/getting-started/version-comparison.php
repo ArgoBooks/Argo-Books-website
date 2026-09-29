@@ -17,8 +17,8 @@ include __DIR__ . '/../../docs-header.php';
         <div class="docs-content">
             <p>Argo Books offers two tiers to match your business needs. Start with our free version,
             perfect for small businesses just getting started. As your business grows, upgrade to
-            Premium for unlimited invoicing, higher monthly limits, and the payroll and forecasting
-            tools.</p>
+            Premium for unlimited invoicing, higher monthly limits, the payroll and forecasting
+            tools, and the API.</p>
 
             <p>Not sure which version is right for you? <a href="../../../downloads/" class="link">Try our free
                 version first</a> – you can always <a href="../../../pricing/" class="link">upgrade
@@ -71,6 +71,11 @@ include __DIR__ . '/../../docs-header.php';
                         </tr>
                         <tr>
                             <td>Predictive Analytics</td>
+                            <td>—</td>
+                            <td>✓</td>
+                        </tr>
+                        <tr>
+                            <td>Argo Books API</td>
                             <td>—</td>
                             <td>✓</td>
                         </tr>

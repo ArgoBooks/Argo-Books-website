@@ -15,6 +15,11 @@ include __DIR__ . '/../../docs-header.php';
 ?>
 
         <div class="docs-content">
+            <div class="info-box">
+                <p><strong>Premium Feature:</strong> The Argo Books API is available with the Premium plan.
+                    <a href="../getting-started/version-comparison.php" class="link">Compare versions</a></p>
+            </div>
+
             <p>The Argo Books API lets your application send accounting data into a merchant's books. It lives at <code>https://argorobots.com/v1</code>.</p>
 
             <h2>The One Thing to Understand First</h2>
