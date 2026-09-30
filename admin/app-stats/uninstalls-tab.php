@@ -24,6 +24,7 @@ $uninstallReasons = [
     'not_needed'      => "Doesn't need accounting software",
     'problem'         => "Didn't work on their computer",
     'just_looking'    => 'Only trying it out',
+    'reinstalling'    => 'Reinstalling, not leaving',
     'other'           => 'Something else',
 ];
 

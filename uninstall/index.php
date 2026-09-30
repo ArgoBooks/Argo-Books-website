@@ -29,6 +29,7 @@ $reasons = [
     'not_needed'      => "I don't need accounting software right now",
     'problem'         => "It didn't work properly on my computer",
     'just_looking'    => 'I was only trying it out',
+    'reinstalling'    => "I'm reinstalling it, not leaving",
     'other'           => 'Something else',
 ];
 
