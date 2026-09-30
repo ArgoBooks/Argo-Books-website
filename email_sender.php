@@ -1194,8 +1194,8 @@ function send_free_subscription_key_email($email, $subscriptionKey, $durationMon
     }
 
     $body = <<<HTML
-        <h1>Your free Premium subscription key</h1>
-        <p>You've been given a free Argo Books Premium subscription key.</p>
+        <h1>Your free Premium key</h1>
+        <p>You've been given a free Argo Books Premium key.</p>
 
         <div class="license-key">{$subscriptionKey}</div>
 
@@ -1220,7 +1220,7 @@ function send_free_subscription_key_email($email, $subscriptionKey, $durationMon
         <p>Thank you for being part of the Argo community!</p>
         HTML;
 
-    return send_styled_email($email, 'Your Free Argo Books Premium Subscription Key', $body, 'premium');
+    return send_styled_email($email, 'Your Free Argo Books Premium Key', $body, 'premium');
 }
 
 /**
