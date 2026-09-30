@@ -63,7 +63,7 @@ include __DIR__ . '/../../docs-header.php';
                 <li>Record a revenue transaction (stock decreases)</li>
                 <li>Record an expense transaction (stock increases)</li>
                 <li>Receive a purchase order (stock increases)</li>
-                <li>Bring in sales or purchases from Stripe or the Argo Books API</li>
+                <li>Bring in revenue or purchases from Stripe or the Argo Books API</li>
                 <li>Rent items out or take them back (see <a class="link" href="rental.php">Rental Management</a>)</li>
             </ul>
             <p><a class="link" href="returns.php">Returns</a> and <a class="link" href="lost-damaged.php">lost or damaged</a> records don't change stock. Record an adjustment if the items should come off or go back on the shelf.</p>

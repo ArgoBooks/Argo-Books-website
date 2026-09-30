@@ -385,7 +385,7 @@ $isDocsLanding = true;
                         <?= svg_icon('credit-card', 20) ?>
                     </div>
                     <h3>Stripe Integration</h3>
-                    <p>Import your Stripe sales, fees, tax, and customers</p>
+                    <p>Import your Stripe revenue, fees, tax, and customers</p>
                 </a>
             </div>
         </section>
