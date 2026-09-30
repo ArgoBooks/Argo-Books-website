@@ -111,6 +111,12 @@
             </ul>
             <p>We do not store your customers' credit card or bank details. All payment processing is handled directly by the connected payment provider.</p>
 
+            <h4>Free Receipt Scanner</h4>
+            <p>The free receipt scanner on our Website sends the image you upload to Google Gemini to be read
+                and returns the result to your browser. The image is deleted from our server as soon as it has
+                been sent onward, and neither the image nor what was read from it is kept. Submissions are
+                checked by Cloudflare Turnstile so that the scanner cannot be used by automated traffic.</p>
+
             <h4>Technical Information</h4>
             <p>We automatically collect certain information when you visit our Website:</p>
             <ul>
@@ -182,34 +188,42 @@
                 Two things are exceptions, and we would rather be plain about them than describe the whole
                 system as anonymous when it is not:</p>
             <ul>
-                <li>Each installation is given a random device identifier so we can tell one installation's
-                    sessions apart from another's. It is not derived from your name, your email, your hardware, or
-                    anything else about you, and it is not linked to your Argo Books account. It does mean the
-                    activity from a single installation can be grouped together</li>
+                <li>Each device is given an identifier so we can tell one device's activity apart from
+                    another's. It is a one way hash of an identifier your operating system already holds: the
+                    Cryptography MachineGuid on Windows, the platform UUID on macOS, and the machine id on
+                    Linux. We cannot reverse the hash to recover that value, and it is not derived from your
+                    name or your email, nor is it linked to your Argo Books account. Because it comes from your
+                    device rather than being generated at random, it stays the same if you reinstall Argo Books,
+                    and every installation on the same computer shares it</li>
                 <li>If you create or open a company, we collect the business profile described below, which
                     includes the company name you entered</li>
             </ul>
 
             <h3>Data We Collect in the Desktop Software</h3>
-            <p>The desktop application collects the following:</p>
+            <p>We collect this for two reasons: to find what is broken or slow and fix it, and to see which parts
+                of Argo Books people use so that we know what to build next. The desktop application
+                collects:</p>
             <ul>
-                <li><strong>Export data</strong>: Type of export (Excel, Google Sheets, backup, etc.), duration of
-                    export operation, and file size</li>
-                <li><strong>API usage</strong>: API type (Google Sheets, Google Gemini, Open Exchange Rates, and
-                    receipt scanning), operation duration, and whether the call succeeded</li>
-                <li><strong>Error data</strong>: Error category, exception type name, source filename, line number,
-                    and method name so we can identify and fix software issues. For expected conditions that we
-                    record as warnings, we also collect a short description that we wrote ourselves. The text of an
-                    error produced by your computer or by another program is never sent</li>
-                <li><strong>Session data</strong>: Session start/end times, session duration, application version, and
-                    operating system (Windows, macOS, or Linux)</li>
+                <li><strong>Error data</strong>: When something goes wrong, what kind of failure it was and which
+                    part of our own program it happened in, so that we can find it and fix it. This points at our
+                    own code, never at your files or what is in them. Where we expect a problem and record it as a
+                    warning, we also send a short description that we wrote ourselves. The text of an error
+                    produced by your computer or by another program is never sent</li>
                 <li><strong>Startup timing</strong>: How long the application took to open, so we can find out how
                     slow it is on hardware we do not have</li>
-                <li><strong>Geographic data</strong>: Country, region, and timezone to understand our global user base</li>
-                <li><strong>Feature usage</strong>: Which features are used (e.g., receipts scanned, reports generated) so
-                    we can prioritize improvements</li>
-                <li><strong>Business profile</strong>: See the section immediately below</li>
+                <li><strong>Session data</strong>: When you opened and closed the application, how long it stayed
+                    open, which version you are running, and whether you are on Windows, macOS or Linux</li>
+                <li><strong>Outside services</strong>: Which service the application contacted (Google Sheets,
+                    Google Gemini, Open Exchange Rates, or receipt scanning), how long it took to answer, and
+                    whether it worked. What gets sent to those services is described further down</li>
+                <li><strong>Feature usage</strong>: Which features you use, such as scanning a receipt or
+                    generating a report, so that we know what to improve</li>
+                <li><strong>Export data</strong>: The kind of export you ran (Excel, Google Sheets, backup and so
+                    on), how long it took, and how large the file was</li>
+                <li><strong>Geographic data</strong>: Country, region and timezone, so that we know where Argo
+                    Books is being used</li>
                 <li><strong>Timestamp</strong>: When the action occurred</li>
+                <li><strong>Business profile</strong>: See the section immediately below</li>
             </ul>
 
             <h3>Business Profile Data</h3>
@@ -232,15 +246,41 @@
                 email us at <a class="link" href="mailto:contact@argorobots.com">contact@argorobots.com</a> and we
                 will delete what has already been collected for your installation.</p>
 
+            <h3>Receipt Scanning and Spreadsheet Import</h3>
+            <p>These two features cannot run on your computer alone, so the file you give them leaves your
+                device. When you scan a receipt, the image is sent to our server, which passes it to Google
+                Gemini and returns the vendor, date, totals and line items that were read from it. Spreadsheet
+                import works the same way for files the built in importer cannot read on its own. Our server
+                holds the Google API key so that your copy of Argo Books does not have to, and it passes the
+                file through without storing it.</p>
+            <p>This means the contents of a receipt you scan, and of a spreadsheet imported this way, are
+                processed by Google. Their handling of it is governed by the
+                <a class="link" href="https://ai.google.dev/gemini-api/terms" target="_blank">Gemini API
+                terms</a>. Both features are optional, and anything they produce can be typed in by hand
+                instead.</p>
+
+            <h3>What Stays On Your Computer</h3>
+            <p>Your company file lives on your own computer. Your ledger, invoices, customers, suppliers and
+                payroll records, including employee names, social insurance numbers and pay history, are written
+                there and are never uploaded to us. Backups are written to a folder you choose on your own
+                machine. When you set a password on a company file, that file is encrypted with AES-256. The
+                only exception is the one described above: files you hand to receipt scanning or spreadsheet
+                import.</p>
+
             <h3>What We Never Collect</h3>
-            <p>We never collect financial data, transaction data, customer names, vendor names, file
-                paths, or document contents. We do not collect city-level location. Your IP address is visible to
+            <p>In the usage data described above we never collect financial data, transaction data, customer
+                names, vendor names, file paths, or document contents. We do not collect city-level location. Your IP address is visible to
                 our server during the upload itself (as with any web request) and is used to derive your country
                 and region, but the IP address itself is not stored alongside the collected data. Apart from the
                 business profile above, the data collected describes how the application is used, not what you use
                 it for.</p>
 
-            <p>This data is separate from any standard web analytics we use on our Website.</p>
+            <p>Usage data from the application is kept apart from the analytics on our Website, with one
+                deliberate exception. When you download Argo Books from our Website, the download link carries a
+                signed token derived from your website visitor id. The application sends that token once, the
+                first time it runs, so that we can tell which advertisement, video or link led to an install.
+                That single event joins one website visit to one installation. The token is never sent again,
+                and nothing else you do in the application is connected to your website browsing.</p>
 
             <h3>How We Use This Data</h3>
             <p>We use this data to:</p>
@@ -259,13 +299,13 @@
             <p>Usage data is collected automatically and cannot be turned off in the application, but you remain in
                 control of it:</p>
             <ul>
-                <li><strong>View your data</strong>: Open the telemetry folder on your device from
-                    <em>Settings &gt; General &gt; Privacy</em> to see the events waiting to be sent. Events
-                    are removed from the folder once they have been uploaded. The files are plain JSON that you can
-                    read or copy</li>
-                <li><strong>Delete your data</strong>: You can delete all usage data stored on your device at any
-                    time from the same panel. Deleting clears the local copy. To also remove data that has already
-                    been uploaded to our servers, email
+                <li><strong>View your data</strong>: Open <em>Settings</em>, go to the <em>General</em> tab, and
+                    press <em>View Data</em> under <em>Usage Data</em>. This opens the folder on your computer
+                    holding the events that are waiting to be sent, and events are removed from it once they have
+                    been uploaded. The files are plain JSON that you can read or copy</li>
+                <li><strong>Delete your data</strong>: <em>Delete All Data</em>, beside that button, removes every
+                    piece of usage data stored on your computer. That clears the local copy. To also remove data
+                    that has already been uploaded to our servers, email
                     <a class="link" href="mailto:contact@argorobots.com">contact@argorobots.com</a> and we will
                     delete it</li>
                 <li><strong>Ask what we hold</strong>: Email us from the same address and we will tell you what has
@@ -283,6 +323,35 @@
             <p>Our use of information received from Google APIs adheres to the <a class="link" href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank">Google API Services User Data Policy</a>, including the Limited Use requirements.</p>
             <p>The first time you use the Google Sheets export feature, you will be prompted to sign in to your Google account and grant permission to the application. You can revoke this access at any time through your <a class="link" href="https://myaccount.google.com/permissions" target="_blank">Google Account permissions page</a>.</p>
           
+            <h2>Who Else Handles Your Data</h2>
+            <p>We use the services below to run Argo Books. Each one receives only what it needs for the job
+                named beside it, and none of them receives your company file.</p>
+            <ul>
+                <li><strong>Google</strong>: receipt images and imported spreadsheets, so that they can be read,
+                    and your Google Drive only when you use Export to Google Sheets</li>
+                <li><strong>Stripe, PayPal and Square</strong>: payments, subscriptions, and invoice payments
+                    taken through the payment portal</li>
+                <li><strong>Resend</strong>: sending email, such as invoices, account notices and license keys</li>
+                <li><strong>Cloudflare</strong>: checking that form and scanner submissions come from a person</li>
+                <li><strong>Open Exchange Rates</strong>: currency rates, requested without sending anything
+                    that describes you</li>
+            </ul>
+            <p>We do not sell your data and we do not share it with advertisers.</p>
+
+            <h2>Where Your Data Is Held</h2>
+            <p>Our website, our database and the usage data described above are held on servers in Canada.</p>
+            <p>The services listed above operate internationally, so some data is processed outside Canada. A
+                receipt you scan is read by Google, a payment you make is handled by Stripe, PayPal or Square,
+                and email is sent through Resend, each under that provider's own safeguards. Your company file
+                is not sent to any of them.</p>
+
+            <h2>Who We Are and Which Law Applies</h2>
+            <p>Argo Books is operated from Canada, and Canadian privacy law applies to the data described in
+                this policy. If you live somewhere that grants you additional rights over your personal data,
+                such as the United Kingdom or the European Union, we will honour the rights listed above
+                wherever you live rather than asking you to show where you are. To exercise any of them, email
+                <a class="link" href="mailto:contact@argorobots.com">contact@argorobots.com</a>.</p>
+
             <h2>Children's Privacy</h2>
             <p>Our Website does not address anyone under the age of 18 ("Children"). We do not knowingly collect
                 personally identifiable information from anyone under the age of 18. If you are a parent or guardian and
@@ -302,7 +371,7 @@
                 <li>By email: <a class="link" href="mailto:contact@argorobots.com">contact@argorobots.com</a></li>
             </ul>
 
-            <p class="last-updated">Last updated: August 9, 2026</p>
+            <p class="last-updated">Last updated: September 30, 2026</p>
         </div>
     </div>
 
