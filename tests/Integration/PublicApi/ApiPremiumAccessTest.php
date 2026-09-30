@@ -58,6 +58,20 @@ final class ApiPremiumAccessTest extends TestCase
         $this->assertSame($this->accountId, $this->authenticate()['account_id']);
     }
 
+    public function testAKeyCreatedSubscriptionCountsInTheOtherEnvironment(): void
+    {
+        $this->subscription('active', '+30 days', $this->otherEnvironment());
+
+        $this->assertSame($this->accountId, $this->authenticate()['account_id']);
+    }
+
+    public function testASubscriptionPaidForInTheOtherEnvironmentIsRefused(): void
+    {
+        $this->subscription('active', '+30 days', $this->otherEnvironment(), 'stripe');
+
+        $this->assertRefusedForPremium();
+    }
+
     public function testAKeyStopsWorkingOnceTheSubscriptionHasEnded(): void
     {
         $this->subscription('active', '-1 day');
@@ -70,20 +84,26 @@ final class ApiPremiumAccessTest extends TestCase
         $this->assertRefusedForPremium();
     }
 
-    private function subscription(string $status, string $endsIn): void
+    private function subscription(string $status, string $endsIn, ?string $environment = null, string $paymentMethod = 'free_key'): void
     {
         $this->pdo->prepare(
             "INSERT INTO premium_subscriptions
              (subscription_id, billing_cycle, amount, currency, start_date, end_date,
               status, payment_method, transaction_id, auto_renew, environment, created_at)
-             VALUES (?, 'yearly', 0.00, 'CAD', NOW(), ?, ?, 'free_key', ?, 0, ?, NOW())"
+             VALUES (?, 'yearly', 0.00, 'CAD', NOW(), ?, ?, ?, ?, 0, ?, NOW())"
         )->execute([
             $this->subscriptionId,
             date('Y-m-d H:i:s', strtotime($endsIn)),
             $status,
+            $paymentMethod,
             $this->subscriptionId,
-            current_environment(),
+            $environment ?? current_environment(),
         ]);
+    }
+
+    private function otherEnvironment(): string
+    {
+        return current_environment() === 'production' ? 'sandbox' : 'production';
     }
 
     private function authenticate(): array

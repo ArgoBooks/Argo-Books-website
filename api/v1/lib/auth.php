@@ -76,15 +76,15 @@ function api_authenticate(): array
         'SELECT k.id AS key_id, k.scopes, k.revoked_at, k.last_used_at,
                 a.id AS account_id, a.public_id AS account_public_id,
                 a.company_uid, a.is_active,
-                s.status AS subscription_status, s.end_date AS subscription_end
+                s.status AS subscription_status, s.end_date AS subscription_end,
+                s.environment AS subscription_environment, s.payment_method
            FROM api_keys k
            JOIN api_accounts a ON a.id = k.account_id
-           LEFT JOIN premium_subscriptions s
-                  ON s.subscription_id = a.subscription_id AND s.environment = ?
+           LEFT JOIN premium_subscriptions s ON s.subscription_id = a.subscription_id
           WHERE k.key_hash = ?
           LIMIT 1'
     );
-    $stmt->execute([current_environment(), hash('sha256', $secret)]);
+    $stmt->execute([hash('sha256', $secret)]);
     $row = $stmt->fetch();
 
     if (!$row) {
@@ -102,9 +102,13 @@ function api_authenticate(): array
         api_error(403, 'invalid_request_error', 'account_inactive', 'The Argo Books account behind this key is not active.');
     }
     // Checked on every request rather than only when the key was made, or a key minted during
-    // one paid month would keep working after the subscription ended.
+    // one paid month would keep working after the subscription ended. A key-created (free_key)
+    // subscription counts in either environment, because validating the key moves it to
+    // whichever site the app last used. A paid one only counts where it was paid, so a sandbox
+    // test payment never buys production access.
     $premium = in_array($row['subscription_status'], ['active', 'cancelled'], true)
-        && strtotime((string) $row['subscription_end']) > time();
+        && strtotime((string) $row['subscription_end']) > time()
+        && ($row['subscription_environment'] === current_environment() || $row['payment_method'] === 'free_key');
     if (!$premium) {
         api_error(403, 'invalid_request_error', 'premium_required', 'The API is part of Argo Books Premium, and the account behind this key does not have it. The merchant needs to upgrade or renew.');
     }
