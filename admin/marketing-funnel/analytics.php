@@ -476,7 +476,15 @@ function funnel_stage_dimension(string $column, ?string $period_start, ?string $
         $params[] = $source_filter;
     }
 
-    $sql = "SELECT event_type, $column AS k, COUNT(DISTINCT visitor_id) AS visitors
+    // Both rules must match get_funnel_stage_counts(), or the shares describe a
+    // different population from the count they sit under.
+    $confirmed = funnel_confirmed_visitor_sql('referral_events');
+    $first_run = funnel_first_run_key_sql();
+    $where .= " AND (event_type <> 'download_click' OR $confirmed)";
+
+    $sql = "SELECT event_type, $column AS k,
+                   COUNT(DISTINCT CASE WHEN event_type = 'app_first_run'
+                                       THEN $first_run ELSE visitor_id END) AS visitors
               FROM referral_events
              WHERE $where
              GROUP BY event_type, k";
