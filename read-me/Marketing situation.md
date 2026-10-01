@@ -8,12 +8,12 @@ Related: [Google Ads economics.md](Google%20Ads%20economics.md), [Email outreach
 
 - Solo founder, bootstrapping. Argo Books has been in development for about 2 years.
 - Windows, macOS, and Linux. The macOS build shipped 2026-09-09, signed and notarized, for Apple Silicon and Intel; see [macOS](#macos).
-- **6 paying customers: 2 subscriptions and 4 one-time.** The two subscribers signed up around May, both auto-renewed and are still active, although they don't use the app.
+- **7 paying customers: 2 subscriptions and 5 one-time.** The two subscribers signed up around May, both auto-renewed and are still active, although they don't use the app.
   - Customer 1 came from a YouTube video (the receipt scanning one).
   - Customer 2 came from Google search.
-  - Customers 3 to 6 bought the lifetime deal through Stack Social, one each on 2026-08-27, 2026-09-27, 2026-09-28 and 2026-09-29. None of them produce recurring revenue.
+  - Customers 3 to 7 bought the lifetime deal through Stack Social, one each on 2026-08-27, 2026-09-27, 2026-09-28, 2026-09-29 and 2026-10-01. None of them produce recurring revenue.
 - Pricing: \$15/month or \$150/year. Customer 1 is paying \$10/month with no payment processing fee added, because I increased the price after he signed up.
-- Revenue: **\$102.96 CAD from subscriptions** all time (2026-09-29), all of it inside the last year, plus **\$95.27 USD from Stack Social** across four lifetime sales. Kept in their own currencies because that is how each is paid. Stack Social keys are reseller keys and never touch the site's billing, so they are absent from the admin revenue figures entirely.
+- Revenue: **\$102.96 CAD from subscriptions** all time (2026-09-29), all of it inside the last year, plus **\$111.51 USD from Stack Social** across five lifetime sales (2026-10-01). Kept in their own currencies because that is how each is paid. Stack Social keys are reseller keys and never touch the site's billing, so they are absent from the admin revenue figures entirely.
 - **MRR has been flat at \$25.74 since June 2026.** Four months, no growth: all-time subscription revenue is exactly four months of it. 2 active licenses, 0% churn so far.
 - Running costs: **~\$170 CAD/month.** Claude Code \$140, Azure code signing \$10, Apple Developer Program \$10, website hosting and domain \$10. Against \$25.74 of revenue that is about \$145/month out of pocket, so a \$1,000 spend is roughly seven months of runway.
 - **The "LTV" tile on `/admin/marketing-funnel/` is not lifetime value.** It computes `total_revenue / total_paying` (see `admin/marketing-funnel/index.php`), which is revenue booked to date per customer. It reads low early and drifts up as customers renew. Do not quote it as LTV.
@@ -105,11 +105,11 @@ Current view counts, newest first:
 Subscriber count: 3.
 
 ### Stack Social
-A Stack Social deal went live late August. **Four sales so far, one each on 2026-08-27, 2026-09-27, 2026-09-28 and 2026-09-29.** Argo Books Premium is being sold as a lifetime deal of $83.99 CAD. My share of the revenue is 45-50%, depending on how they acquired each customer. Stack Social is generally either a hit or a miss, with most companies making almost no sales, while some do very well, with hundreds, or thousands of sales. While ~$40 revenue on each sale is very little considering I also have business expenses, based on my research:
+A Stack Social deal went live late August. **Five sales so far, one each on 2026-08-27, 2026-09-27, 2026-09-28, 2026-09-29 and 2026-10-01.** Argo Books Premium is being sold as a lifetime deal of $83.99 CAD. My share of the revenue is 45-50%, depending on how they acquired each customer. Stack Social is generally either a hit or a miss, with most companies making almost no sales, while some do very well, with hundreds, or thousands of sales. While ~$40 revenue on each sale is very little considering I also have business expenses, based on my research:
 - Around 80% of people who buy lifetime software deals never use the software, or use it very little. 
 - Lifetime users tend to churn at similar rates as subscription users.
 
-**Everything is in US dollars, and the rate is being paid correctly** (confirmed 2026-09-29 from their earnings CSV). The deal sells for \$59.99 USD; \$83.99 CAD is just what a Canadian buyer is shown. Earnings so far are \$95.27 USD across four sales, no refunds and no chargebacks:
+**Everything is in US dollars, and the rate is being paid correctly** (confirmed 2026-09-29 from their earnings CSV). The deal sells for \$59.99 USD; \$83.99 CAD is just what a Canadian buyer is shown. Earnings so far are \$111.51 USD across five sales, no refunds and no chargebacks:
 
 | Sale date | Sold for | Where | Rate | Card fee | Earnings |
 |---|---|---|---|---|---|
@@ -117,15 +117,16 @@ A Stack Social deal went live late August. **Four sales so far, one each on 2026
 | 2026-09-27 | \$59.99 | Stack O&O | 50% | \$2.40 | \$27.60 |
 | 2026-09-28 | \$59.99 | Network | 40.1% | \$2.40 | \$21.66 |
 | 2026-09-29 | \$59.99 | Stack O&O | 50% | \$2.40 | \$27.60 |
+| 2026-10-01 | \$44.99 | Network | 40.1% | \$1.80 | \$16.24 |
 
-The maths is `sale price x rate, minus a 4% card fee`, and it checks out on all four. The rate depends on where the sale came from, which is what "45-50% depending on how they acquired each customer" meant:
+The maths is `sale price x rate, minus a 4% card fee`, and it checks out on all five. The 2026-10-01 row is derived rather than read off their dashboard, and only its date and \$16.24 earnings are certain. Both rates fit the arithmetic: Network gives \$44.99 and Stack O&O gives \$35.30. Network is the guess only because \$44.99 is a price somebody would actually set. Worth confirming against their earnings CSV. The rate depends on where the sale came from, which is what "45-50% depending on how they acquired each customer" meant:
 
 - **Stack O&O**, their own site, pays **50%**, so \$27.60 a sale.
 - **Network**, someone else's storefront, pays **40.1%**, so \$21.66 a sale.
 
-The first sale looked worst because it was both a Network sale and discounted to \$51.00. So there is no shortfall and nothing to query with them. Expect \$27.60 when they sell it themselves and \$21.66 when a partner does, and around \$24 on average. Note that \$40 a sale was never possible at this price: half of \$59.99 is \$30 before fees.
+The two weakest sales were both Network sales and both discounted, to \$51.00 and \$44.99. So there is no shortfall and nothing to query with them. Expect \$27.60 when they sell it themselves and \$21.66 when a partner does, and around \$24 on average. Note that \$40 a sale was never possible at this price: half of \$59.99 is \$30 before fees.
 
-**Redemption so far: 1 of 4** (2026-09-29). Three of the four sold in the last three days, so that number means nothing yet. Check it at `/admin/license/?tab=reseller-batches`. The one person who redeemed gave an email address but never confirmed it, so there are no usable contacts from this deal yet.
+**Redemption so far: 1 of 5** (2026-09-29). Four of the five sold in the last five days, so that number means nothing yet. Check it at `/admin/license/?tab=reseller-batches`. The one person who redeemed gave an email address but never confirmed it, so there are no usable contacts from this deal yet.
 
 **Stack Social does not give you the buyers' email addresses.** The only way to reach these customers is by asking them in the app when they enter their key.
 
