@@ -20,7 +20,7 @@ return [
 
   'published' => '2026-07-22',
 
-  'updated' => '2026-07-22',
+  'updated' => '2026-09-30',
 
   'reading_time_min' => 11,
 
@@ -28,7 +28,7 @@ return [
 
   'intro_html' => <<<'HTML'
 <p>Switching accounting software feels riskier than it is. Your books hold years of invoices, expenses, and reports, and the thought of moving all of that somewhere new is enough to keep plenty of people paying for a subscription they've outgrown, or outgrown paying for. The quiet truth is that most switches are far smaller jobs than they look, because you don't need to move most of that history. You need a clean starting point, a handful of open items, and a permanent copy of the past you can open any time.</p>
-<p>This guide walks through the whole process in seven steps: deciding what actually needs to come with you, exporting from QuickBooks (Online or Desktop), saving the reports that become your archive, picking a start date, importing into the new tool, running a short overlap to check the numbers, and finally cancelling. No horror stories, no pressure. Just the calm, boring way to move your books without losing anything that matters.</p>
+<p>This guide walks through the whole process in seven steps, ending with bringing everything into Argo Books: deciding what actually needs to come with you, exporting from QuickBooks (Online or Desktop), saving the reports that become your archive, picking a start date, importing into the new tool, running a short overlap to check the numbers, and finally cancelling. No horror stories, no pressure. Just the calm, boring way to move your books without losing anything that matters.</p>
 HTML,
 
   'sections' => [
@@ -95,15 +95,17 @@ HTML,
     ],
 
     [
-      'h2' => 'Step 5: import into your new tool',
+      'h2' => 'Step 5: import into Argo Books',
       'anchor' => 'import-new-tool',
-      'step_name' => 'Import into your new tool',
-      'step_text' => 'Bring your exported CSV and spreadsheet files into the new software, starting with customer and vendor lists, then this year\'s transactions, then re-create any open invoices.',
+      'step_name' => 'Import your exported files into Argo Books',
+      'step_text' => 'Open Import, choose QuickBooks, and add every file you exported. Argo Books reads the columns itself, so there is no mapping spreadsheet to build first. ',
       'html' => <<<'HTML'
-<p>Now the files you exported come back to life. Most modern accounting tools accept CSV or spreadsheet imports for lists and transactions, and this is where the switch actually happens. Bring things in roughly in this order: customer and vendor lists first, then your products or services, then the current year's transactions, and finally re-create any open invoices so they're ready to be paid in the new system.</p>
+<p>Now the files you exported come back to life. In Argo Books, open the <strong>Import</strong> menu and choose <strong>QuickBooks</strong>, say whether you came from QuickBooks Online or Desktop, and add every file at once. There is no order to get right and no mapping spreadsheet to build first: the importer reads each file and works out what the columns mean, including when QuickBooks has named them something only QuickBooks uses.</p>
 {{illustration:spreadsheet-to-books}}
-<p>Be realistic about what "import" means. This is an import, not an automatic migration: no tool waves a wand over a QuickBooks account and rebuilds it perfectly somewhere else, and any service claiming otherwise still involves cleanup. Your exported files will have QuickBooks' column names and formatting quirks, so expect to spend a little time mapping columns and checking that dates and amounts landed correctly.</p>
-<p>This is where Argo Books is genuinely convenient: its AI spreadsheet and CSV import reads exported files like the ones QuickBooks produces and works out what each column means, so you spend minutes mapping instead of an afternoon rearranging spreadsheets. It can read bank statements the same way. It's still an import, you'll still glance over the results, but it takes most of the tedium out of this step. If your data lives partly in spreadsheets already, our guide on <a href="/how-to-convert-excel-spreadsheet-to-accounting-software/">converting a spreadsheet into accounting software</a> covers that side in detail.</p>
+<p><strong>Export as Excel rather than CSV wherever QuickBooks offers both.</strong> QuickBooks reports are not plain tables. They carry heading lines at the top, group headings in the middle, and subtotal rows mixed in with the data. Argo Books reads around all of that in an Excel file. A CSV is treated as a plain table, so those subtotal rows can be read as if they were transactions, which quietly inflates your totals.</p>
+<p>What arrives: your customers, suppliers, products, employees, open invoices, and the revenue and expenses for whatever period you chose in step 4. What does not arrive is your chart of accounts and journal entries, and that is by design rather than a shortfall. Argo Books works out your Income Statement, Balance Sheet and General Ledger from the transactions themselves, so there is no separate list of accounts for them to land in. Export transaction detail reports instead of the General Ledger or Journal.</p>
+<p>Be realistic about what "import" means. This is an import, not an automatic migration: no tool waves a wand over a QuickBooks account and rebuilds it perfectly somewhere else, and any service claiming otherwise still involves cleanup. Nothing is written to your books until you confirm, so look over what was understood before committing to it.</p>
+<p>The <a href="/documentation/pages/features/quickbooks-import.php">Import from QuickBooks documentation</a> lists exactly which reports to export from each version and what each one becomes. If your data lives partly in spreadsheets already, our guide on <a href="/how-to-convert-excel-spreadsheet-to-accounting-software/">converting a spreadsheet into accounting software</a> covers that side in detail.</p>
 HTML,
     ],
 
@@ -139,9 +141,9 @@ HTML,
 
   'callout_after_section_index' => 2,
 
-  'tool_callout_text' => 'Argo Books\' AI spreadsheet import reads the CSV and Excel files you export from QuickBooks and works out what each column means, so your lists and transactions come across in minutes.',
-  'tool_callout_cta' => 'See how spreadsheet import works',
-  'tool_callout_url' => '/features/spreadsheet-import/',
+  'tool_callout_text' => 'Argo Books imports the reports QuickBooks already knows how to export. Choose QuickBooks in the Import menu, add the files, and your customers, suppliers, products, employees and transactions come across without a mapping step.',
+  'tool_callout_cta' => 'See which reports to export',
+  'tool_callout_url' => '/documentation/pages/features/quickbooks-import.php',
 
   'faqs' => [
     [
