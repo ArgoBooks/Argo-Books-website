@@ -960,6 +960,7 @@ include __DIR__ . '/../admin_header.php';
         // Per-stage top sources / countries for the funnel hover tooltip.
         $stage_countries = $analytics['stage_countries'];
         $stage_sources   = $analytics['stage_sources'];
+        $stage_os        = $analytics['stage_os'];
         $name_by_source_code = [];
         foreach ($referral_links as $rl) {
             $name_by_source_code[$rl['source_code']] = referral_display_name($rl['category'], $rl['name'], $rl['source_code']);
@@ -994,6 +995,7 @@ include __DIR__ . '/../admin_header.php';
                 'step_value' => $c > 0 ? round($total_revenue / $c, 2) : 0,
                 'top_countries' => $fmt_stage_rows($stage_countries[$sd['key']] ?? [], true),
                 'top_sources'   => $fmt_stage_rows($stage_sources[$sd['key']] ?? [], false),
+                'top_os'        => $fmt_stage_rows($stage_os[$sd['key']] ?? [], false),
             ];
             $prev_count = $c;
         }
@@ -2298,16 +2300,19 @@ include __DIR__ . '/../admin_header.php';
                 h += `<div class="ft-line"><span>Conversion</span><b>${s.retained === null ? '100%' : s.retained + '%'}</b></div>`;
                 h += `<div class="ft-line ft-sub"><span>from start</span><b>${s.pct_of_top}%</b></div>`;
                 h += `<div class="ft-line"><span>Step value</span><b>${money(s.step_value)}/visitor</b></div>`;
-                if ((s.top_sources && s.top_sources.length) || (s.top_countries && s.top_countries.length)) {
+                if ((s.top_sources && s.top_sources.length) || (s.top_countries && s.top_countries.length)
+                    || (s.top_os && s.top_os.length)) {
                     const col = (title, rows) => `<div class="ft-col"><div class="ft-h">${title}</div>` +
                         rows.map(r => `<div class="ft-row"><span>${r.flag ? r.flag + ' ' : ''}${escapeHtml(r.label)}</span><em>${r.pct}%</em></div>`).join('') + `</div>`;
-                    h += `<div class="ft-cols">` + col('Top sources', s.top_sources || []) + col('Top countries', s.top_countries || []) + `</div>`;
+                    h += `<div class="ft-cols">` + col('Top sources', s.top_sources || [])
+                        + col('Top countries', s.top_countries || [])
+                        + col('Top OS', s.top_os || []) + `</div>`;
                 }
                 tip.innerHTML = h;
                 tip.setAttribute('aria-hidden', 'false');
                 tip.classList.add('show');
                 let x = e.clientX + 16;
-                if (x + 250 > window.innerWidth) x = e.clientX - 250;
+                if (x + 340 > window.innerWidth) x = e.clientX - 340;
                 tip.style.left = Math.max(4, x) + 'px';
                 tip.style.top = Math.max(4, e.clientY + 14) + 'px';
             };

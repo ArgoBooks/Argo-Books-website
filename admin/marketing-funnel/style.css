@@ -726,8 +726,8 @@
 .funnel-tip {
     position: fixed;
     z-index: 2000;
-    min-width: 210px;
-    max-width: 240px;
+    min-width: 260px;
+    max-width: 330px;
     background: var(--white);
     border: 1px solid var(--gray-border);
     border-radius: 10px;
@@ -749,7 +749,7 @@
 [data-theme="dark"] .ft-line { color: var(--white); }
 .ft-sep { height: 1px; background: var(--gray-border); margin: 8px 0; }
 [data-theme="dark"] .ft-sep { background: var(--gray-700); }
-.ft-cols { display: flex; gap: 14px; margin-top: 8px; }
+.ft-cols { display: flex; gap: 10px; margin-top: 8px; }
 .ft-col { flex: 1; min-width: 0; }
 .ft-h {
     font-size: 10px;

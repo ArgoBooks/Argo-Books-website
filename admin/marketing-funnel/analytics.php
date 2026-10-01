@@ -444,7 +444,20 @@ function funnel_merge_breakdown(
  * across every funnel stage, for the funnel hover tooltip.
  *
  * Returns [event_type => ['total' => int, 'rows' => [['label','visitors','pct'], ...]]].
+ *
+ * $column is pasted into the query, so it may be an expression such as
+ * FUNNEL_OS_EXPR as well as a plain column name. It never carries user input.
  */
+const FUNNEL_OS_EXPR = "CASE
+        WHEN user_agent IS NULL OR user_agent = '' THEN 'Unknown'
+        WHEN user_agent LIKE '%Windows NT%'                     THEN 'Windows'
+        WHEN user_agent LIKE '%Android%'                        THEN 'Android'
+        WHEN user_agent REGEXP 'iPhone|iPad|iPod'               THEN 'iOS'
+        WHEN user_agent REGEXP 'Macintosh|Mac OS X'             THEN 'macOS'
+        WHEN user_agent REGEXP 'Linux|X11|Ubuntu|CrOS'          THEN 'Linux'
+        ELSE 'Other'
+    END";
+
 function funnel_stage_dimension(string $column, ?string $period_start, ?string $source_filter, int $top = 3): array
 {
     global $pdo;
@@ -641,6 +654,7 @@ function build_funnel_analytics(?string $period_start, ?string $source_filter, a
         ),
         'stage_countries' => funnel_stage_dimension('country_code', $period_start, $source_filter),
         'stage_sources'   => funnel_stage_dimension('source_code',  $period_start, $source_filter),
+        'stage_os'        => funnel_stage_dimension(FUNNEL_OS_EXPR,  $period_start, $source_filter),
     ];
 }
 
