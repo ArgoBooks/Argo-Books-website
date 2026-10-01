@@ -152,8 +152,8 @@ $title = $answered ? 'Thanks for telling me' : 'Argo Books has been removed';
                         placeholder="What would have made you keep it?"></textarea>
 
               <div class="action-buttons">
-                <button type="submit" class="btn primary-btn">Send</button>
                 <a href="/" class="btn secondary-btn">No thanks</a>
+                <button type="submit" class="btn primary-btn">Send</button>
               </div>
             </form>
           <?php endif; ?>

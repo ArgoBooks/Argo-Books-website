@@ -66,3 +66,11 @@
   color: var(--red-600);
   font-size: 14px;
 }
+
+.action-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 22px;
+}
