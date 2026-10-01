@@ -570,3 +570,36 @@ body {
         font-size: var(--text-xs);
     }
 }
+
+.store-badges {
+    margin: 0 0 40px;
+    text-align: center;
+}
+
+.store-badges-label {
+    margin: 0 0 12px;
+    font-size: var(--text-2xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--gray-500);
+}
+
+.store-badges-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+}
+
+.store-badges-row img {
+    display: block;
+    height: auto;
+    opacity: .85;
+    transition: opacity .15s ease;
+}
+
+.store-badges-row a:hover img,
+.store-badges-row a:focus-visible img {
+    opacity: 1;
+}

@@ -281,6 +281,67 @@ $systemRequirements = getSystemRequirements();
             <?php endforeach; ?>
         </div>
 
+        <?php
+        // Store listings, shown to everyone rather than matched to the visitor's
+        // platform: the point is that the app is carried in real stores, which a
+        // Mac user reads just as well from a Windows badge.
+        //
+        // The tracked buttons above carry the install token and these do not, so
+        // these stay a credential and never become the main call to action.
+        //
+        // To add a store: drop its artwork in resources/images/badges/, add a row,
+        // set enabled. The section hides itself while nothing is enabled.
+        $store_badges = array_values(array_filter([
+            [
+                'enabled' => true,
+                'url'     => 'https://apps.microsoft.com/detail/xpdmdvrxj0xs0m?referrer=appbadge&cid=argorobots-downloads',
+                'img'     => '../resources/images/badges/microsoft-store-badge-light.svg',
+                'w'       => 200,
+                'h'       => 55,
+                'alt'     => 'Download Argo Books from the Microsoft Store',
+            ],
+            [
+                'enabled' => false,
+                'url'     => '',
+                'img'     => '../resources/images/badges/mac-app-store-badge.svg',
+                'w'       => 200,
+                'h'       => 55,
+                'alt'     => 'Download Argo Books on the Mac App Store',
+            ],
+            [
+                'enabled' => false,
+                'url'     => '',
+                'img'     => '../resources/images/badges/flathub-badge.svg',
+                'w'       => 200,
+                'h'       => 55,
+                'alt'     => 'Get Argo Books on Flathub',
+            ],
+            [
+                'enabled' => false,
+                'url'     => '',
+                'img'     => '../resources/images/badges/snapcraft-badge.svg',
+                'w'       => 200,
+                'h'       => 55,
+                'alt'     => 'Get Argo Books from the Snap Store',
+            ],
+        ], fn($b) => $b['enabled'] && $b['url'] !== ''));
+        ?>
+        <?php if ($store_badges): ?>
+        <div class="store-badges">
+            <p class="store-badges-label">Also available from</p>
+            <div class="store-badges-row">
+                <?php foreach ($store_badges as $badge): ?>
+                <a href="<?= htmlspecialchars($badge['url']) ?>" target="_self" rel="noopener">
+                    <img src="<?= htmlspecialchars($badge['img']) ?>"
+                         width="<?= (int) $badge['w'] ?>" height="<?= (int) $badge['h'] ?>"
+                         alt="<?= htmlspecialchars($badge['alt']) ?>"
+                         loading="lazy" decoding="async">
+                </a>
+                <?php endforeach; ?>
+            </div>
+        </div>
+        <?php endif; ?>
+
         <!-- Post-download walkthrough: the browser's "keep" steps (when the browser
              warns) followed by a final Windows launch step, as one continuous
              numbered list. Revealed after a Windows download click. -->
