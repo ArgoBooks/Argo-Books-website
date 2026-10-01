@@ -34,7 +34,7 @@
             {"label": "Import {premium_ai_import_monthly_limit} spreadsheets a month"},
             {"label": "Import {premium_bank_import_monthly_limit} bank statements a month"},
             {"label": "Run Canadian payroll and produce T4s"},
-            {"label": "Connect your store and apps with the API"},
+            {"label": "Connect your store and apps to the API"},
             {"label": "Forecast revenue and spot trends early"},
             {"label": "Sign in with your fingerprint or face"},
             {"label": "Priority support when you need it"}
