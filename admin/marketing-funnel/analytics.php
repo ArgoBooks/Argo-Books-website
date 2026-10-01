@@ -449,6 +449,9 @@ function funnel_merge_breakdown(
  * FUNNEL_OS_EXPR as well as a plain column name. It never carries user input.
  */
 const FUNNEL_OS_EXPR = "CASE
+        WHEN JSON_UNQUOTE(JSON_EXTRACT(event_data, '$.platform')) = 'win'   THEN 'Windows'
+        WHEN JSON_UNQUOTE(JSON_EXTRACT(event_data, '$.platform')) = 'mac'   THEN 'macOS'
+        WHEN JSON_UNQUOTE(JSON_EXTRACT(event_data, '$.platform')) = 'linux' THEN 'Linux'
         WHEN user_agent IS NULL OR user_agent = '' THEN 'Unknown'
         WHEN user_agent LIKE '%Windows NT%'                     THEN 'Windows'
         WHEN user_agent LIKE '%Android%'                        THEN 'Android'

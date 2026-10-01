@@ -2312,7 +2312,7 @@ include __DIR__ . '/../admin_header.php';
                 tip.setAttribute('aria-hidden', 'false');
                 tip.classList.add('show');
                 let x = e.clientX + 16;
-                if (x + 340 > window.innerWidth) x = e.clientX - 340;
+                if (x + 440 > window.innerWidth) x = e.clientX - 440;
                 tip.style.left = Math.max(4, x) + 'px';
                 tip.style.top = Math.max(4, e.clientY + 14) + 'px';
             };
