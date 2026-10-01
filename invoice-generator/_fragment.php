@@ -318,7 +318,7 @@ $ref_qs = '?source=' . htmlspecialchars($invgen_ref) . '&amp;utm_source=' . html
     <h2 id="invgen-modal-title"><?= htmlspecialchars($dc['modal_heading']) ?></h2>
     <p>If you want to handle payments, refunds, and track everything, use Argo Books.</p>
     <div class="invgen-modal-actions">
-      <a href="https://argorobots.com/pricing/?source=<?= htmlspecialchars($invgen_ref) ?>&amp;utm_source=<?= htmlspecialchars($dc['utm_source']) ?>&amp;utm_medium=tool&amp;utm_campaign=phase1&amp;placement=modal" data-pitch-placement="modal" class="btn btn-primary">Get Argo Books</a>
+      <a href="<?= INVGEN_BASE ?>/pricing/?source=<?= htmlspecialchars($invgen_ref) ?>&amp;utm_source=<?= htmlspecialchars($dc['utm_source']) ?>&amp;utm_medium=tool&amp;utm_campaign=phase1&amp;placement=modal" data-pitch-placement="modal" class="btn btn-primary">Get Argo Books</a>
       <button type="button" class="btn btn-secondary" data-action="close-modal">Close</button>
     </div>
   </dialog>

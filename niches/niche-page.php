@@ -290,7 +290,7 @@ ob_start();
     <span class="page-banner-text">If you want to handle payments, refunds, and track everything,</span>
     <a class="link page-banner-link"
        data-pitch-placement="footer"
-       href="https://argorobots.com/?source=<?= htmlspecialchars($invgen_ref) ?>&amp;utm_source=invoice-generator&amp;utm_medium=niche&amp;utm_campaign=phase1&amp;placement=footer&amp;niche=<?= htmlspecialchars($slug) ?>">
+       href="<?= INVGEN_BASE ?>/?source=<?= htmlspecialchars($invgen_ref) ?>&amp;utm_source=invoice-generator&amp;utm_medium=niche&amp;utm_campaign=phase1&amp;placement=footer&amp;niche=<?= htmlspecialchars($slug) ?>">
       use Argo Books <span aria-hidden="true">&rarr;</span>
     </a>
   </aside>

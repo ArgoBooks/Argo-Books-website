@@ -444,7 +444,7 @@ ob_start();
     <span class="page-banner-text">Argo Books is the accounting app behind these guides.</span>
     <a class="link page-banner-link"
        data-pitch-placement="article-footer"
-       href="https://argorobots.com/<?= $utm_qs ?>&amp;placement=footer">
+       href="<?= INVGEN_BASE ?>/<?= $utm_qs ?>&amp;placement=footer">
       Try it free <span aria-hidden="true">&rarr;</span>
     </a>
   </aside>

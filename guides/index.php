@@ -287,7 +287,7 @@ ob_start();
     </div>
     <a class="guides-hub-banner-link"
        data-pitch-placement="guides-hub-footer"
-       href="https://argorobots.com/?source=<?= htmlspecialchars($invgen_ref) ?>&amp;utm_source=guides&amp;utm_medium=hub&amp;utm_campaign=phase1&amp;placement=footer">
+       href="<?= INVGEN_BASE ?>/?source=<?= htmlspecialchars($invgen_ref) ?>&amp;utm_source=guides&amp;utm_medium=hub&amp;utm_campaign=phase1&amp;placement=footer">
       Visit Argo Books <span aria-hidden="true">&rarr;</span>
     </a>
   </aside>
