@@ -95,9 +95,9 @@ include __DIR__ . '/../../docs-header.php';
                     <span class="nav-label">Previous</span>
                     <span class="nav-title">&larr; AI Receipt Scanning</span>
                 </a>
-                <a href="spreadsheet-export.php" class="nav-button next">
+                <a href="quickbooks-import.php" class="nav-button next">
                     <span class="nav-label">Next</span>
-                    <span class="nav-title">Spreadsheet Export &rarr;</span>
+                    <span class="nav-title">Import from QuickBooks &rarr;</span>
                 </a>
             </div>
         </div>

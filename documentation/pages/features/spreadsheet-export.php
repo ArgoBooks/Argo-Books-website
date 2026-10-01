@@ -42,9 +42,9 @@ include __DIR__ . '/../../docs-header.php';
             </ol>
 
             <div class="page-navigation">
-                <a href="spreadsheet-import.php" class="nav-button prev">
+                <a href="quickbooks-import.php" class="nav-button prev">
                     <span class="nav-label">Previous</span>
-                    <span class="nav-title">&larr; Spreadsheet Import</span>
+                    <span class="nav-title">&larr; Import from QuickBooks</span>
                 </a>
                 <a href="send-to-accountant.php" class="nav-button next">
                     <span class="nav-label">Next</span>

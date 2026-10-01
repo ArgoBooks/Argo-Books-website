@@ -344,6 +344,13 @@ $isDocsLanding = true;
                     <h3>Spreadsheet Import</h3>
                     <p>Import from any Excel or CSV file with AI</p>
                 </a>
+                <a href="pages/features/quickbooks-import.php" class="doc-card">
+                    <div class="card-icon">
+                        <?= svg_icon('document-download', 20) ?>
+                    </div>
+                    <h3>Import from QuickBooks</h3>
+                    <p>Move your books over from QuickBooks Online or Desktop</p>
+                </a>
                 <a href="pages/features/spreadsheet-export.php" class="doc-card">
                     <div class="card-icon">
                         <?= svg_icon('document-upload', 20) ?>

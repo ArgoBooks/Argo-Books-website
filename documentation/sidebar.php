@@ -52,6 +52,7 @@ $sidebarSections = [
             'receipts' => ['title' => 'Receipt Management'],
             'receipt-scanning' => ['title' => 'AI Receipt Scanning'],
             'spreadsheet-import' => ['title' => 'AI Spreadsheet Import'],
+            'quickbooks-import' => ['title' => 'Import from QuickBooks'],
             'spreadsheet-export' => ['title' => 'Spreadsheet Export'],
             'send-to-accountant' => ['title' => 'Send to Accountant'],
             'history-modal' => ['title' => 'Version History']
