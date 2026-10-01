@@ -272,3 +272,23 @@
 [data-theme="dark"] .site-brand .site-logo-dark {
   display: block;
 }
+
+/* ------------------------------------------------------------------
+   The shared search dropdown (resources/styles/site-search.css).
+   ------------------------------------------------------------------ */
+
+/* --white does not invert but --gray-900 and --black do, so the panel was
+   drawing white text on a white ground. Hover and selected need surfaces of
+   their own too: --gray-50 lands darker than the panel it sits on, and
+   --blue-50 is never redefined, so it stayed a pastel pill. */
+[data-theme="dark"] .search-results {
+  background: var(--gray-100);
+}
+
+[data-theme="dark"] .search-result-item:hover {
+  background: var(--gray-200);
+}
+
+[data-theme="dark"] .search-result-item.selected {
+  background: var(--blue-e6f3ff);
+}
