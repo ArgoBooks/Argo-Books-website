@@ -66,18 +66,13 @@ foreach ([$ua_dataDir, $ua_legacyDir] as $dir) {
 // Matching by filename (not authId) so legacy files with no authId can be
 // deleted too. Each posted name is basename()'d and must already be in the
 // collected $ua_files map, so nothing outside data-logs/ can be touched.
-$ua_flash = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['del_files'])) {
-    $label   = (string)($_POST['del_label'] ?? '');
-    $deleted = 0;
     foreach ((array)$_POST['del_files'] as $reqName) {
         $base = basename((string)$reqName);
         if (isset($ua_files[$base]) && @unlink($ua_files[$base])) {
-            $deleted++;
             unset($ua_files[$base]);
         }
     }
-    $ua_flash = "Deleted {$deleted} file(s) for " . htmlspecialchars($label) . ".";
 }
 
 // ---- Aggregate per authId ---------------------------------------------------
@@ -365,7 +360,6 @@ if (!function_exists('ua_fmt')) {
 ?>
 <style>
 .ua-intro { color:var(--black); margin-bottom:1rem; }
-.ua-flash { background:#ecfdf5; border:1px solid #6ee7b7; color:#065f46; padding:10px 14px; border-radius:8px; margin-bottom:1rem; }
 .ua-card { border:1px solid #e5e7eb; border-radius:10px; padding:1rem 1.25rem; margin-bottom:1rem; background:#fff; }
 .ua-card h3 { margin:0 0 .25rem; font-family:monospace; font-size:1rem; word-break:break-all; }
 .ua-badge { display:inline-block; font-size:.7rem; font-weight:700; text-transform:uppercase; padding:2px 8px; border-radius:999px; margin-left:.5rem; vertical-align:middle; }
@@ -461,7 +455,6 @@ if (!function_exists('ua_fmt')) {
 
 <h2 class="section-title">User Activity</h2>
 
-<?php if ($ua_flash): ?><div class="ua-flash"><?= $ua_flash ?></div><?php endif; ?>
 
 <?php if (!$ua_users): ?>
     <?php if ($ua_files && isset($rangeDisplay)): ?>
@@ -536,7 +529,6 @@ if (!function_exists('ua_fmt')) {
                title="Every event this user has ever sent, ignoring the filters above.">Download CSV</a>
             <form method="post" action="<?= htmlspecialchars($ua_action) ?>"
                   onsubmit="return confirm('Delete ALL <?= count($u['files']) ?> file(s) for this user? This cannot be undone.');">
-                <input type="hidden" name="del_label" value="<?= htmlspecialchars($u['authId']) ?>">
                 <?php foreach ($u['files'] as $fn): ?>
                     <input type="hidden" name="del_files[]" value="<?= htmlspecialchars($fn) ?>">
                 <?php endforeach; ?>
