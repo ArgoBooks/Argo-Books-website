@@ -282,7 +282,7 @@ foreach ($ua_users as $ua_authId => $_ua_ignored) {
         $ua_deviceHashes[] = substr($ua_authId, 7);
     }
 }
-$ua_referrals = [];   // device hash => ['link' =>, 'linkCode' =>, 'survey' =>]
+$ua_referrals = [];   // device hash => ['link' =>, 'linkCode' =>, 'survey' =>, 'visitorId' =>, 'premium' =>]
 if ($ua_deviceHashes && isset($pdo)) {
     try {
         require_once __DIR__ . '/../../config/survey_options.php';
@@ -295,6 +295,7 @@ if ($ua_deviceHashes && isset($pdo)) {
         $ua_ph = implode(',', array_fill(0, count($ua_deviceHashes), '?'));
         $ua_stmt = $pdo->prepare("
             SELECT JSON_UNQUOTE(JSON_EXTRACT(e.event_data, '$.device_hash')) AS device_hash,
+                   e.visitor_id,
                    e.source_code, l.name AS source_name, l.category AS source_category,
                    e.source_survey_answer, e.source_survey_other_text
             FROM referral_events e
@@ -309,7 +310,9 @@ if ($ua_deviceHashes && isset($pdo)) {
             // A reinstall adds a second row. The first answer found for each part is
             // kept, so a later bare reinstall can't blank out a known source.
             $ua_ref =& $ua_referrals[$ua_row['device_hash']];
-            $ua_ref ??= ['link' => null, 'linkCode' => null, 'survey' => null];
+            $ua_ref ??= ['link' => null, 'linkCode' => null, 'survey' => null,
+                         'visitorId' => null, 'premium' => null];
+            $ua_ref['visitorId'] ??= $ua_row['visitor_id'] ?: null;
             if ($ua_ref['link'] === null && !empty($ua_row['source_code'])) {
                 // A source code with no referral_links row has no category to show.
                 $ua_ref['link']     = $ua_row['source_name'] !== null
@@ -325,6 +328,44 @@ if ($ua_deviceHashes && isset($pdo)) {
                 }
             }
             unset($ua_ref);
+        }
+
+        // A purchase happens in a browser and is filed against a visitor id, so it never
+        // reaches the telemetry this tab is built from. The install event above is the only
+        // thing holding both ids, which makes this the one join that can show a
+        // device's purchase. An install with no visitor id (a Microsoft Store or Homebrew
+        // download carries no token) cannot be joined and simply shows nothing.
+        $ua_visitorDevice = [];   // visitor id => device hash
+        foreach ($ua_referrals as $ua_hash => $ua_r) {
+            if (!empty($ua_r['visitorId'])) {
+                $ua_visitorDevice[$ua_r['visitorId']] = $ua_hash;
+            }
+        }
+        if ($ua_visitorDevice) {
+            $ua_vids = array_keys($ua_visitorDevice);
+            $ua_vph  = implode(',', array_fill(0, count($ua_vids), '?'));
+            $ua_pstmt = $pdo->prepare("
+                SELECT visitor_id, event_type, subscription_id, created_at
+                FROM referral_events
+                WHERE event_type IN ('premium_signup', 'premium_paid', 'premium_churned')
+                  AND environment = ?
+                  AND visitor_id IN ($ua_vph)
+                ORDER BY created_at ASC
+            ");
+            $ua_pstmt->execute(array_merge([current_environment()], $ua_vids));
+            foreach ($ua_pstmt->fetchAll(PDO::FETCH_ASSOC) as $ua_prow) {
+                $ua_hash = $ua_visitorDevice[$ua_prow['visitor_id']] ?? null;
+                if ($ua_hash === null) continue;
+                $ua_p =& $ua_referrals[$ua_hash]['premium'];
+                $ua_p ??= [];
+                // Ordered oldest first, so the first of each type is the one that counts:
+                // a renewal must not overwrite the date they originally paid.
+                $ua_p[$ua_prow['event_type']] ??= [
+                    'at'           => strtotime($ua_prow['created_at']) ?: null,
+                    'subscription' => $ua_prow['subscription_id'] ?: null,
+                ];
+                unset($ua_p);
+            }
         }
     } catch (PDOException $e) {
         error_log('user-activity referral lookup failed: ' . $e->getMessage());
@@ -566,6 +607,22 @@ if (!function_exists('ua_fmt')) {
                 <?php if ($ua_ref['link'] !== null && $ua_ref['survey'] !== null): ?> &middot; <?php endif; ?>
                 <?php if ($ua_ref['survey'] !== null): ?>
                     <span>said "<?= htmlspecialchars($ua_ref['survey']) ?>"</span>
+                <?php endif; ?>
+            </div>
+        <?php endif; ?>
+        <?php if ($ua_ref !== null && !empty($ua_ref['premium'])):
+            $ua_prem = $ua_ref['premium'];
+            $ua_sub  = $ua_prem['premium_paid']['subscription']
+                    ?? $ua_prem['premium_signup']['subscription'] ?? null; ?>
+            <div class="ua-row"><b>Premium:</b>
+                <?php $ua_parts = [];
+                if (isset($ua_prem['premium_signup']))  $ua_parts[] = 'signed up ' . ua_fmt($ua_prem['premium_signup']['at']);
+                if (isset($ua_prem['premium_paid']))    $ua_parts[] = 'paid ' . ua_fmt($ua_prem['premium_paid']['at']);
+                else                                    $ua_parts[] = '<span class="ua-warn">not paid</span>';
+                if (isset($ua_prem['premium_churned'])) $ua_parts[] = '<span class="ua-err">churned ' . ua_fmt($ua_prem['premium_churned']['at']) . '</span>';
+                echo implode(' &middot; ', $ua_parts); ?>
+                <?php if ($ua_sub !== null): ?>
+                    &middot; <span title="Subscription id"><?= htmlspecialchars($ua_sub) ?></span>
                 <?php endif; ?>
             </div>
         <?php endif; ?>
