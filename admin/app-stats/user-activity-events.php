@@ -259,7 +259,7 @@ if (!function_exists('ua_merge_timeline')) {
         // has more than one.
         $order = array_keys($companyIdx);
         usort($order, function ($a, $b) use ($timeline) {
-            return ((int)($timeline[$a]['ts'] ?? 0) <=> (int)($timeline[$b]['ts'] ?? 0)) ?: ($a <=> $b);
+            return (($timeline[$a]['ts'] ?? 0) <=> ($timeline[$b]['ts'] ?? 0)) ?: ($a <=> $b);
         });
 
         $lastDetails = [];   // company name => the detail string last seen for it
@@ -292,7 +292,7 @@ if (!function_exists('ua_merge_timeline')) {
             }
         }
         foreach ($pagesByName as &$indices) {
-            usort($indices, fn($a, $b) => ((int)$timeline[$a]['ts'] <=> (int)$timeline[$b]['ts']) ?: ($a <=> $b));
+            usort($indices, fn($a, $b) => ($timeline[$a]['ts'] <=> $timeline[$b]['ts']) ?: ($a <=> $b));
         }
         unset($indices);
 

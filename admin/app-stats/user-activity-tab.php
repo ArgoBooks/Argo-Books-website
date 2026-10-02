@@ -25,6 +25,7 @@ require_once __DIR__ . '/../../telemetry_environment.php'; // is_other_environme
 // download-user.php so the CSV export says the same thing this timeline does.
 require_once __DIR__ . '/user-activity-events.php';
 require_once __DIR__ . '/telemetry-dedupe.php';       // telemetry_is_duplicate_event()
+require_once __DIR__ . '/telemetry-time.php';         // telemetry_ts_seconds()
 
 if (!function_exists('ua_set_language')) {
     // Newest wins: files are read in name order, not event order. Language comes from
@@ -168,7 +169,7 @@ foreach ($ua_files as $name => $path) {
         // check above already does this internally; everything below it needs it too.
         $ev = ua_unwrap_event($ev);
 
-        $ts = isset($ev['timestamp']) ? strtotime($ev['timestamp']) : false;
+        $ts = telemetry_ts_seconds($ev['timestamp'] ?? null);
 
         // Page-level date range. An event we can't date is kept, matching how
         // the crash tab treats undated reports.
@@ -354,7 +355,7 @@ if (!function_exists('ua_fmt')) {
         if (!$ts) return '—';
         return '<time data-epoch="' . (int)$ts . '"'
             . ($withSeconds ? ' data-epoch-seconds="1"' : '') . '>'
-            . gmdate($withSeconds ? 'Y-m-d H:i:s' : 'Y-m-d H:i', $ts) . ' UTC</time>';
+            . gmdate($withSeconds ? 'Y-m-d H:i:s' : 'Y-m-d H:i', (int)$ts) . ' UTC</time>';
     }
 }
 ?>

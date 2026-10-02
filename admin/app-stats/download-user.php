@@ -25,6 +25,7 @@
 
 require_once __DIR__ . '/../admin_session.php';
 require_once __DIR__ . '/telemetry-dedupe.php';        // telemetry_is_duplicate_event()
+require_once __DIR__ . '/telemetry-time.php';          // telemetry_ts_seconds()
 require_once __DIR__ . '/user-activity-events.php';    // ua_describe_event() etc.
 require_once __DIR__ . '/../../founder_identity.php';  // is_founder_auth_id()
 require_once __DIR__ . '/../../country_names.php';     // country_name()
@@ -176,13 +177,13 @@ function ua_rows_for_user(array $files, string $authId, array &$seen, bool &$mat
             $ev = ua_unwrap_event($ev);
 
             [$type, $text] = ua_describe_event($ev);
-            $ts = isset($ev['timestamp']) ? strtotime($ev['timestamp']) : false;
+            $ts = telemetry_ts_seconds($ev['timestamp'] ?? null);
 
             $rows[] = [
                 'sort'             => $ts === false ? 0 : $ts,
                 'auth_id'          => $authId,
                 'is_founder'       => $isFounder,
-                'timestamp_utc'    => $ts === false ? '' : gmdate('Y-m-d H:i:s', $ts),
+                'timestamp_utc'    => $ts === false ? '' : telemetry_ts_text($ts),
                 'event_type'       => $type,
                 'description'      => $text,
                 'severity'         => $ev['severity'] ?? '',

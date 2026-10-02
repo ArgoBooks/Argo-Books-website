@@ -125,13 +125,16 @@ function telemetry_clean_int($value, int $max = PHP_INT_MAX): ?int
  */
 function telemetry_clean_timestamp($value): string
 {
-    if (is_string($value)) {
-        $ts = strtotime($value);
-        if ($ts !== false) {
-            return gmdate('Y-m-d\TH:i:s\Z', $ts);
+    if (is_string($value) && $value !== '') {
+        try {
+            return (new DateTimeImmutable($value))
+                ->setTimezone(new DateTimeZone('UTC'))
+                ->format('Y-m-d\TH:i:s.v\Z');
+        } catch (Exception $e) {
+            // Unparseable, fall through to server-now.
         }
     }
-    return gmdate('Y-m-d\TH:i:s\Z');
+    return (new DateTimeImmutable('now', new DateTimeZone('UTC')))->format('Y-m-d\TH:i:s.v\Z');
 }
 
 /**
