@@ -94,23 +94,61 @@ $uninstallWithComment = count(array_filter($uninstallRows, static fn($r) => !emp
            uninstaller. Only people who choose to answer appear here.</p>
     <?php else: ?>
 
-        <div class="table-container">
-            <h3 class="section-title">Why they left</h3>
-            <table>
-                <thead>
-                    <tr><th>Reason</th><th>Answers</th><th>Share</th></tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($uninstallCounts as $reason => $count): ?>
-                        <tr>
-                            <td><?= htmlspecialchars($uninstallReasons[$reason] ?? $reason) ?></td>
-                            <td><?= number_format($count) ?></td>
-                            <td><?= $uninstallTotal > 0 ? round($count / $uninstallTotal * 100) : 0 ?>%</td>
-                        </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
+        <?php
+        // Keyed by reason rather than by position, so a reason keeps its colour when the
+        // order changes. "Something else" and any reason not listed here are grey.
+        $uninstallColors = [
+            'missing_feature' => ['#2a78d6', '#3987e5'],
+            'too_complicated' => ['#eb6834', '#d95926'],
+            'switched'        => ['#1baf7a', '#199e70'],
+            'price'           => ['#eda100', '#c98500'],
+            'not_needed'      => ['#e87ba4', '#d55181'],
+            'problem'         => ['#008300', '#008300'],
+            'just_looking'    => ['#4a3aa7', '#9085e9'],
+            'reinstalling'    => ['#e34948', '#e66767'],
+        ];
+        $uninstallChart = [];
+        foreach ($uninstallCounts as $reason => $count) {
+            $uninstallChart[] = [
+                'label' => ($uninstallReasons[$reason] ?? $reason) . ': ' . number_format($count)
+                    . ' (' . round($count / $uninstallTotal * 100) . '%)',
+                'count' => $count,
+                'color' => $uninstallColors[$reason] ?? ['#8a8a85', '#8a8a85'],
+            ];
+        }
+        ?>
+        <div class="chart-container" style="height: 380px;">
+            <h2>Why they left</h2>
+            <canvas id="uninstallReasonsChart"></canvas>
         </div>
+        <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var rows = <?= json_encode($uninstallChart, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
+            var canvas = document.getElementById('uninstallReasonsChart');
+            var dark = document.documentElement.getAttribute('data-theme') === 'dark';
+            new Chart(canvas, {
+                type: 'pie',
+                data: {
+                    labels: rows.map(function (r) { return r.label; }),
+                    datasets: [{
+                        data: rows.map(function (r) { return r.count; }),
+                        backgroundColor: rows.map(function (r) { return r.color[dark ? 1 : 0]; }),
+                        // The card's own colour, so the border reads as a gap between slices.
+                        borderColor: getComputedStyle(canvas.parentElement).backgroundColor,
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'right' },
+                        tooltip: { callbacks: { label: function (ctx) { return ctx.label; } } }
+                    }
+                }
+            });
+        });
+        </script>
 
         <div class="table-container">
             <h3 class="section-title">What they said</h3>
