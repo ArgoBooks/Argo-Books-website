@@ -9,9 +9,7 @@ PHP/MySQL website for [Argo Books](https://argorobots.com/) accounting software.
 ## Environment files
 
 - `.env`: active environment file (gitignored)
-- `.env - production` and `.env - sandbox`: reference copies kept on disk, not in
-  the repo. `.gitignore` excludes `.env*`, so a fresh clone has none of them and
-  they have never been committed. They hold real credentials; keep it that way.
+- `.env - production` and `.env - sandbox`: reference copies kept on disk, not in the repo. `.gitignore` excludes `.env*`, so a fresh clone has none of them and they have never been committed. They hold real credentials; keep it that way.
 - `APP_ENV` (`sandbox` or `production`) drives all environment-conditional code (see `current_environment()` in `db_connect.php`)
 
 ## Key files

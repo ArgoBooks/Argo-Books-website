@@ -4,30 +4,22 @@ All cron scripts live in `/cron/` and must be run via CLI only. Each script writ
 
 ## Run history retention
 
-`cron_runs` is pruned by `cron_runs_prune()` in `cron/lib/run_tracker.php`, called
-from `cron_run_finish()` on roughly one run in five hundred. Retention is 90 days,
-well beyond the 30 day maximum the admin page displays.
+`cron_runs` is pruned by `cron_runs_prune()` in `cron/lib/run_tracker.php`, called from `cron_run_finish()` on roughly one run in five hundred. Retention is 90 days, well beyond the 30 day maximum the admin page displays.
 
-It lives in the tracker rather than in any single cron because that file is what
-writes the rows, so every cron contributes to the cleanup regardless of which one
-happens to fire.
+It lives in the tracker rather than in any single cron because that file is what writes the rows, so every cron contributes to the cleanup regardless of which one happens to fire.
 
 Two rows are never deleted, whatever their age:
 
-- The newest run of each cron. Without that, a cron that has not fired in months
-  would disappear from `/admin/crons/` and read as "never run", which is the one
-  question that page exists to answer.
+- The newest run of each cron. Without that, a cron that has not fired in months would disappear from `/admin/crons/` and read as "never run", which is the one question that page exists to answer.
 - Anything still marked `running`, since that is a stuck run worth seeing.
 
-The table had no cleanup at all before this. A cron on a one minute schedule adds
-around 525,000 rows a year on its own, and two of them are on that schedule.
+The table had no cleanup at all before this. A cron on a one minute schedule adds around 525,000 rows a year on its own, and two of them are on that schedule.
 
 ---
 
 ## 1. Subscription Renewal
 
-**Script:** `cron/subscription_renewal.php`
-**Schedule:** Daily at 3:00 PM
+**Script:** `cron/subscription_renewal.php` **Schedule:** Daily at 3:00 PM
 
 ```bash
 0 15 * * * /usr/bin/php /home/argorobots/public_html/cron/subscription_renewal.php
@@ -45,11 +37,7 @@ around 525,000 rows a year on its own, and two of them are on that schedule.
 
 ### Overlap Protection
 
-Takes an exclusive lock on `cron/logs/subscription_renewal.lock` and exits
-immediately if a previous run still holds it, recording the skip in `cron_runs`.
-Both the charged path and the fully-credit-covered path also check for a
-completed renewal payment in the last 23 hours before doing anything, so a
-manual re-run cannot charge a card or spend credit twice.
+Takes an exclusive lock on `cron/logs/subscription_renewal.lock` and exits immediately if a previous run still holds it, recording the skip in `cron_runs`. Both the charged path and the fully-credit-covered path also check for a completed renewal payment in the last 23 hours before doing anything, so a manual re-run cannot charge a card or spend credit twice.
 
 ### Manual Execution
 
@@ -65,8 +53,7 @@ php /home/argorobots/public_html/cron/subscription_renewal.php
 
 ## 2. Account Purge
 
-**Script:** `cron/account_purge.php`
-**Schedule:** Daily at 4:00 AM
+**Script:** `cron/account_purge.php` **Schedule:** Daily at 4:00 AM
 
 ```bash
 0 4 * * * /usr/bin/php /home/argorobots/public_html/cron/account_purge.php
@@ -93,8 +80,7 @@ php /home/argorobots/public_html/cron/account_purge.php
 
 ## 3. Outreach Pipeline
 
-**Script:** `cron/outreach_pipeline.php`
-**Schedule:** Daily at 8:00 AM
+**Script:** `cron/outreach_pipeline.php` **Schedule:** Daily at 8:00 AM
 
 ```bash
 0 8 * * * /usr/bin/php /home/argorobots/public_html/cron/outreach_pipeline.php
@@ -141,8 +127,7 @@ A lock file (`/cron/logs/outreach_pipeline.lock`) prevents overlapping runs.
 
 ## 4. Outreach Reply Checker
 
-**Script:** `cron/reply_checker.php`
-**Schedule:** Hourly
+**Script:** `cron/reply_checker.php` **Schedule:** Hourly
 
 ```bash
 0 * * * * /usr/bin/php /home/argorobots/public_html/cron/reply_checker.php
@@ -195,8 +180,7 @@ A lock file (`/cron/logs/reply_checker.lock`) prevents overlapping runs.
 
 ## 5. Refund Cooling-Off Promoter
 
-**Script:** `cron/refund_cooling_off_promoter.php`
-**Schedule:** Every 1 minute
+**Script:** `cron/refund_cooling_off_promoter.php` **Schedule:** Every 1 minute
 
 ```bash
 * * * * * /usr/bin/php /home/argorobots/public_html/cron/refund_cooling_off_promoter.php
@@ -210,8 +194,7 @@ Promotes refund requests from `cooling_off` to `processing` once their cooling-o
 
 ## 6. Refund Stale Processing Reconcile
 
-**Script:** `cron/refund_stale_processing_reconcile.php`
-**Schedule:** Every 5 minutes
+**Script:** `cron/refund_stale_processing_reconcile.php` **Schedule:** Every 5 minutes
 
 ```bash
 */5 * * * * /usr/bin/php /home/argorobots/public_html/cron/refund_stale_processing_reconcile.php
@@ -225,8 +208,7 @@ Queries Stripe for refund requests stuck in `processing` for more than 30 minute
 
 ## 7. Refund Stale Request Cleanup
 
-**Script:** `cron/refund_stale_request_cleanup.php`
-**Schedule:** Hourly
+**Script:** `cron/refund_stale_request_cleanup.php` **Schedule:** Hourly
 
 ```bash
 0 * * * * /usr/bin/php /home/argorobots/public_html/cron/refund_stale_request_cleanup.php
@@ -241,8 +223,7 @@ Queries Stripe for refund requests stuck in `processing` for more than 30 minute
 
 ## 8. Refund Velocity Baseline Recompute
 
-**Script:** `cron/refund_velocity_baseline_recompute.php`
-**Schedule:** Nightly at 2:00 AM
+**Script:** `cron/refund_velocity_baseline_recompute.php` **Schedule:** Nightly at 2:00 AM
 
 ```bash
 0 2 * * * /usr/bin/php /home/argorobots/public_html/cron/refund_velocity_baseline_recompute.php
@@ -256,8 +237,7 @@ Refreshes `refund_velocity_baselines` per company so the established-account har
 
 ## 9. Marketing Broadcast Sender
 
-**Script:** `cron/marketing_broadcast.php`
-**Schedule:** Every 5 minutes
+**Script:** `cron/marketing_broadcast.php` **Schedule:** Every 5 minutes
 
 ```bash
 */5 * * * * /usr/bin/php /home/argorobots/public_html/cron/marketing_broadcast.php
@@ -289,8 +269,7 @@ A lock file (`/cron/logs/marketing_broadcast.lock`) prevents overlapping runs.
 
 ## 10. IndexNow Submit
 
-**Script:** `cron/indexnow_submit.php`
-**Schedule:** Daily at 5:00 AM
+**Script:** `cron/indexnow_submit.php` **Schedule:** Daily at 5:00 AM
 
 ```bash
 0 5 * * * /usr/bin/php /home/argorobots/public_html/cron/indexnow_submit.php
@@ -335,8 +314,7 @@ A lock file (`/cron/logs/indexnow_submit.lock`) prevents overlapping runs.
 
 ## 11. Portal Invoice Reminders
 
-**Script:** `cron/portal_invoice_reminders.php`
-**Schedule:** Daily at 9:00 AM
+**Script:** `cron/portal_invoice_reminders.php` **Schedule:** Daily at 9:00 AM
 
 ```bash
 0 9 * * * /usr/bin/php /home/argorobots/public_html/cron/portal_invoice_reminders.php
@@ -388,22 +366,15 @@ A lock file (`/cron/logs/portal_invoice_reminders.lock`) prevents overlapping ru
 
 ### What It Does
 
-Emails a reminder that CRA is about to publish new payroll deduction tables. CRA changes them
-twice a year, effective 1 January and 1 July, and Argo Books ships no tax numbers in the app,
-so a new rate file has to be prepared and uploaded before each changeover.
+Emails a reminder that CRA is about to publish new payroll deduction tables. CRA changes them twice a year, effective 1 January and 1 July, and Argo Books ships no tax numbers in the app, so a new rate file has to be prepared and uploaded before each changeover.
 
-Runs daily but does nothing outside the two windows: the 10th to the 20th of December, which
-warns about the January edition, and the same days in June for July's.
+Runs daily but does nothing outside the two windows: the 10th to the 20th of December, which warns about the January edition, and the same days in June for July's.
 
 ### Behaviour Worth Knowing
 
-Sends **once per window**, not once per day. It checks `cron_runs` for a successful send
-naming the same edition in the last 30 days, so a daily schedule produces one email rather
-than eleven.
+Sends **once per window**, not once per day. It checks `cron_runs` for a successful send naming the same edition in the last 30 days, so a daily schedule produces one email rather than eleven.
 
-**Cannot be disabled.** There is no notification preference for it. The whole point is that it
-arrives in a month when payroll is not on anyone's mind, and missing a changeover means every
-pay run calculated afterwards uses the wrong rates.
+**Cannot be disabled.** There is no notification preference for it. The whole point is that it arrives in a month when payroll is not on anyone's mind, and missing a changeover means every pay run calculated afterwards uses the wrong rates.
 
 December warns about `YYYY+1-01`, June about `YYYY-07`.
 
@@ -411,15 +382,13 @@ December warns about `YYYY+1-01`, June about `YYYY-07`.
 
 No daily log file. Activity is visible on `/admin/crons/`, and failures go to `error_log`.
 
-Full instructions for actually doing the update are in `docs/Payroll rate updates.md` in the
-desktop repository.
+Full instructions for actually doing the update are in `docs/Payroll rate updates.md` in the desktop repository.
 
 ---
 
 ## 13. API Webhook Delivery
 
-**Script:** `cron/api_webhook_delivery.php`
-**Schedule:** Every minute
+**Script:** `cron/api_webhook_delivery.php` **Schedule:** Every minute
 
 ```bash
 * * * * * /usr/bin/php /home/argorobots/public_html/cron/api_webhook_delivery.php
@@ -429,9 +398,7 @@ desktop repository.
 
 Delivers Argo Books public API events to the webhook endpoints developers have registered.
 
-Events fire when a merchant acts on data a developer pushed: `<object>.imported`,
-`<object>.rejected`, `import_batch.completed`, `import_batch.reverted`. There is deliberately
-no `<object>.created` event, since the developer who created it already knows.
+Events fire when a merchant acts on data a developer pushed: `<object>.imported`, `<object>.rejected`, `import_batch.completed`, `import_batch.reverted`. There is deliberately no `<object>.created` event, since the developer who created it already knows.
 
 1. Claims up to 200 due deliveries, oldest first
 2. POSTs each one with an `Argo-Signature: t=<unix>,v1=<hmac-sha256>` header
@@ -442,31 +409,19 @@ no `<object>.created` event, since the developer who created it already knows.
 
 ### Why It Is a Cron
 
-Delivery is not inline with the request that creates the event, because a developer's slow or
-hanging server would otherwise become a merchant's slow import. The cost is up to a minute of
-latency, which is nothing next to a queue whose next step is a person opening an app.
+Delivery is not inline with the request that creates the event, because a developer's slow or hanging server would otherwise become a merchant's slow import. The cost is up to a minute of latency, which is nothing next to a queue whose next step is a person opening an app.
 
 ### Behaviour Worth Knowing
 
-Takes a `flock` on `cron/logs/api_webhook_delivery.lock`. Overlapping runs would double-POST the
-same delivery, so a run that cannot get the lock records an `ok` result saying it skipped, rather
-than exiting silently and looking like a missed cron.
+Takes a `flock` on `cron/logs/api_webhook_delivery.lock`. Overlapping runs would double-POST the same delivery, so a run that cannot get the lock records an `ok` result saying it skipped, rather than exiting silently and looking like a missed cron.
 
-A 410 is retried like any other failure. Guessing "this endpoint is gone" from a status code
-would drop events during a bad deploy on the developer's side; the attempt limit catches a
-genuinely dead URL soon enough.
+A 410 is retried like any other failure. Guessing "this endpoint is gone" from a status code would drop events during a bad deploy on the developer's side; the attempt limit catches a genuinely dead URL soon enough.
 
 Redirects are never followed. The signature is for the URL the merchant approved.
 
-The destination is re-checked against the private-address rules immediately before
-every POST, not just when the endpoint was registered. Checking only at registration
-would leave DNS rebinding open: a name that resolved publicly then can resolve to an
-internal address by delivery time. A destination that fails the re-check is counted
-under "Refused, destination not public".
+The destination is re-checked against the private-address rules immediately before every POST, not just when the endpoint was registered. Checking only at registration would leave DNS rebinding open: a name that resolved publicly then can resolve to an internal address by delivery time. A destination that fails the re-check is counted under "Refused, destination not public".
 
-**This is the one cron that does not filter on `environment`,** and it is on purpose.
-Only production runs crons, so filtering would queue sandbox webhooks and never deliver
-them. The trade is that its metrics count both environments together.
+**This is the one cron that does not filter on `environment`,** and it is on purpose. Only production runs crons, so filtering would queue sandbox webhooks and never deliver them. The trade is that its metrics count both environments together.
 
 Supports `--dry-run`, which resolves everything and logs what would be sent without sending it.
 
@@ -478,8 +433,7 @@ No daily log file. Metrics are on `/admin/crons/`, and failures go to `error_log
 
 ## 14. Argo Books Books Sync
 
-**Script:** `cron/argo_books_sync.php`
-**Schedule:** Daily at 4:25 AM
+**Script:** `cron/argo_books_sync.php` **Schedule:** Daily at 4:25 AM
 
 ```bash
 25 4 * * * /usr/bin/php /home/argorobots/public_html/cron/argo_books_sync.php
@@ -549,8 +503,7 @@ Daily file at `cron/logs/argo_books_sync-YYYY-MM-DD.log`, plus metrics on `/admi
 
 ## 15. API Retention
 
-**Script:** `cron/api_retention.php`
-**Schedule:** Daily at 4:30 AM
+**Script:** `cron/api_retention.php` **Schedule:** Daily at 4:30 AM
 
 ```bash
 30 4 * * * /usr/bin/php /home/argorobots/public_html/cron/api_retention.php

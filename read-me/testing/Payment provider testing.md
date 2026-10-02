@@ -1,16 +1,13 @@
 # Payment Provider Testing
 
-Test procedures for Stripe, PayPal, and Square, both the **payment portal**
-and the **SaaS subscription billing**.
+Test procedures for Stripe, PayPal, and Square, both the **payment portal** and the **SaaS subscription billing**.
 
 Two completely separate flows go through each provider:
 
 - **SaaS subscription payments**: argorobots.com customers paying for Argo Books Premium.
 - **Portal Connect**: Argo Books desktop users authorizing the website to accept invoice payments through their own provider account.
 
-All testing below runs against the sandbox environment of each provider. To
-switch the website to sandbox, set `APP_ENV=sandbox` in `.env`. Production
-testing instructions are in the **Switch to Production** section at the bottom.
+All testing below runs against the sandbox environment of each provider. To switch the website to sandbox, set `APP_ENV=sandbox` in `.env`. Production testing instructions are in the **Switch to Production** section at the bottom.
 
 ---
 

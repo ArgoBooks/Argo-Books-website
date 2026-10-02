@@ -2,10 +2,7 @@
 
 Full setup for Stripe, PayPal, and Square, both the **payment portal** and the **SaaS subscription billing**.
 
-Each provider has two completely separate apps: **sandbox** and **live**.
-They have separate client IDs, secrets, webhook IDs, and redirect-URI
-allowlists. Configuring one does not carry over to the other. Repeat
-every step below twice, once per environment.
+Each provider has two completely separate apps: **sandbox** and **live**. They have separate client IDs, secrets, webhook IDs, and redirect-URI allowlists. Configuring one does not carry over to the other. Repeat every step below twice, once per environment.
 
 The website is environment-switched by `APP_ENV` in `.env`:
 
@@ -14,8 +11,7 @@ APP_ENV=sandbox       # uses sandbox keys and URLs
 APP_ENV=production    # uses live keys and URLs
 ```
 
-And `SITE_URL` controls what host is sent as `redirect_uri` to each
-provider, which is matched against the allowlists below:
+And `SITE_URL` controls what host is sent as `redirect_uri` to each provider, which is matched against the allowlists below:
 
 ```
 # sandbox
@@ -27,39 +23,23 @@ SITE_URL=https://argorobots.com
 
 ## What each provider handles
 
-For all three providers, the website uses the same three integration
-points. Provider-specific quirks are called out in the respective
-sections below.
+For all three providers, the website uses the same three integration points. Provider-specific quirks are called out in the respective sections below.
 
-1. **Portal Connect**: Argo Books desktop users authorize the website
-   to receive invoice payments through their own provider account
-   (OAuth / Connect onboarding).
-2. **Portal payment webhooks**: backup confirmation when a portal
-   invoice captures or refunds. The primary path is synchronous via
-   `process-payment.php`; the webhook covers the case where the customer
-   closes their browser before the success page loads.
-3. **SaaS subscription billing**: argorobots.com customers paying for
-   Argo Books Premium subscriptions.
+1. **Portal Connect**: Argo Books desktop users authorize the website to receive invoice payments through their own provider account (OAuth / Connect onboarding).
+2. **Portal payment webhooks**: backup confirmation when a portal invoice captures or refunds. The primary path is synchronous via `process-payment.php`; the webhook covers the case where the customer closes their browser before the success page loads.
+3. **SaaS subscription billing**: argorobots.com customers paying for Argo Books Premium subscriptions.
 
 ---
 
 ## Stripe
 
-The portal Connect flow uses Stripe Connect Express. Stripe Account Links generate
-one-time onboarding URLs, so there's **no redirect-URI allowlist** to
-maintain (unlike PayPal / Square). Subscription billing goes through
-Stripe Checkout / Subscriptions.
+The portal Connect flow uses Stripe Connect Express. Stripe Account Links generate one-time onboarding URLs, so there's **no redirect-URI allowlist** to maintain (unlike PayPal / Square). Subscription billing goes through Stripe Checkout / Subscriptions.
 
 ### A. Create / enable the platform account
 
 1. Sign in at https://dashboard.stripe.com.
-2. Click the account name in the top-left of the dashboard. For sandbox
-   setup, click **Switch to sandbox** and pick a sandbox (or create one
-   via **Manage sandboxes**). For live setup, click **Exit sandbox**.
-   The dashboard reloads in the chosen environment. Every step below
-   must be repeated once per environment.
-3. Open **Developers > API keys** (easiest way: type "API keys" into the top search bar).
-   Copy the publishable and secret keys into `.env`:
+2. Click the account name in the top-left of the dashboard. For sandbox setup, click **Switch to sandbox** and pick a sandbox (or create one via **Manage sandboxes**). For live setup, click **Exit sandbox**. The dashboard reloads in the chosen environment. Every step below must be repeated once per environment.
+3. Open **Developers > API keys** (easiest way: type "API keys" into the top search bar). Copy the publishable and secret keys into `.env`:
    ```
    STRIPE_SANDBOX_SECRET_KEY=sk_test_...
    STRIPE_SANDBOX_PUBLISHABLE_KEY=pk_test_...
@@ -69,12 +49,9 @@ Stripe Checkout / Subscriptions.
 
 ### B. Enable Connect (portal Connect)
 
-1. Search "Connect onboarding options" in the top search bar, or go
-   directly to **Settings -> Connect -> Onboarding options**. If that page
-   loads, Connect is already enabled on the account.
+1. Search "Connect onboarding options" in the top search bar, or go directly to **Settings -> Connect -> Onboarding options**. If that page loads, Connect is already enabled on the account.
 2. **Countries**: click **Select all** in the top-right.
-3. No redirect URLs to whitelist. The server creates one-time onboarding
-   URLs via Stripe Account Links.
+3. No redirect URLs to whitelist. The server creates one-time onboarding URLs via Stripe Account Links.
 4. Search "Express Dashboard" in the top search bar, or go directly to **Settings -> Connect -> Express Dashboard**. Enter "Argo Books" for the name, and select the Argo Books logo.
 
 ### C. Portal payment webhook
@@ -88,8 +65,7 @@ In the Stripe Dashboard (Test mode for sandbox, Live mode for live):
 3. **Events to send:**
    - `payment_intent.succeeded`
    - `charge.refunded`
-4. After creating, click into the endpoint and reveal the
-   **Destination ID** (`whsec_...`). Copy into `.env`:
+4. After creating, click into the endpoint and reveal the **Destination ID** (`whsec_...`). Copy into `.env`:
    ```
    STRIPE_SANDBOX_PORTAL_WEBHOOK_SECRET=whsec_...
    STRIPE_LIVE_PORTAL_WEBHOOK_SECRET=whsec_...
@@ -153,14 +129,11 @@ PAYPAL_LIVE_MONTHLY_PLAN_ID=...
 PAYPAL_LIVE_YEARLY_PLAN_ID=...
 ```
 
-The script does **not** write to `.env`. Copy the printed IDs into
-`.env` manually.
+The script does **not** write to `.env`. Copy the printed IDs into `.env` manually.
 
 ### D. Webhooks
 
-PayPal pings two separate endpoints, with **two separate webhook IDs**.
-The setup steps are identical for each, just different URLs / events /
-env keys.
+PayPal pings two separate endpoints, with **two separate webhook IDs**. The setup steps are identical for each, just different URLs / events / env keys.
 
 #### D1. SaaS subscription webhook
 
