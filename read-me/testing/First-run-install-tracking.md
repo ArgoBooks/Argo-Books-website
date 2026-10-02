@@ -199,7 +199,7 @@ If this is greater than zero, attribution is missing the window but the install 
 
 ### The token file is not being written by the installer
 
-On Windows, the Advanced Installer `WriteInstallToken` custom action writes `install_token.txt` to `%LOCALAPPDATA%\ArgoBooks\` during install. If a packaging change stopped that action from running, every install posts with an empty token and lands as `visitor_id = null`. See `Argo-Books-Avalonia/docs/setup/Advanced Installer project setup.md` for the custom action setup.
+On Windows, the Advanced Installer `WriteInstallToken` custom action writes `install_token.txt` to `%LOCALAPPDATA%\ArgoBooks\` during install. If a packaging change stopped that action from running, every install posts with an empty token and lands as `visitor_id = null`. See `Argo-Books-Avalonia/docs/setup/AdvancedInstallerProjectSetup.md` for the custom action setup.
 
 **Fastest check** (works any time after first launch): read the marker file.
 
@@ -235,4 +235,4 @@ Argo Books is marketed as offline-capable, and a user who installs on a machine 
 - `admin/marketing-funnel/index.php` - funnel display
 - `ArgoBooks.Core/Services/FirstRunReporter.cs` - desktop reporter, marker file logic, token resolution
 - `ArgoBooks/App.axaml.cs` - kicks off the reporter on app startup
-- `Argo-Books-Avalonia/docs/setup/Advanced Installer project setup.md` - Windows installer custom action that writes the token file
+- `Argo-Books-Avalonia/docs/setup/AdvancedInstallerProjectSetup.md` - Windows installer custom action that writes the token file

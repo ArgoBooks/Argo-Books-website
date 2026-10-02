@@ -17,7 +17,7 @@
 // which are passed through). Positions are numbered from the array order, so a
 // crumb cannot be inserted without the numbering following it.
 //
-// See read-me/Tool page standards.md for which schema each page type carries.
+// See read-me/Tool-page-standards.md for which schema each page type carries.
 
 const ARGO_SITE_URL = 'https://argorobots.com';
 

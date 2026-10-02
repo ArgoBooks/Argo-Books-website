@@ -112,7 +112,7 @@ https://dev.argorobots.com/pricing/checkout/index.php?method=paypal
 
 The PayPal portal Connect flow is **disabled**. PayPal's "Log in with PayPal" OAuth endpoint refuses to return identity for Business-account tokens, so the flow can't onboard real merchants. The desktop app hides the PayPal Connect button under Settings -> Payment Portal, and the server-side `api/portal/connect/paypal` endpoint returns 503 PROVIDER_UNSUPPORTED.
 
-Re-enabling requires migrating to **PayPal Partner Referrals API** after approval into PayPal Platforms & Marketplaces. See `read-me/Admin guide.md` for the program details. There is no portal Connect test to run for PayPal today; test Stripe and Square portal Connect instead.
+Re-enabling requires migrating to **PayPal Partner Referrals API** after approval into PayPal Platforms & Marketplaces. See `read-me/Admin-guide.md` for the program details. There is no portal Connect test to run for PayPal today; test Stripe and Square portal Connect instead.
 
 ---
 

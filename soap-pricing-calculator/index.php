@@ -1,7 +1,7 @@
 <?php
 // soap-pricing-calculator/index.php
 // Batch cost and pricing calculator for soap makers. Tier 1 (see
-// read-me/Tool page standards.md). Shares the craft calculator surface and math.
+// read-me/Tool-page-standards.md). Shares the craft calculator surface and math.
 //
 // Deliberately NOT a lye calculator. Saponification maths is safety-critical and
 // well served by the established tools; getting it wrong burns someone. This

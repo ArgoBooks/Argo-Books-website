@@ -1,7 +1,7 @@
 <?php
 // break-even-calculator/index.php
 // How many units must sell before fixed costs are covered. Tier 1 (see
-// read-me/Tool page standards.md). Math in shared/scripts/business-calcs.js.
+// read-me/Tool-page-standards.md). Math in shared/scripts/business-calcs.js.
 
 require_once __DIR__ . '/../shared/_base.php';
 require_once __DIR__ . '/../shared/currencies.php';

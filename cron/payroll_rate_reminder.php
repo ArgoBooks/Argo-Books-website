@@ -117,7 +117,7 @@ $safeEffective = htmlspecialchars($effectiveDate);
 
 $steps = '
     <p>Full instructions, including where to get the numbers and how to verify them, are in
-    <code>docs/Payroll rate updates.md</code> in the desktop repository.</p>
+    <code>docs/PayrollRateUpdates.md</code> in the desktop repository.</p>
 
     <p>Rough steps:</p>
     <ol>

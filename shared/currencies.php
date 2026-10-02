@@ -10,7 +10,7 @@
 //
 // 'locale' is the Intl.NumberFormat fallback locale for that currency, so
 // separators and symbol placement are right when the user switches.
-// See read-me/Tool page standards.md for which tools offer which currencies.
+// See read-me/Tool-page-standards.md for which tools offer which currencies.
 
 /** Currencies pinned to the top of every picker, in this order. */
 function argo_currencies_common(): array

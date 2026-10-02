@@ -3,7 +3,7 @@
    tumbler, cake). Loads after shared/styles/calculator.css, which supplies the
    .calc-* component; this file only adds what the craft surface needs on top.
 
-   See partials/craft-calculator.php and read-me/Tool page standards.md. */
+   See partials/craft-calculator.php and read-me/Tool-page-standards.md. */
 
 .craft-fieldset {
   display: flex;

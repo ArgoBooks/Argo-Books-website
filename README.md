@@ -41,7 +41,7 @@ You can view the live website here: www.argorobots.com.
 
 ## Getting Started
 
-To run the site on your own machine (Windows with Laragon, or macOS with Homebrew), follow [Local development setup](read-me/setup/Local%20development%20setup.md).
+To run the site on your own machine (Windows with Laragon, or macOS with Homebrew), follow [Local development setup](read-me/setup/Local-development-setup.md).
 
 ## Documentation
 
@@ -52,31 +52,31 @@ Reference docs live in [read-me/](read-me/).
 | Document | Read it when |
 |---|---|
 | [Deployment](read-me/Deployment.md) | Shipping to production, or a push did not land on the server |
-| [Cron jobs](read-me/Cron%20jobs.md) | Adding a scheduled task, or one has stopped running |
-| [Admin guide](read-me/Admin%20guide.md) | Checking payment processor fees, switching between sandbox and production, rotating payment keys, or creating an admin account |
-| [Refund block response procedure](read-me/procedures/Refund%20block%20response%20procedure.md) | The refund system has hard-blocked someone and emailed you |
+| [Cron jobs](read-me/Cron-jobs.md) | Adding a scheduled task, or one has stopped running |
+| [Admin guide](read-me/Admin-guide.md) | Checking payment processor fees, switching between sandbox and production, rotating payment keys, or creating an admin account |
+| [Refund block response procedure](read-me/procedures/Refund-block-response-procedure.md) | The refund system has hard-blocked someone and emailed you |
 
 ### Setup
 
 | Document | Read it when |
 |---|---|
-| [Local development setup](read-me/setup/Local%20development%20setup.md) | Installing and running the site on Windows (Laragon) or macOS (Homebrew) |
-| [Local email setup](read-me/setup/Local%20email%20setup.md) | Setting up MailHog so local mail does not try to reach a real server |
-| [Payment provider setup](read-me/setup/Payment%20provider%20setup.md) | Configuring Stripe, PayPal or Square, for the portal or subscriptions |
-| [Cloudflare Turnstile setup](read-me/setup/Cloudflare%20Turnstile%20setup.md) | Working on the free receipt scanner's bot protection |
-| [Google Ads campaign setup](read-me/setup/Google%20Ads%20campaign%20setup.md) | Building a new Google Ads campaign, step by step |
+| [Local development setup](read-me/setup/Local-development-setup.md) | Installing and running the site on Windows (Laragon) or macOS (Homebrew) |
+| [Local email setup](read-me/setup/Local-email-setup.md) | Setting up MailHog so local mail does not try to reach a real server |
+| [Payment provider setup](read-me/setup/Payment-provider-setup.md) | Configuring Stripe, PayPal or Square, for the portal or subscriptions |
+| [Cloudflare Turnstile setup](read-me/setup/Cloudflare-Turnstile-setup.md) | Working on the free receipt scanner's bot protection |
+| [Google Ads campaign setup](read-me/setup/Google-Ads-campaign-setup.md) | Building a new Google Ads campaign, step by step |
 
 ### Testing
 
 | Document | Read it when |
 |---|---|
-| [Payment provider testing](read-me/testing/Payment%20provider%20testing.md) | Running sandbox payments through any provider |
-| [First-run install tracking](read-me/testing/First-run%20install%20tracking.md) | Checking that installs attribute back to the originating ad click |
+| [Payment provider testing](read-me/testing/Payment-provider-testing.md) | Running sandbox payments through any provider |
+| [First-run install tracking](read-me/testing/First-run-install-tracking.md) | Checking that installs attribute back to the originating ad click |
 | [PHPUnit suite](tests/README.md) | Running or adding backend tests. Covers the financial and licensing flows |
 
 ### Marketing
 
 | Document | Read it when |
 |---|---|
-| [Email outreach](read-me/Email%20outreach.md) | Running or changing the outreach pipeline |
-| [Google Ads economics](read-me/Google%20Ads%20economics.md) | Deciding whether to spend, and what a click is worth. Keep the figures current |
+| [Email outreach](read-me/Email-outreach.md) | Running or changing the outreach pipeline |
+| [Google Ads economics](read-me/Google-Ads-economics.md) | Deciding whether to spend, and what a click is worth. Keep the figures current |

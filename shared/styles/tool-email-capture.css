@@ -3,7 +3,7 @@
    partials/tool-email-capture.php.
 
    Uses the same --tool-* tokens as calculator.css, so dark mode is inherited
-   rather than re-declared. See read-me/Tool page standards.md. */
+   rather than re-declared. See read-me/Tool-page-standards.md. */
 
 .tec {
   max-width: 1100px;

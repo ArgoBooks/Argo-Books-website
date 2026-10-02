@@ -1,7 +1,7 @@
 // craft-pricing-calculator/scripts/main.js
 // Wires the pricing form to the pure calc and renders live. Vanilla ES module.
 //
-// Tier 1 tool (see read-me/Tool page standards.md): the math is the same in any
+// Tier 1 tool (see read-me/Tool-page-standards.md): the math is the same in any
 // currency, so the picker carries the full supported list. Locales come from
 // window.ARGO_CURRENCY_LOCALES, emitted by index.php from shared/currencies.php.
 

@@ -4,7 +4,7 @@
  *
  * Charges Premium subscriptions due within 24h (credit first, then Stripe/Square
  * for the balance), emails receipts and decline notices, suspends after 3 failed
- * attempts, and expires non-auto-renew subs. Full detail in read-me/Cron jobs.md.
+ * attempts, and expires non-auto-renew subs. Full detail in read-me/Cron-jobs.md.
  *
  * Schedule: daily at 3:00 PM.
  *   0 15 * * * /usr/bin/php /home/argorobots/public_html/cron/subscription_renewal.php

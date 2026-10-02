@@ -7,7 +7,7 @@
    and before the per-tool stylesheet, which keeps only what is genuinely its own.
    Colours are variables from custom-colors.css, so dark mode is inherited.
 
-   See read-me/Tool page standards.md. */
+   See read-me/Tool-page-standards.md. */
 
 .calc-app {
   max-width: 1100px;

@@ -1,7 +1,7 @@
 <?php
 // hourly-rate-calculator/index.php
 // Works out the hourly rate a self-employed person must charge to actually take
-// home a target income. Tier 1 (see read-me/Tool page standards.md).
+// home a target income. Tier 1 (see read-me/Tool-page-standards.md).
 //
 // The point of the tool is the gap between the naive figure (salary divided by
 // hours worked) and the real one, which has to absorb unbillable time, business

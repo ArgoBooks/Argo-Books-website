@@ -2,7 +2,7 @@
 
 Context snapshot for anyone (including Claude) picking up marketing work. Numbers are as of **2026-09-03** unless a line says otherwise. Update this file when the picture changes.
 
-Related: [Google Ads economics.md](Google%20Ads%20economics.md), [Email outreach.md](Email%20outreach.md).
+Related: [Google-Ads-economics.md](Google-Ads-economics.md), [Email-outreach.md](Email-outreach.md).
 
 ## Where things stand
 
@@ -133,7 +133,7 @@ The two weakest sales were both Network sales and both discounted, to \$51.00 an
 Stack Social is a great opportunity to get customer reviews, which would be extremely valuable because I currently have no social proof.
 
 ### Google Ads
-About CA\$300 spent, 0 attributable customers. Details in [Google Ads economics.md](Google%20Ads%20economics.md). Roughly two thirds of spend went to mobile and tablet clicks that cannot install a Windows app, which was a mistake. Even with device exclusions, realistic cost per customer looks like \$300+ against an unproven LTV. Not viable.
+About CA\$300 spent, 0 attributable customers. Details in [Google-Ads-economics.md](Google-Ads-economics.md). Roughly two thirds of spend went to mobile and tablet clicks that cannot install a Windows app, which was a mistake. Even with device exclusions, realistic cost per customer looks like \$300+ against an unproven LTV. Not viable.
 
 ### Cold email outreach
 ~1,100 emails sent starting around January 2026. A couple of replies, zero customers. Stopped.

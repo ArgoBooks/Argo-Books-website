@@ -1,6 +1,6 @@
 # Google Ads economics
 
-The living numbers for the Argo Books Google Ads campaign(s): the terminology, the click-to-customer funnel model, the revenue levers, and the actual figures from real spend. Keep this file up to date as new data comes in. The setup (how to build a campaign, step by step) lives in [Google Ads campaign setup.md](setup/Google%20Ads%20campaign%20setup.md).
+The living numbers for the Argo Books Google Ads campaign(s): the terminology, the click-to-customer funnel model, the revenue levers, and the actual figures from real spend. Keep this file up to date as new data comes in. The setup (how to build a campaign, step by step) lives in [Google-Ads-campaign-setup.md](setup/Google-Ads-campaign-setup.md).
 
 **Last updated:** 2026-07-23 (all-time data through Jul 23, 2026).
 
@@ -48,7 +48,7 @@ Campaign "Argo Books - Search", all-time through Jul 23, 2026. Bid strategy: Max
 | Computers | 31 | CA$75.16 | CA$2.42 | 33% |
 | Tablets | 2 | CA$5.16 | CA$2.58 | 2% |
 
-About 67% of spend went to mobile and tablet, which cannot install a Windows desktop app. Those clicks produced downloads-page visits (Google counted them as conversions) but zero real installs. Excluding mobile and tablet makes the budget roughly 3x more efficient by sending all of it to computers. The useful CPC is the computer figure: about CA$2.42. See the device-exclusion section in [Google Ads campaign setup.md](setup/Google%20Ads%20campaign%20setup.md).
+About 67% of spend went to mobile and tablet, which cannot install a Windows desktop app. Those clicks produced downloads-page visits (Google counted them as conversions) but zero real installs. Excluding mobile and tablet makes the budget roughly 3x more efficient by sending all of it to computers. The useful CPC is the computer figure: about CA$2.42. See the device-exclusion section in [Google-Ads-campaign-setup.md](setup/Google-Ads-campaign-setup.md).
 
 ## What we do not know yet
 

@@ -1,7 +1,7 @@
 <?php
 // tumbler-pricing-calculator/index.php
 // Pricing calculator for sublimation, vinyl, and epoxy tumbler makers. Tier 1
-// (see read-me/Tool page standards.md). Shares the craft calculator surface and
+// (see read-me/Tool-page-standards.md). Shares the craft calculator surface and
 // math; this file owns the material rows, the wording, and the article.
 
 require_once __DIR__ . '/../shared/_base.php';

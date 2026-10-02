@@ -4,7 +4,7 @@
 // the craft pricing calculator and the Etsy fee calculator were both carrying.
 //
 // Locales come from window.ARGO_CURRENCY_LOCALES, which the page emits from
-// shared/currencies.php. See read-me/Tool page standards.md.
+// shared/currencies.php. See read-me/Tool-page-standards.md.
 
 /** Locale for a currency code, falling back to en-US. */
 export function localeFor(code) {

@@ -1,7 +1,7 @@
 <?php
 // cake-pricing-calculator/index.php
 // Pricing calculator for home bakers and cottage food sellers. Tier 1 (see
-// read-me/Tool page standards.md). Shares the craft calculator surface and math;
+// read-me/Tool-page-standards.md). Shares the craft calculator surface and math;
 // this file owns the ingredient rows, the wording, and the article.
 
 require_once __DIR__ . '/../shared/_base.php';

@@ -1,7 +1,7 @@
 <?php
 // candle-pricing-calculator/index.php
 // Batch-to-unit pricing calculator for candle makers. Tier 1 (see
-// read-me/Tool page standards.md): the math is currency-agnostic, so the picker
+// read-me/Tool-page-standards.md): the math is currency-agnostic, so the picker
 // carries the full supported list.
 //
 // The calculator surface, math, and styling are shared: partials/craft-calculator.php,

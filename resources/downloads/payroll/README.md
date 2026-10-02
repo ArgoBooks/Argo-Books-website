@@ -22,7 +22,7 @@ The file must:
 
 ## Preparing an edition
 
-Full process, including where the numbers come from and how to verify them against CRA, is in `docs/Payroll rate updates.md` in the desktop repository. Commit the file there as well as uploading it here: the upload reaches existing installs, the commit means a fresh install has it offline.
+Full process, including where the numbers come from and how to verify them against CRA, is in `docs/PayrollRateUpdates.md` in the desktop repository. Commit the file there as well as uploading it here: the upload reaches existing installs, the commit means a fresh install has it offline.
 
 ## What is here
 

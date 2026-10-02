@@ -2,7 +2,7 @@
 
 A start-to-finish guide for setting up a Google Ads Search campaign for Argo Books. This is what was done for the first "QuickBooks Alternative" campaign in May 2026, written so future campaigns (targeting other competitors, other keyword themes) can follow the same recipe.
 
-**This doc is the setup recipe: how to build the campaign. The unit economics, the funnel math, and the actual cost numbers live in [Google Ads economics.md](../Google%20Ads%20economics.md), which is kept up to date as real data comes in. Dollar amounts in this recipe are setup defaults, not performance figures.**
+**This doc is the setup recipe: how to build the campaign. The unit economics, the funnel math, and the actual cost numbers live in [Google-Ads-economics.md](../Google-Ads-economics.md), which is kept up to date as real data comes in. Dollar amounts in this recipe are setup defaults, not performance figures.**
 
 **Terminology note:**
 - **CPC** = Cost Per Click.
@@ -13,7 +13,7 @@ A start-to-finish guide for setting up a Google Ads Search campaign for Argo Boo
 
 Targets people in Canada searching for terms like "quickbooks alternative" and "free accounting software" on Google Search. When they click the ad, they land on the Argo Books vs QuickBooks comparison page. Their visit is tracked via `?source=google-ads-qb-alt` so attribution shows up in the admin referral dashboard. If they then visit `/downloads/`, that counts as a conversion in Google Ads.
 
-Budget: a small daily amount (start around CA$10 to CA$15/day; see [Google Ads economics.md](../Google%20Ads%20economics.md) for the current figure). All settings can be changed after launch except budget type (daily vs. total).
+Budget: a small daily amount (start around CA$10 to CA$15/day; see [Google-Ads-economics.md](../Google-Ads-economics.md) for the current figure). All settings can be changed after launch except budget type (daily vs. total).
 
 ## Before you start
 
@@ -65,7 +65,7 @@ Search - QuickBooks Alternative - CA
 ### Step 6: Bidding
 
 - **What do you want to focus on?** → Change from "Conversions" to **Clicks**. Conversions-based smart bidding needs ~30+ conversions of data to optimize, which you don't have on day one.
-- Check **"Set a maximum cost per click bid limit"** → enter a cap in CAD. This caps the worst-case spend per click. See [Google Ads economics.md](../Google%20Ads%20economics.md) for the current max CPC to use and what these keywords actually cost.
+- Check **"Set a maximum cost per click bid limit"** → enter a cap in CAD. This caps the worst-case spend per click. See [Google-Ads-economics.md](../Google-Ads-economics.md) for the current max CPC to use and what these keywords actually cost.
 - Leave **"Adjust your bidding to help acquire new customers"** unchecked.
 
 ### Step 7: Campaign settings
@@ -232,11 +232,11 @@ No Subscription
 
 ### Step 11: Budget
 
-Switch from Google's recommended budget to **Set custom budget**. Enter your daily amount (see [Google Ads economics.md](../Google%20Ads%20economics.md) for the current figure). Keep type as **Average daily budget**. Currency stays CAD.
+Switch from Google's recommended budget to **Set custom budget**. Enter your daily amount (see [Google-Ads-economics.md](../Google-Ads-economics.md) for the current figure). Keep type as **Average daily budget**. Currency stays CAD.
 
 Don't go under CA$10/day. Google needs minimum volume to optimize. Don't scale up before the funnel is converting; that just spends more at the same unfavorable ratio.
 
-The budget projections, the click-to-customer funnel model, and the revenue levers (Free tier limits, retention) all live in [Google Ads economics.md](../Google%20Ads%20economics.md).
+The budget projections, the click-to-customer funnel model, and the revenue levers (Free tier limits, retention) all live in [Google-Ads-economics.md](../Google-Ads-economics.md).
 
 ### Step 12: Review and publish
 
@@ -322,7 +322,7 @@ After 3-5 days:
 After 1 to 2 weeks:
 - Check `https://argorobots.com/admin/marketing-funnel` for visit and conversion counts.
 - Compare Google Ads' reported conversion count to the admin dashboard count. They should roughly agree.
-- Watch the trend, not just absolute CPA. Every tracked conversion is a `/downloads/` visit, not a paying customer, so Google's CPA is cost per downloads-page visit, not cost per customer. The metric that actually pays the bills is Premium sign-ups, which you measure in your own admin, not in Google. See [Google Ads economics.md](../Google%20Ads%20economics.md) for the current CPA, what counts as normal, and the real cost per customer as it becomes measurable.
+- Watch the trend, not just absolute CPA. Every tracked conversion is a `/downloads/` visit, not a paying customer, so Google's CPA is cost per downloads-page visit, not cost per customer. The metric that actually pays the bills is Premium sign-ups, which you measure in your own admin, not in Google. See [Google-Ads-economics.md](../Google-Ads-economics.md) for the current CPA, what counts as normal, and the real cost per customer as it becomes measurable.
 
 After 30+ days:
 - Consider switching bid strategy from Manual CPC / Maximize Clicks to Maximize Conversions once you have 15+ conversions of data. Smart bidding works once it has signal.

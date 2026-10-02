@@ -181,5 +181,5 @@ The import writes locally first, then claims server-side. That order is delibera
 
 ## Related
 
-- `read-me/Tool page standards.md` for the free tools, unrelated to this
+- `read-me/Tool-page-standards.md` for the free tools, unrelated to this
 - `api/portal/` is the customer payment portal, a different thing entirely

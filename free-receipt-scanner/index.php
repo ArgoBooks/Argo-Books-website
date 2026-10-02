@@ -1,6 +1,6 @@
 <?php
 // free-receipt-scanner/index.php
-// Free public AI receipt scanner. Tier 3 (see read-me/Tool page standards.md):
+// Free public AI receipt scanner. Tier 3 (see read-me/Tool-page-standards.md):
 // the currency is read off the receipt. Client logic in scanner.js mirrors the
 // desktop scanner's review UI and funnels to the free app + Premium at the
 // daily limit.

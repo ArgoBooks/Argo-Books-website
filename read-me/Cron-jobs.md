@@ -231,7 +231,7 @@ Queries Stripe for refund requests stuck in `processing` for more than 30 minute
 
 ### What It Does
 
-Refreshes `refund_velocity_baselines` per company so the established-account hard-block tier (≥ 50% of trailing 30-day revenue) has accurate inputs. If baselines drift out of date, the refund safety check fires too often or not enough. See the [Hard-Block Response Procedure](procedures/Refund%20block%20response%20procedure.md) for symptoms.
+Refreshes `refund_velocity_baselines` per company so the established-account hard-block tier (≥ 50% of trailing 30-day revenue) has accurate inputs. If baselines drift out of date, the refund safety check fires too often or not enough. See the [Hard-Block Response Procedure](procedures/Refund-block-response-procedure.md) for symptoms.
 
 ---
 
@@ -382,7 +382,7 @@ December warns about `YYYY+1-01`, June about `YYYY-07`.
 
 No daily log file. Activity is visible on `/admin/crons/`, and failures go to `error_log`.
 
-Full instructions for actually doing the update are in `docs/Payroll rate updates.md` in the desktop repository.
+Full instructions for actually doing the update are in `docs/PayrollRateUpdates.md` in the desktop repository.
 
 ---
 

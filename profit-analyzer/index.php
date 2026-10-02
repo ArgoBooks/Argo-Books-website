@@ -1,7 +1,7 @@
 <?php
 // profit-analyzer/index.php
 // Owner-facing landing page for the free Profit Analyzer. Tier 1 (see
-// read-me/Tool page standards.md). Upload handling in assets/upload.js, the
+// read-me/Tool-page-standards.md). Upload handling in assets/upload.js, the
 // sample money-flow chart in assets/owner-sample.js.
 
 require_once __DIR__ . '/../shared/_base.php';

@@ -6,7 +6,7 @@
  * from the expansion list, discovers businesses via Google Places, imports them
  * (skipping duplicates), generates AI email drafts for leads without one,
  * auto-approves drafts, and sends approved emails up to the daily limit. Full
- * detail in read-me/Cron jobs.md.
+ * detail in read-me/Cron-jobs.md.
  *
  * Schedule: daily at 8:00 AM.
  *   0 8 * * * /usr/bin/php /home/argorobots/public_html/cron/outreach_pipeline.php

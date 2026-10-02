@@ -50,7 +50,7 @@ All queries go through the global `$pdo`. PDO is configured with `ATTR_ERRMODE =
 
 Pattern for new callers outside `email_sender.php`: try SMTP first, fall back to `mail()` only when `create_smtp_mailer()` returns `null`. Reference implementations: `api/invoice/invoice_email_sender.php`, `api/portal/portal-helper.php`.
 
-For local dev, set up MailHog so the fallback path doesn't try to hit a real MTA. See `read-me/setup/Local email setup.md`.
+For local dev, set up MailHog so the fallback path doesn't try to hit a real MTA. See `read-me/setup/Local-email-setup.md`.
 
 ## Payment gateways
 
@@ -102,7 +102,7 @@ Required for every cron:
 - **Put the numbers in `cron_metric_incr()`, not in prose.** The admin page renders metrics as tiles, so counts recorded there are readable at a glance and comparable across runs. The optional 4th argument to `cron_run_finish()` is for a short summary line shown under "Last run detail"; it lands in the `error_message` column either way, so on an `ok` run keep it to a summary and not an error.
 - **Report failures through `cron_runs` too**, including ones that happen before the main work starts. An early `exit` that skips `cron_run_start` leaves no trace on the admin page and looks identical to the cron never firing.
 - Add a `$cronConfig` entry in `admin/crons/index.php` with the metric labels, or the page has nothing to render.
-- Add a section to `read-me/Cron jobs.md` with the crontab line.
+- Add a section to `read-me/Cron-jobs.md` with the crontab line.
 - CLI guard at the top (`php_sapi_name()`), so the script cannot be triggered over HTTP.
 - `error_log()` for anything worth diagnosing later.
 
@@ -139,14 +139,14 @@ When writing markdown docs (in `read-me/` or anywhere else in the repo), don't u
 
 The `read-me/` directory has authoritative reference docs:
 
-- `read-me/Tool page standards.md`: conventions for the free tools under `/tools/`, including which currencies each tool offers and why
-- `read-me/Cron jobs.md`: every scheduled cron and its frequency
+- `read-me/Tool-page-standards.md`: conventions for the free tools under `/tools/`, including which currencies each tool offers and why
+- `read-me/Cron-jobs.md`: every scheduled cron and its frequency
 - `read-me/Deployment.md`: how `.github/workflows/deploy.yml` ships code to the server
-- `read-me/Email outreach.md`: outreach pipeline behavior
-- `read-me/Admin guide.md`: payment processor fees, sandbox vs production modes, key rotation, admin-account scripts
-- `read-me/setup/Payment provider setup.md`: Stripe / PayPal / Square provider config
-- `read-me/testing/Payment provider testing.md`: sandbox testing procedures
-- `read-me/testing/First-run install tracking.md`: how the install funnel attributes back to the originating ad click, why your own machine deduplicates itself, and the end-to-end test procedure
-- `read-me/setup/Local email setup.md`: MailHog setup
-- `read-me/setup/Google Ads campaign setup.md`: Google Ads campaign + UET/gtag wiring
-- `read-me/procedures/Refund block response procedure.md`: what to do when the refund safety check fires
+- `read-me/Email-outreach.md`: outreach pipeline behavior
+- `read-me/Admin-guide.md`: payment processor fees, sandbox vs production modes, key rotation, admin-account scripts
+- `read-me/setup/Payment-provider-setup.md`: Stripe / PayPal / Square provider config
+- `read-me/testing/Payment-provider-testing.md`: sandbox testing procedures
+- `read-me/testing/First-run-install-tracking.md`: how the install funnel attributes back to the originating ad click, why your own machine deduplicates itself, and the end-to-end test procedure
+- `read-me/setup/Local-email-setup.md`: MailHog setup
+- `read-me/setup/Google-Ads-campaign-setup.md`: Google Ads campaign + UET/gtag wiring
+- `read-me/procedures/Refund-block-response-procedure.md`: what to do when the refund safety check fires
