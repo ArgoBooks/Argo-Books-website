@@ -34,6 +34,36 @@ function macInstallTokenQuery(): string
     return $token === '' ? '' : '?t=' . urlencode($token);
 }
 
+/**
+ * Which desktop system the visitor is on, or null when it cannot be told.
+ *
+ * Only used to pick which store badges to show. The platform cards above stay
+ * whole whatever this returns, because the user agent is not reliable enough to
+ * decide what somebody is allowed to see: it reports Intel on Apple Silicon, and
+ * people download for machines they are not sitting at.
+ *
+ * Android says Linux and an iPhone says Mac OS X, so the mobile check comes
+ * first. A phone gets null and is shown everything, which is the right answer
+ * when it cannot install any of it anyway.
+ */
+function visitorDesktopOs(): ?string
+{
+    $ua = $_SERVER['HTTP_USER_AGENT'] ?? '';
+    if ($ua === '' || preg_match('/Android|iPhone|iPad|iPod/i', $ua)) {
+        return null;
+    }
+    if (stripos($ua, 'Windows NT') !== false) {
+        return 'windows';
+    }
+    if (preg_match('/Macintosh|Mac OS X/i', $ua)) {
+        return 'macos';
+    }
+    if (preg_match('/Linux|X11|CrOS/i', $ua)) {
+        return 'linux';
+    }
+    return null;
+}
+
 // Load system requirements from JSON
 function getSystemRequirements()
 {
@@ -295,10 +325,11 @@ $systemRequirements = getSystemRequirements();
             [
                 'enabled' => true,
                 'url'     => 'https://apps.microsoft.com/detail/xpdmdvrxj0xs0m?referrer=appbadge&cid=argorobots-downloads',
-                'img'     => '../resources/images/badges/microsoft-store-badge-light.svg',
+                'img'     => '../resources/images/badges/microsoft-store-badge-dark.svg',
                 'w'       => 200,
                 'h'       => 55,
                 'alt'     => 'Download Argo Books from the Microsoft Store',
+                'os'      => 'windows',
             ],
             [
                 'enabled' => false,
@@ -307,38 +338,75 @@ $systemRequirements = getSystemRequirements();
                 'w'       => 200,
                 'h'       => 55,
                 'alt'     => 'Download Argo Books on the Mac App Store',
+                'os'      => 'macos',
             ],
             [
                 'enabled' => false,
-                'url'     => '',
+                'url'     => 'https://flathub.org/apps/com.argorobots.ArgoBooks',
                 'img'     => '../resources/images/badges/flathub-badge.svg',
-                'w'       => 200,
+                'w'       => 165,
                 'h'       => 55,
                 'alt'     => 'Get Argo Books on Flathub',
+                'os'      => 'linux',
             ],
             [
                 'enabled' => false,
-                'url'     => '',
+                'url'     => 'https://snapcraft.io/argo-books',
                 'img'     => '../resources/images/badges/snapcraft-badge.svg',
-                'w'       => 200,
+                'w'       => 179,
                 'h'       => 55,
                 'alt'     => 'Get Argo Books from the Snap Store',
+                'os'      => 'linux',
             ],
         ], fn($b) => $b['enabled'] && $b['url'] !== ''));
+
+        // Flathub and the Snap Store mean nothing to someone who has never used
+        // Linux, and a brew command means nothing on Windows. Each entry is shown
+        // only to the system it is for. A visitor we cannot place sees them all.
+        $visitor_os = visitorDesktopOs();
+        $for_visitor = fn(array $e) => $visitor_os === null || $e['os'] === $visitor_os;
+        $store_badges = array_values(array_filter($store_badges, $for_visitor));
+
+        // Homebrew has no badge artwork of its own, so it is a command. Flathub and
+        // the Snap Store do have badges and sit in the list above instead.
+        $package_commands = array_values(array_filter([
+            [
+                'enabled' => false,
+                'label'   => 'macOS, with Homebrew',
+                'command' => 'brew install --cask argo-books',
+                'os'      => 'macos',
+            ],
+        ], fn($c) => $c['enabled']));
+        $package_commands = array_values(array_filter($package_commands, $for_visitor));
         ?>
-        <?php if ($store_badges): ?>
+        <?php if ($store_badges || $package_commands): ?>
         <div class="store-badges">
             <p class="store-badges-label">Also available from</p>
             <div class="store-badges-row">
                 <?php foreach ($store_badges as $badge): ?>
-                <a href="<?= htmlspecialchars($badge['url']) ?>" target="_self" rel="noopener">
+                <a href="<?= htmlspecialchars($badge['url']) ?>" target="_blank" rel="noopener">
                     <img src="<?= htmlspecialchars($badge['img']) ?>"
                          width="<?= (int) $badge['w'] ?>" height="<?= (int) $badge['h'] ?>"
-                         alt="<?= htmlspecialchars($badge['alt']) ?>"
+                         alt="<?= htmlspecialchars($badge['alt']) ?>, opens in a new tab"
                          loading="lazy" decoding="async">
                 </a>
                 <?php endforeach; ?>
             </div>
+            <?php if ($package_commands): ?>
+            <div class="store-commands">
+                <?php foreach ($package_commands as $pc): ?>
+                <span class="store-command">
+                    <span class="store-command-label"><?= htmlspecialchars($pc['label']) ?></span>
+                    <button type="button" class="store-command-copy"
+                            data-command="<?= htmlspecialchars($pc['command']) ?>"
+                            aria-label="Copy the install command">
+                        <code><?= htmlspecialchars($pc['command']) ?></code>
+                        <span class="store-command-feedback" aria-hidden="true"><?= svg_icon('clipboard-check', 13) ?></span>
+                    </button>
+                </span>
+                <?php endforeach; ?>
+            </div>
+            <?php endif; ?>
         </div>
         <?php endif; ?>
 
@@ -459,6 +527,15 @@ $systemRequirements = getSystemRequirements();
     </footer>
 
     <script>
+        document.querySelectorAll('.store-command-copy').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                navigator.clipboard.writeText(btn.dataset.command).then(function () {
+                    btn.classList.add('copied');
+                    setTimeout(function () { btn.classList.remove('copied'); }, 1600);
+                });
+            });
+        });
+
         const downloadGuides = document.getElementById('downloadGuides');
 
         // Add download tracking + reveal SmartScreen guide for Windows downloads

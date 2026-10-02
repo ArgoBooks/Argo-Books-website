@@ -603,3 +603,57 @@ body {
 .store-badges-row a:focus-visible img {
     opacity: 1;
 }
+
+.store-commands {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px 20px;
+  margin-top: 16px;
+}
+
+.store-command {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.store-command-label {
+  font-size: var(--text-2xs);
+  color: var(--gray-700);
+}
+
+.store-command-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 9px;
+  border: 1px solid var(--gray-border);
+  border-radius: var(--radius-sm);
+  background: var(--white);
+  cursor: pointer;
+  transition: border-color .15s ease;
+}
+
+.store-command-copy:hover,
+.store-command-copy:focus-visible {
+  border-color: var(--primary-blue);
+}
+
+.store-command-copy code {
+  font-size: var(--text-2xs);
+  color: var(--gray-900);
+  white-space: nowrap;
+}
+
+.store-command-feedback {
+  display: flex;
+  flex-shrink: 0;
+  opacity: 0;
+  color: var(--emerald-600);
+  transition: opacity .15s ease;
+}
+
+.store-command-copy.copied .store-command-feedback {
+  opacity: 1;
+}
