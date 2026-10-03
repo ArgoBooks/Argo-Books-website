@@ -29,7 +29,7 @@ const TELEMETRY_ERROR_SEVERITIES = ['Error', 'Warning'];
 const TELEMETRY_FEATURE_NAMES = [
     'ReportGenerated',
     'ReceiptScanned',
-    'DataImported', 'BackupCreated', 'BackupRestored',
+    'DataImported', 'BackupCreated', 'BackupRestored', 'BackupSettingsChanged',
     'InvoiceCreated', 'InvoiceSent', 'ExpenseCreated', 'RevenueCreated', 'PaymentRecorded',
     'BankMatchConfirmed',
     'ProductCreated', 'CategoryCreated', 'LocationCreated', 'StockAdjusted',
@@ -46,7 +46,7 @@ const TELEMETRY_FEATURE_NAMES = [
     'ImportOpened', 'ImportPreviewShown', 'ImportAbandoned', 'ImportFailed',
     'ReceiptScanFailed', 'EmptyStateShown', 'WelcomeShown',
     // The paywall
-    'UpgradePromptShown', 'UpgradeModalOpened',
+    'UpgradePromptShown', 'UpgradeModalOpened', 'LicenseKeyRedeemed',
     // Payroll
     'PayRunDrafted',
     'PayRunApproved',
