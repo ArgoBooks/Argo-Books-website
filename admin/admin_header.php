@@ -303,9 +303,12 @@ $base_path = $in_subdir ? '../' : '';
                 const d = new Date(secs * 1000);
                 if (isNaN(d.getTime())) return;
 
+                // 12-hour with am/pm. The hour is not padded, so it reads 9:05 am rather than 09:05 am.
+                const h24 = d.getHours();
                 let out = d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate())
-                    + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+                    + ' ' + (h24 % 12 || 12) + ':' + pad(d.getMinutes());
                 if (el.dataset.epochSeconds === '1') out += ':' + pad(d.getSeconds());
+                out += h24 < 12 ? ' am' : ' pm';
 
                 const zone = zoneName(d);
                 el.textContent = zone ? out + ' ' + zone : out;

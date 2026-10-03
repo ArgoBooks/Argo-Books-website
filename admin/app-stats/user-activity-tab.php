@@ -396,7 +396,7 @@ if (!function_exists('ua_fmt')) {
         if (!$ts) return '—';
         return '<time data-epoch="' . (int)$ts . '"'
             . ($withSeconds ? ' data-epoch-seconds="1"' : '') . '>'
-            . gmdate($withSeconds ? 'Y-m-d H:i:s' : 'Y-m-d H:i', (int)$ts) . ' UTC</time>';
+            . gmdate($withSeconds ? 'Y-m-d g:i:s a' : 'Y-m-d g:i a', (int)$ts) . ' UTC</time>';
     }
 }
 ?>
