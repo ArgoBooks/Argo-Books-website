@@ -75,6 +75,10 @@ function rate_limits(): array
         'ai_completions_ip' => [_rl_env('RL_AI_COMPLETIONS_IP_MAX', 600), _rl_env('RL_AI_COMPLETIONS_IP_WINDOW', 900)],
         'ai_priors' => [_rl_env('RL_AI_PRIORS_MAX', 120), _rl_env('RL_AI_PRIORS_WINDOW', 900)],
         'bank_extract' => [_rl_env('RL_BANK_EXTRACT_MAX', 30), _rl_env('RL_BANK_EXTRACT_WINDOW', 900)],
+        // A diagnostic file is offered only after an import fails, so a handful an hour
+        // from one device is already generous. Low on purpose: this is the one endpoint
+        // that writes a customer's own file to our disk.
+        'import_diagnostic' => [_rl_env('RL_IMPORT_DIAGNOSTIC_MAX', 5), _rl_env('RL_IMPORT_DIAGNOSTIC_WINDOW', 3600)],
 
         // Exchange rates: a wide ceiling, because the app asks for single dates while transactions
         // wait on a rate, on top of the one large batch a multi-year import sends.

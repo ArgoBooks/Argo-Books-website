@@ -43,7 +43,7 @@ const TELEMETRY_FEATURE_NAMES = [
     'CompanyCreateOpened', 'ReceiptScanOpened', 'InvoiceCreateOpened',
     'ExpenseCreateOpened', 'RevenueCreateOpened', 'ReportOpened',
     // The import funnel
-    'ImportOpened', 'ImportPreviewShown', 'ImportAbandoned', 'ImportFailed',
+    'ImportOpened', 'ImportPreviewShown', 'ImportAbandoned', 'ImportFailed', 'ImportDiagnosticSent',
     'ReceiptScanFailed', 'EmptyStateShown', 'WelcomeShown',
     // The paywall
     'UpgradePromptShown', 'UpgradeModalOpened', 'LicenseKeyRedeemed',

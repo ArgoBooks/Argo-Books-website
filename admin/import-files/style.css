@@ -1,0 +1,165 @@
+/* Import Files page. Only what common-style.css does not already cover: the
+   standing notice, the expiry pill, the row buttons and the device/reason code
+   spans. Everything else uses the shared .stats-grid, .control-bar and
+   .table-container, so this page sits inside the rest of the admin unchanged.
+   Colours follow the badge scale already in common-style.css (amber-100/800,
+   red-100/800) rather than introducing a second set. */
+
+/* The page holds customer bank statements, so it says so above everything else,
+   every time. Amber rather than red: a standing condition of the page, not an
+   error that has happened. */
+.if-notice {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  background: var(--amber-50);
+  border: 1px solid var(--amber-200);
+  border-left: 4px solid var(--amber-500);
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin-bottom: 20px;
+  color: var(--admin-text);
+  line-height: 1.5;
+}
+
+.if-notice-mark {
+  flex: 0 0 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--amber-500);
+  color: var(--white);
+  font-weight: 700;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Expiry is the column that decides what you do next, so it is the only one
+   carrying colour. */
+.if-expiry {
+  display: inline-block;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.if-expiry-ok   { background: var(--gray-100);  color: var(--admin-text); }
+.if-expiry-soon { background: var(--amber-100); color: var(--amber-800); }
+.if-expiry-now  { background: var(--red-100);   color: var(--red-800); }
+
+.if-device,
+.if-reason {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.82rem;
+  background: var(--gray-100);
+  border-radius: 4px;
+  padding: 2px 6px;
+}
+
+/* Secondary detail under a cell's main value. */
+.if-sub {
+  color: var(--gray-500);
+  font-size: 0.78rem;
+  margin-top: 3px;
+}
+
+.if-col-actions {
+  white-space: nowrap;
+  text-align: right;
+}
+
+.if-btn {
+  border: 1px solid var(--gray-300);
+  background: var(--white);
+  color: var(--admin-text);
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+/* Each action is its own POST form, so they need to sit side by side. */
+.if-inline { display: inline-block; }
+.if-inline + .if-inline { margin-left: 6px; }
+
+.if-btn:hover:not(:disabled) { background: var(--gray-100); }
+.if-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+/* Matches .btn-green, the admin's existing primary action. */
+.if-btn-primary {
+  background: var(--emerald-500);
+  border-color: var(--emerald-500);
+  color: var(--white);
+}
+
+.if-btn-primary:hover:not(:disabled) {
+  background: var(--emerald-600);
+  border-color: var(--emerald-600);
+}
+
+.if-btn-danger {
+  background: var(--white);
+  border-color: var(--red-200);
+  color: var(--red-800);
+}
+
+.if-btn-danger:hover:not(:disabled) { background: var(--red-100); }
+
+/* A file already taken is still on disk until the purge runs, so the row stays
+   visible but stops competing for attention. */
+.if-row-done { opacity: 0.6; }
+
+.if-footnote {
+  color: var(--gray-500);
+  font-size: 0.82rem;
+  margin: 14px 2px 0;
+  max-width: 70ch;
+}
+
+/* Dark mode: only the surfaces the shared stylesheet does not already reach,
+   following its own badge overrides (alpha fill, light text). */
+[data-theme="dark"] .if-notice {
+  background: var(--amber-alpha-15);
+  border-color: var(--gray-200);
+  border-left-color: var(--amber-500);
+}
+
+[data-theme="dark"] .if-expiry-soon {
+  background: var(--amber-alpha-20);
+  color: var(--amber-400);
+}
+
+[data-theme="dark"] .if-expiry-now {
+  background: var(--red-alpha-20);
+  color: var(--red-400);
+}
+
+[data-theme="dark"] .if-device,
+[data-theme="dark"] .if-reason,
+[data-theme="dark"] .if-expiry-ok {
+  background: var(--gray-200);
+}
+
+[data-theme="dark"] .if-btn {
+  background: var(--gray-100);
+  border-color: var(--gray-200);
+}
+
+[data-theme="dark"] .if-btn:hover:not(:disabled) { background: var(--gray-200); }
+
+[data-theme="dark"] .if-btn-danger {
+  background: var(--gray-100);
+  border-color: var(--red-alpha-20);
+  color: var(--red-400);
+}
+
+[data-theme="dark"] .if-btn-danger:hover:not(:disabled) { background: var(--red-alpha-20); }
+
+@media (max-width: 768px) {
+  .if-col-actions { text-align: left; }
+  .if-notice { flex-direction: column; }
+}

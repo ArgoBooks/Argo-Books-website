@@ -1,0 +1,6 @@
+# The files here are customer bank statements, encrypted at rest. Nothing should
+# ever reach them over HTTP: the admin download reads them from disk in PHP.
+Deny from all
+<IfModule mod_authz_core.c>
+    Require all denied
+</IfModule>

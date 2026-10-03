@@ -1262,6 +1262,30 @@ CREATE TABLE IF NOT EXISTS cron_runs (
 -- cookie ties events together across sessions; on Premium signup all prior
 -- events for that visitor get backfilled with subscription_id + user_id so
 -- attribution survives a logged-out browse-to-buy flow.
+-- Files a user chose to send after an import failed, so the reason can be seen.
+-- Held briefly and deleted by cron/purge_import_files.php whether or not anyone
+-- looked. The file itself lives encrypted in storage/import-diagnostics/; only
+-- its description is here. No original filename is kept: people name statements
+-- after their business.
+CREATE TABLE IF NOT EXISTS import_diagnostic_files (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    storage_name CHAR(64) NOT NULL UNIQUE COMMENT 'Random name on disk, derived from nothing about the file or the person.',
+    device_hash VARCHAR(64) DEFAULT NULL COMMENT 'Ties the file to the telemetry device that failed, for the admin view only.',
+    failure_reason VARCHAR(64) NOT NULL COMMENT 'The ImportFailed context that prompted the offer, e.g. bank-pdf:extract-empty.',
+    file_kind VARCHAR(8) NOT NULL COMMENT 'PDF, CSV, XLSX or XLS.',
+    file_bytes INT UNSIGNED NOT NULL COMMENT 'Size of the original file, before encryption.',
+    page_count SMALLINT UNSIGNED DEFAULT NULL COMMENT 'PDFs only.',
+    app_version VARCHAR(20) DEFAULT NULL,
+    environment ENUM('production','sandbox') NOT NULL DEFAULT 'production',
+    state ENUM('held','downloaded') NOT NULL DEFAULT 'held',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    expires_at DATETIME NOT NULL COMMENT 'Purged at this time regardless of state.',
+    downloaded_at DATETIME DEFAULT NULL,
+    downloaded_by VARCHAR(100) DEFAULT NULL COMMENT 'Admin username, so every download is attributable.',
+    INDEX idx_state_expires (state, expires_at),
+    INDEX idx_environment_created (environment, created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS referral_events (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     visitor_id CHAR(36) DEFAULT NULL COMMENT 'UUID from argo_visitor_id cookie; NULL for unattributed app_first_run events',

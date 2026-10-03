@@ -532,3 +532,35 @@ Like API Webhook Delivery, it does not filter on `environment`. Only production 
 ### Logs
 
 No daily log file. Metrics are on `/admin/crons/`, and failures go to `error_log`.
+
+## 16. Purge Import Files
+
+**Script:** `cron/purge_import_files.php` **Schedule:** Hourly
+
+```bash
+0 * * * * /usr/bin/php /home/argorobots/public_html/cron/purge_import_files.php
+```
+
+### What It Does
+
+Deletes the diagnostic files people send after an import fails, once each one passes its retention window of seven days. The file is removed from `storage/import-diagnostics/` and its row is marked so the admin page stops offering it. The row itself stays, because it is the only record that a file existed and who took it.
+
+It also sweeps orphans: a file on disk with no row in `import_diagnostic_files`. That can only happen if an upload died between writing the file and inserting its row, which the upload endpoint already tries to clean up after itself. Anything other than zero orphans is worth looking at.
+
+### Behaviour Worth Knowing
+
+This cron is the thing that keeps a promise made to customers, not a tidying job. The Import Files page tells you every file deletes itself whether or not you looked at it, and the privacy policy says the same. If this stops running, files that people were told would be deleted are not deleted, so the failure paths report through `cron_runs` rather than exiting quietly.
+
+It does not filter on `environment`. An expired sandbox file is as real on disk as a production one, and only production runs crons anyway.
+
+The retention window lives in two places that have to agree: `IMPORT_DIAGNOSTIC_RETENTION_DAYS` in `api/import-diagnostic/upload.php`, which stamps `expires_at` when a file arrives, and `$retentionDays` in `admin/import-files/index.php`, which is only what the page tells you. The cron reads `expires_at` and so follows the first of those.
+
+Hourly rather than daily because the window is short. A file deleted up to a day late has spent a seventh of its whole retention period past the point it should have been gone.
+
+### Metrics
+
+`still_held` is the one to watch. It is how many customer files are on the server right now, and it should fall back to zero on its own. A number that keeps climbing means files are arriving faster than anyone is dealing with them.
+
+### Logs
+
+No daily log file. Metrics are on `/admin/crons/`, and failures go to `error_log`.

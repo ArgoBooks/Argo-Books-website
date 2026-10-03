@@ -204,6 +204,19 @@ $cronConfig = [
         ],
         'expected_interval_hours' => 48,
     ],
+    'purge_import_files' => [
+        'label'     => 'Purge Import Files',
+        'frequency' => 'hourly',
+        'description' => "Deletes the diagnostic files people sent after a failed import, once each one passes its retention window, whether or not anyone looked at it. The Import Files page promises that deletion, so this is the thing keeping the promise: a run that stops happening is a privacy problem, not an untidy disk. 'Still held' is the number of customer files sitting on the server right now and the one to watch, because it should fall back to zero on its own. 'Orphans removed' counts files whose database row is missing, which can only happen if an upload died between writing the file and recording it; anything other than zero there is worth a look.",
+        'metrics'   => [
+            'expired_rows'    => 'Expired',
+            'files_removed'   => 'Files deleted',
+            'orphans_removed' => 'Orphans deleted',
+            'kb_freed'        => 'KB freed',
+            'still_held'      => 'Still held',
+        ],
+        'expected_interval_hours' => 2,
+    ],
 ];
 
 // ─── Aggregate runs in the time range ───────────────────────────────────────

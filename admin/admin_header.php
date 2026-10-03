@@ -95,7 +95,8 @@ $base_path = $in_subdir ? '../' : '';
                         'reports' => 'Reports',
                     ],
                     'System' => [
-                        'crons'    => 'Crons',
+                        'crons'        => 'Crons',
+                        'import-files' => 'Import files',
                         'settings' => 'Settings',
                     ],
                 ];
