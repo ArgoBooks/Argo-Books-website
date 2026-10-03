@@ -93,6 +93,7 @@ function rate_limits(): array
         'sheets_export' => [_rl_env('RL_SHEETS_EXPORT_MAX', 30), _rl_env('RL_SHEETS_EXPORT_WINDOW', 900)],
         'invoice_usage' => [_rl_env('RL_INVOICE_USAGE_MAX', 30), _rl_env('RL_INVOICE_USAGE_WINDOW', 900)],
         'ai_import_usage' => [_rl_env('RL_AI_IMPORT_USAGE_MAX', 30), _rl_env('RL_AI_IMPORT_USAGE_WINDOW', 900)],
+        'receipt_usage' => [_rl_env('RL_RECEIPT_USAGE_MAX', 30), _rl_env('RL_RECEIPT_USAGE_WINDOW', 900)],
         'api_auth_failure' => [_rl_env('RL_API_AUTH_FAILURE_MAX', 20), _rl_env('RL_API_AUTH_FAILURE_WINDOW', 900)],
 
         // Payment portal.

@@ -4,6 +4,8 @@
  * Tracks and enforces monthly scan limits.
  */
 
+require_once __DIR__ . '/../portal/portal-helper.php';
+
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST, OPTIONS');
@@ -22,11 +24,29 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit();
 }
 
+// Rate limit per IP, as on api/invoice/usage.php and api/ai-import/usage.php.
+$ip = get_client_ip();
+if (rate_limit_hit('receipt_usage', $ip)) {
+    send_rate_limited_response('receipt_usage');
+}
+
 $input = json_decode(file_get_contents('php://input'), true);
+if (!is_array($input)) {
+    http_response_code(400);
+    echo json_encode(['success' => false, 'error' => 'Invalid JSON input']);
+    exit();
+}
 
 // Accept either license_key (premium) or device_id (free)
 $license_key = trim($input['license_key'] ?? '');
 $device_id = trim($input['device_id'] ?? '');
+
+// Reject overly long identifiers
+if (strlen($license_key) > 100 || strlen($device_id) > 200) {
+    http_response_code(400);
+    echo json_encode(['success' => false, 'error' => 'Invalid identifier length.']);
+    exit();
+}
 
 if (empty($license_key) && empty($device_id)) {
     http_response_code(400);
