@@ -371,7 +371,7 @@ $systemRequirements = getSystemRequirements();
         // the Snap Store do have badges and sit in the list above instead.
         $package_commands = array_values(array_filter([
             [
-                'enabled' => false,
+                'enabled' => true,
                 'label'   => 'macOS, with Homebrew',
                 'command' => 'brew install --cask argo-books',
                 'os'      => 'macos',
