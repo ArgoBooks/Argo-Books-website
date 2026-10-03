@@ -9,6 +9,7 @@
         { "key": "capterra",    "label": "Capterra" },
         { "key": "producthunt", "label": "Product Hunt" },
         { "key": "microsoftstore", "label": "Microsoft Store" },
+        { "key": "homebrew",    "label": "Homebrew" },
         { "key": "other",       "label": "Other", "freeform": true }
     ]
 }
