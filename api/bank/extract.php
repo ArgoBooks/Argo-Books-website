@@ -6,7 +6,8 @@
  *
  * Receives a PDF bank statement (multipart field "statement") from the Argo Books
  * desktop app, uploads it to the Gemini Files API, asks the model to extract the
- * transaction rows, and returns them as structured JSON. Premium (license) gated.
+ * transaction rows, and returns them as structured JSON. Open to the free tier within
+ * the monthly AI import allowance, which the desktop app checks and counts around it.
  * Stores nothing past the request. The Gemini API key lives server-side.
  *
  * Response shape (consumed by PdfStatementExtractor.ParseRows in the desktop app):
@@ -30,16 +31,39 @@ require_method(['POST']);
 
 const BS_MAX_BYTES = 15 * 1024 * 1024; // 15 MB upload ceiling
 
-// --- 1. Auth: premium license required (the desktop PDF import is premium-gated). ---
+// --- 1. Auth: a license, or the device id for the free tier. ---
+// This refused everything without a license, while the app offers PDF import to free
+// users within their monthly AI import allowance and meters it through
+// UsageLimitService. The two disagreed, so a free user was allowed to start, got a 401
+// here, and PdfStatementExtractor turned that into an empty result: every PDF import on
+// the free tier failed as "no transactions found", three days running for one user in
+// Melbourne. The allowance is checked and counted by the caller before and after this
+// endpoint, so letting the device through does not uncap anything.
 $license = authenticate_license_request();
+$deviceIdHash = null;
 if (!$license) {
-    send_error_response(401, 'A valid license is required for PDF statement import.', 'UNAUTHORIZED');
+    $deviceIdHash = authenticate_device_request();
+    if (!$deviceIdHash) {
+        send_error_response(401, 'A valid license or device id is required for PDF statement import.', 'UNAUTHORIZED');
+    }
 }
 
-// --- 2. Rate limit per license: 30 PDF extractions per 15 minutes. ---
-$rateLimitId = substr($license['license_key_hash'], 0, 16);
+// --- 2. Rate limit per identity: 30 PDF extractions per 15 minutes. ---
+$rateLimitId = $license
+    ? substr($license['license_key_hash'], 0, 16)
+    : substr($deviceIdHash, 0, 16);
 if (rate_limit_hit('bank_extract', $rateLimitId)) {
     send_rate_limited_response('bank_extract');
+}
+
+// Per-IP ceiling for the free (device) path only, as on the AI proxy: an X-Device-Id is
+// self-asserted and can be rotated, so the per-identity limit above does not bound a
+// single origin on its own. A verified license is not the abuse vector and is exempt.
+if (!$license) {
+    $clientIp = get_client_ip();
+    if (rate_limit_hit('bank_extract_ip', $clientIp, 'bank_ip')) {
+        send_rate_limited_response('bank_extract_ip');
+    }
 }
 
 // PHP empties $_FILES when the body exceeds post_max_size; surface a clear message.

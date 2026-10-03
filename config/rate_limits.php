@@ -75,6 +75,7 @@ function rate_limits(): array
         'ai_completions_ip' => [_rl_env('RL_AI_COMPLETIONS_IP_MAX', 600), _rl_env('RL_AI_COMPLETIONS_IP_WINDOW', 900)],
         'ai_priors' => [_rl_env('RL_AI_PRIORS_MAX', 120), _rl_env('RL_AI_PRIORS_WINDOW', 900)],
         'bank_extract' => [_rl_env('RL_BANK_EXTRACT_MAX', 30), _rl_env('RL_BANK_EXTRACT_WINDOW', 900)],
+        'bank_extract_ip' => [_rl_env('RL_BANK_EXTRACT_IP_MAX', 60), _rl_env('RL_BANK_EXTRACT_IP_WINDOW', 900)],
         // A diagnostic file is offered only after an import fails, so a handful an hour
         // from one device is already generous. Low on purpose: this is the one endpoint
         // that writes a customer's own file to our disk.
