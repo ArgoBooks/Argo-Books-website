@@ -372,11 +372,8 @@ if ($ua_deviceHashes && isset($pdo)) {
     }
 }
 
-// Sort users: free first (what you care about), then most-recent activity.
-uasort($ua_users, function ($a, $b) {
-    if ($a['tier'] !== $b['tier']) return $a['tier'] === 'free' ? -1 : 1;
-    return ($b['last'] ?? 0) <=> ($a['last'] ?? 0);
-});
+// Most recent first, whatever the tier, so the list reads the same at every tier setting.
+uasort($ua_users, fn($a, $b) => ($b['last'] ?? 0) <=> ($a['last'] ?? 0));
 
 // Delete posts back to this tab with the current filters intact, so the page
 // doesn't snap back to the default range after removing a user's files.
