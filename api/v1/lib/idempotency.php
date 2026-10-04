@@ -93,8 +93,15 @@ function api_with_idempotency(int $accountId, string $rawBody, callable $handler
     $row = $stmt->fetch();
 
     if (!$row) {
-        // The claim was released or aged out between our INSERT and this SELECT.
-        // Restart once: the second pass either claims cleanly or finds the cache.
+        // The key is past its 24 hours and the cleanup has not reached it yet, or the
+        // claim was released between our INSERT and this SELECT. An expired row has to
+        // go before restarting, or the INSERT finds it again and this never ends.
+        $pdo->prepare(
+            'DELETE FROM api_idempotency_cache
+              WHERE account_id = ? AND idempotency_key = ?
+                AND created_at <= DATE_SUB(NOW(), INTERVAL 24 HOUR)'
+        )->execute([$accountId, $key]);
+
         api_with_idempotency($accountId, $rawBody, $handler, $requireKey);
         return;
     }

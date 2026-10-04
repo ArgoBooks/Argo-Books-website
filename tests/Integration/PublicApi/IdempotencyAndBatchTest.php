@@ -77,6 +77,30 @@ final class IdempotencyAndBatchTest extends ApiIntegrationTestCase
         $this->assertSame(1, (int) $count->fetchColumn(), 'the retry created a second row');
     }
 
+    /**
+     * A key stays in the table past its 24 hours until the cleanup reaches it. Used
+     * again in that gap it has to run as a new request. It used to find its own
+     * expired row, restart, and find it again without end.
+     */
+    public function testAKeyPastItsDayRunsAsANewRequest(): void
+    {
+        $body = $this->customerBody();
+        $this->runCreate('expired-1', $body);
+
+        $this->pdo->prepare(
+            'UPDATE api_idempotency_cache SET created_at = DATE_SUB(NOW(), INTERVAL 25 HOUR)
+              WHERE account_id = ? AND idempotency_key = ?'
+        )->execute([$this->accountId, 'expired-1']);
+
+        [$status] = $this->runCreate('expired-1', $body);
+
+        $this->assertSame(201, $status);
+
+        $count = $this->pdo->prepare('SELECT COUNT(*) FROM api_customers WHERE account_id = ?');
+        $count->execute([$this->accountId]);
+        $this->assertSame(2, (int) $count->fetchColumn());
+    }
+
     public function testSameKeyWithADifferentBodyIsRefused(): void
     {
         $this->runCreate('conflict-1', $this->customerBody('First'));
