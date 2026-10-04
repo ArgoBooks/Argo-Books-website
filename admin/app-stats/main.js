@@ -7,6 +7,10 @@ document.addEventListener("DOMContentLoaded", function () {
   }
   const isGeoEnabled = rawData.geoLocationEnabled || false;
 
+  // Ranked bar charts are one measure with a label on every bar, so they are all one
+  // colour. Charts that compare different things keep their own palettes below.
+  const BAR_BLUE = "#3b82f6";
+
   const typeColors = {
     ExcelSheetsChart: "#3b82f6",
     GoogleSheetsChart: "#10b981",
@@ -162,7 +166,13 @@ document.addEventListener("DOMContentLoaded", function () {
     const labels = sortedCountries.map(([country]) => country);
     const data = sortedCountries.map(([, count]) => count);
 
-    new Chart(document.getElementById("countryDistributionChart"), {
+    // One row per country, so the box is sized from the list rather than the list being
+    // trimmed to the box. 28px a bar, plus room for the title and the axis beneath.
+    const countryCanvas = document.getElementById("countryDistributionChart");
+    countryCanvas.parentElement.style.height =
+      Math.max(300, labels.length * 28 + 90) + "px";
+
+    new Chart(countryCanvas, {
       type: "bar",
       data: {
         labels: labels,
@@ -170,11 +180,8 @@ document.addEventListener("DOMContentLoaded", function () {
           {
             label: "Users",
             data: data,
-            // One colour for every bar. Each bar is the same measure and its label names the
-            // country, so a colour per country said nothing, and any country without one
-            // fell back to grey.
-            backgroundColor: "#3b82f6",
-            borderColor: "#3b82f6",
+            backgroundColor: BAR_BLUE,
+            borderColor: BAR_BLUE,
             borderWidth: 1,
           },
         ],
@@ -196,6 +203,11 @@ document.addEventListener("DOMContentLoaded", function () {
               text: "Number of Users",
             },
             ticks: { precision: 0 },
+          },
+          // Every country is named. Without this the axis drops labels it thinks will not
+          // fit, which hides the name of a bar that is still drawn.
+          y: {
+            ticks: { autoSkip: false },
           },
         }
       },
@@ -2428,19 +2440,6 @@ document.addEventListener("DOMContentLoaded", function () {
       .sort(([, a], [, b]) => b - a)
       .slice(0, 10);
 
-    const colors = [
-      "#3b82f6",
-      "#10b981",
-      "#f59e0b",
-      "#ef4444",
-      "#1e40af",
-      "#06b6d4",
-      "#84cc16",
-      "#f97316",
-      "#ec4899",
-      "#60a5fa",
-    ];
-
     new Chart(document.getElementById("featureUsageChart"), {
       type: "bar",
       data: {
@@ -2449,8 +2448,8 @@ document.addEventListener("DOMContentLoaded", function () {
           {
             label: "Usage Count",
             data: sortedFeatures.map(([, count]) => count),
-            backgroundColor: colors,
-            borderColor: colors,
+            backgroundColor: BAR_BLUE,
+            borderColor: BAR_BLUE,
             borderWidth: 1,
           },
         ],
