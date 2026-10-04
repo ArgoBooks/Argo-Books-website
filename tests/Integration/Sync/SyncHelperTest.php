@@ -22,6 +22,32 @@ final class SyncHelperTest extends DatabaseTestCase
         $this->assertSame('Acme Co', $consumed['company_label']);
     }
 
+    /**
+     * A free desktop that enters a license key keeps its phone and the receipts
+     * the phone has already sent, and nobody else's rows are touched.
+     */
+    public function test_entering_a_license_keeps_the_paired_phone_and_its_queue(): void
+    {
+        $add = function (string $owner, string $company): void {
+            $this->pdo->prepare(
+                'INSERT INTO mobile_sync_devices (device_token_hash, owner_identity_hash, company_uid, device_label) VALUES (?,?,?,?)'
+            )->execute([hash('sha256', bin2hex(random_bytes(8))), $owner, $company, 'Phone']);
+            $this->pdo->prepare(
+                'INSERT INTO mobile_sync_queue (company_uid, owner_identity_hash, from_device_id, ciphertext) VALUES (?,?,?,?)'
+            )->execute([$company, $owner, (int) $this->pdo->lastInsertId(), 'ITEM']);
+        };
+        $add('device-hash', 'company-1');
+        $add('someone-else', 'company-2');
+
+        sync_adopt_device_identity('device-hash', 'license-hash');
+
+        $owners = fn (string $table) => $this->pdo
+            ->query("SELECT owner_identity_hash FROM $table ORDER BY company_uid")
+            ->fetchAll(\PDO::FETCH_COLUMN);
+        $this->assertSame(['license-hash', 'someone-else'], $owners('mobile_sync_devices'));
+        $this->assertSame(['license-hash', 'someone-else'], $owners('mobile_sync_queue'));
+    }
+
     public function test_pairing_token_is_single_use(): void
     {
         $pairing = create_pairing_token('owner-hash-1', 'company-uid-1', 'Acme Co');

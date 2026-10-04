@@ -21,12 +21,58 @@ require_once __DIR__ . '/../portal/portal-helper.php';
  */
 function resolve_owner_identity(): ?string
 {
+    $deviceHash = authenticate_device_request();
     $license = authenticate_license_request();
     if ($license) {
+        if ($deviceHash) {
+            sync_adopt_device_identity($deviceHash, $license['license_key_hash']);
+        }
         return $license['license_key_hash'];
     }
-    $deviceHash = authenticate_device_request();
     return $deviceHash ?: null;
+}
+
+/**
+ * Carry a desktop's paired phones over when it starts sending a license key.
+ *
+ * A free desktop is known by its device id and a Premium one by its license key,
+ * so entering a key changed who the desktop was. Its phones stayed under the old
+ * identity: they kept sending receipts to a queue the desktop no longer read, and
+ * the desktop listed no phones at all. The desktop sends both headers, so the
+ * rows filed under its device id are moved to its license here.
+ *
+ * The snapshot is dropped, not moved. The desktop uploads a new one on every
+ * sync, and moving it could collide with one already stored under the license.
+ */
+function sync_adopt_device_identity(string $deviceHash, string $licenseHash): void
+{
+    global $pdo;
+
+    if ($deviceHash === $licenseHash) {
+        return;
+    }
+
+    try {
+        $stmt = $pdo->prepare('SELECT DISTINCT company_uid FROM mobile_sync_devices WHERE owner_identity_hash = ?');
+        $stmt->execute([$deviceHash]);
+        $companies = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        if (!$companies) {
+            return;
+        }
+
+        // The phones go last. They are what the lookup above finds, so a run cut
+        // short part way is picked up again by the next request.
+        foreach ($companies as $companyUid) {
+            $pdo->prepare('UPDATE mobile_sync_queue SET owner_identity_hash = ? WHERE company_uid = ? AND owner_identity_hash = ?')
+                ->execute([$licenseHash, $companyUid, $deviceHash]);
+            $pdo->prepare('DELETE FROM mobile_sync_snapshots WHERE company_uid = ? AND owner_identity_hash = ?')
+                ->execute([$companyUid, $deviceHash]);
+        }
+        $pdo->prepare('UPDATE mobile_sync_devices SET owner_identity_hash = ? WHERE owner_identity_hash = ?')
+            ->execute([$licenseHash, $deviceHash]);
+    } catch (PDOException $e) {
+        error_log('sync: could not move paired phones to the license identity: ' . $e->getMessage());
+    }
 }
 
 /**
