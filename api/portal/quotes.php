@@ -116,8 +116,16 @@ function handle_publish_quote(): void
 
     $quoteData = json_encode($data['quoteData'] ?? $data);
 
+    // An answered quote is what the customer agreed to or turned down, so a plain resend
+    // leaves it exactly as they saw it. It used to keep the answer but replace the contents,
+    // which left an acceptance attached to a quote the customer never read. Only a revision,
+    // which the app sends after asking the user, replaces an answered quote.
+    $keepAsAnswered = $existing && !$decision['clearResponse'] && $status !== 'cancelled';
+
     try {
-        if ($existing) {
+        if ($keepAsAnswered) {
+            // Nothing to write.
+        } elseif ($existing) {
             $sql = 'UPDATE portal_quotes SET
                         customer_name = ?, customer_email = ?, quote_data = ?, status = ?,
                         total_amount = ?, currency = ?, valid_until = ?, updated_at = NOW()';
@@ -178,7 +186,7 @@ function handle_publish_quote(): void
         'respondedAt' => $decision['clearResponse'] ? null : portal_iso_datetime($existing['responded_at'] ?? null),
         'responseNote' => $decision['clearResponse'] ? null : ($existing['response_note'] ?? null),
         'emailSent' => $emailSent,
-        'message' => $existing ? 'Quote updated' : 'Quote published',
+        'message' => $keepAsAnswered ? 'Quote already answered' : ($existing ? 'Quote updated' : 'Quote published'),
         'timestamp' => date('c')
     ]);
 }
