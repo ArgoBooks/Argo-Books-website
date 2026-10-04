@@ -7,55 +7,55 @@
         <language>en</language>
 
         <item>
-            <title>Version 2.0.18</title>
-            <sparkle:version>2.0.18</sparkle:version>
+            <title>Version 2.0.19</title>
+            <sparkle:version>2.0.19</sparkle:version>
             <sparkle:releaseNotesLink>https://argorobots.com/whats-new/</sparkle:releaseNotesLink>
-            <pubDate>Mon, 28 Sep 2026 16:43:15 +0000</pubDate>
-            <enclosure url="https://argorobots.com/resources/downloads/2.0.18/Argo%20Books%20Installer%20V.2.0.18.exe"
-                       sparkle:version="2.0.18"
+            <pubDate>Sun, 04 Oct 2026 19:30:55 +0000</pubDate>
+            <enclosure url="https://argorobots.com/resources/downloads/2.0.19/Argo%20Books%20Installer%20V.2.0.19.exe"
+                       sparkle:version="2.0.19"
                        sparkle:os="windows"
                        type="application/octet-stream"
-                       length="180278416"
-                       sparkle:edSignature="+WA+9I8Yx3D4dKOtHrDSONRe6gexUzcbg9pT/JbvxajBS0F5XtY1piJ2iD5d7vNPWkVWJom9EF0zXlSyYWyIBQ==" />
+                       length="180375760"
+                       sparkle:edSignature="6ahIp4qGPTFe15To41t3s8zFjRiKfKQFvNLeDJXm3JvmoIgcSJ118jXKsSEipxoqUcKz3u7QWcqGiXmHq3QeAg==" />
         </item>
 
         <item>
-            <title>Version 2.0.18</title>
-            <sparkle:version>2.0.18</sparkle:version>
+            <title>Version 2.0.19</title>
+            <sparkle:version>2.0.19</sparkle:version>
             <sparkle:releaseNotesLink>https://argorobots.com/whats-new/</sparkle:releaseNotesLink>
-            <pubDate>Mon, 28 Sep 2026 16:43:15 +0000</pubDate>
-            <enclosure url="https://argorobots.com/resources/downloads/2.0.18/ArgoBooks-2.0.18-linux-x64.AppImage"
-                       sparkle:version="2.0.18"
+            <pubDate>Sun, 04 Oct 2026 19:30:55 +0000</pubDate>
+            <enclosure url="https://argorobots.com/resources/downloads/2.0.19/ArgoBooks-2.0.19-linux-x64.AppImage"
+                       sparkle:version="2.0.19"
                        sparkle:os="linux"
                        type="application/octet-stream"
-                       length="142420472"
-                       sparkle:edSignature="lCLVLQEiBazGkWM+JzOW2OyjAbGQTFnTZoap3nE9OFbwJuS5GfV1paC7yeZMHu5DxT2FLQHiaXGBuZBwT2tNAg==" />
+                       length="142481912"
+                       sparkle:edSignature="UHf3lgLWJ6fMC5GFf0qLBRotu/B5kyzJt30D30N6dyoqxsoGBj4rUn3Bvb4saGggn5Ju4x7UeSwoYKSoSag/CQ==" />
         </item>
 
         <item>
-            <title>Version 2.0.18</title>
-            <sparkle:version>2.0.18</sparkle:version>
+            <title>Version 2.0.19</title>
+            <sparkle:version>2.0.19</sparkle:version>
             <sparkle:releaseNotesLink>https://argorobots.com/whats-new/</sparkle:releaseNotesLink>
-            <pubDate>Mon, 28 Sep 2026 16:43:15 +0000</pubDate>
-            <enclosure url="https://argorobots.com/resources/downloads/2.0.18/ArgoBooks-2.0.18-osx-arm64.zip"
-                       sparkle:version="2.0.18"
+            <pubDate>Sun, 04 Oct 2026 19:30:55 +0000</pubDate>
+            <enclosure url="https://argorobots.com/resources/downloads/2.0.19/ArgoBooks-2.0.19-osx-arm64.zip"
+                       sparkle:version="2.0.19"
                        sparkle:os="macos-arm64"
                        type="application/zip"
-                       length="119393320"
-                       sparkle:edSignature="DZpfMjVnLgO7MByw7KPORe2W6eHKvRU8NRc7owY8+sOnH+r+YUrM0cUa3dLGrwUNEX8viZ6RaCv5ktN5q8JKDA==" />
+                       length="119465201"
+                       sparkle:edSignature="Pxf75c66ux2A0zPEgD+G/jyOrUaO6+6bOEh19n3PqJIxs+ivHpvcxR+l9hnDg3EGwNEiZG7942YZQ7GP+hxeAw==" />
         </item>
 
         <item>
-            <title>Version 2.0.18</title>
-            <sparkle:version>2.0.18</sparkle:version>
+            <title>Version 2.0.19</title>
+            <sparkle:version>2.0.19</sparkle:version>
             <sparkle:releaseNotesLink>https://argorobots.com/whats-new/</sparkle:releaseNotesLink>
-            <pubDate>Mon, 28 Sep 2026 16:43:15 +0000</pubDate>
-            <enclosure url="https://argorobots.com/resources/downloads/2.0.18/ArgoBooks-2.0.18-osx-x64.zip"
-                       sparkle:version="2.0.18"
+            <pubDate>Sun, 04 Oct 2026 19:30:55 +0000</pubDate>
+            <enclosure url="https://argorobots.com/resources/downloads/2.0.19/ArgoBooks-2.0.19-osx-x64.zip"
+                       sparkle:version="2.0.19"
                        sparkle:os="macos-x64"
                        type="application/zip"
-                       length="148531500"
-                       sparkle:edSignature="8U2omhXNbqJzteFHjZFqiXpf/e9Sp1KLZfoTXfrAXv/+4Kk4+fHKWN3Ta3Qggp5YQP7SVrAoHhrWVLJF9jaFAA==" />
+                       length="148620808"
+                       sparkle:edSignature="fqY0JLMA311w8Nmg6gbidU+Ai4HLN1GY1oi4iX2ie2moJ15CXLOS0KOvaBLz1YAdhgnbkukdY0NCgzbMEA6VDQ==" />
         </item>
     </channel>
 </rss>

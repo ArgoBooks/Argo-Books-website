@@ -89,6 +89,51 @@ $pricing = get_pricing_config();
     <div class="container">
         <div class="version-grid">
 
+            <!-- Version 2.0.19 -->
+            <div class="version-card">
+                <div class="version-header">
+                    <div class="version-info">
+                        <span class="version-tag">Version 2.0.19</span>
+                        <span class="date-tag">October 4 2026</span>
+                    </div>
+                    <?= svg_icon('chevron-down', 24, 'dropdown-arrow', null, 'stroke-linecap="round" stroke-linejoin="round"') ?>
+                </div>
+
+                <div class="version-content">
+                    <div class="changelog">
+                        <div class="changelog-section">
+                            <h4 class="section-label feature">New Features</h4>
+                            <ul class="changelog-list">
+                                <li><strong>Automatic backups:</strong> Argo Books can keep dated copies of your company, after every save, once a day or once a week, and before an import. Choose how many to keep and where they go.</li>
+                                <li><strong>Bring your books over from QuickBooks:</strong> A new screen tells you exactly which reports to export from QuickBooks Online or Desktop, then takes them all at once, including the zip file QuickBooks gives you. Drop them onto the screen or browse for them.</li>
+                                <li><strong>Know which file you need first:</strong> Imports now tell you what to download and where to find it before opening the file picker, so you aren't guessing at a file browser.</li>
+                            </ul>
+                        </div>
+                        <div class="changelog-section">
+                            <h4 class="section-label enhancement">Enhancements</h4>
+                            <ul class="changelog-list">
+                                <li><strong>Dates read the way your computer writes them:</strong> A spreadsheet full of dates like 03/04 is read in your own country's order.</li>
+                                <li><strong>More dependable saving:</strong> Cleanup tools like CCleaner can empty the temporary folder Argo Books works in while your company is still open. Argo Books now rebuilds what it needs as it saves.</li>
+                                <li><strong>Payroll says who it's for:</strong> The Employees and Pay Runs screens now say payroll works out Canadian deductions, using CRA rates for every province and territory.</li>
+                                <li><strong>Backups run per company:</strong> Each company keeps its own schedule and its own copies, and a restored copy comes back under the right name.</li>
+                            </ul>
+                        </div>
+                        <div class="changelog-section">
+                            <h4 class="section-label fix">Fixes</h4>
+                            <ul class="changelog-list">
+                                <li>Refunds cover more cases: a full refund goes through, tax can be refunded on its own, and refunding part of a sale returns the tax on just those items.</li>
+                                <li>Stock stays right when you edit a sale made through an invoice, or an older purchase.</li>
+                                <li>Invoices brought in unpaid record their sale, and each repeat of a recurring invoice records its own.</li>
+                                <li>Undoing a quote conversion keeps an invoice you've already sent.</li>
+                                <li>Undoing a bank match gives the other lines their suggestions back, and Stripe payouts are left out of matching.</li>
+                                <li>Exporting a PDF receipt saves the file you attached, rather than a picture of its first page.</li>
+                                <li>Importing a PDF bank statement works on the free plan, and a statement the reader can't make sense of says so plainly.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Version 2.0.18 -->
             <div class="version-card">
                 <div class="version-header">
