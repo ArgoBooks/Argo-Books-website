@@ -15,19 +15,6 @@ document.addEventListener("DOMContentLoaded", function () {
     Receipts: "#1e40af",
   };
 
-  const countryColors = {
-    "United States": "#3b82f6",
-    Canada: "#ef4444",
-    "United Kingdom": "#10b981",
-    Germany: "#f59e0b",
-    Australia: "#1e40af",
-    France: "#06b6d4",
-    Netherlands: "#84cc16",
-    Japan: "#f97316",
-    Brazil: "#ec4899",
-    India: "#60a5fa",
-  };
-
   if (!rawData.dataPoints) {
     return;
   }
@@ -174,7 +161,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const labels = sortedCountries.map(([country]) => country);
     const data = sortedCountries.map(([, count]) => count);
-    const colors = labels.map((country) => countryColors[country] || "#9ca3af");
 
     new Chart(document.getElementById("countryDistributionChart"), {
       type: "bar",
@@ -184,8 +170,11 @@ document.addEventListener("DOMContentLoaded", function () {
           {
             label: "Users",
             data: data,
-            backgroundColor: colors,
-            borderColor: colors.map((c) => c.replace("0.8", "1")),
+            // One colour for every bar. Each bar is the same measure and its label names the
+            // country, so a colour per country said nothing, and any country without one
+            // fell back to grey.
+            backgroundColor: "#3b82f6",
+            borderColor: "#3b82f6",
             borderWidth: 1,
           },
         ],
