@@ -11,8 +11,8 @@ use PHPUnit\Framework\TestCase;
  *
  * These exist because the unit suite covers only pure functions, which left the
  * riskiest parts of the API, authentication, the idempotency claim, batch
- * atomicity, and environment scoping, verified by hand exactly once and by
- * nothing thereafter.
+ * atomicity, and the boundary between accounts, verified by hand exactly once
+ * and by nothing thereafter.
  *
  * Each test gets its own account and keys, and every row it creates is torn
  * down afterwards, so tests do not see each other's data.
@@ -25,9 +25,8 @@ abstract class ApiIntegrationTestCase extends TestCase
     protected string $writeKey;
     protected string $readKey;
 
-    /** Account in the OTHER environment, for proving the scoping holds. */
-    protected int $otherEnvAccountId;
-    protected string $otherEnvKey;
+    /** The Premium subscriptions behind the test accounts, removed in tearDown. */
+    private array $subscriptionIds = [];
 
     protected function setUp(): void
     {
@@ -35,13 +34,9 @@ abstract class ApiIntegrationTestCase extends TestCase
         $this->pdo = $GLOBALS['pdo'];
         $this->ensureSchema();
 
-        [$this->accountId, $this->accountPublicId] = $this->makeAccount(api_env());
-        $this->writeKey = $this->makeKey($this->accountId, 'read,write', api_env());
-        $this->readKey = $this->makeKey($this->accountId, 'read', api_env());
-
-        $otherEnv = api_env() === 'production' ? 'sandbox' : 'production';
-        [$this->otherEnvAccountId] = $this->makeAccount($otherEnv);
-        $this->otherEnvKey = $this->makeKey($this->otherEnvAccountId, 'read,write', $otherEnv);
+        [$this->accountId, $this->accountPublicId] = $this->makeAccount();
+        $this->writeKey = $this->makeKey($this->accountId, 'read,write');
+        $this->readKey = $this->makeKey($this->accountId, 'read');
 
         $this->resetRequestState();
     }
@@ -49,8 +44,11 @@ abstract class ApiIntegrationTestCase extends TestCase
     protected function tearDown(): void
     {
         // ON DELETE CASCADE takes every row that hangs off the account with it.
-        $stmt = $this->pdo->prepare('DELETE FROM api_accounts WHERE id IN (?, ?)');
-        $stmt->execute([$this->accountId, $this->otherEnvAccountId]);
+        $this->pdo->prepare('DELETE FROM api_accounts WHERE id = ?')->execute([$this->accountId]);
+        foreach ($this->subscriptionIds as $subscriptionId) {
+            $this->pdo->prepare('DELETE FROM premium_subscriptions WHERE subscription_id = ?')->execute([$subscriptionId]);
+        }
+        $this->subscriptionIds = [];
         $this->resetRequestState();
         parent::tearDown();
     }
@@ -82,29 +80,41 @@ abstract class ApiIntegrationTestCase extends TestCase
     }
 
     /** @return array{0:int,1:string} */
-    protected function makeAccount(string $environment): array
+    protected function makeAccount(): array
     {
+        // The API is Premium only, so an account with no subscription behind it is refused
+        // before a test reaches whatever it is testing.
+        $subscriptionId = 'PREM-TEST-API-' . bin2hex(random_bytes(4));
+        $this->pdo->prepare(
+            "INSERT INTO premium_subscriptions
+             (subscription_id, billing_cycle, amount, currency, start_date, end_date,
+              status, payment_method, transaction_id, auto_renew, environment, created_at)
+             VALUES (?, 'yearly', 0.00, 'CAD', NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY),
+                     'active', 'free_key', ?, 0, ?, NOW())"
+        )->execute([$subscriptionId, $subscriptionId, current_environment()]);
+        $this->subscriptionIds[] = $subscriptionId;
+
         $publicId = api_generate_id('acct');
         $this->pdo->prepare(
-            'INSERT INTO api_accounts (public_id, owner_identity_hash, company_uid, display_name, environment)
+            'INSERT INTO api_accounts (public_id, owner_identity_hash, company_uid, subscription_id, display_name)
              VALUES (?, ?, ?, ?, ?)'
         )->execute([
             $publicId,
             hash('sha256', 'phpunit-' . $publicId),
             'phpunit-' . bin2hex(random_bytes(6)),
+            $subscriptionId,
             'PHPUnit Co',
-            $environment,
         ]);
 
         return [(int) $this->pdo->lastInsertId(), $publicId];
     }
 
-    protected function makeKey(int $accountId, string $scopes, string $environment): string
+    protected function makeKey(int $accountId, string $scopes): string
     {
         $secret = api_generate_secret_key();
         $this->pdo->prepare(
-            'INSERT INTO api_keys (account_id, public_id, key_hash, key_hint, label, scopes, environment)
-             VALUES (?, ?, ?, ?, ?, ?, ?)'
+            'INSERT INTO api_keys (account_id, public_id, key_hash, key_hint, label, scopes)
+             VALUES (?, ?, ?, ?, ?, ?)'
         )->execute([
             $accountId,
             api_generate_id('key'),
@@ -112,7 +122,6 @@ abstract class ApiIntegrationTestCase extends TestCase
             api_key_hint($secret),
             'phpunit',
             $scopes,
-            $environment,
         ]);
 
         return $secret;
@@ -138,12 +147,11 @@ abstract class ApiIntegrationTestCase extends TestCase
     }
 
     /** Insert a resource row directly, bypassing the HTTP layer. */
-    protected function seedObject(string $table, int $accountId, array $columns, string $environment = null): string
+    protected function seedObject(string $table, int $accountId, array $columns): string
     {
         $publicId = $columns['public_id'] ?? api_generate_id('cus');
         $columns['public_id'] = $publicId;
         $columns['account_id'] = $accountId;
-        $columns['environment'] = $environment ?? api_env();
 
         $names = implode(', ', array_keys($columns));
         $holders = implode(', ', array_fill(0, count($columns), '?'));

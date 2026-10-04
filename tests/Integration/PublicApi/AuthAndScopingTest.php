@@ -4,11 +4,11 @@ declare(strict_types=1);
 namespace Tests\Integration\PublicApi;
 
 /**
- * Authentication, scopes, and the environment boundary.
+ * Authentication, scopes, and the boundary between accounts.
  *
- * The environment tests matter most. Production and dev share one database, so
- * a query that forgets its environment filter shows one environment's rows to
- * the other, and that is the failure this codebase is most prone to.
+ * An account is one Argo Books company, and it is the only isolation the API
+ * has: a query that forgets its account filter shows one company's objects to
+ * another.
  */
 final class AuthAndScopingTest extends ApiIntegrationTestCase
 {
@@ -99,63 +99,34 @@ final class AuthAndScopingTest extends ApiIntegrationTestCase
         $this->assertTrue(true); // no exception is the assertion
     }
 
-    // -- environment ---------------------------------------------------------
+    // -- accounts ------------------------------------------------------------
 
-    /**
-     * A key issued in the other environment must not authenticate here, even
-     * though both rows live in the same table in the same database.
-     */
-    public function testKeyFromTheOtherEnvironmentDoesNotAuthenticate(): void
+    public function testListsDoNotLeakAcrossAccounts(): void
     {
-        [$status, $payload] = $this->capture(fn () => $this->authenticateAs($this->otherEnvKey));
+        [$otherAccountId] = $this->makeAccount();
+        try {
+            $mine = $this->seedObject('api_customers', $this->accountId, [
+                'public_id' => api_generate_id('cus'), 'name' => 'Mine',
+            ]);
+            $this->seedObject('api_customers', $otherAccountId, [
+                'public_id' => api_generate_id('cus'), 'name' => 'Someone Else',
+            ]);
 
-        $this->assertSame(401, $status);
-        $this->assertSame('invalid_api_key', $payload['error']['code']);
+            $auth = $this->authenticateAs($this->writeKey);
+            $spec = api_resource_definitions()['customers'];
+
+            [$status, $payload] = $this->capture(fn () => api_handle_list($spec, $auth, 'customers'));
+
+            $this->assertSame(200, $status);
+            $this->assertSame([$mine], array_column($payload['data'], 'id'));
+        } finally {
+            $this->pdo->prepare('DELETE FROM api_accounts WHERE id = ?')->execute([$otherAccountId]);
+        }
     }
 
-    public function testListsDoNotLeakAcrossEnvironments(): void
-    {
-        $otherEnv = api_env() === 'production' ? 'sandbox' : 'production';
-
-        $mine = $this->seedObject('api_customers', $this->accountId, [
-            'public_id' => api_generate_id('cus'), 'name' => 'In My Environment',
-        ]);
-        $this->seedObject('api_customers', $this->accountId, [
-            'public_id' => api_generate_id('cus'), 'name' => 'In The Other One',
-        ], $otherEnv);
-
-        $auth = $this->authenticateAs($this->writeKey);
-        $spec = api_resource_definitions()['customers'];
-
-        [$status, $payload] = $this->capture(fn () => api_handle_list($spec, $auth, 'customers'));
-
-        $this->assertSame(200, $status);
-        $names = array_column($payload['data'], 'name');
-        $this->assertContains('In My Environment', $names);
-        $this->assertNotContains('In The Other One', $names);
-        $this->assertSame([$mine], array_column($payload['data'], 'id'));
-    }
-
-    public function testRetrieveDoesNotReachAcrossEnvironments(): void
-    {
-        $otherEnv = api_env() === 'production' ? 'sandbox' : 'production';
-        $hidden = $this->seedObject('api_customers', $this->accountId, [
-            'public_id' => api_generate_id('cus'), 'name' => 'Hidden',
-        ], $otherEnv);
-
-        $auth = $this->authenticateAs($this->writeKey);
-        $spec = api_resource_definitions()['customers'];
-
-        [$status, $payload] = $this->capture(fn () => api_handle_retrieve($spec, $auth, $hidden));
-
-        $this->assertSame(404, $status);
-        $this->assertSame('resource_missing', $payload['error']['code']);
-    }
-
-    /** One account must never see another's objects, environment aside. */
     public function testRetrieveDoesNotReachAcrossAccounts(): void
     {
-        [$otherAccountId] = $this->makeAccount(api_env());
+        [$otherAccountId] = $this->makeAccount();
         try {
             $theirs = $this->seedObject('api_customers', $otherAccountId, [
                 'public_id' => api_generate_id('cus'), 'name' => 'Someone Else',
@@ -164,8 +135,9 @@ final class AuthAndScopingTest extends ApiIntegrationTestCase
             $auth = $this->authenticateAs($this->writeKey);
             $spec = api_resource_definitions()['customers'];
 
-            [$status] = $this->capture(fn () => api_handle_retrieve($spec, $auth, $theirs));
+            [$status, $payload] = $this->capture(fn () => api_handle_retrieve($spec, $auth, $theirs));
             $this->assertSame(404, $status);
+            $this->assertSame('resource_missing', $payload['error']['code']);
         } finally {
             $this->pdo->prepare('DELETE FROM api_accounts WHERE id = ?')->execute([$otherAccountId]);
         }

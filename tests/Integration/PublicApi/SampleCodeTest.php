@@ -31,6 +31,7 @@ final class SampleCodeTest extends TestCase
     private static ?string $csharpDir = null;
     private static string $csharpError = '';
     private static int $accountId = 0;
+    private static string $subscriptionId = '';
     private static ?bool $dnsWorks = null;
 
     public static function setUpBeforeClass(): void
@@ -50,6 +51,9 @@ final class SampleCodeTest extends TestCase
         }
         if (self::$accountId > 0) {
             $GLOBALS['pdo']->prepare('DELETE FROM api_accounts WHERE id = ?')->execute([self::$accountId]);
+        }
+        if (self::$subscriptionId !== '') {
+            $GLOBALS['pdo']->prepare('DELETE FROM premium_subscriptions WHERE subscription_id = ?')->execute([self::$subscriptionId]);
         }
         if (self::$csharpDir !== null && is_dir(self::$csharpDir)) {
             self::removeTree(self::$csharpDir);
@@ -97,21 +101,31 @@ final class SampleCodeTest extends TestCase
     {
         $pdo = $GLOBALS['pdo'];
 
+        // The API is Premium only, so the samples need a subscription behind their account.
+        self::$subscriptionId = 'PREM-TEST-DOCS-' . bin2hex(random_bytes(4));
+        $pdo->prepare(
+            "INSERT INTO premium_subscriptions
+             (subscription_id, billing_cycle, amount, currency, start_date, end_date,
+              status, payment_method, transaction_id, auto_renew, environment, created_at)
+             VALUES (?, 'yearly', 0.00, 'CAD', NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY),
+                     'active', 'free_key', ?, 0, ?, NOW())"
+        )->execute([self::$subscriptionId, self::$subscriptionId, current_environment()]);
+
         $publicId = api_generate_id('acct');
         $pdo->prepare(
-            'INSERT INTO api_accounts (public_id, owner_identity_hash, company_uid, display_name, environment)
+            'INSERT INTO api_accounts (public_id, owner_identity_hash, company_uid, subscription_id, display_name)
              VALUES (?, ?, ?, ?, ?)'
-        )->execute([$publicId, hash('sha256', $publicId), 'docsamples-' . bin2hex(random_bytes(4)), 'Doc Samples', api_env()]);
+        )->execute([$publicId, hash('sha256', $publicId), 'docsamples-' . bin2hex(random_bytes(4)), self::$subscriptionId, 'Doc Samples']);
 
         self::$accountId = (int) $pdo->lastInsertId();
 
         $secret = api_generate_secret_key();
         $pdo->prepare(
-            'INSERT INTO api_keys (account_id, public_id, key_hash, key_hint, label, scopes, environment)
-             VALUES (?, ?, ?, ?, ?, ?, ?)'
+            'INSERT INTO api_keys (account_id, public_id, key_hash, key_hint, label, scopes)
+             VALUES (?, ?, ?, ?, ?, ?)'
         )->execute([
             self::$accountId, api_generate_id('key'), hash('sha256', $secret),
-            api_key_hint($secret), 'doc samples', 'read,write', api_env(),
+            api_key_hint($secret), 'doc samples', 'read,write',
         ]);
 
         self::$apiKey = $secret;

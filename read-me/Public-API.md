@@ -146,7 +146,7 @@ The bootstrap defines `API_TESTING` before loading the lib, which makes `api_jso
 | Path | Role |
 |---|---|
 | `api/v1/index.php` | Front controller and router. Every route passes through it, so auth, rate limiting and versioning cannot be skipped |
-| `api/v1/lib/bootstrap.php` | Request id, version pinning, body parsing, `api_env()` |
+| `api/v1/lib/bootstrap.php` | Request id, version pinning, body parsing |
 | `api/v1/lib/definitions.php` | The seven resources described as data |
 | `api/v1/lib/resource.php` | Generic CRUD engine driven by those definitions |
 | `api/v1/lib/validate.php` | Field validation and cross-field invariants |
