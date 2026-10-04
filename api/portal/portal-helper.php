@@ -11,6 +11,7 @@ require_once __DIR__ . '/../../db_connect.php';
 require_once __DIR__ . '/../../smtp_mailer.php';
 require_once __DIR__ . '/../../rate_limit_helper.php';
 require_once __DIR__ . '/../../config/pricing.php';
+require_once __DIR__ . '/../../shared/currencies.php';
 
 /**
  * Generate a cryptographically secure token (48-character hex string = 192 bits of entropy)
@@ -646,7 +647,7 @@ function send_invoice_notification(array $params): array
     $customerEmail = preg_replace('/[\r\n\x00-\x1F]/', '', $customerEmail);
     $companyName = preg_replace('/[\r\n\x00-\x1F]/', '', $companyName);
 
-    $currencySymbol = $currency === 'CAD' ? 'CA$' : '$';
+    $currencySymbol = argo_currency_display_symbol($currency);
 
     // The customer will be charged balance + processing fee on the payment
     // portal page. The headline amount in the email must match that number,
@@ -747,7 +748,7 @@ function send_invoice_reminder(array $params): array
     $customerEmail = preg_replace('/[\r\n\x00-\x1F]/', '', $customerEmail);
     $companyName = preg_replace('/[\r\n\x00-\x1F]/', '', $companyName);
 
-    $currencySymbol = $currency === 'CAD' ? 'CA$' : '$';
+    $currencySymbol = argo_currency_display_symbol($currency);
 
     // Identical fee maths to send_invoice_notification, and it has to stay
     // identical: if this reminder quotes a different number than the checkout
@@ -865,7 +866,7 @@ function send_payment_confirmation(array $params): array
     $customerEmail = preg_replace('/[\r\n\x00-\x1F]/', '', $customerEmail);
     $companyName = preg_replace('/[\r\n\x00-\x1F]/', '', $companyName);
 
-    $currencySymbol = $currency === 'CAD' ? 'CA$' : '$';
+    $currencySymbol = argo_currency_display_symbol($currency);
     $formattedAmount = $currencySymbol . number_format(floatval($amount), 2) . ' ' . $currency;
     $subject = "Payment Confirmation - Invoice {$invoiceId}";
 
@@ -985,7 +986,7 @@ function send_owner_payment_notification(array $params): array
     ];
     $methodLabel = $methodLabels[$paymentMethod] ?? ucfirst($paymentMethod);
 
-    $currencySymbol = $currency === 'CAD' ? 'CA$' : '$';
+    $currencySymbol = argo_currency_display_symbol($currency);
     // The invoice is credited with the payment minus the processing fee, the
     // same split record_portal_payment applies to balance_due. Reporting the
     // gross here would not match what the owner sees against the invoice.

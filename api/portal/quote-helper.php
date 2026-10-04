@@ -156,7 +156,7 @@ function send_quote_notification(array $params): array
         return ['success' => false, 'message' => 'Missing customer email or quote URL'];
     }
 
-    $currencySymbol = $currency === 'CAD' ? 'CA$' : '$';
+    $currencySymbol = argo_currency_display_symbol($currency);
     $formattedAmount = $currencySymbol . number_format($totalAmount, 2) . ' ' . $currency;
     $formattedValidUntil = $validUntil ? date('F j, Y', strtotime($validUntil)) : '';
     $safeCompany = htmlspecialchars($companyName, ENT_QUOTES, 'UTF-8');

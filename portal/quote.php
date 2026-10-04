@@ -81,7 +81,7 @@ $companyName = $quote['company_name'] ?? '';
 $companyLogo = $quote['company_logo_url'] ?? '';
 $customerName = $quote['customer_name'] ?? '';
 $currency = $quote['currency'] ?: 'USD';
-$currencySymbol = $currency === 'CAD' ? 'CA$' : '$';
+$currencySymbol = argo_currency_display_symbol($currency);
 $totalAmount = (float) $quote['total_amount'];
 $validUntil = $quote['valid_until'] ?? null;
 $status = $quote['status'];
