@@ -20,7 +20,6 @@
   --invoice-header-text: var(--white);
   --invoice-border: var(--gray-border);
   --invoice-muted: var(--gray-placeholder);
-  --invoice-row-alt-bg: var(--gray-bg-light);
 
   /* Heading ink for the template variants. Deliberately darker than
      --invoice-text and independent of the site palette: this paints the
@@ -65,7 +64,6 @@
   --invoice-header-text: var(--white);
   --invoice-border: var(--gray-200);
   --invoice-muted: var(--gray-500);
-  --invoice-row-alt-bg: var(--gray-100);
 }
 
 [data-template="modern"] .invoice {
@@ -2102,7 +2100,6 @@ body {
   column-gap: 10px;
 }
 
-.totals-row .totals-label,
 .totals-row .editable-totals-label {
   grid-column: 1;
   text-align: left;
@@ -2125,7 +2122,6 @@ body {
   grid-column: 3;
 }
 
-.totals-label,
 .editable-totals-label {
   color: var(--invoice-text);
   font-size: var(--text-xs);
@@ -2144,7 +2140,6 @@ body {
   margin-top: 4px;
 }
 
-.totals-total .totals-label,
 .totals-total .editable-totals-label,
 .totals-total .totals-value {
   font-weight: 700;
@@ -2158,7 +2153,6 @@ body {
   margin-top: 4px;
 }
 
-.totals-balance .totals-label,
 .totals-balance .editable-totals-label,
 .totals-balance .totals-value {
   font-weight: 700;

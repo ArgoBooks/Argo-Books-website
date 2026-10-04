@@ -315,18 +315,6 @@ code {
     font-size: 13px;
 }
 
-.checkbox-group label {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
-}
-
-.checkbox-group input[type="checkbox"] {
-    width: auto;
-    cursor: pointer;
-}
-
 .form-actions {
     display: flex;
     gap: 12px;

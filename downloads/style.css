@@ -122,11 +122,6 @@ body {
     font-weight: 600;
 }
 
-.file-size {
-    color: var(--black);
-    font-size: var(--text-xs);
-}
-
 .platform-actions {
     display: flex;
     flex-direction: column;

@@ -108,19 +108,6 @@
     color: var(--green-900);
 }
 
-.features-box {
-    background: var(--gray-bg-light);
-    border: 1px solid var(--gray-border);
-}
-
-.features-box h3 {
-    color: var(--gray-700);
-}
-
-.features-box li {
-    color: var(--black);
-}
-
 /* Payment Method Box */
 .payment-method-box {
     background: var(--gray-50);

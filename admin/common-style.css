@@ -1926,18 +1926,6 @@ th.col-nowrap {
   background: linear-gradient(transparent, var(--gray-800));
 }
 
-/* Dark theme - Filter groups */
-[data-theme="dark"] .filter-group select {
-  background: var(--gray-700);
-  border-color: var(--black);
-  color: var(--white);
-}
-
-[data-theme="dark"] .filter-group label {
-  color: var(--white);
-}
-
-
 /* Dark theme - Card (users) */
 [data-theme="dark"] .card {
   background: var(--gray-800);

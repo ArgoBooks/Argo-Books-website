@@ -300,15 +300,6 @@
     color: var(--gray-900); padding: 18px 4px 14px;
 }
 
-.invoice-titlebar {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 10px 14px;
-    background: var(--gray-50);
-    border-bottom: 1px solid var(--gray-200);
-}
-
 .invoice-doc {
     position: relative;
     padding: 24px;

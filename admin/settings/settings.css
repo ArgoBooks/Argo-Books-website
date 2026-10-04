@@ -330,11 +330,6 @@
     margin-top: 4px;
 }
 
-.settings-footnote {
-    margin-top: 16px;
-    text-align: center;
-}
-
 @media (max-width: 560px) {
     .settings-card {
         padding: 20px 18px;

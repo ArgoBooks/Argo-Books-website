@@ -114,136 +114,10 @@
 
 /* ─── Funnel container (bars + landing-pages breakdown) ────────────────── */
 
-.funnel-container {
-    background: var(--white);
-    padding: 32px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px var(--shadow-default);
-    margin-bottom: 24px;
-}
-
-[data-theme="dark"] .funnel-container {
-    background: var(--gray-800);
-    border: 1px solid var(--black);
-}
-
-.funnel-container h2 {
-    margin: 0 0 24px 0;
-    font-size: 20px;
-    font-weight: 600;
-    color: var(--admin-text);
-}
-
-.funnel-container h2 .source-tag {
-    display: inline-block;
-    margin-left: 10px;
-    padding: 3px 10px;
-    background: var(--blue-100);
-    color: var(--blue-800);
-    border-radius: 999px;
-    font-size: 13px;
-    font-weight: 600;
-    font-family: var(--font-mono);
-}
-
-[data-theme="dark"] .funnel-container h2 {
-    color: var(--white);
-}
-
-[data-theme="dark"] .funnel-container h2 .source-tag {
-    background: var(--blue-900);
-    color: var(--blue-200);
-}
-
 .funnel {
     display: flex;
     flex-direction: column;
 }
-
-.funnel-row {
-    display: grid;
-    grid-template-columns: 200px 1fr 120px;
-    align-items: center;
-    gap: 16px;
-    padding: 8px 0;
-}
-
-.funnel-label {
-    font-weight: 500;
-    color: var(--admin-text);
-    font-size: 14px;
-}
-
-[data-theme="dark"] .funnel-label {
-    color: var(--white);
-}
-
-.funnel-bar-wrap {
-    height: 36px;
-    background: var(--gray-bg-light);
-    border-radius: 6px;
-    overflow: hidden;
-    position: relative;
-}
-
-[data-theme="dark"] .funnel-bar-wrap {
-    background: var(--gray-800);
-}
-
-.funnel-bar {
-    height: 100%;
-    width: var(--target-pct, 0);
-    border-radius: 0 6px 6px 0;
-    box-shadow: inset 0 -2px 0 rgba(0,0,0,0.1);
-}
-
-.funnel-bar-landing       { background: linear-gradient(90deg, var(--blue-700),    var(--blue-500)); }
-.funnel-bar-downloads_page{ background: linear-gradient(90deg, var(--blue-500),    var(--blue-400)); }
-.funnel-bar-download_click{ background: linear-gradient(90deg, var(--sky-600),     var(--sky-500)); }
-.funnel-bar-app_first_run { background: linear-gradient(90deg, var(--sky-500),     var(--sky-400)); }
-.funnel-bar-premium_signup{ background: linear-gradient(90deg, var(--emerald-500), var(--emerald-400)); }
-.funnel-bar-premium_paid  { background: linear-gradient(90deg, var(--emerald-700), var(--emerald-500)); }
-.funnel-bar-still_paying  { background: linear-gradient(90deg, var(--emerald-800), var(--emerald-600)); }
-
-.funnel-count {
-    text-align: right;
-    font-size: 22px;
-    font-weight: 700;
-    color: var(--admin-text);
-    font-variant-numeric: tabular-nums;
-}
-
-[data-theme="dark"] .funnel-count {
-    color: var(--white);
-}
-
-.funnel-dropoff {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 6px 0 6px 220px;
-    font-size: 13px;
-    color: var(--admin-text);
-}
-
-.funnel-dropoff .kept { color: var(--emerald-600); font-weight: 600; }
-.funnel-dropoff .lost { color: var(--admin-text); }
-.funnel-dropoff .sep  { color: var(--admin-text); }
-
-.funnel-dropoff.biggest { color: var(--red-600); }
-.funnel-dropoff.biggest .kept { color: var(--red-600); }
-.funnel-dropoff.biggest::before {
-    content: "⚠";
-    margin-right: 4px;
-    color: var(--red-600);
-}
-
-[data-theme="dark"] .funnel-dropoff       { color: var(--white); }
-[data-theme="dark"] .funnel-dropoff .kept { color: var(--emerald-400); }
-[data-theme="dark"] .funnel-dropoff .lost { color: var(--white); }
-[data-theme="dark"] .funnel-dropoff.biggest { color: var(--red-400); }
-[data-theme="dark"] .funnel-dropoff.biggest .kept { color: var(--red-400); }
-[data-theme="dark"] .funnel-dropoff.biggest::before { color: var(--red-400); }
 
 /* ─── Hero stat cards (CAC / LTV ratio) ────────────────────────────────── */
 
@@ -299,25 +173,6 @@
 [data-theme="dark"] .stat-card.ratio-organic .value    { color: var(--emerald-400); }
 
 [data-theme="dark"] .stat-card.hero .suffix { color: var(--white); }
-
-/* ─── Comparison table ─────────────────────────────────────────────────── */
-
-.compare-table tbody tr {
-    cursor: pointer;
-}
-
-.compare-table .ratio-cell {
-    font-weight: 600;
-}
-.compare-table .ratio-cell.losing { color: var(--red-600); }
-.compare-table .ratio-cell.marginal { color: var(--amber-700); }
-.compare-table .ratio-cell.profitable,
-.compare-table .ratio-cell.organic { color: var(--emerald-600); }
-
-[data-theme="dark"] .compare-table .ratio-cell.losing { color: var(--red-400); }
-[data-theme="dark"] .compare-table .ratio-cell.marginal { color: var(--amber-400); }
-[data-theme="dark"] .compare-table .ratio-cell.profitable,
-[data-theme="dark"] .compare-table .ratio-cell.organic { color: var(--emerald-400); }
 
 /* ─── Spend tab ────────────────────────────────────────────────────────── */
 
@@ -384,23 +239,6 @@
     padding: 0;
     min-width: 240px;
     max-width: 420px;
-}
-
-/* Two-column legend for the landing-pages chart, which now lists up to 14
-   pages. auto-fit collapses back to a single column when the row wraps under
-   the chart on narrow screens. */
-/* Multi-column (not grid) so items flow DOWN column 1, then down column 2.
-   That keeps the visitor ranking readable top-to-bottom and lands the
-   always-last "Other" entry at the bottom of the second column. */
-.landing-breakdown-list.landing-breakdown-list--two-col {
-    column-count: 2;
-    column-gap: 28px;
-    max-width: 540px;
-}
-
-.landing-breakdown-list.landing-breakdown-list--two-col li {
-    break-inside: avoid;
-    -webkit-column-break-inside: avoid;
 }
 
 .landing-breakdown-list li {
@@ -531,16 +369,6 @@
 /* ─── Mobile responsive ────────────────────────────────────────────────── */
 
 @media (max-width: 768px) {
-    .funnel-row {
-        grid-template-columns: 1fr;
-        gap: 4px;
-    }
-    .funnel-dropoff {
-        padding-left: 0;
-    }
-    .funnel-count {
-        text-align: left;
-    }
     .landing-breakdown-chart {
         width: 200px;
         height: 200px;
@@ -678,13 +506,6 @@
 
 .funnel-stream {
     position: relative;
-    --funnel-grad-top: var(--blue-400);
-    --funnel-grad-bottom: var(--blue-700);
-}
-
-[data-theme="dark"] .funnel-stream {
-    --funnel-grad-top: #5b7ce8;
-    --funnel-grad-bottom: #2740b5;
 }
 
 .funnel-svg { width: 100%; height: 300px; display: block; overflow: visible; }
