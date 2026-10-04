@@ -26,6 +26,7 @@ require_once __DIR__ . '/../../telemetry_environment.php'; // is_other_environme
 require_once __DIR__ . '/user-activity-events.php';
 require_once __DIR__ . '/telemetry-dedupe.php';       // telemetry_is_duplicate_event()
 require_once __DIR__ . '/telemetry-time.php';         // telemetry_ts_seconds()
+require_once __DIR__ . '/user-activity-files.php'; // ua_collect_files()
 
 if (!function_exists('ua_set_language')) {
     // Newest wins: files are read in name order, not event order. Language comes from
@@ -46,35 +47,10 @@ $ua_tierFilter   = $tierFilter ?? 'all';
 $ua_rangeStartTs = $rangeStartTs ?? null;
 $ua_rangeEndTs   = $rangeEndTs ?? PHP_INT_MAX;
 
-$ua_dataDir   = __DIR__ . '/../data-logs/telemetry/';
-$ua_legacyDir = __DIR__ . '/../data-logs/';
-
-// Collect files, de-duping by basename so a file in both dirs counts once.
-$ua_files = [];
-$ua_seen  = [];
-foreach ([$ua_dataDir, $ua_legacyDir] as $dir) {
-    if (!is_dir($dir)) continue;
-    foreach (glob($dir . '*.json') ?: [] as $f) {
-        $name = basename($f);
-        if (!isset($ua_seen[$name])) {
-            $ua_seen[$name] = true;
-            $ua_files[$name] = $f; // map basename -> full path
-        }
-    }
-}
-
-// ---- Delete action: removes the exact files posted from a card. -------------
-// Matching by filename (not authId) so legacy files with no authId can be
-// deleted too. Each posted name is basename()'d and must already be in the
-// collected $ua_files map, so nothing outside data-logs/ can be touched.
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['del_files'])) {
-    foreach ((array)$_POST['del_files'] as $reqName) {
-        $base = basename((string)$reqName);
-        if (isset($ua_files[$base]) && @unlink($ua_files[$base])) {
-            unset($ua_files[$base]);
-        }
-    }
-}
+// Collected by basename, so a file in both the current folder and the legacy root counts
+// once. The delete the cards post is handled by index.php before the page prints anything,
+// so it can redirect; see user-activity-files.php.
+$ua_files = ua_collect_files();
 
 // ---- Aggregate per authId ---------------------------------------------------
 $ua_users = []; // authId => aggregate

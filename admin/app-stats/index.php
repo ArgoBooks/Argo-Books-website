@@ -13,6 +13,18 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
     exit;
 }
 
+// The User Activity tab's delete button posts here. It is answered with a redirect back to
+// the same URL rather than the page itself, so a refresh afterwards reloads the page instead
+// of the browser offering to send the delete a second time. This has to happen before any
+// output, which is why it is here and not in the tab.
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['del_files'])) {
+    require_once __DIR__ . '/user-activity-files.php';
+    ua_delete_posted_files((array)$_POST['del_files']);
+    $del_query = $_SERVER['QUERY_STRING'] ?? '';
+    header('Location: index.php' . ($del_query !== '' ? '?' . $del_query : ''), true, 303);
+    exit;
+}
+
 // Set page variables for header
 $page_title = "Argo Books Statistics";
 $page_description = "View and analyze anonymous user data with geo-location insights from the Argo Books application";
