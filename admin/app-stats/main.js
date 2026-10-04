@@ -644,16 +644,22 @@ document.addEventListener("DOMContentLoaded", function () {
     const versionByDate = {};
     const versions = new Set();
 
+    // People, not events: one busy install would otherwise outweigh several quiet ones
+    // on the same version. hashedIP is the per-user key the rest of this page counts by,
+    // so an event without one cannot be attributed to anybody and is left out.
     allData.forEach((item) => {
       const date = new Date(item.timestamp).toLocaleDateString();
       const version = item.appVersion || "Unknown";
 
-      if (version !== "Unknown") {
+      if (version !== "Unknown" && item.hashedIP) {
         versions.add(version);
         if (!versionByDate[date]) {
           versionByDate[date] = {};
         }
-        versionByDate[date][version] = (versionByDate[date][version] || 0) + 1;
+        if (!versionByDate[date][version]) {
+          versionByDate[date][version] = new Set();
+        }
+        versionByDate[date][version].add(item.hashedIP);
       }
     });
 
@@ -669,7 +675,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const datasets = topVersions.map((version, index) => ({
       label: `V.${version}`,
-      data: recentDates.map((date) => versionByDate[date]?.[version] || 0),
+      data: recentDates.map((date) => versionByDate[date]?.[version]?.size || 0),
       borderColor: ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#1e40af"][
         index
       ],
@@ -701,9 +707,11 @@ document.addEventListener("DOMContentLoaded", function () {
         scales: {
           y: {
             beginAtZero: true,
+            // Whole people only, so a day with one user does not get a 0.5 gridline.
+            ticks: { precision: 0 },
             title: {
               display: true,
-              text: "Operations Count",
+              text: "Users",
             },
           },
           x: {
