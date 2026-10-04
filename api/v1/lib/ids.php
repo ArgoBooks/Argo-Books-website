@@ -12,21 +12,6 @@ declare(strict_types=1);
  * imports an object. The desktop's id comes back separately in `local_ref`.
  */
 
-/** Prefix per object type. Also the allow-list for api_id_has_prefix(). */
-const API_ID_PREFIXES = [
-    'account'      => 'acct',
-    'api_key'      => 'key',
-    'import_batch' => 'imb',
-    'customer'     => 'cus',
-    'supplier'     => 'sup',
-    'category'     => 'cat',
-    'product'      => 'prd',
-    'expense'      => 'exp',
-    'revenue'      => 'rev',
-    'refund'       => 're',
-    'line_item'    => 'li',
-];
-
 function api_generate_id(string $prefix): string
 {
     return $prefix . '_' . bin2hex(random_bytes(12));

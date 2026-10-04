@@ -27,9 +27,7 @@ function env(string $key, $default = '')
  * Build an absolute URL to a path on the site.
  *
  * Uses the SITE_URL env var (default: https://argorobots.com) so this works in
- * cron contexts where $_SERVER is empty. For web-request contexts where the
- * scheme/host must be detected from the request, use get_site_url() in
- * community/community_functions.php.
+ * cron contexts where $_SERVER is empty.
  */
 function site_url(string $path = ''): string
 {

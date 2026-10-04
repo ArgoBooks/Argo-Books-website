@@ -415,21 +415,3 @@ function get_user_comment_vote($comment_id, $user_email)
     return $vote;
 }
 
-/**
- * Get the site URL
- * 
- * @return string Site URL
- */
-function get_site_url()
-{
-    $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https://' : 'http://';
-    $host = $_SERVER['HTTP_HOST'];
-    $script_dir = dirname(dirname($_SERVER['SCRIPT_NAME']));
-
-    // Remove trailing slash if needed
-    if ($script_dir !== '/' && substr($script_dir, -1) === '/') {
-        $script_dir = rtrim($script_dir, '/');
-    }
-
-    return $protocol . $host . $script_dir;
-}

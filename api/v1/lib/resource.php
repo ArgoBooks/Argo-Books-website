@@ -17,12 +17,6 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/definitions.php';
 
-/** Columns present on every resource table, handled by the engine not the spec. */
-const API_SYSTEM_COLUMNS = [
-    'id', 'account_id', 'public_id', 'import_status', 'import_batch_id',
-    'imported_at', 'local_ref', 'created_at', 'updated_at', 'deleted_at',
-];
-
 // ---------------------------------------------------------------------------
 // Serialization
 // ---------------------------------------------------------------------------

@@ -4,7 +4,7 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert';
-import { computeCraft, priceAtMarkup, markupForMargin, marginForMarkup, num } from './craft-engine.js';
+import { computeCraft, priceAtMarkup, marginForMarkup, num } from './craft-engine.js';
 
 const near = (actual, expected, tol = 0.005, msg = '') =>
   assert.ok(Math.abs(actual - expected) <= tol, `${msg} expected ~${expected}, got ${actual}`);
@@ -93,17 +93,7 @@ test('priceAtMarkup matches the main calculation', () => {
 
 // Markup and margin are the pair sellers most often confuse: doubling your cost
 // is a 100% markup but only a 50% margin.
-test('markup and margin convert both ways', () => {
-  near(markupForMargin(50), 100, 0.001, '50% margin needs 100% markup');
-  near(markupForMargin(60), 150, 0.001, '60% margin needs 150% markup');
+test('a markup converts to its margin', () => {
   near(marginForMarkup(100), 0.5, 0.0001, '100% markup is a 50% margin');
   near(marginForMarkup(150), 0.6, 0.0001, '150% markup is a 60% margin');
-  assert.strictEqual(markupForMargin(100), null, 'a 100% margin is unreachable');
-  assert.strictEqual(markupForMargin(120), null, 'above 100% too');
-});
-
-test('markup and margin round-trip', () => {
-  for (const markup of [25, 50, 100, 150, 233, 400]) {
-    near(markupForMargin(marginForMarkup(markup) * 100), markup, 0.01, `markup ${markup}`);
-  }
 });

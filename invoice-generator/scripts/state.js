@@ -137,11 +137,3 @@ export function saveDraft(state) {
     return { ok: false, error: e?.name || 'unknown' };
   }
 }
-
-export function clearDraft() {
-  try {
-    localStorage.removeItem(STORAGE_KEY);
-  } catch (_e) {
-    // ignore
-  }
-}

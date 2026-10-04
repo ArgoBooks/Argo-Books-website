@@ -636,9 +636,6 @@ include __DIR__ . '/../admin_header.php';
 </div>
 
 <script>
-    // Helper function to sum arrays since array_sum is a PHP function
-    const sumArray = (arr) => arr.reduce((sum, val) => sum + (Number(val) || 0), 0);
-
     document.addEventListener('DOMContentLoaded', function() {
         // Chart data
         const chartLabels = <?php echo json_encode($chart_labels); ?>;

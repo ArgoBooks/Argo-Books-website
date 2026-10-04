@@ -23,7 +23,6 @@ define('MAX_FILE_SIZE_FREE', 256 * 1024);          // 256KB max for free-tier up
 define('ALLOWED_MIME_TYPES', ['application/json', 'text/plain']);
 define('DATA_DIR', __DIR__ . '/../../admin/data-logs/telemetry');
 
-define('MAX_FILENAME_LENGTH', 255);
 // The founder's own installs (FOUNDER_AUTH_IDS in .env) upload on exactly the same
 // path as everyone else. Their data is kept so it can be reviewed on the app-stats
 // User Activity tab; every other read site skips it. See founder_identity.php.

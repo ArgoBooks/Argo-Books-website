@@ -23,11 +23,3 @@ export function formatMoney(amount, currencyCode, locale) {
     return `${currencyCode || ''} ${amount.toFixed(2)}`;
   }
 }
-
-export function parseMoney(input) {
-  if (typeof input === 'number') return input;
-  if (!input) return 0;
-  const cleaned = String(input).replace(/[^\d.\-]/g, '');
-  const n = parseFloat(cleaned);
-  return Number.isFinite(n) ? n : 0;
-}

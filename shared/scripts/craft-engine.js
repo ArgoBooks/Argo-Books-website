@@ -76,18 +76,7 @@ export function priceAtMarkup(unitCost, markupPercent) {
   return num(unitCost) * (1 + num(markupPercent) / 100);
 }
 
-/**
- * The markup needed to hit a target margin. Sellers think in margin ("I want to
- * keep half") but price with markup, and the two are not the same number.
- * Returns null at or above 100%, where no finite markup gets there.
- */
-export function markupForMargin(marginPercent) {
-  const m = num(marginPercent) / 100;
-  if (m >= 1) return null;
-  return (m / (1 - m)) * 100;
-}
-
-/** The margin a given markup produces. The inverse of markupForMargin. */
+/** The margin a given markup produces. */
 export function marginForMarkup(markupPercent) {
   const k = num(markupPercent) / 100;
   return k / (1 + k);
