@@ -29,7 +29,7 @@ The agent holds one secret token and nothing else. Every credential and every li
 
 ## Approval
 
-The agent starts in approval mode. It writes the post or the email and the site holds it on the admin page under **Waiting for you**. Nothing goes out until you approve it.
+The agent starts in approval mode. It writes the post or the email and the site holds it on the admin page, on the **Waiting** tab. Nothing goes out until you approve it.
 
 - **Approve** carries it out. A post is published. A business goes onto the outreach list with its email already approved, and the outreach cron sends it on its next run.
 - **Edit and approve** does the same with your wording.
@@ -43,7 +43,7 @@ Tracked links need no approval, because a link sends nothing to anyone.
 
 ## The admin page
 
-**Admin, Agent** shows, from top to bottom: what is waiting for you, the switches, what is set up and which platforms are connected, the limits, the notes, recent runs, what was decided, the journal, and the site's own record of every action.
+**Admin, Agent** has one tab for each of these: what is waiting for you, the switches, what is set up and which platforms are connected, the limits, the notes, recent runs, what was decided, the journal, and the site's own record of every action. It opens on Waiting, and the tab shows how many items are waiting.
 
 Two things on it are worth knowing about.
 

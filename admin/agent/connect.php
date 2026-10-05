@@ -26,7 +26,7 @@ $redirectUri = rtrim(env('SITE_URL', 'https://argorobots.com'), '/') . '/admin/a
 
 $back = function (string $type, string $text): never {
     $_SESSION['agent_message'] = [$type, $text];
-    header('Location: index.php#setup');
+    header('Location: index.php?tab=setup');
     exit;
 };
 

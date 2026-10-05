@@ -20,6 +20,10 @@ if (empty($_SESSION['csrf_token'])) {
 
 const AGENT_SWITCHES = ['enabled', 'posting_enabled', 'outreach_enabled', 'approve_posts', 'approve_emails'];
 const AGENT_LIMIT_KEYS = ['runs_per_day', 'calls_per_run', 'posts_per_day', 'emails_per_day', 'links_per_day', 'research_per_day'];
+const AGENT_TABS = [
+    'waiting' => 'Waiting', 'switches' => 'Switches', 'setup' => 'Setup', 'limits' => 'Limits', 'notes' => 'Notes',
+    'runs' => 'Runs', 'decided' => 'Decided', 'journal' => 'Journal', 'actions' => 'Record',
+];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!hash_equals($_SESSION['csrf_token'], (string) ($_POST['csrf_token'] ?? ''))) {
@@ -52,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $message = match ($status) {
                 'done' => ['success', 'Approved and carried out.'],
                 'rejected' => ['success', 'Rejected. The agent will be told why on its next run.'],
-                default => ['error', 'Approved, but it could not be carried out. The reason is in the list below.'],
+                default => ['error', 'Approved, but it could not be carried out. The reason is on the Decided tab.'],
             };
         } elseif ($action === 'note') {
             agent_note_save($pdo, (string) ($_POST['name'] ?? ''), (string) ($_POST['body'] ?? ''), true);
@@ -65,7 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $_SESSION['agent_message'] = $message;
-    header('Location: index.php' . (isset($_POST['anchor']) ? '#' . preg_replace('/[^a-z-]/', '', (string) $_POST['anchor']) : ''));
+    header('Location: index.php' . (isset(AGENT_TABS[$_POST['tab'] ?? '']) ? '?tab=' . $_POST['tab'] : ''));
     exit;
 }
 
@@ -100,6 +104,8 @@ $configured = [
     'Facts file (api/agent/facts.md)' => trim(agent_facts()) !== '',
 ];
 
+$activeTab = isset(AGENT_TABS[$_GET['tab'] ?? '']) ? $_GET['tab'] : 'waiting';
+
 $page_title = 'Marketing Agent';
 $page_description = 'Approve what the agent wants to send, and see what it has done.';
 include __DIR__ . '/../admin_header.php';
@@ -113,7 +119,7 @@ $toggle = function (string $key, string $onTitle, string $onDesc, string $offTit
     $button = fn (string $value, bool $active, string $title, string $desc) =>
         '<form method="POST" style="display:contents;">' . $csrf
         . '<input type="hidden" name="action" value="switch"><input type="hidden" name="key" value="' . $h($key) . '">'
-        . '<input type="hidden" name="value" value="' . $value . '"><input type="hidden" name="anchor" value="switches">'
+        . '<input type="hidden" name="value" value="' . $value . '"><input type="hidden" name="tab" value="switches">'
         . '<button type="submit" class="segmented-option ' . ($active ? 'active' : '') . '">'
         . '<span class="segmented-title">' . $h($title) . '</span><span class="segmented-desc">' . $h($desc) . '</span></button></form>';
     return '<div class="segmented-toggle" style="margin-bottom:12px;">' . $button('1', $on, $onTitle, $onDesc) . $button('0', !$on, $offTitle, $offDesc) . '</div>';
@@ -138,11 +144,17 @@ $rows = fn (?string $text, int $least = 6) => max($least, min(28, substr_count(w
     .agent-ok { color: var(--green-600); } .agent-bad { color: var(--red); }
 </style>
 
+<div class="section-tabs">
+<?php foreach (AGENT_TABS as $tab => $label): ?>
+    <button class="section-tab<?= $tab === $activeTab ? ' active' : '' ?>" data-tab="<?= $tab ?>"><?= $h($label) ?><?= $tab === 'waiting' ? ' (' . count($pending) . ')' : '' ?></button>
+<?php endforeach; ?>
+</div>
+
 <?php if (!empty($_SESSION['agent_message'])): [$type, $text] = $_SESSION['agent_message']; unset($_SESSION['agent_message']); ?>
     <div class="panel"><div class="panel-content <?= $type === 'error' ? 'agent-bad' : 'agent-ok' ?>"><?= $h($text) ?></div></div>
 <?php endif; ?>
 
-<div class="panel" id="waiting">
+<div id="waiting" class="tab-content<?= $activeTab === 'waiting' ? ' active' : '' ?>"><div class="panel">
     <div class="panel-header"><h2>Waiting for you (<?= count($pending) ?>)</h2></div>
     <div class="panel-content">
         <?php if (!$pending): ?>
@@ -153,7 +165,7 @@ $rows = fn (?string $text, int $least = 6) => max($least, min(28, substr_count(w
                 <?= $csrf ?>
                 <input type="hidden" name="action" value="decide">
                 <input type="hidden" name="id" value="<?= (int) $row['id'] ?>">
-                <input type="hidden" name="anchor" value="waiting">
+                <input type="hidden" name="tab" value="waiting">
                 <?php if ($row['kind'] === 'post'): ?>
                     <strong>Post on <?= $h(ucfirst((string) $row['platform'])) ?></strong>
                     <div class="agent-meta"><?= $h($p['about'] ?? '') ?> &middot; link: <?= $h(($p['link'] ?? '') ?: 'none') ?> &middot; limit <?= (int) (AGENT_PLATFORM_LIMITS[$row['platform']] ?? 0) ?> characters</div>
@@ -177,9 +189,9 @@ $rows = fn (?string $text, int $least = 6) => max($least, min(28, substr_count(w
             </form>
         <?php endforeach; ?>
     </div>
-</div>
+</div></div>
 
-<div class="panel" id="switches">
+<div id="switches" class="tab-content<?= $activeTab === 'switches' ? ' active' : '' ?>"><div class="panel">
     <div class="panel-header"><h2>Switches</h2></div>
     <div class="panel-content">
         <?= $toggle('enabled', 'Agent on', 'It can start a run and read.', 'Agent off', 'Every request is refused. Nothing runs.') ?>
@@ -188,9 +200,9 @@ $rows = fn (?string $text, int $least = 6) => max($least, min(28, substr_count(w
         <?= $toggle('approve_posts', 'Posts wait for approval', 'Each post sits above until you approve it.', 'Posts go out automatically', 'A post is published as soon as the agent writes it.') ?>
         <?= $toggle('approve_emails', 'Emails wait for approval', 'Each email sits above until you approve it. Follow-ups wait in Outreach, Follow-ups.', 'Emails go out automatically', 'An email is queued to send as soon as the agent writes it.') ?>
     </div>
-</div>
+</div></div>
 
-<div class="panel" id="setup">
+<div id="setup" class="tab-content<?= $activeTab === 'setup' ? ' active' : '' ?>"><div class="panel">
     <div class="panel-header"><h2>Setup</h2></div>
     <div class="panel-content">
         <?php foreach ($configured as $what => $ok): ?>
@@ -209,7 +221,7 @@ $rows = fn (?string $text, int $least = 6) => max($least, min(28, substr_count(w
                     <?php if ($c['expires_at']): ?>
                         <form method="POST" style="display:inline;"><?= $csrf ?>
                             <input type="hidden" name="action" value="disconnect"><input type="hidden" name="platform" value="<?= $h($platform) ?>">
-                            <input type="hidden" name="anchor" value="setup">
+                            <input type="hidden" name="tab" value="setup">
                             <button type="submit" class="btn btn-small btn-neutral">Disconnect</button>
                         </form>
                     <?php endif; ?>
@@ -217,13 +229,13 @@ $rows = fn (?string $text, int $least = 6) => max($least, min(28, substr_count(w
             </div>
         <?php endforeach; ?>
     </div>
-</div>
+</div></div>
 
-<div class="panel" id="limits">
+<div id="limits" class="tab-content<?= $activeTab === 'limits' ? ' active' : '' ?>"><div class="panel">
     <div class="panel-header"><h2>Limits</h2></div>
     <div class="panel-content">
         <form method="POST">
-            <?= $csrf ?><input type="hidden" name="action" value="limits"><input type="hidden" name="anchor" value="limits">
+            <?= $csrf ?><input type="hidden" name="action" value="limits"><input type="hidden" name="tab" value="limits">
             <div class="agent-limits">
             <?php foreach ([
                 'runs_per_day' => 'Runs a day', 'calls_per_run' => 'Requests a run', 'posts_per_day' => 'Posts a day, each platform',
@@ -238,14 +250,14 @@ $rows = fn (?string $text, int $least = 6) => max($least, min(28, substr_count(w
             <div class="agent-row"><button type="submit" class="btn btn-blue">Save</button></div>
         </form>
     </div>
-</div>
+</div></div>
 
-<div class="panel agent-note" id="notes">
+<div id="notes" class="tab-content<?= $activeTab === 'notes' ? ' active' : '' ?>"><div class="panel agent-note">
     <div class="panel-header"><h2>Notes</h2></div>
     <div class="panel-content">
         <form method="POST">
             <?= $csrf ?><input type="hidden" name="action" value="note"><input type="hidden" name="name" value="<?= $h(AGENT_OWNER_NOTE) ?>">
-            <input type="hidden" name="anchor" value="notes">
+            <input type="hidden" name="tab" value="notes">
             <strong>Your note to the agent</strong>
             <p class="hint" style="margin:4px 0 8px;">It reads this at the start of every run and cannot change it. Use it to steer: who to go after, what to stop doing, what you liked.</p>
             <textarea name="body" rows="<?= $rows($ownerNote) ?>"><?= $h($ownerNote) ?></textarea>
@@ -256,16 +268,16 @@ $rows = fn (?string $text, int $least = 6) => max($least, min(28, substr_count(w
         <?php foreach ($notes as $note): ?>
             <form method="POST" style="margin-bottom:14px;">
                 <?= $csrf ?><input type="hidden" name="action" value="note"><input type="hidden" name="name" value="<?= $h($note['name']) ?>">
-                <input type="hidden" name="anchor" value="notes">
+                <input type="hidden" name="tab" value="notes">
                 <strong><?= $h($note['name']) ?></strong> <span class="agent-meta">updated <?= $h($note['updated_at']) ?></span>
                 <textarea name="body" rows="<?= $rows($note['body']) ?>"><?= $h($note['body']) ?></textarea>
                 <div class="agent-row"><button type="submit" class="btn btn-small btn-blue">Save</button></div>
             </form>
         <?php endforeach; ?>
     </div>
-</div>
+</div></div>
 
-<div class="panel" id="runs">
+<div id="runs" class="tab-content<?= $activeTab === 'runs' ? ' active' : '' ?>"><div class="panel">
     <div class="panel-header"><h2>Recent runs</h2></div>
     <div class="panel-content agent-log">
         <?php if (!$runs): ?><p class="hint" style="margin:0;">It has not run yet.</p><?php endif; ?>
@@ -282,9 +294,9 @@ $rows = fn (?string $text, int $least = 6) => max($least, min(28, substr_count(w
             </details>
         <?php endforeach; ?>
     </div>
-</div>
+</div></div>
 
-<div class="panel" id="decided">
+<div id="decided" class="tab-content<?= $activeTab === 'decided' ? ' active' : '' ?>"><div class="panel">
     <div class="panel-header"><h2>Posts and emails already decided</h2></div>
     <div class="panel-content">
         <div class="leads-table-wrapper agent-log"><table class="data-table">
@@ -304,9 +316,9 @@ $rows = fn (?string $text, int $least = 6) => max($least, min(28, substr_count(w
             </tbody>
         </table></div>
     </div>
-</div>
+</div></div>
 
-<div class="panel" id="journal">
+<div id="journal" class="tab-content<?= $activeTab === 'journal' ? ' active' : '' ?>"><div class="panel">
     <div class="panel-header"><h2>Journal</h2></div>
     <div class="panel-content agent-log">
         <?php if (!$journal): ?><p class="hint" style="margin:0;">Empty so far.</p><?php endif; ?>
@@ -320,9 +332,9 @@ $rows = fn (?string $text, int $least = 6) => max($least, min(28, substr_count(w
             </details>
         <?php endforeach; ?>
     </div>
-</div>
+</div></div>
 
-<div class="panel" id="actions">
+<div id="actions" class="tab-content<?= $activeTab === 'actions' ? ' active' : '' ?>"><div class="panel">
     <div class="panel-header"><h2>The site's record of what it did</h2></div>
     <div class="panel-content">
         <div class="leads-table-wrapper agent-log"><table class="data-table">
@@ -340,7 +352,7 @@ $rows = fn (?string $text, int $least = 6) => max($least, min(28, substr_count(w
             </tbody>
         </table></div>
     </div>
-</div>
+</div></div>
 
         </main>
     </div>
