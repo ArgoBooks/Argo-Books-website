@@ -1156,6 +1156,98 @@ CREATE TABLE IF NOT EXISTS outreach_pipeline_state (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- ============================================
+-- Marketing agent
+-- ============================================
+-- A scheduled agent outside the site reads the numbers, proposes posts and outreach emails,
+-- and records what it did. Everything it does goes through api/agent/. See
+-- read-me/Marketing-agent.md. Every table is split by environment, because production and
+-- dev share this database.
+
+-- Switches, limits and platform sign-ins, one row per setting. A missing row means the
+-- default in AGENT_DEFAULTS (api/agent/lib.php), where everything starts off.
+CREATE TABLE IF NOT EXISTS agent_settings (
+    environment ENUM('production', 'sandbox') NOT NULL,
+    setting_key VARCHAR(60) NOT NULL,
+    setting_value TEXT,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (environment, setting_key)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- One row per run. api_calls is counted against the run's allowance, and the number of rows
+-- per day is what caps how often the agent can run.
+CREATE TABLE IF NOT EXISTS agent_runs (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    environment ENUM('production', 'sandbox') NOT NULL,
+    started_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    finished_at DATETIME DEFAULT NULL,
+    api_calls INT NOT NULL DEFAULT 0,
+    summary TEXT DEFAULT NULL COMMENT 'The agent''s own account of the run, emailed to the owner',
+    emailed_at DATETIME DEFAULT NULL,
+    INDEX idx_env_started (environment, started_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- The site's own record of everything the agent did or was refused. Written by the site,
+-- not the agent, so it is the record to trust.
+CREATE TABLE IF NOT EXISTS agent_actions (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    environment ENUM('production', 'sandbox') NOT NULL,
+    run_id INT DEFAULT NULL,
+    action VARCHAR(40) NOT NULL,
+    status ENUM('ok', 'refused', 'failed') NOT NULL,
+    detail TEXT COMMENT 'JSON',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_env_created (environment, created_at),
+    INDEX idx_run (run_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- The agent's dated log: what it saw, what it tried and expected, and what happened. A run
+-- starts with no memory of the last, so this and agent_notes are its memory.
+CREATE TABLE IF NOT EXISTS agent_journal (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    environment ENUM('production', 'sandbox') NOT NULL,
+    run_id INT DEFAULT NULL,
+    kind ENUM('observation', 'experiment', 'result', 'decision', 'note') NOT NULL,
+    experiment_key VARCHAR(60) DEFAULT NULL COMMENT 'Ties an experiment to its later result',
+    title VARCHAR(200) NOT NULL,
+    body TEXT NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_env_created (environment, created_at),
+    INDEX idx_experiment (experiment_key)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Named notes the agent keeps and rewrites, such as what has worked. The note called
+-- 'from-the-owner' is written on the admin page and only read by the agent.
+CREATE TABLE IF NOT EXISTS agent_notes (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    environment ENUM('production', 'sandbox') NOT NULL,
+    name VARCHAR(80) NOT NULL,
+    body TEXT NOT NULL,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uniq_env_name (environment, name)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Every post and outreach email the agent wants to send. While approval is on, a row waits
+-- as 'pending' for the owner. Approved rows are carried out and end as 'done' or 'failed'.
+CREATE TABLE IF NOT EXISTS agent_proposals (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    environment ENUM('production', 'sandbox') NOT NULL,
+    run_id INT DEFAULT NULL,
+    kind ENUM('post', 'email') NOT NULL,
+    platform VARCHAR(20) DEFAULT NULL COMMENT 'For posts: bluesky, linkedin or threads',
+    payload TEXT NOT NULL COMMENT 'JSON: the text or the email, its sources, and what the agent first wrote if the owner changed it',
+    text_hash CHAR(64) NOT NULL COMMENT 'To catch the same post, or an email to the same address, twice',
+    status ENUM('pending', 'approved', 'rejected', 'done', 'failed') NOT NULL DEFAULT 'pending',
+    edited TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'The owner changed the wording before approving',
+    owner_note VARCHAR(500) DEFAULT NULL COMMENT 'Why it was rejected or changed, shown to the agent',
+    result TEXT DEFAULT NULL COMMENT 'JSON: the post id and its numbers, the lead id, or the error',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    decided_at DATETIME DEFAULT NULL,
+    told_agent_at DATETIME DEFAULT NULL COMMENT 'When the decision was shown to the agent, so it is shown once',
+    INDEX idx_env_status (environment, status),
+    INDEX idx_env_kind_created (environment, kind, created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- Per-run audit trail for every cron job. Each cron calls cron_run_start
 -- at the top, increments named metrics throughout its work
 -- (cron_metric_incr / cron_metric_set in cron/lib/run_tracker.php), then

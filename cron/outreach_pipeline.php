@@ -516,12 +516,15 @@ function stepDraftFollowups($pdo, $dryRun)
         return;
     }
 
-    // Find rows whose draft window has opened (scheduled_for within next 24h)
+    // Find rows whose draft window has opened (scheduled_for within next 24h). The marketing
+    // agent writes the follow-ups for the leads it added, so those are left for it.
     $stmt = $pdo->prepare(
-        "SELECT * FROM outreach_followups
-         WHERE status = 'scheduled'
-           AND scheduled_for <= DATE_ADD(NOW(), INTERVAL 1 DAY)
-         ORDER BY scheduled_for ASC
+        "SELECT f.* FROM outreach_followups f
+           JOIN outreach_leads l ON l.id = f.lead_id
+         WHERE f.status = 'scheduled'
+           AND f.scheduled_for <= DATE_ADD(NOW(), INTERVAL 1 DAY)
+           AND l.source != 'agent'
+         ORDER BY f.scheduled_for ASC
          LIMIT ?"
     );
     $stmt->bindValue(1, DAILY_DRAFT_LIMIT, PDO::PARAM_INT);

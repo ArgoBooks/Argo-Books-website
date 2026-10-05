@@ -84,6 +84,7 @@ $base_path = $in_subdir ? '../' : '';
                         'referral-links'   => 'Referrals',
                         'affiliates'       => 'Affiliates',
                         'outreach'         => 'Outreach',
+                        'agent'            => 'Agent',
                         'email-customers'  => 'Email customers',
                     ],
                     'Analytics' => [

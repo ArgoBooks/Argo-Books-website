@@ -562,3 +562,24 @@ Hourly rather than daily because the window is short. A file deleted up to a day
 ### Logs
 
 No daily log file. Metrics are on `/admin/crons/`, and failures go to `error_log`.
+
+---
+
+## 17. Marketing Agent Watch
+
+**Script:** `cron/agent_watch.php` **Schedule:** Daily at 9:30 AM
+
+```bash
+30 9 * * * /usr/bin/php /home/argorobots/public_html/cron/agent_watch.php
+```
+
+### What It Does
+
+The marketing agent runs outside the site, on a schedule in Anthropic's cloud, and emails its own update when a run finishes. A run that never starts sends nothing, so a stopped agent would look the same as a quiet one. This cron is the check from the site's side.
+
+1. Does nothing while the agent is switched off on the admin Agent page.
+2. Looks up when the agent last finished a run.
+3. Emails the admin if that was more than 36 hours ago.
+4. Warns once per stoppage. The next warning needs a finished run in between.
+
+It records how long since the last run and how many posts and emails are waiting for approval, so both can be read on the admin Crons page. See `read-me/Marketing-agent.md` for the agent itself.

@@ -1,0 +1,5 @@
+# The agent is served its playbook and facts by the endpoint. They are not for reading over the web.
+<FilesMatch "\.md$">
+Order allow,deny
+Deny from all
+</FilesMatch>

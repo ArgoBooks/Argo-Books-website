@@ -98,6 +98,18 @@ $cronConfig = [
         ],
         'expected_interval_hours' => 48,
     ],
+    'agent_watch' => [
+        'label'     => 'Marketing Agent Watch',
+        'frequency' => 'daily',
+        'description' => 'Checks that the marketing agent finished a run in the last day and a half, and emails you if it did not. The agent runs outside the site, so a run that never starts would otherwise go unnoticed.',
+        'metrics'   => [
+            'agent_on'             => 'Agent switched on (1 or 0)',
+            'hours_since_last_run' => 'Hours since its last run',
+            'waiting_for_approval' => 'Posts and emails waiting for you',
+            'warnings_sent'        => 'Warnings sent',
+        ],
+        'expected_interval_hours' => 48,
+    ],
     'portal_invoice_reminders' => [
         'label'     => 'Portal Invoice Reminders',
         'frequency' => 'daily',

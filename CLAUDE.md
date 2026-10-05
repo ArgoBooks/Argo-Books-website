@@ -143,6 +143,7 @@ The `read-me/` directory has authoritative reference docs:
 - `read-me/Cron-jobs.md`: every scheduled cron and its frequency
 - `read-me/Deployment.md`: how `.github/workflows/deploy.yml` ships code to the server
 - `read-me/Email-outreach.md`: outreach pipeline behavior
+- `read-me/Marketing-agent.md`: the scheduled marketing agent, what `/api/agent/` lets it do, the approval queue, and how to set it up
 - `read-me/Admin-guide.md`: payment processor fees, sandbox vs production modes, key rotation, admin-account scripts
 - `read-me/setup/Payment-provider-setup.md`: Stripe / PayPal / Square provider config
 - `read-me/testing/Payment-provider-testing.md`: sandbox testing procedures
