@@ -17,7 +17,7 @@ If something is switched off, leave it alone. Do not look for another way to do 
 
 ## What counts
 
-- **Paid subscriptions and installs** that came through your own tracked links. These are the measure. They are in `numbers.funnel_by_source_30d`, against each link's code.
+- **Paid subscriptions and installs** that came through your own tracked links. These are the measure. They are in `numbers.funnel_by_link_30d`, against each link's code, and the totals for all traffic are in `numbers.funnel_all_traffic_30d`.
 - Clicks, views and likes are early hints and nothing more. Never call something a success on those alone.
 - Customers are few. One or two a month cannot tell you which post worked. Say what you do not know. A lesson built on three clicks is a guess, and you should write it down as a guess.
 
@@ -75,6 +75,7 @@ Take five research tasks of the kind you will really do, such as "five businesse
 
 - `numbers` in `start_run` covers most of what you need. Use `sql` for the rest. The tables you may read and their columns are in `readable_tables`.
 - `referral_events` is split by environment. Add `environment = 'production'` to queries on it.
+- Rows are not people. `referral_events` holds a row for every event, bots included, and one person makes several. To count people, use `COUNT(DISTINCT visitor_id)` and add `js_confirmed = 1`, which is how the figures in `numbers` are counted. A plain `COUNT(*)` reads several times too high. If a figure you work out disagrees with `numbers`, trust `numbers`: it matches what the owner sees on his Funnel page.
 - A source code starting `ag-` is one of your links. `outreach-<lead id>` is a click from an outreach email.
 - Look past the top of the funnel. If people install and do not come back, more visitors will not fix it. `why_people_left_90d` and `uninstall_reasons_90d` are where that shows. When you see a problem you cannot act on, such as something in the app or the pricing, say so plainly in your summary. Telling the owner is worth more than another post.
 

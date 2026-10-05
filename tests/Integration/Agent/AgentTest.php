@@ -74,6 +74,31 @@ final class AgentTest extends DatabaseTestCase
         $this->assertSame('page_view', $result['rows'][0]['event_type']);
     }
 
+    public function test_the_funnel_it_is_given_counts_people_the_way_the_admin_page_does(): void
+    {
+        $env = current_environment();
+        $since = date('Y-m-d 00:00:00', strtotime('-30 days'));
+        $baseline = get_funnel_stage_counts($since, null);
+        $event = $this->pdo->prepare(
+            'INSERT INTO referral_events (visitor_id, event_type, js_confirmed, environment) VALUES (?, ?, ?, ?)'
+        );
+        $person = '11111111-1111-4111-8111-111111111111';
+        $event->execute([$person, 'landing', 1, $env]);
+        $event->execute([$person, 'landing', 1, $env]);          // the same person, a second page
+        $event->execute([$person, 'download_click', 1, $env]);
+        foreach (['22222222-2222-4222-8222-222222222222', '33333333-3333-4333-8333-333333333333'] as $bot) {
+            $event->execute([$bot, 'landing', 0, $env]);         // never confirmed by a browser
+            $event->execute([$bot, 'download_click', 1, $env]);  // fetched the installer directly
+        }
+
+        $before = get_funnel_stage_counts($since, null);
+        $given = agent_overview($this->pdo)['funnel_all_traffic_30d'];
+
+        $this->assertSame($before, $given, 'the agent and the admin page disagree');
+        $this->assertSame(1, $given['landing'] - $baseline['landing']);
+        $this->assertSame(1, $given['download_click'] - $baseline['download_click']);
+    }
+
     // ── Who may be emailed ──────────────────────────────────────────────────
 
     public function test_an_address_the_site_already_knows_is_never_proposed(): void

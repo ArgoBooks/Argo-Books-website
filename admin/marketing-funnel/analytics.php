@@ -744,3 +744,226 @@ function funnel_page_breakdowns(?string $period_start): array
         'exit'    => $run($edge_sql('MAX'),   $params),
     ];
 }
+
+// ─── Funnel stage counts ───
+// The rules for what counts as a visitor, a download and an install. They live here, not in
+// the page, because the marketing agent reads the same figures (api/agent/lib.php) and the
+// two must never disagree.
+
+/**
+ * SQL fragment: TRUE when a referral_events row's visitor also has a
+ * JS-confirmed page view. Used to bot-filter download_click, which is a
+ * server-side file-request event with no JS beacon, so js_confirmed can't
+ * filter it directly. The check is deliberately not period-scoped: a real
+ * user's landing may predate the selected period. Bots fetching the installer
+ * URL directly mint a fresh cookieless visitor_id per request and never
+ * produce a confirmed page view, so this drops them.
+ *
+ * $alias is how the outer query refers to referral_events (table name or alias).
+ * Shared by the all-traffic funnel and the per-source table so the bot rule
+ * can never drift between the two.
+ */
+function funnel_confirmed_visitor_sql(string $alias): string
+{
+    return "EXISTS (
+        SELECT 1 FROM referral_events pv
+         WHERE pv.visitor_id = {$alias}.visitor_id
+           AND pv.event_type IN ('landing', 'downloads_page')
+           AND pv.js_confirmed = 1
+           AND pv.environment = {$alias}.environment)";
+}
+
+/**
+ * SQL fragment: dedupe key for app_first_run rows. Rows can have
+ * visitor_id = NULL (install token missing or outside the 14-day attribution
+ * window); COUNT(DISTINCT visitor_id) would silently drop those real installs,
+ * so fall back to the per-machine UUID the desktop reporter stamps into
+ * event_data, then the row id.
+ */
+function funnel_first_run_key_sql(): string
+{
+    return "COALESCE(visitor_id,
+        JSON_UNQUOTE(JSON_EXTRACT(event_data, '$.machine_uuid')),
+        CONCAT('row-', id))";
+}
+
+/**
+ * Returns the start datetime for the active period filter. Periods:
+ *   '30d' (default) | '90d' | 'all'
+ */
+function funnel_period_start(string $period): ?string
+{
+    switch ($period) {
+        case '90d': return date('Y-m-d 00:00:00', strtotime('-90 days'));
+        case 'all': return null;
+        case '30d':
+        default:    return date('Y-m-d 00:00:00', strtotime('-30 days'));
+    }
+}
+
+/**
+ * Count funnel-stage totals for the given period + source filter.
+ *
+ * Top-of-funnel stages (landing through premium_signup) count distinct
+ * visitors so a user firing the same event twice doesn't double-count.
+ *
+ * download_click only counts visitors who also have a JS-confirmed page view,
+ * since bots that fetch the installer URL directly bypass the js_confirmed
+ * filter (see the inline comment on $confirmed_visitor_exists).
+ *
+ * app_first_run counts unattributed installs too (visitor_id NULL) by falling
+ * back to the machine_uuid recorded in event_data.
+ *
+ * premium_paid and premium_churned count distinct subscription_id instead:
+ * they're subscription-keyed events that can fire for visitors we never
+ * resolved (webhook context), and premium_paid is restricted to the initial
+ * payment so renewals/retries don't inflate the "paid" stage above signups.
+ */
+function get_funnel_stage_counts(?string $period_start, ?string $source_code): array
+{
+    global $pdo;
+
+    // js_confirmed = 1 filters bots out of the page-view stages (landing,
+    // downloads_page); non-page-view stages are inserted already-confirmed.
+    $where_clauses = ['environment = ?', 'js_confirmed = 1'];
+    $params = [current_environment()];
+
+    $confirmed_visitor_exists = funnel_confirmed_visitor_sql('referral_events');
+    $first_run_key = funnel_first_run_key_sql();
+
+    if ($period_start !== null) {
+        $where_clauses[] = 'created_at >= ?';
+        $params[] = $period_start;
+    }
+    if ($source_code !== null && $source_code !== '') {
+        $where_clauses[] = 'source_code = ?';
+        $params[] = $source_code;
+    }
+    $where = implode(' AND ', $where_clauses);
+
+    $sql = "
+        SELECT
+          COUNT(DISTINCT CASE WHEN event_type='landing'        THEN visitor_id END) AS landing,
+          COUNT(DISTINCT CASE WHEN event_type='downloads_page' THEN visitor_id END) AS downloads_page,
+          COUNT(DISTINCT CASE WHEN event_type='download_click'
+                               AND $confirmed_visitor_exists
+                              THEN visitor_id END) AS download_click,
+          COUNT(DISTINCT CASE WHEN event_type='app_first_run' THEN $first_run_key END) AS app_first_run,
+          COUNT(DISTINCT CASE WHEN event_type='premium_signup' THEN visitor_id END) AS premium_signup,
+          COUNT(DISTINCT CASE WHEN event_type='premium_paid'
+                                AND JSON_UNQUOTE(JSON_EXTRACT(event_data, '$.payment_type')) = 'initial'
+                               THEN subscription_id END) AS premium_paid,
+          COUNT(DISTINCT CASE WHEN event_type='premium_churned' THEN subscription_id END) AS premium_churned
+        FROM referral_events
+        WHERE $where";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
+    $row = $stmt->fetch();
+
+    return [
+        'landing'         => (int)($row['landing'] ?? 0),
+        'downloads_page'  => (int)($row['downloads_page'] ?? 0),
+        'download_click'  => (int)($row['download_click'] ?? 0),
+        'app_first_run'   => (int)($row['app_first_run'] ?? 0),
+        'premium_signup'  => (int)($row['premium_signup'] ?? 0),
+        'premium_paid'    => (int)($row['premium_paid'] ?? 0),
+        'premium_churned' => (int)($row['premium_churned'] ?? 0),
+    ];
+}
+
+/**
+ * Per-source totals for the comparison table. Joins event counts, ad spend,
+ * and premium subscription payment revenue all in a single result set.
+ */
+function get_funnel_per_source(?string $period_start, string $environment): array
+{
+    global $pdo;
+
+    // Same bot-filter + first-run dedupe rules as get_funnel_stage_counts(),
+    // via the shared fragment helpers ('re' is this query's table alias).
+    $confirmed_click = funnel_confirmed_visitor_sql('re');
+    $first_run_key   = funnel_first_run_key_sql();
+
+    $params = [$environment];
+    $event_period_clause = '';
+    if ($period_start !== null) {
+        $event_period_clause = ' AND re.created_at >= ?';
+        $params[] = $period_start;
+    }
+
+    $spend_period_clause = '';
+    $params_spend = [];
+    if ($period_start !== null) {
+        $spend_period_clause = 'WHERE period_start >= ?';
+        $params_spend[] = date('Y-m-01', strtotime($period_start));
+    }
+
+    // Revenue must scope to the same period as events + spend, otherwise the
+    // funnel mixes period-scoped events with all-time revenue and inflates LTV.
+    $rev_period_clause = '';
+    $params_rev_extra = [];
+    if ($period_start !== null) {
+        $rev_period_clause = ' AND p.created_at >= ?';
+        $params_rev_extra[] = $period_start;
+    }
+
+    $sql = "
+        SELECT
+          rl.source_code,
+          rl.name,
+          rl.category,
+          COALESCE(ev.landings,    0)      AS landings,
+          COALESCE(ev.dl_pages,    0)      AS dl_pages,
+          COALESCE(ev.dl_clicks,   0)      AS dl_clicks,
+          COALESCE(ev.first_runs,  0)      AS first_runs,
+          COALESCE(ev.signups,     0)      AS signups,
+          COALESCE(ev.paying,      0)      AS paying,
+          COALESCE(ev.churned,     0)      AS churned,
+          COALESCE(sp.total_spend, 0)      AS spend,
+          COALESCE(rv.total_revenue, 0)    AS revenue
+        FROM referral_links rl
+        LEFT JOIN (
+            SELECT
+              source_code,
+              COUNT(DISTINCT CASE WHEN event_type='landing'        THEN visitor_id END) AS landings,
+              COUNT(DISTINCT CASE WHEN event_type='downloads_page' THEN visitor_id END) AS dl_pages,
+              COUNT(DISTINCT CASE WHEN event_type='download_click'
+                                   AND {$confirmed_click}
+                                  THEN visitor_id END) AS dl_clicks,
+              COUNT(DISTINCT CASE WHEN event_type='app_first_run'
+                                  THEN {$first_run_key} END) AS first_runs,
+              COUNT(DISTINCT CASE WHEN event_type='premium_signup' THEN visitor_id END) AS signups,
+              COUNT(DISTINCT CASE WHEN event_type='premium_paid'
+                                   AND JSON_UNQUOTE(JSON_EXTRACT(event_data, '$.payment_type')) = 'initial'
+                                  THEN subscription_id END) AS paying,
+              COUNT(DISTINCT CASE WHEN event_type='premium_churned' THEN subscription_id END) AS churned
+            FROM referral_events re
+            WHERE re.environment = ? AND re.js_confirmed = 1 $event_period_clause
+            GROUP BY source_code
+        ) ev ON ev.source_code = rl.source_code
+        LEFT JOIN (
+            SELECT source_code, SUM(amount) AS total_spend
+              FROM campaign_spend
+              $spend_period_clause
+            GROUP BY source_code
+        ) sp ON sp.source_code = rl.source_code
+        LEFT JOIN (
+            SELECT re2.source_code, SUM(p.amount) AS total_revenue
+              FROM referral_events re2
+              JOIN premium_subscription_payments p
+                ON p.subscription_id = re2.subscription_id
+               AND p.status = 'completed'
+             WHERE re2.event_type = 'premium_signup'
+               AND re2.environment = ?
+               $rev_period_clause
+             GROUP BY re2.source_code
+        ) rv ON rv.source_code = rl.source_code
+        WHERE rl.is_active = 1
+        ORDER BY landings DESC, rl.created_at DESC";
+
+    $bind = array_merge($params, $params_spend, [$environment], $params_rev_extra);
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($bind);
+    return $stmt->fetchAll();
+}

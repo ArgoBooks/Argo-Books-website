@@ -17,6 +17,7 @@
 
 require_once __DIR__ . '/../../referral_categories.php';
 require_once __DIR__ . '/../../cron/lib/outreach_helpers.php';
+require_once __DIR__ . '/../../admin/marketing-funnel/analytics.php';
 
 /** A refusal the agent should read and act on, as opposed to a fault in the site. */
 class AgentRefused extends RuntimeException
@@ -411,16 +412,6 @@ function agent_overview(PDO $pdo): array
         'site_events_30d' => ["SELECT event_type, SUM(created_at >= NOW() - INTERVAL 7 DAY) AS last_7d, COUNT(*) AS last_30d
                                  FROM statistics WHERE created_at >= NOW() - INTERVAL 30 DAY
                                 GROUP BY event_type ORDER BY last_30d DESC LIMIT 25", []],
-        'visits_by_link_30d' => ["SELECT v.source_code, l.name, l.category,
-                                         SUM(v.visited_at >= NOW() - INTERVAL 7 DAY) AS visits_7d, COUNT(*) AS visits_30d
-                                    FROM referral_visits v LEFT JOIN referral_links l ON l.source_code = v.source_code
-                                   WHERE v.visited_at >= NOW() - INTERVAL 30 DAY
-                                   GROUP BY v.source_code, l.name, l.category ORDER BY visits_30d DESC LIMIT 40", []],
-        // Installs, sign-ups and payments, each against the link the person came through.
-        'funnel_by_source_30d' => ["SELECT COALESCE(source_code, '(none)') AS source_code, event_type,
-                                           SUM(created_at >= NOW() - INTERVAL 7 DAY) AS last_7d, COUNT(*) AS last_30d
-                                      FROM referral_events WHERE environment = ? AND created_at >= NOW() - INTERVAL 30 DAY
-                                     GROUP BY source_code, event_type ORDER BY last_30d DESC LIMIT 80", [$env]],
         'where_new_users_say_they_came_from_90d' => ["SELECT source_survey_answer AS answer, COUNT(*) AS people $firstRun
                                        AND source_survey_answer IS NOT NULL GROUP BY source_survey_answer ORDER BY people DESC", [$env]],
         'what_new_users_came_to_do_90d' => ["SELECT survey_goal AS goal, COUNT(*) AS people $firstRun
@@ -439,7 +430,31 @@ function agent_overview(PDO $pdo): array
                                    WHERE environment = ? AND status = 'active' AND amount > 0", [$env]],
     ];
 
-    $out = [];
+    // The funnel comes from the functions behind the admin Funnel page, so the agent sees the
+    // figures the owner sees: people, not rows. A raw count of referral_events includes bots
+    // and counts one person several times, and reads several times too high.
+    $out = [
+        'how_the_funnel_is_counted' => 'Distinct people, with bots left out, exactly as on the admin Funnel page. '
+            . 'landing and downloads_page count visitors whose page view was confirmed by the browser. '
+            . 'download_click counts only those visitors. app_first_run counts distinct installs.',
+    ];
+    foreach (['funnel_all_traffic_7d' => '-7 days', 'funnel_all_traffic_30d' => '-30 days'] as $name => $since) {
+        try {
+            $out[$name] = get_funnel_stage_counts(date('Y-m-d 00:00:00', strtotime($since)), null);
+        } catch (PDOException $e) {
+            $out[$name] = ['unavailable' => $e->getMessage()];
+        }
+    }
+    try {
+        // Every referral link, including the agent's own, with anything that happened on it.
+        $out['funnel_by_link_30d'] = array_values(array_filter(
+            get_funnel_per_source(date('Y-m-d 00:00:00', strtotime('-30 days')), $env),
+            fn ($row) => $row['landings'] || $row['dl_clicks'] || $row['first_runs'] || $row['signups'] || $row['paying']
+        ));
+    } catch (PDOException $e) {
+        $out['funnel_by_link_30d'] = ['unavailable' => $e->getMessage()];
+    }
+
     foreach ($blocks as $name => [$sql, $params]) {
         try {
             $stmt = $pdo->prepare($sql);
