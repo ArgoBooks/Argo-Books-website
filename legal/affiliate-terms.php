@@ -189,8 +189,8 @@
             <h2>Contact Us</h2>
             <p>If you have any questions about these Affiliate Program Terms, please contact us:</p>
             <ul>
-                <li>By email: <a class="link" href="mailto:contact@argorobots.com">contact@argorobots.com</a></li>
-                <li>Through the <a class="link" href="../contact-us/">Contact Us Page</a> on our website</li>
+                <li>By email: <a class="link" href="mailto:contact@argorobots.com">contact@argorobots.com</a>.</li>
+                <li>Through the <a class="link" href="../contact-us/">Contact Us Page</a> on our website.</li>
             </ul>
 
             <p class="last-updated">Last updated: July 7, 2026</p>

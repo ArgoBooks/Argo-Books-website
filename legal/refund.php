@@ -107,8 +107,8 @@
 
             <p>You can contact our support team:</p>
             <ul>
-                <li>By email: <a class="link" href="mailto:contact@argorobots.com">contact@argorobots.com</a></li>
-                <li>Through the <a class="link" href="../contact-us/">Contact Us Page</a> on our website</li>
+                <li>By email: <a class="link" href="mailto:contact@argorobots.com">contact@argorobots.com</a>.</li>
+                <li>Through the <a class="link" href="../contact-us/">Contact Us Page</a> on our website.</li>
             </ul>
 
             <h2>Refund Processing</h2>
@@ -124,11 +124,11 @@
             <p>If you are experiencing technical issues with Argo Books, we encourage you to:</p>
             <ol>
                 <li>Review our <a class="link" href="../documentation/">Documentation</a> for troubleshooting
-                    guides and frequently asked questions</li>
+                    guides and frequently asked questions.</li>
                 <li>Visit our <a class="link" href="../community/">Community Page</a> to see if other people
-                    have the same problem, and if they've found a solution</li>
+                    have the same problem, and if they've found a solution.</li>
                 <li>Contact our technical support team through our <a class="link"
-                        href="../contact-us/">Contact Us Page</a> or by email</li>
+                        href="../contact-us/">Contact Us Page</a> or by email.</li>
             </ol>
             <p>Many issues can be resolved with proper guidance, and we are committed to helping you get the most out of
                 our software.</p>
@@ -141,7 +141,7 @@
             <h2>Contact Us</h2>
             <p>If you have any questions about this Refund Policy, please contact us:</p>
             <ul>
-                <li>By email: <a class="link" href="mailto:contact@argorobots.com">contact@argorobots.com</a></li>
+                <li>By email: <a class="link" href="mailto:contact@argorobots.com">contact@argorobots.com</a>.</li>
             </ul>
 
             <p class="last-updated">Last updated: August 13, 2026</p>

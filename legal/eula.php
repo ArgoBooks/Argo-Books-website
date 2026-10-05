@@ -82,24 +82,24 @@
             <h3>1.3 License Scope</h3>
             <p>This license permits you to:</p>
             <ul>
-                <li>Install and use the Software on one computer at a time</li>
-                <li>Make one copy of the Software for backup or archival purposes</li>
+                <li>Install and use the Software on one computer at a time.</li>
+                <li>Make one copy of the Software for backup or archival purposes.</li>
                 <li>Transfer the Software from one computer to another, provided it is used on only one computer at a
-                    time</li>
+                    time.</li>
             </ul>
 
             <h2>2. License Restrictions</h2>
             <p>You may NOT:</p>
             <ul>
                 <li>Rent, lease, lend, sell, redistribute, sublicense or provide commercial hosting services with the
-                    Software</li>
+                    Software.</li>
                 <li>Copy, decompile, reverse engineer, disassemble, attempt to derive the source code of, modify, or
-                    create derivative works of the Software</li>
+                    create derivative works of the Software.</li>
                 <li>Remove, alter, or obscure any copyright, trademark, or other proprietary rights notices from the
-                    Software</li>
+                    Software.</li>
                 <li>Use the Software in any manner that violates any applicable local, state, national, or international
-                    law</li>
-                <li>Share or distribute license keys for the Paid Version</li>
+                    law.</li>
+                <li>Share or distribute license keys for the Paid Version.</li>
             </ul>
 
             <h2>3. Intellectual Property Rights</h2>
@@ -116,11 +116,11 @@
                 Data collected includes:</p>
             <ul>
                 <li>Error and crash reports (error category, exception type, source filename, line number, and method
-                    name; the error message text itself is never sent)</li>
-                <li>Performance diagnostics (slow operations, failed exports, API timeouts)</li>
+                    name; the error message text itself is never sent).</li>
+                <li>Performance diagnostics (slow operations, failed exports, API timeouts).</li>
                 <li>Session data (application version, session duration, operating system) to help us
-                    identify version- and platform-specific issues</li>
-                <li>Geographic information (country, region, timezone)</li>
+                    identify version- and platform-specific issues.</li>
+                <li>Geographic information (country, region, timezone).</li>
             </ul>
             <p>The Software does not collect any financial, transactional, customer, vendor, company, or document
                 content data, nor any city-level location data or per-user identifier. Your IP address is visible to
@@ -196,7 +196,7 @@
             <h2>14. Contact Information</h2>
             <p>If you have any questions about this Agreement, please contact:</p>
             <ul>
-                <li>Email: <a class="link" href="mailto:contact@argorobots.com">contact@argorobots.com</a></li>
+                <li>Email: <a class="link" href="mailto:contact@argorobots.com">contact@argorobots.com</a>.</li>
             </ul>
 
             <p class="last-updated">Last updated: July 8, 2026</p>

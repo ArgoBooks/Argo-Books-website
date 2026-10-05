@@ -102,12 +102,12 @@
             <p>Prohibited behaviors include, but are not limited to:</p>
             <ul>
                 <li>Posting content that is illegal, harmful, threatening, abusive, harassing, tortious, defamatory,
-                    vulgar, or invasive of another's privacy</li>
+                    vulgar, or invasive of another's privacy.</li>
                 <li>Impersonating any person or entity, or falsely stating or otherwise misrepresenting your affiliation
-                    with a person or entity</li>
-                <li>Interfering with or disrupting the Service or servers or networks connected to the Service</li>
-                <li>Collecting or storing personal data about other users without their permission</li>
-                <li>Using the Service for any commercial purpose not expressly permitted by us</li>
+                    with a person or entity.</li>
+                <li>Interfering with or disrupting the Service or servers or networks connected to the Service.</li>
+                <li>Collecting or storing personal data about other users without their permission.</li>
+                <li>Using the Service for any commercial purpose not expressly permitted by us.</li>
             </ul>
 
             <h2>License and Use of Argo Books</h2>
@@ -149,10 +149,10 @@
             <h2>Google API Services</h2>
             <p>The Argo Books desktop application includes a feature to export data to Google Sheets. When you use this feature:</p>
             <ul>
-                <li>You will be prompted to sign in to your Google account and grant permission to the application</li>
-                <li>The application will only access your Google Drive to create and write to spreadsheets</li>
-                <li>We do not store, share, or use your Google data for any other purpose</li>
-                <li>You can revoke this access at any time through your Google Account permissions page</li>
+                <li>You will be prompted to sign in to your Google account and grant permission to the application.</li>
+                <li>The application will only access your Google Drive to create and write to spreadsheets.</li>
+                <li>We do not store, share, or use your Google data for any other purpose.</li>
+                <li>You can revoke this access at any time through your Google Account permissions page.</li>
             </ul>
             <p>By using the Google Sheets export feature, you agree to allow the application to access your Google account for the sole purpose of creating and populating spreadsheets with your chart data. For more information, see our <a class="link" href="privacy.php">Privacy Policy</a>.</p>
 
@@ -224,7 +224,7 @@
             <h2>Contact Us</h2>
             <p>If you have any questions about these Terms, please contact us:</p>
             <ul>
-                <li>By email: <a class="link" href="mailto:contact@argorobots.com">contact@argorobots.com</a></li>
+                <li>By email: <a class="link" href="mailto:contact@argorobots.com">contact@argorobots.com</a>.</li>
             </ul>
 
             <p class="last-updated">Last updated: August 13, 2026</p>
