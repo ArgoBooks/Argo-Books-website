@@ -380,7 +380,7 @@ function stepSendEmails($pdo, $dryRun)
                 }
 
                 $successCount++;
-            } elseif ($reason === 'already_sent' || $reason === 'suppressed') {
+            } elseif ($reason === 'already_sent' || $reason === 'suppressed' || $reason === 'customer') {
                 // Skip outcomes are already logged inside send_outreach_lead;
                 // don't double-log as failures and don't count toward fail tally.
                 logPipeline("Skipped $businessName <$email> (lead #$id): $reason");

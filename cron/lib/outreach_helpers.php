@@ -36,6 +36,43 @@ function log_activity($pdo, $lead_id, $action_type, $details = null)
     $stmt->execute([$lead_id, $action_type, $details]);
 }
 
+// ─── Who outreach must never reach ───
+
+/**
+ * Says why an address must not get outreach, or null when it may.
+ *
+ * Outreach is cold email to strangers. Someone who already pays, holds a licence, has an
+ * account or signed up for the newsletter is not a stranger, and a cold pitch to them reads
+ * as the site not knowing who its own customers are. Anyone who unsubscribed is refused too,
+ * whatever they unsubscribed from.
+ *
+ * Checked when a lead is added and again when each email is sent, because a lead can become a
+ * customer in between.
+ */
+function outreach_known_contact($pdo, $email): ?string
+{
+    $email = strtolower(trim((string) $email));
+    if ($email === '') {
+        return null;
+    }
+
+    $lists = [
+        'unsubscribed'          => 'SELECT 1 FROM email_suppressions WHERE LOWER(email) = ? LIMIT 1',
+        'paying subscriber'     => 'SELECT 1 FROM premium_subscriptions WHERE LOWER(email) = ? LIMIT 1',
+        'licence holder'        => 'SELECT 1 FROM license_keys WHERE LOWER(email) = ? LIMIT 1',
+        'account holder'        => 'SELECT 1 FROM community_users WHERE LOWER(email) = ? LIMIT 1',
+        'newsletter subscriber' => 'SELECT 1 FROM marketing_subscribers WHERE LOWER(email) = ? LIMIT 1',
+    ];
+    foreach ($lists as $reason => $sql) {
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$email]);
+        if ($stmt->fetchColumn()) {
+            return $reason;
+        }
+    }
+    return null;
+}
+
 // ─── Send a Single Outreach Email ───
 
 /**
@@ -48,6 +85,7 @@ function log_activity($pdo, $lead_id, $action_type, $details = null)
  *   'sent':          email delivered, lead marked contacted
  *   'already_sent':  atomic claim lost (another process already sent it)
  *   'suppressed':    email is on the outreach suppression list
+ *   'customer':      the address belongs to someone the site already knows
  *   'invalid_email': lead's email is missing or malformed
  *   'smtp_failed':   SMTP/transport failure (the only "real failure" reason)
  * Existing callers that ignore the param still get the correct bool result.
@@ -86,6 +124,14 @@ function send_outreach_lead($pdo, $lead, &$reason = null)
             $pdo->prepare("UPDATE outreach_leads SET sent_at = NULL WHERE id = ?")->execute([$id]);
             log_activity($pdo, $id, 'email_skipped_suppressed', 'Skipped send: email is on outreach suppression list (' . $email . ')');
             $reason = 'suppressed';
+            return false;
+        }
+
+        $known = outreach_known_contact($pdo, $email);
+        if ($known !== null) {
+            $pdo->prepare("UPDATE outreach_leads SET sent_at = NULL, status = 'disqualified', disqualified_reason = 'existing_contact' WHERE id = ?")->execute([$id]);
+            log_activity($pdo, $id, 'email_skipped_customer', 'Skipped send: the address belongs to an existing contact (' . $known . ')');
+            $reason = 'customer';
             return false;
         }
     }
@@ -455,10 +501,24 @@ function halt_followups_bulk($pdo): array
     $suppStmt->execute();
     $unsubCount = $suppStmt->rowCount();
 
+    // Halt rows for leads who have since become a customer, a subscriber or an account holder.
+    $customerCount = 0;
+    $pending = $pdo->query(
+        "SELECT DISTINCT l.id, l.email FROM outreach_followups f
+           JOIN outreach_leads l ON l.id = f.lead_id
+          WHERE f.status IN ('scheduled', 'drafted', 'approved') AND l.email IS NOT NULL AND l.email != ''"
+    )->fetchAll();
+    foreach ($pending as $lead) {
+        if (outreach_known_contact($pdo, $lead['email']) !== null) {
+            $customerCount += halt_followups_for_lead($pdo, (int) $lead['id'], 'customer');
+        }
+    }
+
     return [
         'replied' => $repliedCount,
         'bounced' => $bouncedCount,
         'unsubscribed' => $unsubCount,
+        'customer' => $customerCount,
     ];
 }
 
