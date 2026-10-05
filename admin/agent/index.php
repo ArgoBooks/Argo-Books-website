@@ -118,13 +118,20 @@ $toggle = function (string $key, string $onTitle, string $onDesc, string $offTit
         . '<span class="segmented-title">' . $h($title) . '</span><span class="segmented-desc">' . $h($desc) . '</span></button></form>';
     return '<div class="segmented-toggle" style="margin-bottom:12px;">' . $button('1', $on, $onTitle, $onDesc) . $button('0', !$on, $offTitle, $offDesc) . '</div>';
 };
+
+/** How many rows a text box needs to show its text without scrolling, within reason. */
+$rows = fn (?string $text, int $least = 6) => max($least, min(28, substr_count(wordwrap((string) $text, 100, "\n", true), "\n") + 2));
 ?>
 
 <link rel="stylesheet" href="../outreach/style.css">
 <style>
     .agent-card { border: 1px solid var(--gray-border); border-radius: 8px; padding: 14px 16px; margin-bottom: 14px; }
-    .agent-card textarea, .agent-note textarea { width: 100%; min-height: 110px; font: inherit; padding: 8px; border: 1px solid var(--gray-border); border-radius: 6px; background: transparent; color: inherit; }
+    .agent-card textarea, .agent-note textarea { width: 100%; min-height: 140px; resize: vertical; box-sizing: border-box; font: inherit; padding: 8px; border: 1px solid var(--gray-border); border-radius: 6px; background: transparent; color: inherit; }
     .agent-card input[type=text] { width: 100%; padding: 8px; border: 1px solid var(--gray-border); border-radius: 6px; background: transparent; color: inherit; }
+    .agent-limits { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px 16px; align-items: end; }
+    .agent-log { max-height: 70vh; overflow-y: auto; }
+    details.agent-card > summary { cursor: pointer; }
+    details.agent-card[open] > summary { margin-bottom: 8px; }
     .agent-meta { font-size: 12px; opacity: .75; margin: 6px 0; }
     .agent-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 10px; }
     .agent-pre { white-space: pre-wrap; margin: 4px 0 0; }
@@ -150,7 +157,7 @@ $toggle = function (string $key, string $onTitle, string $onDesc, string $offTit
                 <?php if ($row['kind'] === 'post'): ?>
                     <strong>Post on <?= $h(ucfirst((string) $row['platform'])) ?></strong>
                     <div class="agent-meta"><?= $h($p['about'] ?? '') ?> &middot; link: <?= $h(($p['link'] ?? '') ?: 'none') ?> &middot; limit <?= (int) (AGENT_PLATFORM_LIMITS[$row['platform']] ?? 0) ?> characters</div>
-                    <textarea name="text"><?= $h($p['text'] ?? '') ?></textarea>
+                    <textarea name="text" rows="<?= $rows($p['text'] ?? '') ?>"><?= $h($p['text'] ?? '') ?></textarea>
                 <?php else: ?>
                     <strong>Email to <?= $h($p['business_name'] ?? '') ?></strong> &lt;<?= $h($p['email'] ?? '') ?>&gt;
                     <div class="agent-meta">
@@ -159,7 +166,7 @@ $toggle = function (string $key, string $onTitle, string $onDesc, string $offTit
                     </div>
                     <div class="agent-meta">Why this business: <?= $h($p['why'] ?? '') ?></div>
                     <input type="text" name="subject" value="<?= $h($p['subject'] ?? '') ?>">
-                    <textarea name="body" style="margin-top:8px; min-height:180px;"><?= $h($p['body'] ?? '') ?></textarea>
+                    <textarea name="body" rows="<?= $rows($p['body'] ?? '', 9) ?>" style="margin-top:8px;"><?= $h($p['body'] ?? '') ?></textarea>
                 <?php endif; ?>
                 <div class="agent-meta">Where its claims come from: <?= $h(implode(' | ', $p['sources'] ?? [])) ?></div>
                 <div class="agent-row">
@@ -215,18 +222,20 @@ $toggle = function (string $key, string $onTitle, string $onDesc, string $offTit
 <div class="panel" id="limits">
     <div class="panel-header"><h2>Limits</h2></div>
     <div class="panel-content">
-        <form method="POST" class="agent-row" style="margin-top:0;">
+        <form method="POST">
             <?= $csrf ?><input type="hidden" name="action" value="limits"><input type="hidden" name="anchor" value="limits">
+            <div class="agent-limits">
             <?php foreach ([
                 'runs_per_day' => 'Runs a day', 'calls_per_run' => 'Requests a run', 'posts_per_day' => 'Posts a day, each platform',
                 'emails_per_day' => 'New outreach emails a day', 'links_per_day' => 'New links a day', 'research_per_day' => 'Research questions a day',
             ] as $key => $label): ?>
                 <div class="form-group" style="margin:0;">
                     <label for="lim-<?= $h($key) ?>"><?= $h($label) ?></label>
-                    <input type="number" min="0" max="1000" id="lim-<?= $h($key) ?>" name="<?= $h($key) ?>" value="<?= agent_limit($pdo, $key) ?>" style="width:120px;">
+                    <input type="number" min="0" max="1000" id="lim-<?= $h($key) ?>" name="<?= $h($key) ?>" value="<?= agent_limit($pdo, $key) ?>">
                 </div>
             <?php endforeach; ?>
-            <button type="submit" class="btn btn-blue">Save</button>
+            </div>
+            <div class="agent-row"><button type="submit" class="btn btn-blue">Save</button></div>
         </form>
     </div>
 </div>
@@ -239,7 +248,7 @@ $toggle = function (string $key, string $onTitle, string $onDesc, string $offTit
             <input type="hidden" name="anchor" value="notes">
             <strong>Your note to the agent</strong>
             <p class="hint" style="margin:4px 0 8px;">It reads this at the start of every run and cannot change it. Use it to steer: who to go after, what to stop doing, what you liked.</p>
-            <textarea name="body"><?= $h($ownerNote) ?></textarea>
+            <textarea name="body" rows="<?= $rows($ownerNote) ?>"><?= $h($ownerNote) ?></textarea>
             <div class="agent-row"><button type="submit" class="btn btn-blue">Save</button></div>
         </form>
         <h3 style="margin:18px 0 6px;">The agent's own notes (<?= count($notes) ?>)</h3>
@@ -249,7 +258,7 @@ $toggle = function (string $key, string $onTitle, string $onDesc, string $offTit
                 <?= $csrf ?><input type="hidden" name="action" value="note"><input type="hidden" name="name" value="<?= $h($note['name']) ?>">
                 <input type="hidden" name="anchor" value="notes">
                 <strong><?= $h($note['name']) ?></strong> <span class="agent-meta">updated <?= $h($note['updated_at']) ?></span>
-                <textarea name="body"><?= $h($note['body']) ?></textarea>
+                <textarea name="body" rows="<?= $rows($note['body']) ?>"><?= $h($note['body']) ?></textarea>
                 <div class="agent-row"><button type="submit" class="btn btn-small btn-blue">Save</button></div>
             </form>
         <?php endforeach; ?>
@@ -258,17 +267,19 @@ $toggle = function (string $key, string $onTitle, string $onDesc, string $offTit
 
 <div class="panel" id="runs">
     <div class="panel-header"><h2>Recent runs</h2></div>
-    <div class="panel-content">
+    <div class="panel-content agent-log">
         <?php if (!$runs): ?><p class="hint" style="margin:0;">It has not run yet.</p><?php endif; ?>
-        <?php foreach ($runs as $run): ?>
-            <div class="agent-card">
-                <strong><?= $h($run['started_at']) ?></strong>
-                <span class="agent-meta">
-                    <?= $run['finished_at'] ? 'finished' : 'did not finish' ?> &middot; <?= (int) $run['api_calls'] ?> requests
-                    &middot; <?= $run['emailed_at'] ? 'update emailed' : 'no update emailed' ?>
-                </span>
+        <?php foreach ($runs as $i => $run): ?>
+            <details class="agent-card"<?= $i === 0 ? ' open' : '' ?>>
+                <summary>
+                    <strong><?= $h($run['started_at']) ?></strong>
+                    <span class="agent-meta">
+                        <?= $run['finished_at'] ? 'finished' : 'did not finish' ?> &middot; <?= (int) $run['api_calls'] ?> requests
+                        &middot; <?= $run['emailed_at'] ? 'update emailed' : 'no update emailed' ?>
+                    </span>
+                </summary>
                 <p class="agent-pre"><?= $h($run['summary'] ?: 'No summary.') ?></p>
-            </div>
+            </details>
         <?php endforeach; ?>
     </div>
 </div>
@@ -276,7 +287,7 @@ $toggle = function (string $key, string $onTitle, string $onDesc, string $offTit
 <div class="panel" id="decided">
     <div class="panel-header"><h2>Posts and emails already decided</h2></div>
     <div class="panel-content">
-        <div class="leads-table-wrapper"><table class="data-table">
+        <div class="leads-table-wrapper agent-log"><table class="data-table">
             <thead><tr><th>When</th><th>What</th><th>Outcome</th><th>Text</th><th>Result</th></tr></thead>
             <tbody>
             <?php foreach ($decided as $row): $p = json_decode((string) $row['payload'], true) ?: []; ?>
@@ -297,14 +308,16 @@ $toggle = function (string $key, string $onTitle, string $onDesc, string $offTit
 
 <div class="panel" id="journal">
     <div class="panel-header"><h2>Journal</h2></div>
-    <div class="panel-content">
+    <div class="panel-content agent-log">
         <?php if (!$journal): ?><p class="hint" style="margin:0;">Empty so far.</p><?php endif; ?>
         <?php foreach ($journal as $entry): ?>
-            <div class="agent-card">
-                <strong><?= $h($entry['title']) ?></strong>
-                <span class="agent-meta"><?= $h($entry['kind']) ?><?= $entry['experiment_key'] ? ' &middot; ' . $h($entry['experiment_key']) : '' ?> &middot; <?= $h($entry['created_at']) ?></span>
+            <details class="agent-card">
+                <summary>
+                    <strong><?= $h($entry['title']) ?></strong>
+                    <span class="agent-meta"><?= $h($entry['kind']) ?><?= $entry['experiment_key'] ? ' &middot; ' . $h($entry['experiment_key']) : '' ?> &middot; <?= $h($entry['created_at']) ?></span>
+                </summary>
                 <p class="agent-pre"><?= $h($entry['body']) ?></p>
-            </div>
+            </details>
         <?php endforeach; ?>
     </div>
 </div>
@@ -312,7 +325,7 @@ $toggle = function (string $key, string $onTitle, string $onDesc, string $offTit
 <div class="panel" id="actions">
     <div class="panel-header"><h2>The site's record of what it did</h2></div>
     <div class="panel-content">
-        <div class="leads-table-wrapper"><table class="data-table">
+        <div class="leads-table-wrapper agent-log"><table class="data-table">
             <thead><tr><th>When</th><th>Run</th><th>Action</th><th>Status</th><th>Detail</th></tr></thead>
             <tbody>
             <?php foreach ($actions as $action): ?>
