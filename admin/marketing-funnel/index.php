@@ -589,6 +589,67 @@ function get_unattributed_survey_breakdown(?string $period_start, string $enviro
     ];
 }
 
+/**
+ * What people said they came to do, from both places the app asks: beside the
+ * source question once someone has started using it ("goals"), and on closing the
+ * app with nothing recorded ("exits"), which also carries what they wrote about
+ * anything that got in the way. Counts every install, attributed or not: this is
+ * about why people came, not where from.
+ *
+ * Returns empty lists if the columns are not there yet, so the rest of the page
+ * still renders.
+ */
+function get_survey_goal_breakdown(?string $period_start, string $environment): array
+{
+    global $pdo;
+
+    $out = ['goals' => [], 'goal_texts' => [], 'exits' => [], 'exit_texts' => []];
+    try {
+        $count_by = static function (string $column, string $dated_by) use ($pdo, $period_start, $environment): array {
+            $where = ['environment = ?', "event_type = 'app_first_run'", "$column IS NOT NULL"];
+            $params = [$environment];
+            if ($period_start !== null) {
+                $where[] = "$dated_by >= ?";
+                $params[] = $period_start;
+            }
+            $stmt = $pdo->prepare(
+                "SELECT $column AS answer, COUNT(*) AS count FROM referral_events
+                  WHERE " . implode(' AND ', $where) . " GROUP BY $column ORDER BY count DESC"
+            );
+            $stmt->execute($params);
+            $rows = [];
+            while ($row = $stmt->fetch()) {
+                $rows[(string)$row['answer']] = (int)$row['count'];
+            }
+            return $rows;
+        };
+        $texts = static function (string $column, string $dated_by) use ($pdo, $period_start, $environment): array {
+            $where = ['environment = ?', "event_type = 'app_first_run'", "$column IS NOT NULL", "$column <> ''"];
+            $params = [$environment];
+            if ($period_start !== null) {
+                $where[] = "$dated_by >= ?";
+                $params[] = $period_start;
+            }
+            $stmt = $pdo->prepare(
+                "SELECT $column AS text FROM referral_events
+                  WHERE " . implode(' AND ', $where) . " ORDER BY $dated_by DESC LIMIT 100"
+            );
+            $stmt->execute($params);
+            return array_map('strval', $stmt->fetchAll(PDO::FETCH_COLUMN));
+        };
+
+        // The goal has no date of its own: it is answered with the source question.
+        $out['goals']      = $count_by('survey_goal', 'source_survey_answered_at');
+        $out['goal_texts'] = $texts('survey_goal_other_text', 'source_survey_answered_at');
+        $out['exits']      = $count_by('exit_survey_answer', 'exit_survey_answered_at');
+        $out['exit_texts'] = $texts('exit_survey_text', 'exit_survey_answered_at');
+    } catch (PDOException $e) {
+        error_log('marketing-funnel survey goal breakdown failed: ' . $e->getMessage());
+    }
+
+    return $out;
+}
+
 function get_campaign_spend_rows(): array
 {
     global $pdo;
@@ -909,6 +970,7 @@ include __DIR__ . '/../admin_header.php';
         // so it doesn't matter whether a specific source pill is selected. It
         // always reflects "users we couldn't attribute by token".
         $survey_breakdown = get_unattributed_survey_breakdown($funnel_period_start_dt, current_environment());
+        $survey_goals = get_survey_goal_breakdown($funnel_period_start_dt, current_environment());
 
         // Plausible-style breakdowns for the channel donut, the referrer /
         // campaign bar lists, and the map / country / region / city
@@ -1347,6 +1409,45 @@ include __DIR__ . '/../admin_header.php';
                 <?php endif; ?>
             </div>
         <?php endif; ?>
+        <?php
+            $goal_labels = survey_choice_labels('goals');
+            $goal_sections = [
+                ['What people came to do (survey)',
+                 'Asked beside the source question, once someone has started using the app.',
+                 $survey_goals['goals'], $survey_goals['goal_texts'], 'What "Something else" respondents said'],
+                ['What people were hoping to do (asked on leaving)',
+                 'Asked once, when someone closes the app without having recorded anything.',
+                 $survey_goals['exits'], $survey_goals['exit_texts'], 'What they said got in the way'],
+            ];
+        ?>
+        <?php foreach ($goal_sections as [$goal_title, $goal_note, $goal_counts, $goal_texts, $goal_texts_title]): ?>
+            <?php if (empty($goal_counts) && empty($goal_texts)) continue; ?>
+            <div class="landing-breakdown">
+                <h3><?php echo htmlspecialchars($goal_title); ?></h3>
+                <p class="muted-note"><?php echo htmlspecialchars($goal_note); ?></p>
+                <?php if (!empty($goal_counts)): ?>
+                    <ul class="survey-other-list">
+                        <?php foreach ($goal_counts as $goal_key => $goal_count): ?>
+                            <li>
+                                <span class="lbl"><?php echo htmlspecialchars($goal_labels[$goal_key] ?? $goal_key); ?></span>
+                                <span class="count">×<?php echo number_format($goal_count); ?></span>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                <?php endif; ?>
+                <?php if (!empty($goal_texts)): ?>
+                    <details class="survey-other-details" open>
+                        <summary><?php echo htmlspecialchars($goal_texts_title); ?> (<?php echo count($goal_texts); ?>)</summary>
+                        <ul class="survey-other-list">
+                            <?php foreach ($goal_texts as $goal_text): ?>
+                                <li><span class="lbl"><?php echo htmlspecialchars($goal_text); ?></span></li>
+                            <?php endforeach; ?>
+                        </ul>
+                    </details>
+                <?php endif; ?>
+            </div>
+        <?php endforeach; ?>
+
 
         <?php
             // Users by source. get_funnel_per_source() has always returned first_runs

@@ -4,13 +4,13 @@
  *
  * GET /api/survey-options.php
  *
- * Returns the option list shown in the desktop app's post-onboarding
- * "Where did you hear about Argo Books?" survey. Options are defined in
- * config/survey-options.json so a new option (e.g. a new platform) can be
- * added without releasing a new app version.
+ * Returns the choices the desktop app offers in its surveys: "options" for
+ * "Where did you hear about Argo Books?" and "goals" for "What did you come to
+ * do?". Both are defined in config/survey-options.json so a new choice (e.g. a
+ * new platform) can be added without releasing a new app version.
  *
- * The app falls back to a bundled default list when this endpoint is
- * unreachable or returns a non-2xx.
+ * The app falls back to bundled default lists when this endpoint is unreachable
+ * or returns a non-2xx, and to its bundled goals when "goals" is absent.
  *
  * Response (200):
  *   {
@@ -18,6 +18,10 @@
  *       { "key": "google", "label": "Google" },
  *       ...
  *       { "key": "other", "label": "Other", "freeform": true }
+ *     ],
+ *     "goals": [
+ *       { "key": "invoices", "label": "Send invoices and get paid" },
+ *       ...
  *     ]
  *   }
  */
@@ -43,4 +47,9 @@ if ($options === null) {
 
 // Allow brief client/proxy caching; option changes propagate within minutes.
 header('Cache-Control: public, max-age=300');
-echo json_encode(['options' => $options]);
+$payload = ['options' => $options];
+$goals = get_survey_goals();
+if ($goals !== null) {
+    $payload['goals'] = $goals;
+}
+echo json_encode($payload);

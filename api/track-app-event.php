@@ -2,7 +2,9 @@
 /**
  * Desktop-app telemetry receiver for funnel events.
  *
- * The Avalonia app POSTs here on first launch after install:
+ * The Avalonia app POSTs here on first launch after install, and again for each of
+ * its two surveys (signup_survey, exit_survey), which fill in columns on the row
+ * the first launch created:
  *   {
  *     "token":       "8c4e2f1a",        // HMAC token from installer filename
  *     "event":       "app_first_run",
@@ -51,7 +53,7 @@ $platform     = (string)($data['platform']     ?? '');
 $app_version  = (string)($data['app_version']  ?? '');
 $machine_uuid = (string)($data['machine_uuid'] ?? '');
 
-if ($event_type !== 'app_first_run' && $event_type !== 'signup_survey') {
+if (!in_array($event_type, ['app_first_run', 'signup_survey', 'exit_survey'], true)) {
     http_response_code(400);
     echo json_encode(['success' => false, 'error' => 'Unsupported event']);
     exit;
@@ -63,100 +65,171 @@ if (!preg_match('/^[a-z]{3,8}$/', $platform)) {
     exit;
 }
 
-// signup_survey: the user answered "Where did you hear about Argo Books?".
-// Update the existing app_first_run row for this machine_uuid in place rather
-// than inserting a new event row (a single first-run row per machine is the
-// funnel's source of truth).
-if ($event_type === 'signup_survey') {
-    $answer = strtolower((string)($data['answer'] ?? ''));
-    // Valid answers come from config/survey-options.json (same source the app
-    // reads), so adding a survey option needs only that one file edit.
-    require_once __DIR__ . '/../config/survey_options.php';
-    $allowed = get_survey_option_keys();
-    if ($allowed === null) {
-        // The options JSON is unavailable (broken deploy). The app is serving its
-        // own bundled fallback list, so validate leniently rather than rejecting
-        // every answer and silently losing survey responses during the outage.
-        // Use the same key format as the JSON path so degraded mode stays consistent.
-        if (!preg_match(SURVEY_KEY_PATTERN, $answer)) {
-            http_response_code(400);
-            echo json_encode(['success' => false, 'error' => 'Invalid answer']);
-            exit;
+/** Ends the request with a 400 and the given reason. */
+function survey_reject(string $error): void
+{
+    http_response_code(400);
+    echo json_encode(['success' => false, 'error' => $error]);
+    exit;
+}
+
+/**
+ * Reads one survey choice from the request: a key from the named list in
+ * config/survey-options.json, plus the text that goes with a freeform choice.
+ * Returns [key, text], both null when the field was not sent and is not required.
+ *
+ * When the options JSON is unavailable (broken deploy) the app is serving its own
+ * bundled list, so the key is checked for shape only. Rejecting every answer would
+ * silently lose survey responses for as long as the outage lasted.
+ */
+function survey_read_choice(array $data, string $field, ?string $textField, string $list, bool $required): array
+{
+    $key = strtolower(trim((string)($data[$field] ?? '')));
+    if ($key === '') {
+        if ($required) {
+            survey_reject('Invalid ' . $field);
         }
-    } elseif (!in_array($answer, $allowed, true)) {
-        http_response_code(400);
-        echo json_encode(['success' => false, 'error' => 'Invalid answer']);
-        exit;
-    }
-    if (!preg_match('/^[0-9a-fA-F-]{32,36}$/', $machine_uuid)) {
-        http_response_code(400);
-        echo json_encode(['success' => false, 'error' => 'Invalid machine_uuid']);
-        exit;
+        return [null, null];
     }
 
-    // Freeform text accompanies any option flagged freeform in the JSON (today
-    // just "other"). Trim, cap at 200 chars, strip control characters so it
-    // stores cleanly. Ignore for non-freeform answers. When the JSON is
-    // unavailable, fall back to the conventional "other" freeform key.
-    $freeform_keys = get_survey_freeform_keys();
-    $is_freeform = $freeform_keys === null
-        ? ($answer === 'other')
-        : in_array($answer, $freeform_keys, true);
-    $other_text = null;
-    if ($is_freeform) {
-        $raw_other = trim((string)($data['other_text'] ?? ''));
-        if ($raw_other === '') {
-            http_response_code(400);
-            echo json_encode(['success' => false, 'error' => 'Missing other_text']);
-            exit;
+    $allowed = survey_choice_keys($list);
+    $valid = $allowed === null ? (bool)preg_match(SURVEY_KEY_PATTERN, $key) : in_array($key, $allowed, true);
+    if (!$valid) {
+        survey_reject('Invalid ' . $field);
+    }
+
+    // No text field means the caller takes its text separately and does not require it.
+    $freeform = survey_choice_keys($list, true);
+    $is_freeform = $freeform === null ? ($key === 'other') : in_array($key, $freeform, true);
+    if (!$is_freeform || $textField === null) {
+        return [$key, null];
+    }
+
+    $text = survey_clean_text($data[$textField] ?? '', 200);
+    if ($text === null) {
+        survey_reject('Missing ' . $textField);
+    }
+    return [$key, $text];
+}
+
+/** Trims free text, strips control characters and caps its length. Null when empty. */
+function survey_clean_text($value, int $max): ?string
+{
+    $text = preg_replace('/[\x00-\x1F\x7F]/u', ' ', trim((string)$value));
+    $text = trim((string)$text);
+    if ($text === '') {
+        return null;
+    }
+    return mb_strlen($text) > $max ? mb_substr($text, 0, $max) : $text;
+}
+
+/**
+ * The app_first_run row a survey answer belongs to: the most recent one for this
+ * machine, in this environment. Production and sandbox share one database, so
+ * without the filter a sandbox test row would answer a production survey.
+ */
+function survey_first_run_row_id(string $machine_uuid): ?int
+{
+    global $pdo;
+    $find = $pdo->prepare(
+        "SELECT id FROM referral_events
+          WHERE event_type = 'app_first_run'
+            AND environment = ?
+            AND JSON_UNQUOTE(JSON_EXTRACT(event_data, '$.machine_uuid')) = ?
+          ORDER BY created_at DESC LIMIT 1"
+    );
+    $find->execute([current_environment(), $machine_uuid]);
+    $row = $find->fetch();
+    return $row === false ? null : (int)$row['id'];
+}
+
+// Both surveys update the existing app_first_run row for this machine_uuid in
+// place rather than inserting a new event row (a single first-run row per machine
+// is the funnel's source of truth).
+if ($event_type === 'signup_survey' || $event_type === 'exit_survey') {
+    require_once __DIR__ . '/../config/survey_options.php';
+
+    if (!preg_match('/^[0-9a-fA-F-]{32,36}$/', $machine_uuid)) {
+        survey_reject('Invalid machine_uuid');
+    }
+
+    if ($event_type === 'signup_survey') {
+        // "Where did you hear about Argo Books?", and from 2.0.20 "What did you come
+        // to do?" beside it. Older versions send only the first. A newer one sends
+        // only the second when the source is already known, either because the
+        // install came through a tracked link or because it was answered earlier.
+        [$answer, $other_text] = survey_read_choice($data, 'answer', 'other_text', 'options', false);
+        [$goal, $goal_text] = survey_read_choice($data, 'goal', 'goal_other_text', 'goals', false);
+        if ($answer === null && $goal === null) {
+            survey_reject('Invalid answer');
         }
-        $other_text = preg_replace('/[\x00-\x1F\x7F]/u', '', $raw_other);
-        if (mb_strlen($other_text) > 200) {
-            $other_text = mb_substr($other_text, 0, 200);
+    } else {
+        // Asked once, when someone closes the app without having recorded anything.
+        // A goal, a note on what got in the way, or both.
+        [$goal, ] = survey_read_choice($data, 'answer', null, 'goals', false);
+        $exit_text = survey_clean_text($data['other_text'] ?? '', 500);
+        if ($goal === null && $exit_text === null) {
+            survey_reject('Empty answer');
         }
     }
 
     try {
-        // Find the most recent app_first_run row for this machine, in this
-        // environment. Production and sandbox share one database, so without
-        // the filter a sandbox test row would answer a production survey.
-        $find = $pdo->prepare(
-            "SELECT id FROM referral_events
-              WHERE event_type = 'app_first_run'
-                AND environment = ?
-                AND JSON_UNQUOTE(JSON_EXTRACT(event_data, '$.machine_uuid')) = ?
-              ORDER BY created_at DESC LIMIT 1"
-        );
-        $find->execute([current_environment(), $machine_uuid]);
-        $row = $find->fetch();
-        if ($row === false) {
-            // Survey arrived before first-run was logged. Desktop only fires
-            // the survey after the first-run marker is written, so this is
-            // exceptional. Respond 200 with deferred=true so the client doesn't
-            // retry forever.
+        $row_id = survey_first_run_row_id($machine_uuid);
+        if ($row_id === null) {
+            // The answer arrived before first-run was logged. The app only asks
+            // after the first-run marker is written, so this is exceptional.
+            // Respond 200 with deferred=true so the client doesn't retry forever.
             echo json_encode(['success' => true, 'deferred' => true]);
             exit;
         }
 
-        // The IS NULL guard makes this idempotent: a second submission for the
-        // same machine is silently dropped.
-        $upd = $pdo->prepare(
-            "UPDATE referral_events
-                SET source_survey_answer = ?,
-                    source_survey_other_text = ?,
-                    source_survey_answered_at = NOW()
-              WHERE id = ? AND source_survey_answer IS NULL"
-        );
-        $upd->execute([$answer, $other_text, $row['id']]);
+        if ($event_type === 'exit_survey') {
+            // The IS NULL guard makes this idempotent: a second submission for the
+            // same machine is silently dropped.
+            $pdo->prepare(
+                "UPDATE referral_events
+                    SET exit_survey_answer = ?,
+                        exit_survey_text = ?,
+                        exit_survey_answered_at = NOW()
+                  WHERE id = ? AND exit_survey_answered_at IS NULL"
+            )->execute([$goal, $exit_text, $row_id]);
 
-        echo json_encode(['success' => true]);
-        exit;
+            echo json_encode(['success' => true]);
+            exit;
+        }
+
+        if ($answer !== null) {
+            $pdo->prepare(
+                "UPDATE referral_events
+                    SET source_survey_answer = ?,
+                        source_survey_other_text = ?,
+                        source_survey_answered_at = NOW()
+                  WHERE id = ? AND source_survey_answer IS NULL"
+            )->execute([$answer, $other_text, $row_id]);
+        }
     } catch (PDOException $e) {
-        error_log('track-app-event signup_survey failed: ' . $e->getMessage());
+        error_log("track-app-event $event_type failed: " . $e->getMessage());
         http_response_code(500);
         echo json_encode(['success' => false, 'error' => 'Server error']);
         exit;
     }
+
+    // The goal is written on its own so that a problem with it, such as its columns
+    // not having been added yet, cannot lose the source answer above.
+    if ($goal !== null) {
+        try {
+            $pdo->prepare(
+                "UPDATE referral_events
+                    SET survey_goal = ?, survey_goal_other_text = ?
+                  WHERE id = ? AND survey_goal IS NULL"
+            )->execute([$goal, $goal_text, $row_id]);
+        } catch (PDOException $e) {
+            error_log('track-app-event survey goal failed: ' . $e->getMessage());
+        }
+    }
+
+    echo json_encode(['success' => true]);
+    exit;
 }
 
 /**

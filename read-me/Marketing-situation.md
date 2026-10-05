@@ -74,14 +74,18 @@ The gap is contact, not data.
 
 - **Desktop telemetry** reports on every install: sessions, page views, feature usage, errors, startup timings, company scale. Read it at `/admin/app-stats/`.
 - **Website analytics** cover the whole funnel by source, at `/admin/marketing-funnel/` and `/admin/website-stats/`.
-- **An in-app survey** asks "Where did you hear about Argo Books?" when there is no referral data (`ArgoBooks/Controls/SourceSurveyOverlay.axaml`). Its options are served by the website from `/api/survey-options.php`, so they can be changed without shipping an app update, and answers post back to the site.
+- **An in-app survey** asks two questions once someone has recorded their first expense: "Where did you hear about Argo Books?", only when there is no referral data, and from 2.0.20 "What do you mainly want to use it for?", asked of everyone (`ArgoBooks/Controls/SourceSurveyOverlay.axaml`). The choices for both are served by the website from `/api/survey-options.php`, so they can be changed without shipping an app update, and answers post back to the site.
+- **A closing question** (2.0.20) reaches the people the survey never does. The first time someone closes the app without having recorded anything, it asks what they were hoping to do and whether anything got in the way. It is asked once and can be skipped (`ArgoBooks/Controls/ExitSurveyOverlay.axaml`).
+- **A review request** (2.0.20) appears on the dashboard once someone has had the app for two weeks and recorded ten things, and opens `/review/`. It is shown once and can be dismissed.
+
+Both sets of answers are on `/admin/marketing-funnel/`, under the source survey, and on each person's card at `/admin/app-stats/?tab=user-activity`.
 
 What is missing:
 
 - **No email address for free users.** Only paying customers hand one over. There is no account requirement at install, deliberately, because "no account, runs on your computer" is part of the positioning, and reduces friction.
 - **Community accounts are not linked to telemetry.** 8 people signed up on the website, and there is no way to tell which of them ever ran the app.
 
-The cheap ways to narrow it, none of which require an account at install: ask more than the source question in the existing survey (what they came to do, what stopped them), or offer an optional email field in the app for people who want to be told about updates.
+The app already offers an optional email sign-up for update news, on the dashboard once someone has recorded something. It needs no account. Check how many have used it before building anything more for this gap.
 
 ## What has been tried
 

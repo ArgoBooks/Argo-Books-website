@@ -346,6 +346,47 @@ if ($ua_deviceHashes && isset($pdo)) {
     } catch (PDOException $e) {
         error_log('user-activity referral lookup failed: ' . $e->getMessage());
     }
+
+    // What each person said they came to do, and what they said on the way out. Read on
+    // its own so that a problem here cannot take the referral lookup above with it.
+    try {
+        $ua_goalLabels = survey_choice_labels('goals');
+        $ua_gstmt = $pdo->prepare("
+            SELECT JSON_UNQUOTE(JSON_EXTRACT(event_data, '$.device_hash')) AS device_hash,
+                   survey_goal, survey_goal_other_text, exit_survey_answer, exit_survey_text
+            FROM referral_events
+            WHERE event_type = 'app_first_run'
+              AND environment = ?
+              AND JSON_UNQUOTE(JSON_EXTRACT(event_data, '$.device_hash')) IN ($ua_ph)
+              AND (survey_goal IS NOT NULL OR exit_survey_answered_at IS NOT NULL)
+            ORDER BY created_at ASC
+        ");
+        $ua_gstmt->execute(array_merge([current_environment()], $ua_deviceHashes));
+        foreach ($ua_gstmt->fetchAll(PDO::FETCH_ASSOC) as $ua_row) {
+            $ua_ref =& $ua_referrals[$ua_row['device_hash']];
+            $ua_ref ??= ['link' => null, 'linkCode' => null, 'survey' => null,
+                         'visitorId' => null, 'premium' => null];
+            if (empty($ua_ref['goal']) && !empty($ua_row['survey_goal'])) {
+                $ua_ref['goal'] = $ua_goalLabels[$ua_row['survey_goal']] ?? $ua_row['survey_goal'];
+                if (!empty($ua_row['survey_goal_other_text'])) {
+                    $ua_ref['goal'] .= ': ' . $ua_row['survey_goal_other_text'];
+                }
+            }
+            if (empty($ua_ref['exit']) && ($ua_row['exit_survey_answer'] !== null || $ua_row['exit_survey_text'] !== null)) {
+                $ua_parts = [];
+                if (!empty($ua_row['exit_survey_answer'])) {
+                    $ua_parts[] = $ua_goalLabels[$ua_row['exit_survey_answer']] ?? $ua_row['exit_survey_answer'];
+                }
+                if (!empty($ua_row['exit_survey_text'])) {
+                    $ua_parts[] = '"' . $ua_row['exit_survey_text'] . '"';
+                }
+                $ua_ref['exit'] = implode(' ', $ua_parts);
+            }
+            unset($ua_ref);
+        }
+    } catch (PDOException $e) {
+        error_log('user-activity survey goal lookup failed: ' . $e->getMessage());
+    }
 }
 
 // Most recent first, whatever the tier, so the list reads the same at every tier setting.
@@ -531,6 +572,7 @@ if (!function_exists('ua_fmt')) {
             ' ' . ($u['licenseKey'] ?? '') .
             // So "youtube" pulls up everyone a video brought in.
             ' ' . ($ua_ref['link'] ?? '') . ' ' . ($ua_ref['linkCode'] ?? '') . ' ' . ($ua_ref['survey'] ?? '')
+            . ' ' . ($ua_ref['goal'] ?? '') . ' ' . ($ua_ref['exit'] ?? '')
         ));
     ?>
     <tr class="ua-user"<?= $u['isFounder'] ? ' data-founder="1"' : '' ?> data-search="<?= htmlspecialchars($ua_haystack) ?>">
@@ -582,6 +624,12 @@ if (!function_exists('ua_fmt')) {
                     <span>said "<?= htmlspecialchars($ua_ref['survey']) ?>"</span>
                 <?php endif; ?>
             </div>
+        <?php endif; ?>
+        <?php if ($ua_ref !== null && !empty($ua_ref['goal'])): ?>
+            <div class="ua-row"><b>Came to:</b> <span><?= htmlspecialchars($ua_ref['goal']) ?></span></div>
+        <?php endif; ?>
+        <?php if ($ua_ref !== null && !empty($ua_ref['exit'])): ?>
+            <div class="ua-row"><b>Said on leaving:</b> <span><?= htmlspecialchars($ua_ref['exit']) ?></span></div>
         <?php endif; ?>
         <?php if ($ua_ref !== null && !empty($ua_ref['premium'])):
             $ua_prem = $ua_ref['premium'];

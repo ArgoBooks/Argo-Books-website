@@ -11,5 +11,15 @@
         { "key": "microsoftstore", "label": "Microsoft Store" },
         { "key": "homebrew",    "label": "Homebrew" },
         { "key": "other",       "label": "Other", "freeform": true }
+    ],
+    "goals": [
+        { "key": "invoices",   "label": "Send invoices and get paid" },
+        { "key": "track",      "label": "Track income and expenses" },
+        { "key": "receipts",   "label": "Scan and store receipts" },
+        { "key": "switch",     "label": "Move from QuickBooks or a spreadsheet" },
+        { "key": "inventory",  "label": "Manage stock or rentals" },
+        { "key": "payroll",    "label": "Run payroll" },
+        { "key": "looking",    "label": "Just looking around" },
+        { "key": "other",      "label": "Something else", "freeform": true }
     ]
 }
