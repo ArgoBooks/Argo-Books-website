@@ -1341,16 +1341,15 @@ include __DIR__ . '/../admin_header.php';
             $survey_unanswered = (int)$survey_breakdown['unanswered'];
             $survey_total = array_sum($survey_by_answer) + $survey_unanswered;
             $survey_show = $survey_total > 0;
-            $survey_option_order = ['google','bing','youtube','reddit','friend','email','other'];
-            $survey_option_labels = [
-                'google'  => 'Google',
-                'bing'    => 'Bing',
-                'youtube' => 'YouTube',
-                'reddit'  => 'Reddit',
-                'friend'  => 'A friend',
-                'email'   => 'Email',
-                'other'   => 'Other',
-            ];
+            // The choices come from the same file the app is served, so a source added
+            // there is drawn here too. An answer whose choice has since been removed
+            // keeps its key as its label rather than dropping out of the chart.
+            require_once __DIR__ . '/../../config/survey_options.php';
+            $survey_option_labels = survey_choice_labels('options');
+            foreach (array_keys($survey_by_answer) as $answered) {
+                $survey_option_labels[$answered] ??= $answered;
+            }
+            $survey_option_order = array_keys($survey_option_labels);
 
             // Build chart arrays (skip zero-count buckets so the doughnut isn't
             // cluttered with empty legend entries). Unanswered is included as a
@@ -1409,6 +1408,7 @@ include __DIR__ . '/../admin_header.php';
                 <?php endif; ?>
             </div>
         <?php endif; ?>
+
         <?php
             $goal_labels = survey_choice_labels('goals');
             $goal_sections = [
@@ -1447,7 +1447,6 @@ include __DIR__ . '/../admin_header.php';
                 <?php endif; ?>
             </div>
         <?php endforeach; ?>
-
 
         <?php
             // Users by source. get_funnel_per_source() has always returned first_runs
