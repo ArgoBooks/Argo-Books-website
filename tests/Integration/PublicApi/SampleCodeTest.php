@@ -7,6 +7,7 @@ use PDO;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
+use Tests\Helpers\LocalApiServer;
 
 /**
  * Runs every code sample printed in the API documentation.
@@ -25,9 +26,10 @@ use PHPUnit\Framework\TestCase;
 #[Group('doc-samples')]
 final class SampleCodeTest extends TestCase
 {
+    use LocalApiServer;
+
     private static ?string $baseUrl = null;
     private static string $apiKey = '';
-    private static $server = null;
     private static ?string $csharpDir = null;
     private static string $csharpError = '';
     private static int $accountId = 0;
@@ -39,16 +41,12 @@ final class SampleCodeTest extends TestCase
         self::clearAuthThrottle();
         self::ensureSchema();
         self::seedAccount();
-        self::startServer();
+        self::$baseUrl = self::startApiServer() . '/v1';
     }
 
     public static function tearDownAfterClass(): void
     {
-        if (is_resource(self::$server)) {
-            proc_terminate(self::$server);
-            proc_close(self::$server);
-            self::$server = null;
-        }
+        self::stopApiServer();
         if (self::$accountId > 0) {
             $GLOBALS['pdo']->prepare('DELETE FROM api_accounts WHERE id = ?')->execute([self::$accountId]);
         }
@@ -129,46 +127,6 @@ final class SampleCodeTest extends TestCase
         ]);
 
         self::$apiKey = $secret;
-    }
-
-    private static function startServer(): void
-    {
-        $port = self::freePort();
-        $router = __DIR__ . '/sample-router.php';
-
-        self::$server = proc_open(
-            [PHP_BINARY, '-S', "127.0.0.1:$port", '-t', PROJECT_ROOT, $router],
-            [1 => ['file', self::devNull(), 'w'], 2 => ['file', self::devNull(), 'w']],
-            $pipes
-        );
-
-        self::$baseUrl = "http://127.0.0.1:$port/v1";
-
-        // Wait for it to accept connections rather than guessing at a sleep.
-        for ($i = 0; $i < 100; $i++) {
-            $socket = @fsockopen('127.0.0.1', $port, $errno, $errstr, 0.2);
-            if ($socket) {
-                fclose($socket);
-                return;
-            }
-            usleep(50000);
-        }
-
-        self::fail('the sample test server never started on port ' . $port);
-    }
-
-    private static function devNull(): string
-    {
-        return DIRECTORY_SEPARATOR === '\\' ? 'NUL' : '/dev/null';
-    }
-
-    private static function freePort(): int
-    {
-        $socket = stream_socket_server('tcp://127.0.0.1:0', $errno, $errstr);
-        $name = stream_socket_get_name($socket, false);
-        fclose($socket);
-
-        return (int) substr($name, strrpos($name, ':') + 1);
     }
 
     private static function removeTree(string $dir): void
