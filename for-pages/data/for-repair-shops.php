@@ -41,7 +41,7 @@ return [
 
     'honest_h3' => 'What Argo Books isn\'t',
     'honest' => [
-        'Argo Books is bookkeeping software, not shop management software. It does not run a work-order queue, send pickup-ready texts to customers, or look up labor times from a VIN. If you need Shopmonkey, Tekmetric, or RepairShopr for the front-of-shop workflow, run them side by side: those for the queue, Argo Books for your books. It does payroll for Canadian staff, but not for staff outside Canada. If those are dealbreakers, that\'s fair. If they\'re not, the desktop app is free, the books stay simple, and your data stays on your computer.',
+        'Argo Books is bookkeeping software, not shop management software. It does not run a work-order queue, send pickup-ready texts to customers, or look up labor times from a VIN. If you need Shopmonkey, Tekmetric, or RepairShopr for the front-of-shop workflow, run them side by side: those for the queue, Argo Books for your books. Payroll is for staff in Canada only. If those are dealbreakers, that\'s fair. If they\'re not, the desktop app is free, the books stay simple, and your data stays on your computer.',
     ],
 
     'pricing_h2' => 'Start free, upgrade only if you need more',

@@ -31,17 +31,21 @@ return [
 
     'features_label' => 'Made for Detailers',
     'features_h2' => 'Tiered packages, real margins, less paperwork',
-    'features_desc' => 'Detailing is the package menu (express, full, ceramic coating), the up-charge when the back seat has more dog hair than fabric, and the supply stack that keeps growing in the trailer. Mobile or shop-based, solo or with a few hands, the work that builds the business is repeat customers paying premium for premium work. Argo Books handles the books so you can keep cutting paint.',
+    'features_desc' => 'Detailing is the package menu (express, full, ceramic coating), the up-charge when the back seat has more dog hair than fabric, and the supply stack that keeps growing in the trailer. Mobile or shop-based, solo or with a few hands, the work that builds the business is repeat customers paying premium for premium work. Argo Books keeps the books, so your time goes to the cars.',
     'benefits' => [
         ['icon' => 'document-lines', 'h3' => 'Base package and add-ons on one clean invoice', 'p' => 'Express, Full, or Ceramic Coating on the top line. Pet hair, heavy dirt, headlight restoration, or engine bay each on their own line. The customer sees the base price and what the extras added, which keeps the up-charge conversation short and the bill itemized.'],
-        ['icon' => 'refresh', 'h3' => 'Recurring invoices for memberships and fleet accounts', 'p' => 'Monthly maintenance memberships and weekly fleet washes both run on the same recurring engine. Set the client, the package, and the frequency once, and the invoice goes out on time every cycle.'],
+        ['icon' => 'send', 'h3' => 'Quotes the customer accepts online', 'p' => 'Price a ceramic coating or a paint correction and send it as a link. The customer accepts or declines on their phone, with nothing to install and no account to make. An accepted quote becomes a draft invoice in one click, and quotes are unlimited on the free plan.'],
+        ['icon' => 'refresh', 'h3' => 'Recurring invoices for memberships and fleet accounts', 'p' => 'Monthly maintenance memberships and weekly fleet washes run on the same schedule. Set the client, the package, and the frequency once, and a draft invoice is waiting for you every cycle, ready to check and send.'],
+        ['icon' => 'credit-card', 'h3' => 'Card payments straight from the invoice', 'p' => 'On Premium, every invoice carries a link the customer can pay by card. The money goes through your own Stripe or Square account, and a paid invoice is recorded as revenue without a second entry.'],
         ['icon' => 'receipt-scan-detail', 'h3' => 'Snap a receipt from the detail supply house or the gas station', 'p' => 'Take a photo and Argo Books pulls the vendor, date, and amount automatically. Tag it Supplies, Ceramic Products, Fuel, or Equipment so you can actually see what the supply stack costs you each month and price the next package accordingly.'],
+        ['icon' => 'user', 'h3' => 'Every customer\'s history in one place', 'p' => 'Each customer has one record: contact details, every job you have invoiced them for, and what they still owe. When a regular calls, you can see what they had last time before you quote the next one.'],
+        ['icon' => 'bar-chart', 'h3' => 'See which packages earn, and hand tax time to your accountant', 'p' => 'Sales by Product shows which packages and add-ons bring in the money. The Income Statement and Tax Summary are built in and free. At year end, send your accountant the statements, every transaction, and the receipts in one go.'],
         ['icon' => 'shield-check', 'h3' => 'Works offline in the driveway, free tier covers solo detailers', 'p' => 'Argo Books runs natively on Windows, macOS, and Linux. No internet needed in the customer\'s driveway, no monthly subscription climbing every year. Mobile detailers can build the invoice with no signal, send it when they\'re back in coverage. The free tier covers most solo detailers forever.'],
     ],
 
     'honest_h3' => 'What Argo Books isn\'t',
     'honest' => [
-        'Argo Books is bookkeeping software, not booking software. It does not run a customer-facing booking calendar, take online appointments through your website, or send "on the way" texts before you arrive. Mobile Tech RX, Urable, and DetailPlus handle that side. It also does not run a dedicated ceramic coating warranty database. If you need either, run them alongside Argo Books: those for booking and warranties, Argo Books for the books. It does payroll for Canadian staff, but not for staff outside Canada. If those are dealbreakers, that\'s fair. If they\'re not, the desktop app is free, the books stay simple, and your data stays on your computer.',
+        'Argo Books is bookkeeping software, not booking software. It does not run a customer-facing booking calendar, take online appointments through your website, or send "on the way" texts before you arrive. Mobile Tech RX, Urable, and DetailPlus handle that side. It also does not run a dedicated ceramic coating warranty database. If you need either, run them alongside Argo Books: those for booking and warranties, Argo Books for the books. Payroll is for staff in Canada only. If those are dealbreakers, that\'s fair. If they\'re not, the desktop app is free, the books stay simple, and your data stays on your computer.',
     ],
 
     'pricing_h2' => 'Start free, upgrade only if you need more',
@@ -68,6 +72,8 @@ return [
         ['q_html' => 'Is it really free?', 'a_html' => '<p>Yes, forever. The free tier covers all core features and ' . $free_invoices . ' invoices per month.</p>
                             <p>Premium ($' . $argo_monthly . ' CAD/month) adds predictive analytics, unlimited invoicing, and priority support. No credit card to start.</p>'],
     ],
+
+    'guide_link' => 'Want the bookkeeping side in plain language? Read our guide to <a href="../bookkeeping-for-auto-detailing/">bookkeeping for auto detailing</a>.',
 
     'cta_h2' => 'Ready to bill like the work is worth it?',
     'cta_p' => 'Download Argo Books for free. Set up your first package, scan a supply receipt, and send a detailing invoice in under ten minutes.',

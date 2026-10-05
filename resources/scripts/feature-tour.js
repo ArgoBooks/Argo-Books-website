@@ -734,8 +734,18 @@ document.addEventListener('DOMContentLoaded', function () {
         // resets its own state at the top of each pass, so a single call loops
         // forever. The receipt scan self-starts above and needs nothing here.
         const heroDemo = document.querySelector('[data-feature-demo]');
-        if (heroDemo && tabBtns.length === 0) {
+        if (heroDemo) {
             startTabAnimation(heroDemo.dataset.featureDemo);
+            // Beside a tab strip (the trade pages) the hero keeps looping whatever
+            // tab is clicked, so its timers must not be the ones a click clears.
+            if (tabBtns.length) activeTabAnimation = null;
+        }
+
+        // The tab strip normally opens on the receipt scan, which self-starts. A
+        // page that leaves that tab out opens on another, which needs starting.
+        const firstTab = document.querySelector('.tab-btn.active');
+        if (firstTab && firstTab.dataset.tab !== 'ai-receipts') {
+            startTabAnimation(firstTab.dataset.tab);
         }
 
 });

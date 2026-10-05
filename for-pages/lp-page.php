@@ -215,6 +215,14 @@ $faqs = $d['faqs'];
         </div>
     </section>
 
+    <?php
+    // The rest of the app, shown rather than described. The hero already plays
+    // one of these demos, so the tour leaves that tab out.
+    $ft_id = 'tour';
+    $ft_skip = $d['demo'];
+    include __DIR__ . '/../resources/sections/feature-tour.php';
+    ?>
+
     <section class="honest-take">
         <div class="container">
             <div class="honest-card animate-on-scroll">

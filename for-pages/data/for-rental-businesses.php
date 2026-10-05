@@ -41,7 +41,7 @@ return [
 
     'honest_h3' => 'What Argo Books isn\'t',
     'honest' => [
-        'Argo Books has rental management for the operating and bookkeeping side, but it is not an online booking platform. It does not run a reservation calendar on your website, send automated pickup-and-return SMS reminders, or handle customer-facing self-service rentals. If those are critical, Booqable, Rentle, or EZRentOut handle the booking, and Argo Books handles the books. It does payroll for Canadian staff, but not for staff outside Canada. If those are dealbreakers, that\'s fair. If they\'re not, the desktop app is free, the rental tracking is built in, and your data stays on your computer.',
+        'Argo Books has rental management for the operating and bookkeeping side, but it is not an online booking platform. It does not run a reservation calendar on your website, send automated pickup-and-return SMS reminders, or handle customer-facing self-service rentals. If those are critical, Booqable, Rentle, or EZRentOut handle the booking, and Argo Books handles the books. Payroll is for staff in Canada only. If those are dealbreakers, that\'s fair. If they\'re not, the desktop app is free, the rental tracking is built in, and your data stays on your computer.',
     ],
 
     'pricing_h2' => 'Start free, upgrade only if you need more',
