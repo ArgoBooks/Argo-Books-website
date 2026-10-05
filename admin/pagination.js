@@ -25,7 +25,7 @@ class TablePaginator {
         this.controlsEl.className = 'pagination-controls';
 
         // Insert controls after the table's scroll wrapper or parent
-        const wrapper = tableEl.closest('.table-responsive') || tableEl.closest('.leads-table-wrapper') || tableEl.closest('.discovery-table-wrapper') || tableEl.parentElement;
+        const wrapper = tableEl.closest('.table-responsive') || tableEl.closest('.leads-table-wrapper') || tableEl.parentElement;
         wrapper.after(this.controlsEl);
 
         this.update();

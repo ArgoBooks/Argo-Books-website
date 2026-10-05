@@ -88,20 +88,20 @@ php /home/argorobots/public_html/cron/account_purge.php
 
 ### What It Does
 
-1. Picks the next target city from the expansion list
-2. Discovers businesses via Google Places API
-3. Imports them as leads (skips duplicates)
-4. Generates AI email drafts for leads that don't have one
-5. Auto-approves drafts (configurable)
-6. Sends approved emails up to the daily limit
+It works through the leads already on the admin Outreach page. It does not find leads: they are added there by hand or by CSV.
+
+1. Generates AI email drafts for leads that don't have one
+2. Auto-approves drafts (configurable)
+3. Sends approved emails up to the daily limit
+4. Stops follow-ups for leads who replied, unsubscribed or bounced
+5. Drafts and sends the follow-ups that are due
 
 ### Environment Variables
 
 | Variable | Default | Description |
 |---|---|---|
-| `GOOGLE_PLACES_API_KEY` | (required) | Required for business discovery. Must have **Places API (New)** enabled in Google Cloud Console (uses `places.googleapis.com/v1/places:searchText`, not the legacy `maps.googleapis.com/maps/api/place/...` endpoints). |
 | `GEMINI_API_KEY` | (required) | Required for AI draft generation |
-| `OUTREACH_DAILY_SEND_LIMIT` | 10 | Max first-touch emails sent per day (also controls discovery and draft batch sizes) |
+| `OUTREACH_DAILY_SEND_LIMIT` | 10 | Max first-touch emails sent per day |
 | `OUTREACH_DAILY_FOLLOWUP_LIMIT` | 30 | Max follow-up emails sent per day (separate cap, oldest-due first) |
 
 The Auto-send vs Review-before-send mode is controlled at runtime via the **Settings tab** in the admin (writes to `outreach_pipeline_state.auto_send_mode`); no env var is needed.
@@ -110,8 +110,6 @@ The Auto-send vs Review-before-send mode is controlled at runtime via the **Sett
 
 ```bash
 php outreach_pipeline.php                  # Run full pipeline
-php outreach_pipeline.php --discover-only  # Only discover + import businesses (Google Places + Shopify)
-php outreach_pipeline.php --shopify-only   # Only run Shopify discovery
 php outreach_pipeline.php --draft-only     # Only generate AI drafts
 php outreach_pipeline.php --send-only      # Only send approved emails
 php outreach_pipeline.php --dry-run        # Log what would happen without doing it

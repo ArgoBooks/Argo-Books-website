@@ -36,14 +36,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['tab'])) {
 
 // Determine active tab from ?tab=
 $activeTab = $_GET['tab'] ?? 'leads';
-$allowedTabs = ['discovery', 'leads', 'followups', 'settings'];
+$allowedTabs = ['leads', 'followups', 'settings'];
 if (!in_array($activeTab, $allowedTabs, true)) {
     $activeTab = 'leads';
 }
 
 // Set page variables for the header
 $page_title = "Business Outreach";
-$page_description = "Find local businesses, generate outreach emails, and track leads";
+$page_description = "Generate outreach emails and track leads";
 
 include __DIR__ . '/../admin_header.php';
 ?>
@@ -73,188 +73,16 @@ if (!in_array($activeChannel, ['email', 'editorial', 'creator'], true)) {
 
 <!-- Page-level tabs -->
 <div class="section-tabs">
-    <button class="section-tab <?php echo $activeTab === 'discovery' ? 'active' : ''; ?>" data-tab="discovery">Discovery</button>
     <button class="section-tab <?php echo $activeTab === 'leads' ? 'active' : ''; ?>" data-tab="leads">Leads</button>
     <button class="section-tab <?php echo $activeTab === 'followups' ? 'active' : ''; ?>" data-tab="followups">Follow-ups</button>
     <button class="section-tab <?php echo $activeTab === 'settings' ? 'active' : ''; ?>" data-tab="settings">Settings</button>
 </div>
 
-<div id="discovery" class="tab-content <?php echo $activeTab === 'discovery' ? 'active' : ''; ?>">
-
-<!-- Google Places Discovery Panel -->
-<div class="panel discovery-panel">
-    <div class="panel-header" onclick="togglePanel('discoveryContent')">
-        <h2><?= svg_icon('search', 18) ?> Google Places</h2>
-        <span class="panel-toggle" id="discoveryToggle">&#9660;</span>
-    </div>
-    <div class="panel-content" id="discoveryContent">
-        <div class="discovery-form">
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="discCity">City <span class="required">*</span></label>
-                    <input type="text" id="discCity" placeholder="e.g. Saskatoon" required>
-                </div>
-                <div class="form-group">
-                    <label for="discProvince">Province / State</label>
-                    <input type="text" id="discProvince" placeholder="e.g. Saskatchewan">
-                </div>
-                <div class="form-group">
-                    <label for="discCategory">Category / Industry</label>
-                    <input type="text" id="discCategory" placeholder="e.g. landscaping, cleaners">
-                </div>
-                <div class="form-group">
-                    <label for="discCompanySize">Company Size</label>
-                    <select id="discCompanySize" onchange="renderDiscoveryResults()">
-                        <option value="">All Sizes</option>
-                        <option value="small">Small</option>
-                        <option value="medium">Medium</option>
-                        <option value="large">Large</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="discLimit">Limit</label>
-                    <select id="discLimit">
-                        <option value="5">5</option>
-                        <option value="10">10</option>
-                        <option value="20" selected>20</option>
-                        <option value="50">50</option>
-                        <option value="100">100</option>
-                    </select>
-                </div>
-                <div class="form-group form-group-btn">
-                    <button class="btn btn-blue" onclick="searchBusinesses()" id="searchBtn">Search</button>
-                </div>
-            </div>
-        </div>
-
-        <div id="discoveryResults" style="display:none;">
-            <div class="discovery-actions">
-                <span id="discoveryCount">0 results</span>
-                <div>
-                    <button class="btn btn-small btn-blue" onclick="selectAllDiscovery()">Select All</button>
-                    <button class="btn btn-small btn-blue" onclick="deselectAllDiscovery()">Deselect All</button>
-                    <button class="btn btn-small btn-blue" onclick="importSelected()">Import Selected</button>
-                    <button class="btn btn-small btn-blue" onclick="importAll()">Import All</button>
-                </div>
-            </div>
-            <div class="discovery-table-wrapper">
-                <table class="data-table discovery-table">
-                    <thead>
-                        <tr>
-                            <th><div class="checkbox"><input type="checkbox" id="discSelectAll" onchange="toggleDiscoveryCheckboxes(this)"><label for="discSelectAll"></label></div></th>
-                            <th>Business Name</th>
-                            <th>Email</th>
-                            <th>Phone</th>
-                            <th>Website</th>
-                            <th>Address</th>
-                            <th>Category</th>
-                            <th>Size</th>
-                        </tr>
-                    </thead>
-                    <tbody id="discoveryTableBody"></tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Shopify Discovery Panel -->
-<div class="panel discovery-panel">
-    <div class="panel-header" onclick="togglePanel('shopifyContent')">
-        <h2><?= svg_icon('search', 18) ?> Shopify</h2>
-        <span class="panel-toggle" id="shopifyToggle">&#9660;</span>
-    </div>
-    <div class="panel-content" id="shopifyContent">
-        <div class="discovery-form">
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="shopifyLimit">How many startups to find</label>
-                    <input type="number" id="shopifyLimit" value="10" min="1" max="50">
-                </div>
-                <div class="form-group form-group-btn">
-                    <button class="btn btn-blue" onclick="runShopifyDiscovery()" id="shopifyRunBtn">Run</button>
-                </div>
-            </div>
-            <p class="text-muted" style="margin:8px 0 0; font-size:13px; text-align:center;">
-                The system picks Canadian-startup queries automatically and keeps searching until it finds enough or your daily SerpAPI quota runs out. Usage today: <span id="serpapiUsage">…</span>.
-            </p>
-            <div style="text-align:center; margin-top:10px;">
-                <button class="btn btn-small btn-blue" onclick="showModal('shopifyRejectStatsModal')">
-                    Why candidates get rejected (last 30 days)
-                </button>
-            </div>
-        </div>
-
-        <div id="shopifyResults" style="display:none; margin-top:16px;">
-            <div class="discovery-actions">
-                <span id="shopifyResultsCount">0 results</span>
-                <div>
-                    <button class="btn btn-small btn-blue" onclick="importAllShopifyFits()" id="shopifyImportAllBtn">Import All Fits</button>
-                </div>
-            </div>
-            <div class="discovery-table-wrapper">
-                <table class="data-table discovery-table" data-paginate="25">
-                    <thead>
-                        <tr>
-                            <th>Store</th>
-                            <th>Email</th>
-                            <th>Products</th>
-                            <th>Oldest Product</th>
-                            <th>Country</th>
-                            <th>Result</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="shopifyResultsBody"></tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-</div>
-
-<?php
-// Shopify reject-reason distribution (last 30 days). Helps tune which
-// filters are killing leads so the discovery cron can be adjusted.
-$shopifyRejectStats = [];
-$shopifyImported30d = 0;
-$shopifyTotal30d = 0;
-try {
-    $stmt = $pdo->prepare(
-        "SELECT reject_reason, COUNT(*) AS cnt, MAX(reject_detail) AS sample
-         FROM outreach_shopify_candidates
-         WHERE status = 'rejected'
-           AND checked_at > DATE_SUB(NOW(), INTERVAL 30 DAY)
-           AND reject_reason IS NOT NULL
-         GROUP BY reject_reason
-         ORDER BY cnt DESC"
-    );
-    $stmt->execute();
-    $shopifyRejectStats = $stmt->fetchAll();
-
-    $stmt2 = $pdo->prepare(
-        "SELECT
-             SUM(status='imported') AS imported,
-             COUNT(*) AS total
-         FROM outreach_shopify_candidates
-         WHERE checked_at > DATE_SUB(NOW(), INTERVAL 30 DAY)"
-    );
-    $stmt2->execute();
-    $totals = $stmt2->fetch();
-    $shopifyImported30d = (int) ($totals['imported'] ?? 0);
-    $shopifyTotal30d    = (int) ($totals['total'] ?? 0);
-} catch (Throwable $e) {
-    // Show empty state on query failure
-}
-$shopifyRejectedTotal = max(0, $shopifyTotal30d - $shopifyImported30d);
-?>
-
-</div> <!-- /#discovery -->
-
 <div id="leads" class="tab-content <?php echo $activeTab === 'leads' ? 'active' : ''; ?>">
 
 <!-- Pipeline Running Banner -->
 <div id="pipelineBanner" style="display:none; background:#fff3cd; color:#856404; border:1px solid #ffc107; border-radius:6px; padding:12px 16px; margin-bottom:16px; font-weight:500;">
-    The outreach cron pipeline is currently running. Sending, drafting, and discovery are temporarily disabled to prevent conflicts.
+    The outreach cron pipeline is currently running. Sending and drafting are temporarily disabled to prevent conflicts.
 </div>
 
 <!-- Dashboard Stats -->
@@ -417,78 +245,7 @@ $shopifyRejectedTotal = max(0, $shopifyTotal30d - $shopifyImported30d);
 <!-- Editorial channel -->
 <div class="channel-pane <?php echo $activeChannel === 'editorial' ? 'active' : ''; ?>" data-channel-pane="editorial">
 
-    <div class="section-tabs">
-        <button class="section-tab active" data-tab="editorial-discovery">Discovery</button>
-        <button class="section-tab" data-tab="editorial-leads">Leads</button>
-    </div>
-
-    <div id="editorial-discovery" class="tab-content active">
-        <div class="panel discovery-panel">
-            <div class="panel-header" onclick="togglePanel('editorialContent')">
-                <h2><?= svg_icon('search', 18) ?> Editorial Partners (roundups)</h2>
-                <span class="panel-toggle" id="editorialToggle">&#9660;</span>
-            </div>
-            <div class="panel-content" id="editorialContent">
-                <div class="discovery-form">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="editorialLimit">How many articles to find</label>
-                            <input type="number" id="editorialLimit" value="8" min="1" max="30">
-                        </div>
-                        <div class="form-group form-group-btn">
-                            <button class="btn btn-blue" onclick="runEditorialDiscovery()" id="editorialRunBtn">Run</button>
-                        </div>
-                    </div>
-                    <p class="text-muted" style="margin:8px 0 0; font-size:13px; text-align:center;">
-                        Searches "best free accounting software" and "QuickBooks alternatives" listicles, finds the author (Hunter.io, else the outlet's contact page), and surfaces the ones that don't already list Argo. SerpAPI usage today: <span id="editorialSerpUsage">&hellip;</span> &middot; Hunter.io: <span id="editorialHunterState">&hellip;</span>.
-                    </p>
-
-                    <div class="form-row" style="margin-top:16px; padding-top:16px; border-top:1px solid var(--border-color, #e2e8f0);">
-                        <div class="form-group" style="flex:1;">
-                            <label for="editorialUrl">Or add a specific article URL you already found</label>
-                            <input type="text" id="editorialUrl" placeholder="https://example.com/best-quickbooks-alternatives" style="width:100%;">
-                        </div>
-                        <div class="form-group form-group-btn">
-                            <button class="btn btn-blue" onclick="addEditorialUrl()" id="editorialAddBtn">Add</button>
-                        </div>
-                    </div>
-                    <p class="text-muted" style="margin:8px 0 0; font-size:12px; text-align:center;">
-                        Reads the page, scrapes a contact email, and researches which tools it lists, then adds it to your Leads. If no email is found, add it on the lead and generate the pitch.
-                    </p>
-                </div>
-
-                <div id="editorialResults" style="display:none; margin-top:16px;">
-                    <div class="discovery-actions">
-                        <span id="editorialResultsCount">0 results</span>
-                        <div>
-                            <button class="btn btn-small btn-blue" onclick="importAllEditorialFits()" id="editorialImportAllBtn">Import All Fits</button>
-                        </div>
-                    </div>
-                    <div class="discovery-table-wrapper">
-                        <table class="data-table discovery-table" data-paginate="25">
-                            <thead>
-                                <tr>
-                                    <th>Outlet</th>
-                                    <th>Author</th>
-                                    <th>Email</th>
-                                    <th>Already lists</th>
-                                    <th>Article</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody id="editorialResultsBody"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <p class="text-muted" style="margin-top:12px; font-size:13px;">
-            Imported articles become leads in the <strong>Leads</strong> tab above, where you review the AI-drafted pitch and send it. Keep Send mode on Review-before-send.
-        </p>
-    </div>
-
-    <div id="editorial-leads" class="tab-content">
+    <div id="editorial-leads" class="tab-content active">
         <!-- Filters -->
         <div class="control-bar">
             <div class="control-group">
@@ -567,78 +324,7 @@ $shopifyRejectedTotal = max(0, $shopifyTotal30d - $shopifyImported30d);
 
 <div class="channel-pane <?php echo $activeChannel === 'creator' ? 'active' : ''; ?>" data-channel-pane="creator">
 
-    <div class="section-tabs">
-        <button class="section-tab active" data-tab="creator-discovery">Discovery</button>
-        <button class="section-tab" data-tab="creator-leads">Leads</button>
-    </div>
-
-    <div id="creator-discovery" class="tab-content active">
-        <div class="panel discovery-panel">
-            <div class="panel-header" onclick="togglePanel('creatorContent')">
-                <h2><?= svg_icon('search', 18) ?> Creator Partners (YouTube &amp; newsletters)</h2>
-                <span class="panel-toggle" id="creatorToggle">&#9660;</span>
-            </div>
-            <div class="panel-content" id="creatorContent">
-                <div class="discovery-form">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="creatorLimit">How many creators to find</label>
-                            <input type="number" id="creatorLimit" value="8" min="1" max="30">
-                        </div>
-                        <div class="form-group form-group-btn">
-                            <button class="btn btn-blue" onclick="runCreatorDiscovery()" id="creatorRunBtn">Run</button>
-                        </div>
-                    </div>
-                    <p class="text-muted" style="margin:8px 0 0; font-size:13px; text-align:center;">
-                        Finds YouTubers and newsletter writers whose audience is small businesses and freelancers, then drafts an affiliate-partner pitch (50% recurring). Blogs and roundup articles live in the Editorial channel, not here. Emails are harvested from linked sites where possible; YouTube emails are captcha-gated, so those come in blank, use Get email on the lead to grab them. SerpAPI usage today: <span id="creatorSerpUsage">&hellip;</span> &middot; Hunter.io: <span id="creatorHunterState">&hellip;</span>.
-                    </p>
-
-                    <div class="form-row" style="margin-top:16px; padding-top:16px; border-top:1px solid var(--border-color, #e2e8f0);">
-                        <div class="form-group" style="flex:1;">
-                            <label for="creatorUrl">Or add a specific creator URL (YouTube channel, newsletter, or LinkedIn profile)</label>
-                            <input type="text" id="creatorUrl" placeholder="https://youtube.com/@somechannel" style="width:100%;">
-                        </div>
-                        <div class="form-group form-group-btn">
-                            <button class="btn btn-blue" onclick="addCreatorUrl()" id="creatorAddBtn">Add</button>
-                        </div>
-                    </div>
-                    <p class="text-muted" style="margin:8px 0 0; font-size:12px; text-align:center;">
-                        Researches the creator and scrapes a contact email if one is public, then adds them to your Leads. LinkedIn profiles are added as a manual list (no email, no auto-draft).
-                    </p>
-                </div>
-
-                <div id="creatorResults" style="display:none; margin-top:16px;">
-                    <div class="discovery-actions">
-                        <span id="creatorResultsCount">0 results</span>
-                        <div>
-                            <button class="btn btn-small btn-blue" onclick="importAllCreatorFits()" id="creatorImportAllBtn">Import All Fits</button>
-                        </div>
-                    </div>
-                    <div class="discovery-table-wrapper">
-                        <table class="data-table discovery-table" data-paginate="25">
-                            <thead>
-                                <tr>
-                                    <th>Creator</th>
-                                    <th>Platform</th>
-                                    <th>Audience</th>
-                                    <th>Email</th>
-                                    <th>Profile</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody id="creatorResultsBody"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <p class="text-muted" style="margin-top:12px; font-size:13px;">
-            Imported creators become leads in the <strong>Leads</strong> tab above, where you review the AI-drafted affiliate pitch and send it. Keep Send mode on Review-before-send.
-        </p>
-    </div>
-
-    <div id="creator-leads" class="tab-content">
+    <div id="creator-leads" class="tab-content active">
         <!-- Filters -->
         <div class="control-bar">
             <div class="control-group">
@@ -923,54 +609,6 @@ $shopifyRejectedTotal = max(0, $shopifyTotal30d - $shopifyImported30d);
         <div class="modal-footer">
             <button class="btn btn-blue" onclick="closeModal('creatorEmailModal')">Cancel</button>
             <button class="btn btn-blue" onclick="saveCreatorEmail()">Save email</button>
-        </div>
-    </div>
-</div>
-
-<!-- Shopify Rejection Reasons Modal -->
-<div id="shopifyRejectStatsModal" class="modal" style="display:none;">
-    <div class="modal-content modal-large" style="height:auto; max-height:80vh;">
-        <div class="modal-header">
-            <h3>Why Shopify candidates get rejected (last 30 days)</h3>
-            <button class="modal-close" onclick="closeModal('shopifyRejectStatsModal')">&times;</button>
-        </div>
-        <div class="modal-body">
-            <?php if ($shopifyTotal30d === 0): ?>
-                <p class="text-muted" style="margin:8px 0; font-size:13px;">No Shopify candidates evaluated in the last 30 days.</p>
-            <?php else: ?>
-                <p class="text-muted" style="margin:0 0 12px; font-size:13px;">
-                    Of <?= (int) $shopifyTotal30d ?> candidates evaluated, <?= (int) $shopifyImported30d ?> were imported as leads and <?= (int) $shopifyRejectedTotal ?> were rejected. Use this breakdown to tune the dork pool or evaluator thresholds.
-                </p>
-                <div class="discovery-table-wrapper">
-                    <table class="data-table discovery-table">
-                        <thead>
-                            <tr>
-                                <th>Reject reason</th>
-                                <th style="width:90px; text-align:right;">Count</th>
-                                <th style="width:90px; text-align:right;">% of rejects</th>
-                                <th>Sample detail</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($shopifyRejectStats as $row): ?>
-                                <?php
-                                    $cnt = (int) $row['cnt'];
-                                    $pct = $shopifyRejectedTotal > 0 ? round($cnt / $shopifyRejectedTotal * 100) : 0;
-                                ?>
-                                <tr>
-                                    <td><code><?= htmlspecialchars((string) $row['reject_reason']) ?></code></td>
-                                    <td style="text-align:right;"><?= $cnt ?></td>
-                                    <td style="text-align:right;"><?= $pct ?>%</td>
-                                    <td class="text-muted" style="font-size:12px;"><?= htmlspecialchars((string) ($row['sample'] ?? '')) ?></td>
-                                </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                </div>
-            <?php endif; ?>
-        </div>
-        <div class="modal-footer">
-            <button class="btn btn-blue" onclick="closeModal('shopifyRejectStatsModal')">Close</button>
         </div>
     </div>
 </div>

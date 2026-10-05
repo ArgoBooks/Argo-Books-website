@@ -144,7 +144,7 @@ About CA\$300 spent, 0 attributable customers. Details in [Google-Ads-economics.
 ~1,100 emails sent starting around January 2026. A couple of replies, zero customers. Stopped.
 
 ### Editorial outreach
-22 emails to blog and article writers who cover accounting/bookkeeping software, started July 20226. Zero responses. Main friction is finding unique targets, and the auto-discovery feature in the admin outreach page does not work well.
+22 emails to blog and article writers who cover accounting/bookkeeping software, started July 20226. Zero responses. Main friction is finding unique targets. The auto-discovery feature in the admin outreach page did not work well and was removed on 2026-10-05, so targets are now added by hand.
 
 ### YouTuber outreach
 82 emails sent starting about a month ago. 2 responses, both rejections (one "schedule is full", one asked which regions Argo Books supports then went quiet). A third response showed interest then said that the email had been forwarded to someone else for consideration. A fourth response gave a quote of $1000 USD as a flat-fee instead of an affiliate (see below).

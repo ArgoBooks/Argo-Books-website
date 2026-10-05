@@ -909,7 +909,7 @@ CREATE TABLE IF NOT EXISTS exchange_rates (
 -- Outreach CRM Tables
 -- ============================================
 
--- Outreach leads for business discovery and outreach tracking
+-- Outreach leads and their outreach tracking
 CREATE TABLE IF NOT EXISTS outreach_leads (
     id INT PRIMARY KEY AUTO_INCREMENT,
     business_name VARCHAR(255) NOT NULL,
@@ -1145,75 +1145,6 @@ CREATE TABLE IF NOT EXISTS outreach_scrape_cache (
     INDEX idx_scrape_attempted (last_attempted_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Tracks Shopify storefronts discovered via SerpAPI dorking.
--- Acts as a dedup cache + reject-reason audit log so SerpAPI quota
--- isn't wasted re-evaluating known stores. Fit candidates are imported
--- into outreach_leads (source='shopify_auto') and linked via lead_id.
-CREATE TABLE IF NOT EXISTS outreach_shopify_candidates (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    canonical_url VARCHAR(500) NOT NULL,
-    myshopify_url VARCHAR(500) DEFAULT NULL,
-    status ENUM('imported','rejected','error','pending') NOT NULL DEFAULT 'pending',
-    reject_reason VARCHAR(100) DEFAULT NULL,
-    reject_detail VARCHAR(500) DEFAULT NULL,
-    products_count INT DEFAULT NULL,
-    first_product_created_at DATETIME DEFAULT NULL,
-    detected_country VARCHAR(8) DEFAULT NULL,
-    harvested_email VARCHAR(255) DEFAULT NULL,
-    lead_id INT DEFAULT NULL,
-    last_query VARCHAR(255) DEFAULT NULL,
-    checked_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    UNIQUE KEY uniq_canonical_url (canonical_url),
-    INDEX idx_status_checked (status, checked_at),
-    INDEX idx_lead (lead_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- Candidate roundup/listicle articles for the Editorial outreach channel. One
--- row per article URL (identity is the article, not the outlet), tracking
--- fitness + dedup so discovery re-runs skip already-imported articles. Mirrors
--- outreach_shopify_candidates.
-CREATE TABLE IF NOT EXISTS outreach_editorial_candidates (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    canonical_url VARCHAR(500) NOT NULL,
-    status ENUM('imported','rejected','error','pending') NOT NULL DEFAULT 'pending',
-    reject_reason VARCHAR(100) DEFAULT NULL,
-    reject_detail VARCHAR(500) DEFAULT NULL,
-    outlet_name VARCHAR(150) DEFAULT NULL,
-    author_name VARCHAR(120) DEFAULT NULL,
-    harvested_email VARCHAR(255) DEFAULT NULL,
-    lead_id INT DEFAULT NULL,
-    last_query VARCHAR(255) DEFAULT NULL,
-    checked_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    UNIQUE KEY uniq_canonical_url (canonical_url),
-    INDEX idx_status_checked (status, checked_at),
-    INDEX idx_lead (lead_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- Dedup/audit table for the Creators / affiliate-partner discovery channel
--- (YouTubers, newsletter writers, niche bloggers, and LinkedIn profiles found by
--- cron/lib/creator_discovery.php). Mirrors outreach_editorial_candidates: one row
--- per canonical creator URL, status tracks imported/rejected so repeat runs skip
--- already-handled candidates. platform records youtube/newsletter/blog/linkedin.
-CREATE TABLE IF NOT EXISTS outreach_creator_candidates (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    canonical_url VARCHAR(500) NOT NULL,
-    status ENUM('imported','rejected','error','pending') NOT NULL DEFAULT 'pending',
-    reject_reason VARCHAR(100) DEFAULT NULL,
-    reject_detail VARCHAR(500) DEFAULT NULL,
-    platform VARCHAR(20) DEFAULT NULL,
-    creator_name VARCHAR(150) DEFAULT NULL,
-    harvested_email VARCHAR(255) DEFAULT NULL,
-    lead_id INT DEFAULT NULL,
-    last_query VARCHAR(255) DEFAULT NULL,
-    checked_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    UNIQUE KEY uniq_canonical_url (canonical_url),
-    INDEX idx_status_checked (status, checked_at),
-    INDEX idx_lead (lead_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
 -- Key/value state for the outreach pipeline: master kill-switch
 -- (outreach_enabled), auto-send mode, follow-up sequence config, and other
 -- runtime flags. Read/written via getState/setState in cron/outreach_pipeline.php
@@ -1223,21 +1154,6 @@ CREATE TABLE IF NOT EXISTS outreach_pipeline_state (
     state_key VARCHAR(100) NOT NULL UNIQUE,
     state_value TEXT,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- 14-day cache of SerpAPI organic-results responses. The Shopify discovery
--- cron rotates through ~12 dork queries on a daily schedule, and Google's
--- site:myshopify.com results for these queries change slowly. Caching cuts
--- SerpAPI credit burn substantially with no measurable impact on lead
--- discovery. Cache hits do NOT increment serpapi_calls_today.
-CREATE TABLE IF NOT EXISTS serpapi_response_cache (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    query_hash CHAR(64) NOT NULL,
-    query_text VARCHAR(500) NOT NULL,
-    response_json MEDIUMTEXT NOT NULL,
-    fetched_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE KEY uniq_query_hash (query_hash),
-    INDEX idx_fetched_at (fetched_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Per-run audit trail for every cron job. Each cron calls cron_run_start
