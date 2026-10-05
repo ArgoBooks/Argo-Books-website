@@ -2234,7 +2234,6 @@ document.addEventListener("DOMContentLoaded", function () {
     sortedUsers.forEach((u) => {
       const tr = document.createElement("tr");
       tr.innerHTML =
-        "<td style=\"font-family: monospace; font-weight: 600;\">" + u.ip.substring(0, 8) + "</td>" +
         "<td>" + new Date(u.firstSeen).toLocaleDateString() + "</td>" +
         "<td>" + new Date(u.lastSeen).toLocaleDateString() + "</td>" +
         "<td>" + u.sessionCount + "</td>" +

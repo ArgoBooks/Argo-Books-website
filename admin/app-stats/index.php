@@ -804,7 +804,6 @@ include __DIR__ . '/../admin_header.php';
                     <table class="error-details-table" id="activeUsersTable" data-paginate="25" data-paginate-noun="users">
                         <thead>
                             <tr>
-                                <th>User ID</th>
                                 <th>First Seen</th>
                                 <th>Last Seen</th>
                                 <th>Sessions</th>
