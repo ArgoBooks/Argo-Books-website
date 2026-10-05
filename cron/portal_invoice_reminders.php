@@ -35,11 +35,9 @@ $dotenv->load();
 require_once __DIR__ . '/../db_connect.php';
 require_once __DIR__ . '/../api/portal/portal-helper.php';
 require_once __DIR__ . '/lib/run_tracker.php';
+require_once __DIR__ . '/lib/invoice_reminder_helpers.php';
 
 global $pdo;
-
-// stage => days past due. Fixed, deliberately not user-configurable.
-const PORTAL_REMINDER_STAGES = [1 => 3, 2 => 7, 3 => 14];
 
 // Max reminders across all companies in one run, to stay inside Resend's
 // rate limits and the script's time budget.
@@ -47,15 +45,6 @@ const PORTAL_REMINDER_RUN_CAP = 200;
 
 // No single merchant may consume the whole run budget.
 const PORTAL_REMINDER_COMPANY_CAP = 50;
-
-// Never chase an invoice more than this many days past due. Bounds the scan,
-// and stops a long outage or a late re-enable from firing a "final reminder"
-// at an invoice from months ago.
-const PORTAL_REMINDER_MAX_AGE_DAYS = 45;
-
-// Balances below this are rounding noise (typically a processing-fee residue
-// on a partial payment) and are not worth an email.
-const PORTAL_REMINDER_MIN_BALANCE = 1.00;
 
 $dryRun = in_array('--dry-run', $argv ?? [], true);
 
@@ -111,44 +100,9 @@ $scanned = 0;
 $perCompany = [];
 
 try {
-    $environment = current_environment();
-    $minDue = PORTAL_REMINDER_STAGES[1];
-
-    // Candidate selection. Several clauses here are load-bearing:
-    //
-    //  - pi.due_date > DATE(pc.reminders_enabled_at) is the entire "enabling
-    //    never releases a backlog" guarantee. Kept in SQL so there is exactly
-    //    one place to get it wrong. reminders_enabled_at IS NOT NULL is a
-    //    fail-closed guard for rows where the flag was set by hand.
-    //  - pi.environment = ? is mandatory. Sandbox and production share this
-    //    database, so without it a sandbox test invoice emails a real customer.
-    //  - pc.locked = 0 keeps a company under fraud review from emailing anyone.
-    $stmt = $pdo->prepare(
-        'SELECT pi.id, pi.company_id, pi.invoice_id, pi.invoice_token,
-                pi.customer_name, pi.customer_email, pi.status,
-                pi.total_amount, pi.balance_due, pi.currency, pi.due_date,
-                pi.pass_processing_fee,
-                pc.company_name, pc.owner_email, pc.email_verified_at,
-                DATEDIFF(CURDATE(), pi.due_date) AS days_overdue
-         FROM portal_invoices pi
-         INNER JOIN portal_companies pc ON pc.id = pi.company_id
-         WHERE pc.reminders_enabled = 1
-           AND pc.is_active = 1
-           AND pc.locked = 0
-           AND pc.reminders_enabled_at IS NOT NULL
-           AND pi.due_date IS NOT NULL
-           AND pi.due_date > DATE(pc.reminders_enabled_at)
-           AND pi.environment = ?
-           AND pi.balance_due >= ?
-           AND pi.status NOT IN ("paid", "cancelled", "draft")
-           AND pi.customer_email IS NOT NULL AND pi.customer_email <> ""
-           AND pi.due_date <= DATE_SUB(CURDATE(), INTERVAL ? DAY)
-           AND pi.due_date >= DATE_SUB(CURDATE(), INTERVAL ? DAY)
-         ORDER BY pi.due_date ASC
-         LIMIT 1000'
-    );
-    $stmt->execute([$environment, PORTAL_REMINDER_MIN_BALANCE, $minDue, PORTAL_REMINDER_MAX_AGE_DAYS]);
-    $candidates = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    // Which invoices qualify, and why each condition is there, is in
+    // portal_reminder_candidates().
+    $candidates = portal_reminder_candidates($pdo, current_environment());
     $scanned = count($candidates);
 
     $portalBaseUrl = env('SITE_URL', 'https://argorobots.com');
@@ -167,34 +121,10 @@ try {
         $invoiceRowId = (int)$inv['id'];
         $daysOverdue = (int)$inv['days_overdue'];
 
-        // Highest eligible stage wins rather than catching up, so a cron that
-        // missed a week sends one reminder, not three in a row.
-        $stage = null;
-        foreach ([3, 2, 1] as $s) {
-            if ($daysOverdue >= PORTAL_REMINDER_STAGES[$s]) {
-                $stage = $s;
-                break;
-            }
-        }
+        // The highest stage reached, unless it or a later one has already gone
+        // out, or the last reminder was too recent.
+        $stage = portal_reminder_stage_due($pdo, $invoiceRowId, $daysOverdue);
         if ($stage === null) {
-            continue;
-        }
-
-        // Stages only ever move forward. An invoice whose due date was edited
-        // after a reminder went out can look un-sent by days_overdue alone.
-        $prev = $pdo->prepare(
-            'SELECT MAX(stage) AS max_stage, MAX(sent_at) AS last_sent
-             FROM portal_invoice_reminders WHERE portal_invoice_id = ?'
-        );
-        $prev->execute([$invoiceRowId]);
-        $prevRow = $prev->fetch(PDO::FETCH_ASSOC);
-
-        if ($prevRow && $prevRow['max_stage'] !== null && (int)$prevRow['max_stage'] >= $stage) {
-            continue;
-        }
-        // Minimum 48-hour gap. The natural cadence gaps are 4 and 7 days, so
-        // this only ever catches day-boundary and DST edge cases.
-        if ($prevRow && !empty($prevRow['last_sent']) && strtotime((string)$prevRow['last_sent']) > time() - 172800) {
             continue;
         }
 
@@ -205,52 +135,16 @@ try {
             continue;
         }
 
-        // Claim the stage BEFORE sending. UNIQUE (portal_invoice_id, stage)
-        // means a zero rowCount is another run (or an earlier day) already
-        // owning this touch, so this is the whole duplicate-send defence.
-        $claim = $pdo->prepare(
-            'INSERT IGNORE INTO portal_invoice_reminders
-                (portal_invoice_id, company_id, stage, status,
-                 due_date_at_send, balance_at_send, recipient_email, created_at)
-             VALUES (?, ?, ?, "sending", ?, ?, ?, NOW())'
-        );
-        $claim->execute([
-            $invoiceRowId, $companyId, $stage,
-            $inv['due_date'], $inv['balance_due'], $inv['customer_email'],
-        ]);
-        if ($claim->rowCount() === 0) {
+        // Claim the stage BEFORE sending. Null means another run, or an earlier
+        // day, already owns this touch.
+        $reminderId = portal_reminder_claim($pdo, $inv, $stage);
+        if ($reminderId === null) {
             continue;
         }
-        $reminderId = (int)$pdo->lastInsertId();
 
-        // Re-read state immediately before sending. The batch SELECT above can
-        // be tens of seconds stale on a full run, which is plenty of time for
-        // the customer to have paid online or the merchant to have cancelled.
-        $fresh = $pdo->prepare(
-            'SELECT status, balance_due, customer_email FROM portal_invoices WHERE id = ? LIMIT 1'
-        );
-        $fresh->execute([$invoiceRowId]);
-        $now = $fresh->fetch(PDO::FETCH_ASSOC);
-
-        $haltReason = null;
-        if (!$now) {
-            $haltReason = 'not_found';
-        } elseif (in_array($now['status'], ['paid', 'cancelled'], true)) {
-            $haltReason = $now['status'];
-        } elseif ((float)$now['balance_due'] < PORTAL_REMINDER_MIN_BALANCE) {
-            $haltReason = 'zero_balance';
-        } elseif (empty($now['customer_email'])) {
-            $haltReason = 'no_email';
-        } else {
-            $sup = $pdo->prepare(
-                'SELECT 1 FROM email_suppressions
-                 WHERE LOWER(email) = LOWER(?) AND context IN ("portal", "all_marketing") LIMIT 1'
-            );
-            $sup->execute([$now['customer_email']]);
-            if ($sup->fetch()) {
-                $haltReason = 'suppressed';
-            }
-        }
+        // Re-read state immediately before sending, in case the customer has
+        // paid or the merchant has cancelled since the list was read.
+        [$haltReason, $now] = portal_reminder_halt_reason($pdo, $invoiceRowId);
 
         if ($haltReason !== null) {
             $pdo->prepare('UPDATE portal_invoice_reminders SET status = "skipped", halt_reason = ? WHERE id = ?')
