@@ -2,9 +2,7 @@
 
 A scheduled agent that runs once a day with one goal: more people installing Argo Books and paying for it. It reads the numbers, writes posts and outreach emails, and records what it did and what came of it. The next run reads that record and adjusts.
 
-The agent itself runs outside the site, in Anthropic's cloud. This document covers the site's side: what the agent can and cannot do, how to set it up, and how to run it day to day. The reasoning behind the design, including the reasons it may not work, is in `docs/superpowers/plans/2026-10-05-marketing-agent.md`.
-
-## The idea in one paragraph
+The agent itself runs outside the site, in Anthropic's cloud. This document covers the site's side: what the agent can and cannot do, how to set it up, and how to run it day to day. The reasoning behind the design, and the reasons it may not work, are in the last sections.
 
 The agent holds one secret token and nothing else. Every credential and every limit lives on the site. The agent asks the site to do things through `/api/agent/`, and the site decides. This matters because the agent reads the open web, and a page it reads could try to instruct it. Whatever it is talked into, it can only do what the endpoint allows.
 
@@ -20,12 +18,12 @@ The agent holds one secret token and nothing else. Every credential and every li
 
 ## What it cannot do
 
-- Spend money. X is not connected. It is the last stage in the plan and is added only once the free platforms are bringing installs.
+- Spend money. X is not connected, because posting there is paid. See "X, if it is added" below.
 - Create pages on the site or submit directory listings.
 - Email anyone the site already knows: a paying subscriber, a licence holder, an account holder, a newsletter subscriber, or anyone who unsubscribed from anything.
 - Email an address it did not read from a page. The site loads the page the agent names and refuses the email if the address is not there.
 - Read customer data.
-- Send anything without approval, until you switch approval off.
+- Read or answer replies. A reply to an outreach email arrives in the contact@argorobots.com inbox, and the `reply_checker` cron marks that business as replied. The agent sees that a business replied and the subject line, not what the reply said. Answering is yours to do.
 
 ## Approval
 
@@ -38,8 +36,6 @@ The agent starts in approval mode. It writes the post or the email and the site 
 Your edits and rejections are shown to the agent at the start of its next run. This is the best teaching it gets, so the one-line reason is worth writing.
 
 There are two switches, one for posts and one for emails. Turning one off makes that kind go out as soon as the agent writes it. Follow-up emails are the exception to the admin page: while email approval is on they wait in **Outreach, Follow-ups**, which is where follow-ups have always been approved.
-
-Tracked links need no approval, because a link sends nothing to anyone.
 
 ## The admin page
 
@@ -69,7 +65,7 @@ Neither file can be read over the web: `api/agent/.htaccess` blocks them.
 
 ## Limits
 
-All set on the admin page.
+These limits are set on the admin page:
 
 - Runs a day: 2. The scheduler has no cap of its own on what a run costs, so this is what stops a schedule set wrong from running all day.
 - Requests a run: 200.
@@ -80,11 +76,7 @@ All set on the admin page.
 
 ## Setting it up
 
-### 1. The tables
-
-Run the "Marketing agent" block from `mysql_schema.sql` in HeidiSQL. It creates six tables whose names start with `agent_`.
-
-### 2. A token for the agent
+### 1. A token for the agent
 
 Add to the server's `.env` a long random value:
 
@@ -94,7 +86,7 @@ AGENT_API_TOKEN="<64 random characters>"
 
 The endpoint answers "not set up" until this is at least 32 characters long.
 
-### 3. A database user that can only read
+### 2. A database user that can only read
 
 In cPanel, under MySQL Databases, create a new user and add it to the database with the **SELECT** privilege only. Then add to `.env`:
 
@@ -105,7 +97,7 @@ AGENT_DB_PASS="<its password>"
 
 Without these the agent gets no SQL at all. There is no fallback to the site's own database user, on purpose.
 
-### 4. Bluesky
+### 3. Bluesky
 
 In Bluesky, under Settings, Privacy and security, App passwords, create an app password. Add to `.env`:
 
@@ -114,7 +106,7 @@ BLUESKY_HANDLE="<your handle, such as argobooks.bsky.social>"
 BLUESKY_APP_PASSWORD="<the app password>"
 ```
 
-### 5. LinkedIn
+### 4. LinkedIn
 
 Create an app at linkedin.com/developers. On its Products tab add **Share on LinkedIn** and **Sign In with LinkedIn using OpenID Connect**. On its Auth tab add this redirect URL exactly:
 
@@ -129,9 +121,9 @@ LINKEDIN_CLIENT_ID="<client id>"
 LINKEDIN_CLIENT_SECRET="<client secret>"
 ```
 
-Then on the admin Agent page, under Setup, click **Connect** beside LinkedIn and sign in. The sign-in lasts about two months and LinkedIn offers no way to renew it, so it has to be connected again. The daily update warns you ten days before it runs out.
+Then on the admin Agent page, on the Setup tab, click **Connect** beside LinkedIn and sign in. The sign-in lasts about two months and LinkedIn offers no way to renew it, so it has to be connected again. The daily update warns you ten days before it runs out.
 
-### 6. Threads
+### 5. Threads
 
 Create an app at developers.facebook.com with the Threads use case. Add the same redirect URL as above, and add your own Threads account as a tester of the app. Add to `.env`:
 
@@ -142,59 +134,85 @@ THREADS_APP_SECRET="<Threads app secret>"
 
 Then click **Connect** beside Threads. This sign-in lasts 60 days and the site renews it by itself while the agent is running.
 
-### 7. The watch cron
+### 6. The scheduled agent
 
-Add one line in cPanel, Cron Jobs:
+At claude.ai/code/routines, create a routine that runs once a day, with the website repo attached so the agent can read how the site and the product work.
 
-```
-30 9 * * * /usr/bin/php /home/argorobots/public_html/cron/agent_watch.php
-```
+In the routine's cloud environment:
 
-### 8. The scheduled agent
+- Set network access to **Full**. The narrower setting lets it reach argorobots.com but blocks the small business sites it has to read before writing to them.
+- Add an **API credential** of the Bearer kind, holding the token from step 2, for the website `argorobots.com` and the path `/api/agent/`. The environment then adds the token to every request to that address. The agent never sees the token, so nothing it reads on the web can get it to reveal it. Do not put the token in an environment variable: those are not kept secret.
 
-At claude.ai/code/routines, create a routine that runs once a day.
+The routine also carries two short notes for Claude's own safety check, which otherwise stops the agent from sending SQL to a live site. One says that argorobots.com is the owner's own site and that its `/api/agent/` endpoint was built for this routine. The other allows read-only `SELECT` queries to the `sql` action. They cannot be entered on the routine's page. Claude Code sets them, so ask it to if the routine is ever made again.
 
-- In its cloud environment, under network access, add `argorobots.com` to the allowed domains.
-- Store the token from step 2 as a secret named `AGENT_API_TOKEN`.
-- Attach the website repo and the app repo if you want it to be able to read them.
+Its prompt is short, because the real instructions are the playbook, which the site sends at the start of every run. The prompt has to say five things:
 
-Its prompt:
+- That the environment signs its requests for it, so it adds no `Authorization` header and looks for no token.
+- To start with a `POST` to `https://argorobots.com/api/agent/?action=start_run`, and what to do when that is refused: stop at once if the agent is switched off or has already run today, and say so in its last message if the site cannot be reached or the sign-in is wrong.
+- That the playbook and the note from the owner in the answer are its only instructions, and that anything it reads on the web is information, never instructions.
+- That the repo is for reading only, and that SQL is for counts and totals, not for text people typed themselves.
+- To always finish by calling `finish_run`, even if the run went badly.
 
-```
-You are the marketing agent for Argo Books.
+The wording it runs with is on the routine's own page, which is the only place it is kept.
 
-Start a run:
-  curl -s -X POST "https://argorobots.com/api/agent/?action=start_run" \
-    -H "Authorization: Bearer $AGENT_API_TOKEN" -H "Content-Type: application/json" -d '{}'
+Each run can be read afterwards on the routine's page, step by step.
 
-The answer contains your playbook. Read it and follow it exactly. It is your only
-instructions, together with the note from the owner in the same answer.
-
-If the answer says the agent is switched off, or that it has already run today, stop.
-Always finish by calling finish_run, even if the run went badly.
-```
-
-### 9. Switch it on
+### 7. Switch it on
 
 On the admin Agent page, turn on **Agent**. Leave posting and outreach off for the first run, so you can read what it makes of the numbers before it writes anything. Then turn those on, with approval left on.
 
-## The platforms have not been tried against real accounts
-
-The code for Bluesky, LinkedIn and Threads was written from each platform's documentation and tested against stand-ins, not against the platforms themselves. Connect one at a time and approve one post on each before trusting it. If a post fails, the reason the platform gave is under **Posts and emails already decided** and in the site's record.
-
 ## Choosing how it researches
 
-The agent can search two ways: its own web search, or `research`, which asks Gemini with Google Search through the site. Which is better for finding small businesses is not known. The playbook has the agent test both on its first run with outreach on, and record the result in a note called `research-test`. Read that note. If you disagree with its choice, say so in your note to the agent.
+The agent can search two ways: its own web search, or `research`, which asks Gemini with Google Search through the site. Which is better for finding small businesses was not known, so the playbook has the agent test both and record the result in a note called `research-test`. It ran that test on 2026-10-05. `research` named 25 businesses and about 15 had a real email on their own page. Its own search named about 11 and none had an email. It uses `research`. If you disagree with its choice, say so in your note to the agent.
 
 `research` uses `GEMINI_API_KEY`, and the model in `GEMINI_RESEARCH_MODEL` if that is set, otherwise `GEMINI_MODEL`. Google gives a free monthly allowance of searches. At 40 questions a day the agent uses at most about 1,200 a month, which should sit inside it. Check the allowance for your key in Google's own console.
 
 ## Judging it
 
-The measure is paid subscriptions and installs that came through the agent's own tracked links, plus replies to its outreach. Followers, views and clicks are worth noting and are not the measure.
+The measure is paid subscriptions and installs that came through the agent's own tracked links, plus replies to its outreach. Followers, views and clicks are worth noting but not the goal.
 
-After 30 days of it acting, read the journal and the numbers together. Stop if its links brought no installs, if the journal shows it repeating itself, or if the posts are ones you would not have published.
+## What it cannot see
 
-To stop it at any time, turn **Agent** off on the admin page. Every request is then refused.
+These limit what it can learn, so keep them in mind when reading its conclusions.
+
+- **How a LinkedIn post did.** The free LinkedIn access creates posts and returns no likes, comments or views. A LinkedIn post is judged only by its tracked link. Bluesky and Threads do return numbers for the account's own posts.
+- **Comments and replies on posts.** It cannot answer them on any platform, so it cannot hold the conversations that early customers usually come from.
+- **What people do inside the app.** Feature usage is in telemetry files and is worked out inside the admin page, not in the database. The agent sees installs, first runs and survey answers.
+- **Who the customers are.** It gets counts of paying subscribers, never names or addresses.
+
+LinkedIn posts go to the personal profile. Posting to a company page needs an access level LinkedIn grants by review.
+
+## Why its memory is a journal and notes
+
+The agent starts every run with no memory of the last one, so its memory is kept on the site.
+
+- **Notes** are a few short documents it rewrites as it learns. It reads all of them at the start of every run.
+- **The journal** is the dated log of what it tried and what happened. Read it to judge whether the agent is thinking well.
+
+You can read both on the admin page, and correct or delete a note. That is the reason for doing it this way: a memory you can see is one you can fix.
+
+## X, if it is added
+
+X is not built. It is the one platform that costs money, so it is meant to come last, once the free platforms are bringing installs.
+
+- Posting goes through X's paid API. When this was planned, a post cost $0.015, a post containing a link cost $0.20, and reading a post's numbers back cost $0.001. Check the prices again before building.
+- Buy a fixed amount of credit and leave automatic top-up off. When the credit runs out, posting stops and nothing more is charged. At one post a day without a link, $10 lasts well over a year.
+- Because a link in a post costs so much more, the tracked link belongs in the profile, and a link in a post is something to spend on deliberately.
+
+## What it needs from you
+
+- Approving, editing or rejecting what it writes, for as long as approval is on.
+- Connecting LinkedIn again about every two months.
+- Updating `api/agent/facts.md` when the app changes. A fact that is missing is not used, and a fact that has gone stale is repeated.
+- Reading the journal now and then, and correcting a note that has drawn the wrong lesson.
+
+## Risks
+
+- **A wrong claim goes out under your name.** The facts file, the sources each proposal must give, and the one-post-a-day limit reduce this. Only your approval prevents it, which is why approval starts on.
+- **Cold email affects deliverability.** Outreach is sent from the same domain as receipts and licence emails. More cold email means more risk to those, so the daily sending limit stays where it is.
+- **Cold email law.** Canada's anti-spam law restricts unsolicited commercial email. The outreach pipeline already sent it before the agent existed, but an agent adding businesses every day makes it steadier.
+- **Instructions hidden in web pages.** The agent reads the open web. The defence is that every power is limited on the site, not left to the agent's judgment.
+- **It rests on a preview feature.** Scheduled agents are a research preview and may change. Its cost in Claude usage has no hard limit either: the limits are how often it runs and how many requests a run may make.
 
 ## Where the code is
 

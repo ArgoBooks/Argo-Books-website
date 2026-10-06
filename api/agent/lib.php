@@ -5,8 +5,7 @@
  * A scheduled agent outside the site reads numbers, proposes posts and emails, and records
  * what it did. Everything it can do goes through api/agent/, so the limits live here and not
  * in the agent's judgment: what it may read, how much it may do in a day, who it may never
- * email. The plan is in docs/superpowers/plans/2026-10-05-marketing-agent.md and the working
- * description in read-me/Marketing-agent.md.
+ * email. How it works and why is in read-me/Marketing-agent.md.
  *
  * Each function takes its inputs and returns a result, so tests call them directly. What the
  * agent may do to the outside world is in actions.php.
