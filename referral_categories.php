@@ -14,6 +14,7 @@ function referral_categories(): array
         'invgen'    => 'Invoice generator',
         'loop'      => 'Growth loops',
         'outreach'  => 'Outreach',
+        'agent'     => 'Marketing agent',
         'ai'        => 'AI assistants',
         'directory' => 'Directories',
         'affiliate' => 'Affiliates',
@@ -39,7 +40,7 @@ function referral_default_category(string $source_code): string
         'google-ads-' => 'paid', 'bing-ads-' => 'paid', 'ads-' => 'paid', 'paid-' => 'paid',
         'guide-' => 'website', 'invgen-' => 'invgen', 'loop-' => 'loop',
         'outreach-' => 'outreach', 'social-' => 'social', 'youtube-' => 'youtube',
-        'ai-' => 'ai', 'dir-' => 'directory', 'aff-' => 'affiliate',
+        'ai-' => 'ai', 'dir-' => 'directory', 'aff-' => 'affiliate', 'ag-' => 'agent',
     ];
     foreach ($prefixes as $prefix => $category) {
         if (strncmp($code, $prefix, strlen($prefix)) === 0) {

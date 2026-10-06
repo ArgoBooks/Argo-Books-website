@@ -12,7 +12,7 @@ The agent holds one secret token and nothing else. Every credential and every li
 
 - **Read the numbers.** Visits, the install funnel by referral link, survey answers, uninstall reasons, outreach results, and a count of paying subscribers.
 - **Run SQL**, one `SELECT` at a time, over a fixed list of tables. Customer accounts, payments, licence keys, portal data and synced books are not on the list, and visitor IP addresses are removed from every answer.
-- **Make tracked referral links**, with codes starting `ag-`, pointing only at argorobots.com.
+- **Make tracked referral links**, with codes starting `ag-`, pointing only at argorobots.com. They are listed under their own category, Marketing agent, on the admin Referral Links page.
 - **Research** through Gemini with Google Search, or with its own web search.
 - **Propose posts** for Bluesky, LinkedIn and Threads.
 - **Propose outreach emails** to businesses it found, and write the follow-ups for those businesses.

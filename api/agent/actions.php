@@ -40,7 +40,7 @@ function agent_create_link(PDO $pdo, ?int $runId, array $in): array
 
     try {
         $pdo->prepare('INSERT INTO referral_links (source_code, name, category, target_url) VALUES (?, ?, ?, ?)')
-            ->execute([$code, mb_substr($name, 0, 255), referral_category_or_other($in['category'] ?? null), $target]);
+            ->execute([$code, mb_substr($name, 0, 255), 'agent', $target]);
     } catch (PDOException $e) {
         if ($e->getCode() === '23000') {
             throw new AgentRefused('DUPLICATE', 'That source_code is already in use.', 409);

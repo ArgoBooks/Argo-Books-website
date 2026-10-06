@@ -114,7 +114,7 @@ Every request is a `POST` to `https://argorobots.com/api/agent/?action=NAME` wit
 - `research` with `{"run_id": 1, "question": "..."}`. Returns an answer and the pages it used.
 - `journal_add` with `{"run_id": 1, "kind": "experiment", "title": "...", "body": "...", "experiment_key": "tax-time-posts"}`.
 - `note_save` with `{"run_id": 1, "name": "what-works-on-bluesky", "body": "..."}`. An empty body deletes the note.
-- `link_create` with `{"run_id": 1, "source_code": "ag-bsky-late-invoices", "name": "Bluesky post on late invoices", "category": "social", "target_url": "https://argorobots.com/late-fee-calculator/"}`. Returns the URL to use.
+- `link_create` with `{"run_id": 1, "source_code": "ag-bsky-late-invoices", "name": "Bluesky post on late invoices", "target_url": "https://argorobots.com/late-fee-calculator/"}`. Returns the URL to use.
 - `propose_post` with `{"run_id": 1, "platform": "bluesky", "text": "...", "link": "https://argorobots.com/...?source=ag-...", "about": "useful", "sources": ["..."], "experiment_key": "..."}`.
 - `propose_email` with `{"run_id": 1, "business_name": "...", "email": "...", "found_on": "https://...", "website": "https://...", "category": "...", "city": "...", "country": "CA", "why": "...", "subject": "...", "body": "...", "sources": ["..."], "experiment_key": "..."}`.
 - `followup_write` with `{"run_id": 1, "followup_id": 12, "body": "..."}`.
