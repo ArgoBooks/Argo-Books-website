@@ -98,7 +98,7 @@ What is available:
 
 Required for every cron:
 
-- Wrap the run in `cron_run_start($pdo, '<name>')` / `cron_run_finish($pdo, $runId, 'ok'|'error', $msg)` from `cron/lib/run_tracker.php`, and record what it did with `cron_metric_incr()` (a running count) or `cron_metric_set()` (a value such as a total or a mode). All fourteen scripts do this; it is the only universal convention.
+- Wrap the run in `cron_run_start($pdo, '<name>')` / `cron_run_finish($pdo, $runId, 'ok'|'error', $msg)` from `cron/lib/run_tracker.php`, and record what it did with `cron_metric_incr()` (a running count) or `cron_metric_set()` (a value such as a total or a mode). All seventeen scripts do this; it is the only universal convention.
 - **Put the numbers in `cron_metric_incr()`, not in prose.** The admin page renders metrics as tiles, so counts recorded there are readable at a glance and comparable across runs. The optional 4th argument to `cron_run_finish()` is for a short summary line shown under "Last run detail"; it lands in the `error_message` column either way, so on an `ok` run keep it to a summary and not an error.
 - **Report failures through `cron_runs` too**, including ones that happen before the main work starts. An early `exit` that skips `cron_run_start` leaves no trace on the admin page and looks identical to the cron never firing.
 - Add a `$cronConfig` entry in `admin/crons/index.php` with the metric labels, or the page has nothing to render.
@@ -106,7 +106,7 @@ Required for every cron:
 - CLI guard at the top (`php_sapi_name()`), so the script cannot be triggered over HTTP.
 - `error_log()` for anything worth diagnosing later.
 
-Situational, not required: a `flock` lock file (5 of 11, for scripts where overlapping runs would double-process), a `--dry-run` flag (3 of 11, worth it for anything that sends email or money), and a daily log in `cron/logs/` (6 of 11).
+Situational, not required: a `flock` lock file (8 of 17, for scripts where overlapping runs would double-process), a `--dry-run` flag (5 of 17, worth it for anything that sends email or money), and a daily log in `cron/logs/` (9 of 17).
 
 ## Tests
 
