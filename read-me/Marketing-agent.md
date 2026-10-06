@@ -54,7 +54,7 @@ Everything starts switched off. Nothing happens until you turn the agent on.
 
 ## The daily update
 
-When a run finishes, the site emails you the agent's summary, the site's own record of that run, and anything that needs you: posts or emails waiting, or a platform sign-in about to run out. It goes to the admin notification address set in **Admin, Settings**.
+When a run finishes, the site emails you a short update. It starts with what needs you: each post or email waiting for approval, on one line, and any platform sign-in about to run out. Then comes the agent's own summary, which the site limits to 800 characters, and one line counting what the run did. The wording of each proposal and the full record of the run are on the admin page, not in the email. It goes to the admin notification address set in **Admin, Settings**.
 
 A run that never starts sends nothing. The `agent_watch` cron covers that: it emails you when no run has finished for a day and a half. See `read-me/Cron-jobs.md`.
 

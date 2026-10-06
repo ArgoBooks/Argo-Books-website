@@ -115,10 +115,19 @@ function agent_use_call(PDO $pdo, int $runId): int
     return $limit - (int) $calls - 1;
 }
 
+/** The longest summary a run may end with. The owner reads one every day, so it stays short. */
+const AGENT_SUMMARY_MAX = 800;
+
 function agent_finish_run(PDO $pdo, int $runId, string $summary): void
 {
+    $summary = trim($summary);
+    if (mb_strlen($summary) > AGENT_SUMMARY_MAX) {
+        throw new AgentRefused('SUMMARY_TOO_LONG', 'Your summary is ' . mb_strlen($summary) . ' characters and the most is '
+            . AGENT_SUMMARY_MAX . '. The owner reads it every morning. Keep what he has to do or know, put the rest in the '
+            . 'journal, and call finish_run again.', 422);
+    }
     $pdo->prepare('UPDATE agent_runs SET finished_at = NOW(), summary = ? WHERE id = ? AND environment = ?')
-        ->execute([mb_substr(trim($summary), 0, 6000), $runId, current_environment()]);
+        ->execute([$summary, $runId, current_environment()]);
 }
 
 function agent_log(PDO $pdo, ?int $runId, string $action, string $status, array $detail): void

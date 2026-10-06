@@ -87,12 +87,20 @@ Take five research tasks of the kind you will really do, such as "five businesse
 
 ## The summary
 
-`finish_run` takes a `summary`, which is emailed to Evan as it is. Write it for him, in plain sentences:
+`finish_run` takes a `summary`, which is emailed to Evan. He reads it every morning and has a minute for it, so it is short: 800 characters at most. The site refuses a longer one.
 
-1. What you did today, including the full text of anything you proposed or posted.
-2. What you learned from yesterday's results.
-3. What you plan next.
-4. Anything you need from him, and anything you noticed that he should know.
+Write it in this shape:
+
+- First, two or three plain sentences: what you did today, and the one result or lesson that matters.
+- Then, only when there is something, up to three lines that each start with `- `. Each is one thing he has to do or should know, in one sentence.
+
+Leave these out. He does not need them in the email, and each has its own place:
+
+- The text of the posts and emails you wrote. The site lists them in the same email, and he reads them in full on the page where he approves them.
+- How you did the research, and anything else about your method. That goes in the journal.
+- Your plan for tomorrow, unless it changes what he should do.
+- Numbers he already sees on his own admin pages, unless one of them is the news.
+- Something you already told him. Raise a thing once. Keep a note called `told-the-owner` listing what you have raised and when, and bring a thing up again only when it has changed.
 
 Say plainly when nothing worked. He would rather hear that than a cheerful report.
 

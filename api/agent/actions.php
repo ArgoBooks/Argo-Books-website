@@ -724,32 +724,62 @@ function agent_brief(PDO $pdo, int $runId, ?callable $http = null): array
 
 // ─── The daily update ───
 
-/**
- * Emails the owner what a run did. Sent when the run finishes, so the update is the agent's
- * own summary plus the site's record of what it actually did, which the agent cannot dress up.
- */
-function agent_send_update(PDO $pdo, int $runId): bool
+/** The agent's summary as HTML: a line starting "- " is a list item, any other line a paragraph. */
+function agent_summary_html(string $summary): string
 {
+    $html = '';
+    $items = [];
+    $lines = preg_split('/\R+/', trim($summary));
+    $lines[] = '';
+    foreach ($lines as $line) {
+        $line = trim($line);
+        if (preg_match('/^[-*]\s+(.+)$/', $line, $m)) {
+            $items[] = htmlspecialchars($m[1], ENT_QUOTES, 'UTF-8');
+            continue;
+        }
+        if ($items) {
+            $html .= '<ul><li>' . implode('</li><li>', $items) . '</li></ul>';
+            $items = [];
+        }
+        if ($line !== '') {
+            $html .= '<p>' . htmlspecialchars($line, ENT_QUOTES, 'UTF-8') . '</p>';
+        }
+    }
+    return $html;
+}
+
+/**
+ * The email that tells the owner what a run did, as [subject, html], or null for an unknown run.
+ *
+ * It is read every morning, so it leads with what needs him and stays short: the posts and
+ * emails waiting, the agent's own summary, and one line of counts from the site's record. The
+ * full text of each proposal and the full record are on the admin page.
+ */
+function agent_update_email(PDO $pdo, int $runId): ?array
+{
+    $env = current_environment();
     $run = $pdo->prepare('SELECT * FROM agent_runs WHERE id = ? AND environment = ?');
-    $run->execute([$runId, current_environment()]);
+    $run->execute([$runId, $env]);
     $run = $run->fetch();
     if ($run === false) {
-        return false;
+        return null;
     }
 
-    $actions = $pdo->prepare('SELECT action, status, detail FROM agent_actions WHERE run_id = ? ORDER BY id');
-    $actions->execute([$runId]);
-    $waiting = $pdo->prepare("SELECT kind, COUNT(*) FROM agent_proposals WHERE environment = ? AND status = 'pending' GROUP BY kind");
-    $waiting->execute([current_environment()]);
-    $waiting = $waiting->fetchAll(PDO::FETCH_KEY_PAIR);
-
     $esc = fn ($s) => htmlspecialchars((string) $s, ENT_QUOTES, 'UTF-8');
-    $html = '<h2>What the marketing agent did today</h2>';
-    $html .= '<p style="white-space:pre-wrap;">' . $esc($run['summary'] ?: 'It finished without writing a summary.') . '</p>';
+    $count = fn (int $n, string $one) => "$n $one" . ($n === 1 ? '' : 's');
 
+    $pending = $pdo->prepare("SELECT kind, platform, payload FROM agent_proposals WHERE environment = ? AND status = 'pending' ORDER BY id");
+    $pending->execute([$env]);
+    $pending = $pending->fetchAll();
     $needs = [];
-    foreach ($waiting as $kind => $count) {
-        $needs[] = "$count " . ($kind === 'post' ? 'post' : 'outreach email') . ($count == 1 ? '' : 's') . ' waiting for your approval';
+    foreach (array_slice($pending, 0, 8) as $row) {
+        $p = json_decode((string) $row['payload'], true) ?: [];
+        $needs[] = $row['kind'] === 'post'
+            ? 'Post for ' . ucfirst((string) $row['platform']) . ': ' . mb_strimwidth((string) ($p['text'] ?? ''), 0, 90, '...')
+            : 'Email to ' . ($p['business_name'] ?? '') . (empty($p['city']) ? '' : ', ' . $p['city']) . ': ' . ($p['subject'] ?? '');
+    }
+    if (count($pending) > 8) {
+        $needs[] = 'And ' . (count($pending) - 8) . ' more.';
     }
     foreach (agent_connections($pdo) as $platform => $connection) {
         if ($connection['expires_at'] !== null && $connection['expires_at'] - time() < 10 * 86400) {
@@ -758,22 +788,45 @@ function agent_send_update(PDO $pdo, int $runId): bool
                 : ucfirst($platform) . ' sign-in has run out, so nothing is being posted there';
         }
     }
+
+    $html = '';
     if ($needs) {
-        $html .= '<h3>Needs you</h3><ul><li>' . implode('</li><li>', array_map($esc, $needs)) . '</li></ul>';
-        $html .= '<p><a href="https://argorobots.com/admin/agent/">Open the agent page</a></p>';
+        $html .= '<h3>Waiting for you</h3><ul><li>' . implode('</li><li>', array_map($esc, $needs)) . '</li></ul>';
+        $html .= '<p><a href="https://argorobots.com/admin/agent/">Review and approve</a></p>';
     }
+    $html .= '<h3>What it did</h3>' . agent_summary_html($run['summary'] ?: 'It finished without writing a summary.');
 
-    $rows = '';
-    foreach ($actions->fetchAll() as $action) {
-        $detail = json_decode((string) $action['detail'], true) ?: [];
-        unset($detail['hash']);
-        $rows .= '<li><strong>' . $esc($action['action']) . '</strong> (' . $esc($action['status']) . '): '
-               . $esc(mb_substr(json_encode($detail, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE), 0, 300)) . '</li>';
+    $actions = $pdo->prepare("SELECT action, COUNT(*) FROM agent_actions WHERE run_id = ? AND environment = ? AND status = 'ok' GROUP BY action");
+    $actions->execute([$runId, $env]);
+    $actions = $actions->fetchAll(PDO::FETCH_KEY_PAIR);
+    $proposed = $pdo->prepare('SELECT kind, COUNT(*) FROM agent_proposals WHERE run_id = ? AND environment = ? GROUP BY kind');
+    $proposed->execute([$runId, $env]);
+    $proposed = $proposed->fetchAll(PDO::FETCH_KEY_PAIR);
+    $did = [];
+    foreach (['research' => 'research question', 'link_create' => 'new link'] as $action => $noun) {
+        if (!empty($actions[$action])) {
+            $did[] = $count((int) $actions[$action], $noun);
+        }
     }
-    $html .= '<h3>The site\'s own record of this run</h3>' . ($rows ? "<ul>$rows</ul>" : '<p>No actions. It read and wrote to its journal only.</p>');
-    $html .= '<p style="color:#666;">Run ' . (int) $runId . ', ' . (int) $run['api_calls'] . ' requests.</p>';
+    foreach (['email', 'post'] as $kind) {
+        if (!empty($proposed[$kind])) {
+            $did[] = $count((int) $proposed[$kind], $kind) . ' written';
+        }
+    }
+    $html .= '<p style="color:#666;">Run ' . (int) $runId . ($did ? ': ' . implode(', ', $did) : '') . '. '
+           . 'The full record is on the <a href="https://argorobots.com/admin/agent/?tab=runs">Agent page</a>.</p>';
 
-    $sent = send_styled_email(admin_notification_email(), 'Marketing agent: ' . date('M j'), $html);
+    return ['Marketing agent: ' . ($pending ? count($pending) . ' waiting for you' : date('M j')), $html];
+}
+
+/** Sends the update when a run finishes. */
+function agent_send_update(PDO $pdo, int $runId): bool
+{
+    $email = agent_update_email($pdo, $runId);
+    if ($email === null) {
+        return false;
+    }
+    $sent = send_styled_email(admin_notification_email(), $email[0], $email[1]);
     if ($sent) {
         $pdo->prepare('UPDATE agent_runs SET emailed_at = NOW() WHERE id = ?')->execute([$runId]);
     }
