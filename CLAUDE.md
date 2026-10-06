@@ -58,7 +58,7 @@ For local dev, set up MailHog so the fallback path doesn't try to hit a real MTA
 
 **PayPal portal Connect is disabled.** The "Log in with PayPal" OAuth endpoint refuses to return identity for Business-account tokens, and proper merchant onboarding requires the Partner Referrals API (gated behind Platforms & Marketplaces partner enrollment). All portal-side PayPal handlers (`api/portal/connect.php`, `connect-callback.php`, `checkout.php` `handle_paypal_checkout()`, `process-payment.php` `process_paypal_payment()`) return 503 `PROVIDER_UNSUPPORTED`, and `get_available_payment_methods()` in `api/portal/portal-helper.php` deliberately omits PayPal even when `paypal_merchant_id` is set. The desktop app hides the PayPal Connect button.
 
-**PayPal IS still used for the SaaS subscription flow** (Argo Books Premium billing on argorobots.com): separate, working integration with its own webhook handler (`webhooks/paypal-subscription.php`), plan IDs, and checkout. Do not touch SaaS-subscription PayPal code when working on portal features.
+**PayPal is still used for the SaaS subscription flow** (Argo Books Premium billing on argorobots.com): separate, working integration with its own webhook handler (`webhooks/paypal-subscription.php`), plan IDs, and checkout. Do not touch SaaS-subscription PayPal code when working on portal features.
 
 ## Header / footer loading
 
@@ -88,7 +88,7 @@ What is available:
 
 - **cPanel > Cron Jobs** is the only way to execute a script server-side. Set a schedule a minute or two out, let it fire, then restore or delete the entry. It runs through the shell, so `php_sapi_name() === 'cli'` and CLI guards still pass.
 - **HeidiSQL** for all SQL. Schema changes and any one-off queries go to the user as a copy-pasteable block.
-- **Local Laragon** for anything genuinely interactive. Reproduce there first; the server is not a debugging environment.
+- **Local Laragon** You can reproduce there first; the server is not a debugging environment.
 
 **Cron mail is not configured, so stdout goes nowhere.** Never treat `echo` as a way to report anything, and don't add one. No cron script echoes.
 
@@ -124,6 +124,14 @@ For end users, plain language, no jargon. Include only user-visible changes; ski
 
 - "Fixed a bug where invoices could be lost" → skip, or "More reliable invoice saving"
 - "Patched a security vulnerability" → skip entirely
+
+## Code comments
+
+Write a comment only for the reason something is done, and only when that reason is not obvious. One line. Three to five line comments are not allowed.
+
+Write it in the present tense, in plain language and in full sentences, for somebody who knows PHP but has never opened this file. A comment that compresses the reasoning into framework vocabulary is a note to yourself rather than an explanation to a reader.
+
+Say what the code does and why it is this way, never what the code used to do and never what not to do. "used to", "previously" and the rest of a bug's story belong in the commit message, which is where someone goes for history.
 
 ## Documentation style
 
