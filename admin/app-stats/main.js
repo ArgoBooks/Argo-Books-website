@@ -598,10 +598,7 @@ document.addEventListener("DOMContentLoaded", function () {
           {
             data: data,
             backgroundColor: colors.slice(0, labels.length),
-            borderColor: colors
-              .slice(0, labels.length)
-              .map((c) => c.replace("0.8", "1")),
-            borderWidth: 2,
+            borderWidth: 1,
           },
         ],
       },
