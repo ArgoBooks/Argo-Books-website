@@ -43,17 +43,12 @@ if (!empty($premium_subscription['last_cycle_change_at'])
 $payment_method = strtolower($premium_subscription['payment_method'] ?? '');
 $is_paypal = ($payment_method === 'paypal');
 
-// Only Stripe, Square, and PayPal reach this page. free_key, manual, or
-// unknown payment methods can't switch cycles, so redirect rather than
-// render a confirm UI that would inevitably fail.
+// Only Stripe, Square, and PayPal reach this page. free_key, manual, or unknown payment methods can't switch cycles, so redirect rather than render a confirm UI that would inevitably fail.
 if (!in_array($payment_method, ['stripe', 'square', 'paypal'], true)) {
     $redirect_with_error('Cycle switching is not available for this subscription type. Please contact support.');
 }
 
-// PayPal-specific eligibility: must have at least one completed sale to
-// refund against (otherwise PayPal hasn't billed yet, since the user just
-// subscribed seconds ago and the webhook hasn't arrived). Block here
-// rather than later in the flow.
+// PayPal needs a completed sale to refund against, which it has none of seconds after subscribing.
 if ($is_paypal) {
     require_once __DIR__ . '/../../paypal-helper.php';
     $paypal_recent_sale = getMostRecentPayPalSale($premium_subscription['subscription_id']);
@@ -68,9 +63,7 @@ $yearly_base = $pricing_config['premium_yearly_price'];
 $old_cycle = $premium_subscription['billing_cycle'];
 $new_cycle = ($old_cycle === 'monthly') ? 'yearly' : 'monthly';
 
-// Compute proration server-side. Even though the page is read-only, the
-// AJAX endpoint (Stripe/Square) and process-subscription.php (PayPal)
-// recompute to prevent any client tampering with displayed values.
+// Worked out on the server, and worked out again by the endpoint that charges, so a tampered figure on the page cannot be billed.
 $proration = calculate_cycle_switch_proration($premium_subscription, $new_cycle, $pricing_config);
 
 // PayPal-only refund estimate (same math used by checkout disclosure banner)
@@ -209,14 +202,7 @@ $is_upgrade = ($new_cycle === 'yearly');
             </div>
 
             <?php if ($is_paypal):
-                // PayPal flow: show the breakdown with refund-style copy,
-                // then send the user to checkout where they'll approve a
-                // new PayPal subscription with the new plan_id.
-                // PayPal subscription plans (see setup-paypal-plans.php)
-                // are configured with the BASE price only. PayPal does NOT add
-                // our processing fee on top. So "charged today by PayPal" must
-                // show the base, not base+fee, or the user sees one number on
-                // our page and a different number on their PayPal statement.
+                // PayPal flow: show the breakdown with refund-style copy, then send the user to checkout where they'll approve a new PayPal subscription with the new plan_id.
                 $new_billed_base = ($new_cycle === 'yearly') ? $yearly_base : $monthly_base;
                 $new_billed_fee = 0.0;
                 $new_billed_total = round($new_billed_base, 2);

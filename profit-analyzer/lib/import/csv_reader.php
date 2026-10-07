@@ -44,8 +44,6 @@ function pa_read_csv(string $path): array
         return [[], []];
     }
     // Decode by BOM, mirroring .NET's StreamReader(detectEncodingFromByteOrderMarks).
-    // Excel "Unicode Text" and some bank exports are UTF-16; decode them to UTF-8
-    // so the parser sees real characters instead of interleaved null bytes.
     if (strncmp($content, "\xFF\xFE\x00\x00", 4) === 0) {        // UTF-32 LE
         $content = mb_convert_encoding(substr($content, 4), 'UTF-8', 'UTF-32LE');
     } elseif (strncmp($content, "\x00\x00\xFE\xFF", 4) === 0) {  // UTF-32 BE
@@ -125,9 +123,7 @@ function pa_csv_parse(string $content, string $delimiter): array
                 $inQuotes = true;
                 $started = true;
             } elseif ($c === '"') {
-                // A quote mid-field is a literal character (lenient, like Excel):
-                // e.g. inch marks in '3/4" pipe'. Prevents swallowing the rest of
-                // the file when a stray quote appears in an unquoted field.
+                // A quote mid-field is a literal character (lenient, like Excel): e.g. inch marks in '3/4" pipe'.
                 $field .= $c;
                 $started = true;
             } elseif ($c === $delimiter) {

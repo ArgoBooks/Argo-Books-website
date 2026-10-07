@@ -78,12 +78,7 @@ if ($user) {
         ];
     }
 
-    // Calculate reputation based on votes
-    // For post upvotes: +10 per upvote
-    // For post downvotes: -5 per downvote
-    // For downvoting others: -2 per downvote cast
-    // For comment upvotes: +2 per upvote
-    // For comment downvotes: -1 per downvote
+    // Reputation from votes: an upvote on a post is +10 and a downvote -5, a comment upvote is +2, and casting a downvote costs 2.
 
     // First, calculate reputation from post votes received
     $stmt = $pdo->prepare("

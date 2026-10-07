@@ -17,9 +17,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/definitions.php';
 
-// ---------------------------------------------------------------------------
-// Serialization
-// ---------------------------------------------------------------------------
+// --- Serialization -------------------------------------------------------------------------------
 
 /** Turn a database row into the object a caller sees. */
 function api_serialize(array $spec, array $row, array $expand = []): array
@@ -154,9 +152,7 @@ function api_expand_params(array $input = []): array
     return array_values(array_filter(array_map('strval', $expand)));
 }
 
-// ---------------------------------------------------------------------------
-// Reads
-// ---------------------------------------------------------------------------
+// --- Reads ---------------------------------------------------------------------------------------
 
 /** Fetch one row by public id, or 404. */
 function api_fetch_object(array $spec, string $publicId, int $accountId): array
@@ -275,9 +271,7 @@ function api_handle_retrieve(array $spec, array $auth, string $publicId): void
     api_json(200, api_serialize($spec, $row, api_expand_params()));
 }
 
-// ---------------------------------------------------------------------------
-// Writes
-// ---------------------------------------------------------------------------
+// --- Writes --------------------------------------------------------------------------------------
 
 /** POST /v1/<resource> */
 function api_handle_create(array $spec, array $auth): void
@@ -352,11 +346,7 @@ function api_handle_delete(array $spec, array $auth, string $publicId): void
     $existing = api_fetch_object($spec, $publicId, $accountId);
     api_require_pending($spec, $existing, 'deleted');
 
-    // Soft delete, and note that a later GET of this id returns a plain 404:
-    // the row is kept for referential integrity, not to report the deletion.
-    // Keeping it means an id is never reused, a reference from another object
-    // cannot dangle onto a recycled row, and a deleted refund stops counting
-    // against its revenue's refundable balance.
+    // A soft delete: the row stays for referential integrity so an id is never reused and no reference dangles, and a later GET of it is a plain 404.
     $pdo->prepare(
         'UPDATE ' . $spec['table'] . ' SET deleted_at = NOW() WHERE public_id = ? AND account_id = ?'
     )->execute([$publicId, $accountId]);
@@ -453,9 +443,7 @@ function api_check_resource_invariants(array $spec, array $values, ?array $exist
     }
 }
 
-// ---------------------------------------------------------------------------
-// Line items
-// ---------------------------------------------------------------------------
+// --- Line items ----------------------------------------------------------------------------------
 
 /** All line items for one expense or revenue, oldest first. */
 function api_list_line_items(int $accountId, string $parentType, string $parentPublicId): array

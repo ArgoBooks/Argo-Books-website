@@ -107,9 +107,7 @@ final class RedeemPremiumKeyTest extends IntegrationTestCase
 
     public function test_re_redemption_moves_a_key_subscription_into_this_environment(): void
     {
-        // A key carries no environment, so one redeemed on the other site can be
-        // redeemed here. Tests run as sandbox, so the production subscription plays
-        // the part of the one redeemed elsewhere.
+        // A key carries no environment, so one redeemed on the other site can be redeemed here.
         $subId = 'PREM-OTHER-ENVS-AAAA-DDDD';
         $this->seedSubscription($subId, (new \DateTime('+30 days'))->format('Y-m-d H:i:s'));
         $this->pdo->prepare("UPDATE premium_subscriptions SET environment = 'production' WHERE subscription_id = ?")

@@ -31,9 +31,7 @@ function referral_json_response(array $payload)
     exit;
 }
 
-// The management-table forms post through fetch() and set ajax=1. Those requests
-// get JSON back (message + freshly rendered table rows) instead of a redirect,
-// so adding or editing a link never reloads the page.
+// The management forms post through fetch() with ajax=1 and get JSON back, so adding or editing a link never reloads the page.
 $is_ajax = ($_SERVER['REQUEST_METHOD'] === 'POST') && (($_POST['ajax'] ?? '') === '1');
 $saved_message = '';
 $saved_category = '';

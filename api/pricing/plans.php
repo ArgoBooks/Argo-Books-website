@@ -9,9 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
-// Load environment variables so price overrides (PREMIUM_MONTHLY_PRICE, etc.) are
-// applied. get_pricing_config() reads $_ENV, which is only populated once the .env
-// is loaded; without this the endpoint silently serves the default prices.
+// Load environment variables so price overrides (PREMIUM_MONTHLY_PRICE, etc.) are applied.
 require_once __DIR__ . '/../../vendor/autoload.php';
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../../');
 $dotenv->safeLoad();
@@ -27,9 +25,7 @@ $currency = $pricing['currency'];
 
 echo json_encode([
     'plans' => $plans,
-    // Raw numeric limits. The same figures appear inside the plan feature strings
-    // (e.g. "10/month"), but the desktop app needs them as numbers to compose its own
-    // sentences, and parsing them back out of display text would be fragile.
+    // The same figures appear inside the plan feature strings, but the desktop needs them as numbers to write its own sentences.
     'limits' => [
         'free_invoice_monthly_limit'      => (int) $pricing['free_invoice_monthly_limit'],
         'free_receipt_scan_monthly_limit' => (int) $pricing['free_receipt_scan_monthly_limit'],

@@ -54,7 +54,7 @@ try {
  * Claim due deliveries. Limited per run so one badly-behaved endpoint with a
  * huge backlog cannot starve everyone else's notifications.
  *
- * There is no environment filter here, and no longer one anywhere under /v1:
+ * There is no environment filter here, nor anywhere under /v1:
  * an account is one Argo Books company, and that is the whole of the scoping.
  */
 $stmt = $pdo->prepare("
@@ -99,10 +99,7 @@ foreach ($due as $row) {
         continue;
     }
 
-    // Re-check the destination immediately before sending. The URL was screened
-    // when it was registered, but DNS can be repointed afterwards, so screening
-    // once would leave rebinding open: a name that was public then can resolve
-    // to a private address now and turn this cron into the attacker's client.
+    // Re-check the destination immediately before sending.
     $host = (string) parse_url((string) $row['url'], PHP_URL_HOST);
     if (api_host_is_reserved_name($host) || !api_host_is_public($host)) {
         $pdo->prepare("
@@ -118,9 +115,7 @@ foreach ($due as $row) {
 
     [$statusCode, $error] = api_webhook_post((string) $row['url'], (string) $body, $signature);
 
-    // 2xx is success. Everything else retries, including a 410: an endpoint that
-    // has genuinely gone is caught by the attempt limit below, and guessing from
-    // a status code would drop events during a bad deploy on their side.
+    // Anything other than 2xx retries, a 410 included, because the attempt limit catches an endpoint that has really gone.
     if ($statusCode !== null && $statusCode >= 200 && $statusCode < 300) {
         $pdo->prepare("
             UPDATE api_webhook_deliveries

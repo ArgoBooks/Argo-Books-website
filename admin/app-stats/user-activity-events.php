@@ -55,10 +55,7 @@ if (!function_exists('ua_describe_event')) {
                 }
                 $dur = (int)($ev['durationSeconds'] ?? 0);
                 $human = $dur >= 60 ? round($dur / 60, 1) . ' min' : $dur . 's';
-                // Only an explicit false is unclean. Ends uploaded before the flag existed
-                // have no value at all and must not be shown as if they'd been force-quit.
-                // The duration on an unclean end is accurate to the app's heartbeat interval,
-                // not to the moment it died.
+                // Only an explicit false is unclean. Ends uploaded before the flag existed have no value at all and must not be shown as if they'd been force-quit.
                 if (array_key_exists('clean', $ev) && $ev['clean'] === false) {
                     return ['unclean', "Session ended unexpectedly ({$human})"];
                 }
@@ -218,9 +215,7 @@ if (!function_exists('ua_merge_timeline')) {
      */
     function ua_merge_timeline(array $timeline): array
     {
-        // Wide enough for the gap between creating a company and finishing its
-        // details, tight enough that a later profile edit in the same session is
-        // not mistaken for the creation itself.
+        // Wide enough for the gap between creating a company and finishing its details, tight enough that a later edit is not read as the creation.
         $window = 60;
 
         $companyIdx = [];
@@ -254,9 +249,7 @@ if (!function_exists('ua_merge_timeline')) {
             $drop[$i] = true;
         }
 
-        // Oldest first, so "first sighting of this company" means what it says. The
-        // rows arrive grouped by upload file, which is not chronological once a user
-        // has more than one.
+        // Oldest first, so "first sighting of this company" means what it says. The rows arrive grouped by upload file, which is not chronological once a user has more than one.
         $order = array_keys($companyIdx);
         usort($order, function ($a, $b) use ($timeline) {
             return (($timeline[$a]['ts'] ?? 0) <=> ($timeline[$b]['ts'] ?? 0)) ?: ($a <=> $b);
@@ -274,9 +267,7 @@ if (!function_exists('ua_merge_timeline')) {
             } elseif (array_key_exists($name, $lastDetails) && $lastDetails[$name] !== $details) {
                 $timeline[$j]['text'] = 'Updated company details: ' . $rest;
             } else {
-                // Also covers a language-only change, which re-fires the profile without
-                // altering anything shown here. Rare, and reading it as another open is
-                // the harmless way to be wrong.
+                // Also covers a language-only change, which re-fires the profile without altering anything shown here.
                 $timeline[$j]['text'] = 'Opened company: ' . $rest;
             }
             $lastDetails[$name] = $details;

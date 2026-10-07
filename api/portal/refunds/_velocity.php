@@ -24,11 +24,7 @@ function refund_load_velocity_config(PDO $pdo, int $company_id): array {
         $stmt = $pdo->query("SELECT * FROM refund_velocity_config WHERE company_id IS NULL LIMIT 1");
         $cfg = $stmt->fetch(PDO::FETCH_ASSOC);
     }
-    // Final fallback if config table is empty (shouldn't happen post-migration).
-    // The *_floor_cents value MUST be strictly greater than *_cooling_cents in
-    // both age brackets. When they're equal, the hard-block check ($today_cents
-    // >= floor) catches every request that the cooling check would catch, and
-    // the 'delayed' tier is unreachable.
+    // Final fallback if config table is empty (shouldn't happen post-migration). The *_floor_cents value MUST be strictly greater than *_cooling_cents in both age brackets.
     if (!$cfg) {
         return [
             'soft_warn_multiplier' => 3.0,
@@ -44,9 +40,7 @@ function refund_load_velocity_config(PDO $pdo, int $company_id): array {
             'young_account_cooling_cents' => 300000,  // $3,000/day cooling
         ];
     }
-    // Pre-existing rows from before the young_account_* columns were added
-    // may return NULL for those keys; fall back to the documented defaults so
-    // an unmigrated row can't silently disable the 7-30d bracket.
+    // A row from before the young_account_* columns can return NULL, so the documented defaults stand in rather than disabling the bracket.
     $cfg['young_account_floor_cents']   = $cfg['young_account_floor_cents']   ?? 1000000;
     $cfg['young_account_soft_cents']    = $cfg['young_account_soft_cents']    ?? 100000;
     $cfg['young_account_cooling_cents'] = $cfg['young_account_cooling_cents'] ?? 300000;

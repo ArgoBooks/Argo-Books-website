@@ -7,9 +7,7 @@
 /**
  * Every comparison page, slug => the label other pages link to it by.
  *
- * The labels used to be repeated inside a $other_comparisons array on each of
- * the fifteen pages. They happened to agree, but nothing kept them agreeing:
- * renaming a page meant finding every other page that linked to it.
+ * Held once here, so renaming a page does not mean finding every page that links to it.
  */
 function argo_compare_index(): array
 {

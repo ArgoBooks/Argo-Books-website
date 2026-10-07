@@ -355,10 +355,7 @@ async function runBulkDrafts(opts) {
         ? `Cancelled: ${success} drafted` + (fail ? `, ${fail} failed` : '') + `, ${total - success - fail} skipped`
         : `Done: ${success} drafted` + (fail ? `, ${fail} failed` : '');
     if (progressText) progressText.textContent = doneMsg;
-    // Hide the progress bar as soon as the batch finishes. The same message is
-    // shown as a toast by notify() below, so holding the bar on screen only
-    // made a fast batch (creator/editorial leads use a fixed template and no
-    // AI call, so they finish near-instantly) feel slower than it was.
+    // Hide the progress bar as soon as the batch finishes.
     if (progressEl) progressEl.style.display = 'none';
 
     if (draftBtn) draftBtn.disabled = false;
@@ -592,7 +589,7 @@ function updateDraftStatus(lead) {
     if (saveBtn) saveBtn.style.display = locked ? 'none' : '';
 
     // Lock the subject/body fields too, not just hide the Save button, so a sent
-    // draft can't be typed into (which previously looked editable but never saved).
+    // draft cannot be typed into, which would look editable without saving.
     const subjectEl = document.getElementById('draftSubject');
     const bodyEl = document.getElementById('draftBody');
     if (subjectEl) subjectEl.readOnly = locked;
@@ -800,10 +797,7 @@ async function quickGenerateDraft(id, btn) {
     }
 }
 
-// ─── Email Workflow ───
-// Persist the current subject/body from the Draft tab. Used on its own via the
-// Save Draft button, and by sendEmail() so a send always uses exactly what's
-// shown (the send endpoint reads the draft straight from the DB).
+// ─── Email Workflow ─── Persist the current subject/body from the Draft tab.
 async function saveDraft() {
     if (!currentLeadId) return;
     const subject = document.getElementById('draftSubject').value;
@@ -1253,11 +1247,7 @@ window.loadLeadFollowups = async function() {
     '</tbody></table>';
 };
 
-// Editorial leads list (scoped to source=editorial_auto). Reuses the
-// shared esc/formatStatus/formatDateTime helpers and the id-driven lead modal
-// (openLeadDetail) and draft flow (quickGenerateDraft), so nothing else needs
-// duplicating. Uses its own paginator + table class to avoid colliding with the
-// Email leads table.
+// Editorial leads list (scoped to source=editorial_auto).
 let editorialLeadsPaginator = null;
 
 // ─── Editorial Leads: bulk select (distinct class/IDs from the Email tab so the
@@ -1393,13 +1383,8 @@ async function loadEditorialLeads() {
 }
 
 
-// ═══════════════════════════════════════════════════════════════════════════
-// Creators / affiliate-partner outreach channel
-// Mirrors the editorial channel (leads with filters/bulk), scoped to
-// source=creator_auto, reusing the shared runBulkDrafts()/openBulkSendModal() and
-// the id-driven lead modal. Distinct classes/IDs (.cr-lead-check, cr*) so its
-// selection never collides with the other leads tables in the DOM.
-// ═══════════════════════════════════════════════════════════════════════════
+// === Creators and affiliate partners ===
+// Mirrors the editorial channel with its own filters and bulk actions, scoped to source=creator_auto.
 
 let creatorLeadsPaginator = null;
 
@@ -1468,13 +1453,7 @@ async function bulkDeleteCreatorLeads() {
     loadStats();
 }
 
-// Grab a creator's email when none was auto-found: open the page where the email
-// lives (the channel About page for YouTube) in a new tab, then paste it back
-// onto the lead. Beats a command-line tool for a handful of leads.
-// Holds the button + lead being resolved while the paste-email modal is open.
-// We use an in-page modal rather than a native prompt() because getCreatorEmail
-// opens the channel in a foreground tab, and browsers suppress prompt()/alert()
-// dialogs fired from the now-backgrounded admin tab (the box never appeared).
+// Grab a creator's email when none was auto-found: open the page where the email lives (the channel About page for YouTube) in a new tab, then paste it back onto the lead.
 let creatorEmailBtn = null;
 let creatorEmailLeadId = null;
 
@@ -1603,9 +1582,7 @@ async function loadCreatorLeads() {
 }
 
 
-// ═══════════════════════════════════════════════════════════════════════════
-// Channel switching (Email | Editorial Partners | Creator Partners)
-// ═══════════════════════════════════════════════════════════════════════════
+// === Channel switching (Email, Editorial Partners, Creator Partners) ===
 
 const CHANNEL_LISTS = { editorial: loadEditorialLeads, creator: loadCreatorLeads };
 

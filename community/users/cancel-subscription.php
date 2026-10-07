@@ -96,9 +96,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm_cancel'])) {
                 error_log("Failed to send cancellation admin notification: " . $e->getMessage());
             }
 
-            // Runs in a real browser session, so keep the bot filter (allow_bot
-            // false) and fall back to the live cookie/session user when signup
-            // attribution is missing.
+            // Runs in a real browser session, so keep the bot filter (allow_bot false) and fall back to the live cookie/session user when signup attribution is missing.
             track_subscription_event('premium_churned', $subscription['subscription_id'],
                 ['reason' => 'user_cancelled', 'source' => 'portal'],
                 [

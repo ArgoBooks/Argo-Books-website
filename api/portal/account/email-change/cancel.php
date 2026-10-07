@@ -37,9 +37,7 @@ if (!in_array($row['state'], ['pending','old_verified'], true)) {
     send_error_response(409, 'Cannot cancel in state ' . $row['state'], 'WRONG_STATE');
 }
 
-// State-guarded UPDATE: confirm-old.php / confirm-new.php can transition this
-// row between the SELECT above and this UPDATE. Without the predicate, the
-// cancel would silently overwrite a row that has already moved on.
+// State-guarded, because confirm-old.php or confirm-new.php can move this row between the SELECT above and this UPDATE.
 $upd = $pdo->prepare("UPDATE email_change_requests SET state='cancelled' WHERE id = ? AND state IN ('pending','old_verified')");
 $upd->execute([$change_id]);
 if ($upd->rowCount() === 0) {

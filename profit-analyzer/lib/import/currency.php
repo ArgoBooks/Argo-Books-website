@@ -16,18 +16,13 @@
 // single-currency sheet is still labeled right and a mixed sheet is no worse
 // than before this feature existed.
 
-// Cap on live (uncached) historical-rate fetches per analysis, so a file
-// spanning hundreds of distinct dates can't fan out into hundreds of API calls.
-// Past the cap, the most recent successfully-fetched rate set is reused.
+// Cap on live (uncached) historical-rate fetches per analysis, so a file spanning hundreds of distinct dates can't fan out into hundreds of API calls.
 require_once __DIR__ . '/../../../shared/currencies.php';
 
 const PA_FX_MAX_LIVE_FETCHES = 40;
 
-// ── CurrencyInfo: symbol / code resolution ──────────────────────────────
-// Reads shared/currencies.php, the website's single source of truth, which
-// itself mirrors the desktop app's CurrencyInfo.cs. This module used to carry
-// its own copy of the table, which is how INR ended up supported here and
-// nowhere else on the site.
+// --- CurrencyInfo: symbol and code ---
+// Reads shared/currencies.php, the site's single source of truth, which mirrors the desktop app.
 
 /** code => [symbol, name, decimals]. Positional, matching CurrencyInfo.All. */
 function pa_currency_all(): array

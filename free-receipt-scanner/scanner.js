@@ -96,9 +96,7 @@ function resetToken() {
   if (window.turnstile && turnstileWidgetId !== null) { try { window.turnstile.reset(turnstileWidgetId); } catch (e) {} }
 }
 
-// Attach auth to a request: reuse the server scan pass if we have one (lets
-// requests run concurrently), otherwise a single-use Turnstile token. Returns
-// true if a token was used, so the caller knows to reset it afterward.
+// Attach auth to a request: reuse the server scan pass if we have one (lets requests run concurrently), otherwise a single-use Turnstile token.
 async function appendAuth(fd) {
   if (scanPass) { fd.append('scan_pass', scanPass); return false; }
   const t = await waitForToken();
@@ -186,10 +184,8 @@ async function scan(file) {
   rsError(data?.message || 'That scan did not work. Please try a clearer photo.');
 }
 
-// --- Bulk scanning: one request per receipt, with live progress. The first
-// receipt authenticates with Turnstile and the server returns a reusable pass;
-// the rest run CONCURRENTLY using that pass. Each successful scan counts toward
-// the daily limit; receipts beyond it come back 429 and are marked skipped. ---
+// --- Bulk scanning: one request per receipt, with live progress. The first receipt authenticates
+// with Turnstile and the server returns a reusable pass; the rest run CONCURRENTLY using that pass.
 async function bulkScan(files, totalSelected) {
   bulkResults = null; bulkNote = '';
   scanCancelled = false;

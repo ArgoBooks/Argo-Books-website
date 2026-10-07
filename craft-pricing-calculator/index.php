@@ -61,9 +61,7 @@ $faqs = [
     ],
 ];
 
-// Schema: SoftwareApplication (the calculator) + FAQPage, as a @graph.
-// The FAQPage node is built from $faqs by partials/faq.php, the same array
-// the visible accordion renders from.
+// Schema: SoftwareApplication (the calculator) + FAQPage, as a @graph. The FAQPage node is built from $faqs by partials/faq.php, the same array the visible accordion renders from.
 
 $page_schema_json = json_encode([
     '@context' => 'https://schema.org',

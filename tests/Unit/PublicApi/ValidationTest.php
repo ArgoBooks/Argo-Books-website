@@ -81,9 +81,7 @@ final class ValidationTest extends TestCase
 
     public function testNegativeAmountIsAllowedAtFieldLevel(): void
     {
-        // Field-level validation permits it; resource invariants decide whether
-        // a negative makes sense for that object. Keeping the two separate is
-        // what lets refunds enforce "> 0" without every amount field doing so.
+        // Field-level validation permits it; resource invariants decide whether a negative makes sense for that object.
         $out = api_validate_input($this->revenueSpec(), [
             'description' => 'Correction',
             'amount'      => -500,

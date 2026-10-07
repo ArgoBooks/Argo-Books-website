@@ -174,9 +174,7 @@ $site_schema = [
 </script>
 <?php endif; ?>
 <?php
-// JS-confirmation beacon (bot filter for the marketing funnel); shared with
-// resources/footer/footer.php via the single partial. URL is a JS expression
-// because the base path here is only known client-side (window.INVGEN_BASE).
+// Shared with the footer through one partial, and the URL is a JS expression because the base path is only known there.
 $confirm_url_js = "(window.INVGEN_BASE || '') + '/api/referral/confirm.php'";
 include __DIR__ . '/../resources/referral-confirm-beacon.php';
 ?>

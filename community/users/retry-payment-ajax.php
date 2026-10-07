@@ -227,10 +227,7 @@ try {
             ]);
 
             $paymentsApi = $client->getPaymentsApi();
-            // Deterministic idempotency key per (subscription, calendar day) so a
-            // network retry, double-click, or accidental form re-submit on the
-            // same day reuses the same key and Square dedups instead of charging
-            // twice. Salt with the access token so dev/prod keys don't collide.
+            // One key per subscription and calendar day, so a retry or a double click reuses it and Square declines to charge twice.
             $idempotencyKey = substr(
                 hash('sha256', 'retry_' . $subscription_id . '_' . date('Y-m-d') . '_' . $squareAccessToken),
                 0,
@@ -291,23 +288,14 @@ try {
 
     // If we got here, payment/reactivation was successful
     if ($reactivated) {
-        // For Stripe/Square the card has been charged synchronously, so we can
-        // safely extend end_date here. For PayPal, activatePayPalSubscription
-        // only un-suspends the subscription. PayPal has NOT collected payment
-        // yet. Extending end_date now would give the user a free renewal
-        // period if the next PayPal billing attempt fails. For PayPal, only
-        // flip status back to active and let PAYMENT.SALE.COMPLETED (handled
-        // in webhooks/paypal-subscription.php) extend end_date when the real
-        // payment confirmation arrives.
+        // For Stripe/Square the card has been charged synchronously, so we can safely extend end_date here. For PayPal, activatePayPalSubscription only un-suspends the subscription.
         $extendsEndDate = in_array($payment_method, ['stripe', 'square'], true);
 
         if ($extendsEndDate) {
             $interval = ($billing_cycle === 'yearly') ? '+1 year' : '+1 month';
             $new_end_date = date('Y-m-d H:i:s', strtotime($interval));
 
-            // Env filter: same user_id can have a payment_failed sub on each
-            // environment (shared DB). Without this, a retry from one env could
-            // reactivate the wrong env's subscription.
+            // Filtered by environment because both share a database, so a retry in one cannot reactivate the other's subscription.
             $stmt = $pdo->prepare("
                 UPDATE premium_subscriptions
                 SET status = 'active', auto_renew = 1, end_date = ?, updated_at = NOW()
@@ -342,9 +330,7 @@ try {
                 }
             }
 
-            // Fire premium_paid event for the retry payment. Runs in a real
-            // browser session, so keep the bot filter (allow_bot false) and fall
-            // back to the live cookie/session when signup attribution is missing.
+            // Fire premium_paid event for the retry payment.
             track_subscription_event('premium_paid', $subscription_id, [
                 'amount'         => $amount,
                 'currency'       => 'CAD',

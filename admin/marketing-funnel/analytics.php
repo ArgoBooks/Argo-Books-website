@@ -18,9 +18,7 @@
  * functions) so they run on any MySQL 8 / MariaDB 10 build.
  */
 
-// Shared host -> source map; the AI / social host lists for channel
-// classification are derived from it so new entries there update both source
-// attribution and the channel donut together.
+// Shared host -> source map; the AI / social host lists for channel classification are derived from it so new entries there update both source attribution and the channel donut together.
 require_once __DIR__ . '/../../referral_sources.php';
 
 /**
@@ -346,9 +344,7 @@ function funnel_entry_page_visits(?string $period_start, ?string $source_filter)
         $params[] = $source_filter;
     }
 
-    // MIN(id) picks each visitor's earliest landing, matching the first-touch
-    // rule used for revenue. Written as a join rather than a window function so
-    // it runs on MySQL 5.7 as well as 8.
+    // MIN(id) picks each visitor's earliest landing, matching the first-touch rule used for revenue.
     $sql = "SELECT SUBSTRING_INDEX(r.page_url, '?', 1) AS page, COUNT(*) AS visitors
               FROM referral_events r
               JOIN (
@@ -586,11 +582,8 @@ function build_funnel_analytics(?string $period_start, ?string $source_filter, a
 
     }
 
-    // ---- Free / paid user counts (first-touch) per referrer and entry page ----
-    // Revenue alone hides which pages bring people who convert: a page can pull
-    // plenty of visits and no installs, or few visits and several. Counting the
-    // installs and payments a page introduced answers "which pages earn", which
-    // visit counts on their own cannot.
+    // --- Free and paid user counts per referrer and entry page ---
+    // Revenue alone hides which pages bring people who convert.
     $free_by_ref = $paid_by_ref = [];
     $free_by_page = $paid_by_page = [];
 
@@ -707,9 +700,7 @@ function funnel_page_breakdowns(?string $period_start): array
                      GROUP BY page
                      ORDER BY visits DESC, page ASC";
 
-    // Entry / exit: the first / last page_view row per visitor per day, keyed by
-    // MIN(id) / MAX(id) so same-second ties resolve deterministically by insert
-    // order. Grouping the picked rows by page gives the entry/exit distribution.
+    // Entry / exit: the first / last page_view row per visitor per day, keyed by MIN(id) / MAX(id) so same-second ties resolve deterministically by insert order.
     $edge_sql = fn(string $agg) =>
         "SELECT SUBSTRING_INDEX(s.event_data, '?', 1) AS page, COUNT(*) AS visits
            FROM statistics s
@@ -746,9 +737,7 @@ function funnel_page_breakdowns(?string $period_start): array
 }
 
 // ─── Funnel stage counts ───
-// The rules for what counts as a visitor, a download and an install. They live here, not in
-// the page, because the marketing agent reads the same figures (api/agent/lib.php) and the
-// two must never disagree.
+// Kept here, not in the page, because the marketing agent reads the same figures.
 
 /**
  * SQL fragment: TRUE when a referral_events row's visitor also has a

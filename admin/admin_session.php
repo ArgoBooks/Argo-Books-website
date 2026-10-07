@@ -32,11 +32,7 @@ require_once __DIR__ . '/../env_helper.php';
 // idle, short enough that an abandoned session still expires the same day.
 ini_set('session.gc_maxlifetime', (string) (8 * 60 * 60));
 
-// Keep admin sessions out of the shared system session directory (which the
-// host may sweep aggressively). A dedicated subdirectory of the system temp
-// dir sits outside the web root and is not touched by the host's default
-// session cleanup. If it can't be created/written, we silently keep the
-// default path so login still works.
+// Keep admin sessions out of the shared system session directory (which the host may sweep aggressively).
 $admin_session_dir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'argo_admin_sessions';
 if (!is_dir($admin_session_dir)) {
     @mkdir($admin_session_dir, 0700, true);
@@ -60,10 +56,7 @@ session_set_cookie_params([
 
 session_start();
 
-// Remember the admin page currently being requested so the login page can send
-// the admin back here after they re-authenticate. Skip the login/logout
-// endpoints (so we never bounce back to them) and non-GET requests (so form
-// posts and AJAX endpoints aren't treated as "the page to return to").
+// Remembers the admin page being asked for so login can return there, skipping the login and logout endpoints and anything that is not a GET.
 $admin_request_uri = $_SERVER['REQUEST_URI'] ?? '';
 if ($admin_request_uri !== ''
     && ($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET'

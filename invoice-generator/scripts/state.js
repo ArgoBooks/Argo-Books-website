@@ -37,8 +37,6 @@ export function emptyState() {
     amountPaid: 0,
     signature: null, // null means the acceptance/signature block is hidden; {} when shown
     // Every visible piece of text on the invoice surface is user-editable.
-    // The default values are the standard invoice labels; the user can
-    // rename any of them (e.g. "Bill To" -> "Client", "Tax" -> "GST").
     labels: {
       businessTitle: '',
       documentTitle: DOC.documentTitle || 'INVOICE',

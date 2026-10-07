@@ -78,11 +78,7 @@ $pdo->prepare("
         cancel_token = ?, revert_until = DATE_ADD(NOW(), INTERVAL 30 DAY)
     WHERE id = ?
 ")->execute([$revert_token, $change_id]);
-// email_verified_at goes with it. The code that just passed was delivered to the
-// new address, which is the same proof /verify-email/confirm.php accepts, so the
-// address is verified. Setting only owner_email left a company that started from
-// an unverified address stuck: it had proven the new one and still counted as
-// unverified, which blocks payment notification emails and refunds.
+// email_verified_at goes with it. The code that just passed was delivered to the new address, which is the same proof /verify-email/confirm.php accepts, so the address is verified.
 $pdo->prepare("UPDATE portal_companies SET owner_email = ?, email_verified_at = NOW() WHERE id = ?")
     ->execute([$row['new_email'], $company['id']]);
 

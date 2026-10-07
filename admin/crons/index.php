@@ -22,10 +22,8 @@ if (!isset($rangeMap[$range])) $range = '7d';
 $rangeLabel = $rangeMap[$range]['label'];
 $rangeInterval = $rangeMap[$range]['interval'];
 
-// ─── Per-cron display config ────────────────────────────────────────────────
-// Each entry: ordered metric keys with friendly labels. The page sums the
-// metric across all runs in the time range. Crons not yet writing to
-// cron_runs will show "No runs in range" with zeros across the board.
+// ─── Per-cron display config ──────────────────────────────────────────────── Each entry: ordered
+// metric keys with friendly labels. The page sums the metric across all runs in the time range.
 $cronConfig = [
     'argo_books_sync' => [
         'label'     => 'Argo Books Books Sync',

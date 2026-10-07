@@ -34,9 +34,7 @@ function issue_trusted_device_token($user_id, $user_agent, $ip)
 
     $label = derive_device_label($user_agent);
 
-    // Fail closed: if the INSERT throws (missing migration, transient DB
-    // error, etc.) we don't set the cookie. The caller's login proceeds
-    // normally; the user just doesn't gain trusted-device status this time.
+    // Fails closed: a throw leaves the cookie unset, so the login still goes through and the browser simply is not trusted this time.
     try {
         $stmt = $pdo->prepare(
             'INSERT INTO admin_trusted_devices
@@ -88,9 +86,7 @@ function verify_trusted_device_cookie($ip)
         return null;
     }
 
-    // Trust-cookie verification must NEVER throw. That would block the admin
-    // from logging in entirely if the table is missing or the DB hiccups. Any
-    // error here falls through to the normal TOTP prompt.
+    // Trust-cookie verification must NEVER throw. That would block the admin from logging in entirely if the table is missing or the DB hiccups.
     try {
         $stmt = $pdo->prepare(
             'SELECT d.id, d.validator_hash, d.expires_at, u.username
@@ -113,9 +109,7 @@ function verify_trusted_device_cookie($ip)
         return null;
     }
 
-    // Metadata update is best-effort: the auth decision was already made above
-    // when the validator matched. A transient UPDATE failure must not force
-    // the user back to TOTP. They're already authenticated.
+    // The auth decision was made above when the validator matched, so a failed metadata update must not send the user back to TOTP.
     try {
         $upd = $pdo->prepare(
             'UPDATE admin_trusted_devices

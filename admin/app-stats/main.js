@@ -644,9 +644,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const versionByDate = {};
     const versions = new Set();
 
-    // People, not events: one busy install would otherwise outweigh several quiet ones
-    // on the same version. hashedIP is the per-user key the rest of this page counts by,
-    // so an event without one cannot be attributed to anybody and is left out.
+    // People, not events: one busy install would otherwise outweigh several quiet ones on the same version.
     allData.forEach((item) => {
       const date = new Date(item.timestamp).toLocaleDateString();
       const version = item.appVersion || "Unknown";
@@ -1949,9 +1947,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  // =====================
-  // Active Users Tab
-  // =====================
+  // --- Active Users Tab --------------------------------------------------------------------------
 
   // Total / DAU / WAU / MAU are counted server-side across every event, not just
   // the ones inside the selected date range: "active today" has to mean today
@@ -2006,9 +2002,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const eventsWithUser = allEvents.filter((e) => e.hashedIP);
 
-    // The KPI cards are fixed-window and range-independent, so they're filled from
-    // the server's own count before any early return below: an empty date range
-    // must not blank out numbers that don't depend on the range.
+    // Filled from the server's own count before any early return, because an empty date range must not blank numbers that ignore the range.
     setFixedKpis(rawData);
 
     if (eventsWithUser.length === 0) {
@@ -2356,8 +2350,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Rank categories by their total count over the shown window, so the most
     // active categories are plotted, including ones that only appear recently
-    // (e.g. Network). Previously this kept the first six categories the data
-    // happened to mention, which silently dropped any later ones.
+    // (e.g. Network), rather than the first six the data happens to mention.
     const categoryTotals = {};
     Array.from(categories).forEach((cat) => {
       categoryTotals[cat] = dates.reduce(
@@ -2798,9 +2791,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  // =====================
-  // AI Spreadsheet Importer Charts
-  // =====================
+  // --- AI Spreadsheet Importer Charts ------------------------------------------------------------
 
   // Helper to extract DataImported events from featureUsageData
   function getDataImportedEvents(featureUsageData) {

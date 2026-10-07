@@ -71,9 +71,7 @@ $base_path = $in_subdir ? '../' : '';
                 </div>
 
                 <?php
-                // Grouped desktop navigation. Each group renders as a hover dropdown;
-                // entries with a single null-keyed item render as a standalone link.
-                // Keys are the directory names matched against $current_dir for highlighting.
+                // Grouped desktop navigation. Each group renders as a hover dropdown; entries with a single null-keyed item render as a standalone link.
                 $nav_groups = [
                     'Sales' => [
                         'license'  => 'Licenses',

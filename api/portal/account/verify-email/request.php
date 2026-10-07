@@ -26,12 +26,7 @@ if (!empty($company['email_verified_at'])) {
 
 global $pdo;
 
-// Rolling 24h window. A lifetime cap is wrong here because (unlike the
-// refund flow, where the request advances out of pending_code on successful
-// code entry) an unverified company stays unverified forever. A lifetime
-// cap eventually walls off legitimate users (typo on first registration,
-// missed inbox, account left dormant) with no recovery path. The window
-// matches the email-change resend-throttle pattern.
+// A rolling 24 hour window, because an unverified company stays unverified and a lifetime cap would lock it out for good.
 $stmt = $pdo->prepare("
     SELECT COUNT(*) AS c, MAX(created_at) AS latest
     FROM email_verifications
@@ -47,9 +42,7 @@ if ($row['latest'] && (time() - strtotime($row['latest'])) < 60) {
     send_error_response(429, 'Please wait at least 60 seconds between resends.', 'TOO_SOON');
 }
 
-// Resolve the address to resend to. In the set-initial-email flow,
-// owner_email is not written until the code is confirmed, so the pending
-// address lives on the latest registration verification row.
+// owner_email is not written until the code is confirmed, so the address to resend to lives on the latest verification row.
 $targetEmail = (string)($company['owner_email'] ?? '');
 if ($targetEmail === '') {
     $stmt = $pdo->prepare("

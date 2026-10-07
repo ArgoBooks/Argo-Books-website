@@ -50,9 +50,7 @@ require_once __DIR__ . '/lib/run_tracker.php';
 
 global $pdo;
 
-// db_connect.php catches a failed connection and leaves $pdo as null rather than
-// throwing. cron_runs cannot record a run without a database, so this is the one
-// failure that has to go to error_log and a non-zero exit instead.
+// db_connect.php leaves $pdo null on a failed connection rather than throwing, and cron_runs cannot record a run without a database, so this one failure goes to error_log and exit 1.
 if (!$pdo instanceof PDO) {
     error_log('[argo_books_sync] No database connection; nothing was synced.');
     exit(1);
@@ -92,22 +90,15 @@ if ($lockHandle === false || !flock($lockHandle, LOCK_EX | LOCK_NB)) {
 
 $runId = cron_run_start($pdo, 'argo_books_sync');
 
-// ---------------------------------------------------------------------------
-// Configuration
-// ---------------------------------------------------------------------------
+// --- Configuration ---------------------------------------------------------
 
 $apiKey  = trim((string) env('ARGO_BOOKS_API_KEY', ''));
 $apiBase = rtrim(site_url('/v1'), '/');
-// Only the source tables below are still scoped this way. The API dropped its own
-// environment column, so the sync map is not: an account is one company and that is
-// the whole of the scoping there. These three tables are a different matter, and
-// forgetting the filter here would push sandbox test payments into the real books.
+// Only these three source tables are scoped by environment, and forgetting the filter would push sandbox test payments into the real books. The API itself has no environment column.
 $env     = current_environment();
 
 if ($apiKey === '') {
-    // Reported through cron_runs rather than a bare exit. An early exit that skips
-    // the tracker leaves no trace on the admin page and looks exactly like the cron
-    // never firing, which is the failure that takes longest to notice.
+    // Reported through cron_runs rather than a bare exit, because an early exit leaves no trace on the admin page and looks exactly like the cron never firing.
     $msg = 'ARGO_BOOKS_API_KEY is not set in .env; nothing was sent.';
     error_log("[argo_books_sync] $msg");
     cron_run_finish($pdo, $runId, 'error', $msg);
@@ -135,9 +126,7 @@ function abs_log(string $line): void
     @file_put_contents($logFile, '[' . date('Y-m-d H:i:s') . "] $line\n", FILE_APPEND);
 }
 
-// ---------------------------------------------------------------------------
-// HTTP
-// ---------------------------------------------------------------------------
+// --- HTTP ------------------------------------------------------------------
 
 /**
  * One API call, with retries for the failures that are worth retrying.
@@ -249,9 +238,7 @@ function abs_throttle(): void
     $recent[] = microtime(true);
 }
 
-// ---------------------------------------------------------------------------
-// The map between local rows and API objects
-// ---------------------------------------------------------------------------
+// --- The map between local rows and API objects ----------------------------
 
 /** @return array{api_object_id:string, content_hash:?string, status:string}|null */
 function abs_map_get(string $sourceType, string $sourceKey): ?array
@@ -302,10 +289,7 @@ function abs_sync(string $sourceType, string $sourceKey, string $collection, arr
     $hash     = hash('sha256', json_encode($payload, JSON_UNESCAPED_SLASHES) ?: '');
     $existing = abs_map_get($sourceType, $sourceKey);
 
-    // A row the owner declined in the app is finished with. Sending it again would
-    // re-offer something already refused, and treating it as unsent would drop it from
-    // the books for good the moment the map was consulted. Neither is a decision this
-    // script gets to make, so it stops here.
+    // A row the owner declined in the app is finished with: sending it again re-offers something already refused, and treating it as unsent would drop it from the books for good.
     if ($existing !== null && ($existing['status'] ?? 'sent') === 'rejected') {
         cron_metric_incr('skipped_rejected');
         return $existing['api_object_id'];
@@ -321,9 +305,7 @@ function abs_sync(string $sourceType, string $sourceKey, string $collection, arr
         return $existing['api_object_id'] ?? null;
     }
 
-    // Stable per source row and within the API's 128 character ceiling. Hashing
-    // rather than truncating, because two long keys that share a prefix would
-    // otherwise collide and the second write would be rejected as a replay.
+    // Hashed rather than truncated, because two long keys sharing a prefix would collide and the second write would be rejected as a replay. Stays inside the API's 128 character ceiling.
     $idempotencyKey = 'abs-' . $sourceType . '-' . substr(hash('sha256', $sourceKey), 0, 40);
 
     if ($dryRun) {
@@ -337,9 +319,7 @@ function abs_sync(string $sourceType, string $sourceKey, string $collection, arr
     $isUpdate = $existing !== null;
     $path     = $isUpdate ? "/$collection/" . $existing['api_object_id'] : "/$collection";
 
-    // An update is a correction to an object that already exists, not a second
-    // attempt at creating one, so it must not reuse the create's key: the API
-    // rejects a repeated key whose body has changed.
+    // An update corrects an object that exists rather than creating one again, so it needs its own key: the API rejects a repeated key whose body has changed.
     $result = abs_api_request(
         'POST',
         $path,
@@ -441,15 +421,8 @@ function abs_minor($amount): int
     return (int) round(((float) $amount) * 100);
 }
 
-// ---------------------------------------------------------------------------
-// Preflight
-// ---------------------------------------------------------------------------
-//
-// One read before any write. It proves the key is live and unrevoked, names the
-// company about to be written into so the log says where the money went, and
-// reads the account's own rate ceiling rather than guessing at one. A revoked key
-// failing here costs one request; failing at the first write would leave a
-// half-synced run to unpick.
+// --- Preflight -------------------------------------------------------------
+// One read before any write, so a revoked key costs one request instead of half a synced run.
 
 $account = abs_api_request('GET', '/account', null, null);
 
@@ -472,9 +445,7 @@ abs_log(sprintf(
     $rateLimitPerMin
 ));
 
-// ---------------------------------------------------------------------------
-// The run
-// ---------------------------------------------------------------------------
+// --- The run ---------------------------------------------------------------
 
 try {
 
@@ -490,9 +461,7 @@ try {
     }
 
     // --- Phase 1: categories -----------------------------------------------
-    //
-    // Fixed, and created before anything that points at them. Two is all the
-    // business has: money in from subscriptions, money out to affiliates.
+    // Two is all the business has: money in from subscriptions, money out to affiliates.
 
     $categoryIds = [];
     foreach ([
@@ -503,10 +472,7 @@ try {
     }
 
     // --- Phase 2: customers -------------------------------------------------
-    //
-    // One per paying email, not one per subscription: the same person renewing or
-    // switching plan is one customer with several payments against them. Keyed on
-    // the address for that reason.
+    // One per paying email rather than per subscription, so a renewal or a plan switch is one customer.
 
     $stmt = $pdo->prepare(
         'SELECT s.email,
@@ -540,10 +506,7 @@ try {
     }
 
     // --- Phase 3: suppliers -------------------------------------------------
-    //
-    // Affiliates, because a commission is money paid to someone. Only those with a
-    // payout on record: an approved affiliate who has never earned is not yet a
-    // supplier of anything.
+    // Affiliates with a payout on record, since one who has never earned supplies nothing yet.
 
     $stmt = $pdo->prepare(
         'SELECT DISTINCT a.id, a.source_code, a.payout_email, a.payout_method, a.promo_url
@@ -576,10 +539,7 @@ try {
     }
 
     // --- Phase 4: revenue ---------------------------------------------------
-    //
-    // Refunded payments are included deliberately. The sale happened and the money
-    // arrived; the refund that followed is a separate entry in phase 6 rather than
-    // a reason to pretend the income never existed.
+    // Refunded payments are included: the sale happened, and the refund is its own entry in phase 6.
 
     $sql = 'SELECT p.id, p.subscription_id, p.amount, p.currency, p.payment_method,
                    p.payment_type, p.status, p.transaction_id,
@@ -642,9 +602,7 @@ try {
     }
 
     // --- Phase 5: expenses --------------------------------------------------
-    //
-    // Affiliate commissions actually paid out. Commission accrued but not yet sent
-    // is a liability rather than an expense, and is not recorded here.
+    // Commission actually paid out, since commission accrued but unsent is a liability.
 
     $sql = 'SELECT ap.id, ap.affiliate_id, ap.amount, ap.currency, ap.paid_at,
                    ap.method, ap.reference, ap.notes, a.source_code
@@ -691,14 +649,7 @@ try {
     }
 
     // --- Phase 6: refunds ---------------------------------------------------
-    //
-    // The revenue reference is required, so a refund whose revenue failed to send
-    // is skipped rather than posted against nothing. It will go out on the next run
-    // once the revenue is there.
-    //
-    // There is no refunded_at column; the payment row simply flips to 'refunded'.
-    // The payment date is used, which dates the reversal to the sale rather than to
-    // when the money went back. Worth correcting in the app if the gap matters.
+    // A refund whose revenue has not been sent is skipped rather than posted against nothing.
 
     $refundsSkipped = 0;
     foreach ($payments as $row) {

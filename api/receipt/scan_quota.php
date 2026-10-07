@@ -14,9 +14,8 @@
  * and the server would enforce against another, which reads as the limit firing at
  * random.
  *
- * Why the spend moved here at all: the limit used to be enforced entirely by the
- * client choosing to call usage.php's increment after a successful scan. A client
- * that skipped the call, or simply sent more requests than it had reported, was
+ * Why the spend is counted here: a client that calls usage.php's increment itself
+ * can skip the call, or send more requests than it reports, and would then be
  * unmetered. Consuming inside the request that spends the money closes that.
  *
  * Requires a live $pdo and config/pricing.php to be loadable.

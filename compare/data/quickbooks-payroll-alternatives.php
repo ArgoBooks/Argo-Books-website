@@ -15,8 +15,6 @@ if (!defined('ARGO_TEMPLATE_RENDER')) {
 }
 
 // Also read by compare/mockups/quickbooks-payroll-alternatives.php.
-// The cheapest bundle that includes payroll, which is the like-for-like comparison:
-// Argo Books Premium is also the books and payroll together.
 $qbp_base    = competitor_price('quickbooks-payroll', 'core-easystart');
 $qbp_per     = get_competitors()['quickbooks-payroll']['plans']['core-easystart']['per_employee'];
 $qbp_top     = competitor_price('quickbooks-payroll', 'premium-plus');
@@ -56,9 +54,7 @@ return [
         ['CPP, EI &amp; income tax from CRA tables', 'no', 'yes', 'yes'],
         ['Every province and territory', 'no', 'yes', 'yes'],
         ['Quebec deductions (QPP, QPIP)', 'no', 'yes', 'yes'],
-        // Revenu Quebec accepts a software-printed RL-1 only from software it has
-        // certified, and requires XML above five slips. Argo Books produces the
-        // figures on a worksheet; it cannot file them.
+        // Revenu Quebec accepts a software-printed RL-1 only from software it has certified, and requires XML above five slips.
         ['RL-1 slips filed with Revenu Quebec', 'no', 'no', 'yes'],
         ['Pay stubs', 'no', 'yes', 'yes'],
         ['T4 slips &amp; summary (PDF)', 'no', 'yes', 'yes'],

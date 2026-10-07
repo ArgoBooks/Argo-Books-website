@@ -134,9 +134,7 @@ function getLatestVersion()
 $latestVersion = getLatestVersion();
 $systemRequirements = getSystemRequirements();
 
-// The SmartScreen guide config, detection, and markup live in the shared
-// partial resources/smartscreen-guide/guide.php (also used by the paid
-// landing pages); it's included below where the block renders.
+// The guide's config, detection and markup live in resources/smartscreen-guide/guide.php, which the paid landing pages share too.
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -217,15 +215,7 @@ $systemRequirements = getSystemRequirements();
 
     <div class="container">
         <?php
-        // One shape for every platform: a version tag when there is a build, then a button per
-        // download with its own size on it. The size sits on the button rather than beside the
-        // version because macOS ships two builds of different sizes, and a single figure up
-        // there could only ever have been right for one of them.
-        //
-        // A build with no file in the version folder shows a disabled button rather than
-        // vanishing. An absent button reads as an oversight and leaves someone wondering
-        // whether they missed it; a button that says so answers the question. What it must not
-        // do is link anywhere, which is what the Intel one did before that build existed.
+        // One shape for every platform: a version tag, then a button per download carrying its own size, because macOS has two builds.
         $platformCards = [
             [
                 'class' => 'platform-windows',
@@ -249,10 +239,7 @@ $systemRequirements = getSystemRequirements();
                 // Only worth asking when there are two answers. The browser cannot tell them
                 // apart: Safari and Chrome both report an Intel user agent on Apple Silicon.
                 'help' => ['id' => 'macInstallHelp', 'text' => 'Which one do I need?', 'min_builds' => 2],
-                // macOS only: Windows and Linux recover the visitor's install token from the
-                // downloaded filename, but a Mac expands the .zip and the extracted .app keeps
-                // none of the archive's name. In the query string the browser records it as the
-                // download's source URL, which macOS stores on the file for FirstRunReporter.
+                // macOS only: a Mac expands the zip and the extracted app keeps nothing of the archive's name, so the token cannot ride in it.
                 'install_token' => true,
             ],
             [
@@ -312,15 +299,7 @@ $systemRequirements = getSystemRequirements();
         </div>
 
         <?php
-        // Store listings, shown to everyone rather than matched to the visitor's
-        // platform: the point is that the app is carried in real stores, which a
-        // Mac user reads just as well from a Windows badge.
-        //
-        // The tracked buttons above carry the install token and these do not, so
-        // these stay a credential and never become the main call to action.
-        //
-        // To add a store: drop its artwork in resources/images/badges/, add a row,
-        // set enabled. The section hides itself while nothing is enabled.
+        // Shown to everyone rather than matched to the visitor's platform, because the point is that the app is carried in real stores.
         $store_badges = array_values(array_filter([
             [
                 'enabled' => true,
@@ -360,9 +339,7 @@ $systemRequirements = getSystemRequirements();
             ],
         ], fn($b) => $b['enabled'] && $b['url'] !== ''));
 
-        // Flathub and the Snap Store mean nothing to someone who has never used
-        // Linux, and a brew command means nothing on Windows. Each entry is shown
-        // only to the system it is for. A visitor we cannot place sees them all.
+        // Flathub and the Snap Store mean nothing to someone who has never used Linux, and a brew command means nothing on Windows. Each entry is shown only to the system it is for.
         $visitor_os = visitorDesktopOs();
         $for_visitor = fn(array $e) => $visitor_os === null || $e['os'] === $visitor_os;
         $store_badges = array_values(array_filter($store_badges, $for_visitor));

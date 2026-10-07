@@ -9,8 +9,6 @@
 function render_formatted_text($text)
 {
     // Escape first, so the only HTML in the result is what the formatter builds.
-    // Escaping after formatting and then un-escaping our own tags also
-    // un-escaped the same sequences when a user typed them.
     $text = htmlspecialchars((string) $text, ENT_QUOTES, 'UTF-8');
     $text = process_formatting($text);
     $text = final_cleanup($text);

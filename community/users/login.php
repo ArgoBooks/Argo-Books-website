@@ -38,9 +38,7 @@ $clientIp = get_client_ip();
 
 // Process form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Atomic IP-based rate limit (5 per 15 minutes). The previous session-keyed
-    // counter was trivially bypassed by dropping the session cookie between
-    // attempts. Successful logins clear the bucket below.
+    // Atomic IP-based rate limit (5 per 15 minutes). The previous session-keyed counter was trivially bypassed by dropping the session cookie between attempts.
     if (rate_limit_hit('community_login', $clientIp)) {
         $error = 'Too many login attempts. Please wait ' . rate_limit_wait_phrase('community_login') . ' before trying again.';
     }

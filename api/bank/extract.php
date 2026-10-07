@@ -31,14 +31,8 @@ require_method(['POST']);
 
 const BS_MAX_BYTES = 15 * 1024 * 1024; // 15 MB upload ceiling
 
-// --- 1. Auth: a license, or the device id for the free tier. ---
-// This refused everything without a license, while the app offers PDF import to free
-// users within their monthly AI import allowance and meters it through
-// UsageLimitService. The two disagreed, so a free user was allowed to start, got a 401
-// here, and PdfStatementExtractor turned that into an empty result: every PDF import on
-// the free tier failed as "no transactions found", three days running for one user in
-// Melbourne. The allowance is checked and counted by the caller before and after this
-// endpoint, so letting the device through does not uncap anything.
+// --- 1. Auth: a licence, or the device id for the free tier ---
+// The app offers PDF import to free users inside their monthly allowance.
 $license = authenticate_license_request();
 $deviceIdHash = null;
 if (!$license) {
@@ -56,9 +50,7 @@ if (rate_limit_hit('bank_extract', $rateLimitId)) {
     send_rate_limited_response('bank_extract');
 }
 
-// Per-IP ceiling for the free (device) path only, as on the AI proxy: an X-Device-Id is
-// self-asserted and can be rotated, so the per-identity limit above does not bound a
-// single origin on its own. A verified license is not the abuse vector and is exempt.
+// A per-IP ceiling for the free path only, as on the AI proxy, because a device id is self-asserted and can be rotated.
 if (!$license) {
     $clientIp = get_client_ip();
     if (rate_limit_hit('bank_extract_ip', $clientIp, 'bank_ip')) {

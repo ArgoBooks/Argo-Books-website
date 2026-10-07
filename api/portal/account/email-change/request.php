@@ -29,9 +29,7 @@ if (!$new_email) {
 
 global $pdo;
 
-// No "already in use" rejection: see set-initial-email.php. The address moves to whoever
-// proves they can receive mail at it, rather than staying with a company that may no
-// longer exist.
+// No rejection for an address already in use, as in set-initial-email.php: it moves to whoever proves they can receive mail at it.
 
 // 24h cooldown between completed changes
 $stmt = $pdo->prepare("SELECT MAX(completed_at) FROM email_change_requests WHERE company_id = ? AND state = 'completed'");
@@ -48,12 +46,7 @@ $pdo->prepare("UPDATE email_change_requests SET state='cancelled' WHERE company_
 
 $password_verified = !empty($body['password_verified']) ? 1 : 0;
 
-// The old-email step exists so the current owner can veto a change. That only means
-// something if the current address was ever proven to reach them. An unverified one
-// cannot: the sample company ships with example@samplecompany.com, and a company that
-// set an address but never confirmed the code is in the same position. Demanding a code
-// from an address nobody can read is an unopenable lock, not a security step, so the
-// request starts already past that stage.
+// The old-email step lets the current owner veto a change, which only means something once that address has been proven to reach them.
 $oldAddressProven = !empty($company['owner_email']) && !empty($company['email_verified_at']);
 
 $pdo->beginTransaction();
@@ -81,14 +74,7 @@ if ($oldAddressProven) {
         WHERE id = ?
     ")->execute([$hash, $change_id]);
 } else {
-    // confirm-old.php is what normally issues the new-address code, so skipping that
-    // step means issuing it here or the request sits in old_verified with no code ever
-    // sent. Same expiry and salt confirm-new.php checks against.
-    //
-    // old_email_verified_at is deliberately left NULL. state='old_verified' records
-    // that the step is done; this column records that the old address answered a code,
-    // which here it never did. revert-email.php restores this value, so stamping it
-    // would hand the old address a verified mark it never earned.
+    // confirm-old.php is what normally issues the new-address code, so skipping that step means issuing it here or the request sits in old_verified with no code ever sent.
     $newCode = refund_generate_code();
     $newHash = refund_hash_code($newCode, 'echange-new-' . $change_id);
     $pdo->prepare("

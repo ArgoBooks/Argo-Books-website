@@ -25,9 +25,7 @@ if (!preg_match('/^[0-9a-f-]{36}$/i', $visitor) || !$pdo) {
 }
 
 try {
-    // Confirm only this visitor's own recent page views. A caller can't confirm
-    // anyone else's rows (no visitor id is accepted from the body) and can't
-    // create rows, so this can't be used to inflate the funnel.
+    // Confirm only this visitor's own recent page views.
     $stmt = $pdo->prepare(
         "UPDATE referral_events
             SET js_confirmed = 1

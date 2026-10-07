@@ -23,9 +23,7 @@ define('MAX_FILE_SIZE_FREE', 256 * 1024);          // 256KB max for free-tier up
 define('ALLOWED_MIME_TYPES', ['application/json', 'text/plain']);
 define('DATA_DIR', __DIR__ . '/../../admin/data-logs/telemetry');
 
-// The founder's own installs (FOUNDER_AUTH_IDS in .env) upload on exactly the same
-// path as everyone else. Their data is kept so it can be reviewed on the app-stats
-// User Activity tab; every other read site skips it. See founder_identity.php.
+// The founder's own installs (FOUNDER_AUTH_IDS in .env) upload on exactly the same path as everyone else.
 
 /**
  * Atomic check-and-bump on a single rate-limit bucket. Held under an exclusive
@@ -325,10 +323,7 @@ try {
     // so the on-the-wire shape is identical regardless of subscription status).
     $payload = filter_telemetry_payload($payload);
 
-    // When the desktop app's IP-geo lookup fails (firewalled, rate-limited), the
-    // payload arrives without geoLocation and every event renders "Unknown" in
-    // /admin/app-stats/. Resolve country from the request IP server-side so we
-    // get a usable country for the vast majority of uploads.
+    // When the desktop app's IP-geo lookup fails (firewalled, rate-limited), the payload arrives without geoLocation and every event renders "Unknown" in /admin/app-stats/.
     $payload = backfill_geolocation_from_request($payload);
 
     // Server-injected tier + authId always override anything in the uploaded payload

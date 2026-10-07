@@ -204,9 +204,7 @@ function add_comment($post_id, $user_name, $user_email, $content, $user_id = nul
         // Get the post data
         $post = get_post($post_id);
 
-        // Track which users we've already emailed for this comment so the post
-        // author doesn't get both a "you were mentioned" and a "reply to your
-        // post" email when they're mentioned in a reply on their own post.
+        // Tracks who has been emailed for this comment, so an author mentioned in a reply on their own post gets one email, not two.
         $emailed_user_ids = [];
 
         // Create notifications for mentioned users if applicable

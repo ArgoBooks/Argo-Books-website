@@ -57,9 +57,7 @@ $eventType = $data['type'] ?? '';
 switch ($eventType) {
     case 'payment.created':
     case 'payment.updated':
-        // Square fires payment.created/updated for any status transition.
-        // We only act on COMPLETED. This is the backup confirmation for
-        // payments whose synchronous handling in checkout.php was interrupted.
+        // Square fires payment.created/updated for any status transition. We only act on COMPLETED.
         $payment = $data['data']['object']['payment'] ?? [];
         $paymentStatus = $payment['status'] ?? '';
         if ($paymentStatus !== 'COMPLETED') break;
@@ -112,20 +110,12 @@ switch ($eventType) {
 
             if (empty($paymentId)) break;
 
-            // Find original payment + insert negative-amount refund row.
-            // No status filter: once cumulative refunds cover the original, the row
-            // flips to 'refunded' (see refund_record_ledger). A subsequent webhook
-            // (out-of-order redelivery, late dashboard refund, etc.) must still find
-            // the row or the negative-amount insert silently no-ops. amount > 0 still
-            // excludes sibling refund rows. Mirrors the Stripe path.
+            // No status filter: once refunds cover the original the row flips to refunded, and a redelivered webhook still has to find it.
             $stmt = $pdo->prepare("SELECT * FROM portal_payments WHERE provider_payment_id = ? AND amount > 0 LIMIT 1");
             $stmt->execute([$paymentId]);
             $original = $stmt->fetch(PDO::FETCH_ASSOC);
             if ($original) {
-                // Key the refund row by Square's own refund id so multiple
-                // partial refunds against the same payment produce distinct
-                // rows (paymentId-keying collides on the second refund and
-                // silently drops it).
+                // Keyed by Square's own refund id, because keying by the payment collides on a second partial refund and drops it.
                 $refundRow = 'refund_' . $refundId;
                 $refundAmount = $amount / 100.0;
                 $recordResult = record_portal_payment([
@@ -139,16 +129,11 @@ switch ($eventType) {
                     'provider_transaction_id' => $paymentId,
                     'reference_number' => generate_reference_number(),
                     'status' => 'refunded',
-                    // Inherit the original payment's environment so a misconfigured
-                    // APP_ENV can't tag a refund with a different env than the
-                    // payment it offsets.
+                    // Inherit the original payment's environment so a misconfigured APP_ENV can't tag a refund with a different env than the payment it offsets.
                     'payment_environment' => $original['payment_environment'] ?? (($_ENV['APP_ENV'] ?? 'sandbox') === 'production' ? 'production' : 'sandbox'),
                 ]);
                 if (!empty($recordResult['inserted'])) {
-                    // Cumulative-refund check: only flip the original payment
-                    // to 'refunded' once refunds cover the original amount.
-                    // Without this, even a partial refund flipped the original
-                    // to refunded and books would show it as fully refunded.
+                    // The original flips to refunded only once refunds cover its full amount, so a partial one does not read as full.
                     $sumStmt = $pdo->prepare(
                         "SELECT COALESCE(SUM(amount), 0) AS refunded_total
                          FROM portal_payments
@@ -165,9 +150,7 @@ switch ($eventType) {
                             ->execute([$original['id']]);
                     }
 
-                    // Update invoice balance/status (mirrors Stripe path).
-                    // SET-clause order matters: status CASE must see the
-                    // pre-update balance_due.
+                    // Update invoice balance/status (mirrors Stripe path). SET-clause order matters: status CASE must see the pre-update balance_due.
                     $pdo->prepare(
                         'UPDATE portal_invoices
                          SET status = CASE
@@ -180,9 +163,7 @@ switch ($eventType) {
                     )->execute([$refundAmount, $refundAmount, $original['company_id'], $original['invoice_id']]);
                 }
 
-                // Reconcile refund_requests by argo_request_id (we set this in the
-                // SDK's idempotency_key on issue; Square echoes it back as well
-                // as in some payload shapes).
+                // Matched by argo_request_id, which is sent as Square's idempotency_key and echoed back in the payload.
                 $combined = ($refund['idempotency_key'] ?? '') . '|' . $note . '|' . ($refund['order_id'] ?? '');
                 if (preg_match('/argo_request_(\d+)/', $combined, $m)) {
                     require_once __DIR__ . '/../_audit.php';
@@ -192,9 +173,7 @@ switch ($eventType) {
                     $rstmt->execute([$argoId]);
                     $rr = $rstmt->fetch(PDO::FETCH_ASSOC);
                     if ($rr && $rr['state'] !== 'completed' && $rr['state'] !== 'cancelled') {
-                        // CAS guard: only the UPDATE that actually flips the
-                        // state notifies, so a race with the synchronous
-                        // execute path can't fire two completion emails.
+                        // Only the UPDATE that actually flips the state notifies, so a race with the synchronous path cannot send two completion emails.
                         $upd = $pdo->prepare("UPDATE refund_requests SET state='completed', provider_refund_id = ?, completed_at = NOW(), cancel_token = NULL, updated_at = NOW() WHERE id = ? AND state IN ('processing','cooling_off')");
                         $upd->execute([$refundId, $argoId]);
                         if ($upd->rowCount() > 0) {

@@ -56,9 +56,7 @@ function sitemap_build_urls(): array
         ['/downloads/',      'downloads/index.php',      '1.0', 'weekly'],
         ['/features/',       'features/index.php',       '0.9', 'monthly'],
         ['/pricing/',        'pricing/index.php',        '0.9', 'monthly'],
-        // Its own landing page rather than a stop on the feature tour: this is
-        // the destination for payroll search and payroll video, and it targets
-        // a different buyer to the rest of the site.
+        // Its own landing page rather than a stop on the feature tour, because payroll search and video land here and it targets a different buyer.
         ['/payroll/',        'payroll/index.php',        '0.9', 'monthly'],
         ['/documentation/',  'documentation/index.php',  '0.9', 'weekly'],
         ['/integrations/',   'integrations/index.php',   '0.9', 'monthly'],
@@ -74,9 +72,8 @@ function sitemap_build_urls(): array
         sitemap_add_url($urls, site_url($path), $root . '/' . $file, $priority, $changefreq);
     }
 
-    // --- Auto-discovered page clusters ---
-    // Each child directory with an index.php becomes one URL, so adding a new
-    // feature / comparison page needs no sitemap edit.
+    // --- Auto-discovered page clusters --- Each child directory with an index.php becomes one URL,
+    // so adding a new feature / comparison page needs no sitemap edit.
     $clusters = [
         ['glob' => 'features/*/index.php', 'prefix' => '/features/',  'priority' => '0.8'],
         ['glob' => 'compare/*/index.php',  'prefix' => '/compare/',   'priority' => '0.8'],
@@ -95,11 +92,7 @@ function sitemap_build_urls(): array
         sitemap_add_url($urls, site_url('/' . $slug . '/'), $file, '0.8', 'monthly');
     }
 
-    // --- Documentation sub-pages ---
-    // Served directly as .php under their category folder. Only /documentation/
-    // itself was listed before, so none of the individual guides were in the
-    // sitemap or reaching IndexNow. Adding a page to documentation/pages/ now
-    // needs no sitemap edit.
+    // --- Documentation sub-pages --- Served directly as .php under their category folder.
     foreach (glob($root . '/documentation/pages/*/*.php') as $file) {
         $category = basename(dirname($file));
         $slug     = basename($file, '.php');
@@ -125,9 +118,8 @@ function sitemap_build_urls(): array
         sitemap_add_url($urls, $loc, $file, $urlSlug === 'generic' ? '0.9' : '0.8', 'monthly');
     }
 
-    // --- Free tools hub + the standalone calculators / generators it links to ---
-    // Curated rather than globbed: these live at the site root alongside
-    // non-tool directories, so there is no glob that catches them all.
+    // --- Free tools hub and the calculators it links to ---
+    // Listed rather than globbed: they sit at the site root beside non-tool directories.
     $toolPages = [
         ['/tools/',                          'tools/index.php',                          '0.9', 'monthly'],
         ['/etsy-fee-calculator/',            'etsy-fee-calculator/index.php',            '0.9', 'monthly'],

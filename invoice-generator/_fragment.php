@@ -18,14 +18,12 @@
 require_once __DIR__ . '/../shared/_base.php';
 require_once __DIR__ . '/../shared/currencies.php';
 require_once __DIR__ . '/doc-config.php';
-// Document-type config drives copy, accessibility labels, conversion-CTA
-// attribution, and which invoice-only fields render. Defaults to 'invoice'
-// so niche pages (which embed this fragment without a $doc_type) are unchanged.
+// Document-type config drives copy, accessibility labels, conversion-CTA attribution, and which invoice-only fields render.
 $dc = invgen_doc_config($doc_type ?? 'invoice');
 $invgen_ref = $invgen_ref ?? $dc['default_ref'];
 $ref_qs = '?source=' . htmlspecialchars($invgen_ref) . '&amp;utm_source=' . htmlspecialchars($dc['utm_source']) . '&amp;utm_medium=tool&amp;utm_campaign=phase1';
 // The site-header (logo bar) is rendered once for every tool page by layout.php,
-// so this fragment no longer emits its own.
+// so this fragment does not emit its own.
 ?>
 <div class="invoice-app" data-template="classic">
 

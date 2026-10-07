@@ -91,8 +91,6 @@ test('empty mileage input gives zero, not NaN', () => {
 /* --------------------------------------------------------- hourly rate */
 
 // Target $60k after 25% tax, $12k expenses, 40h/week, 6 weeks off, 60% billable.
-// working weeks 46, hours 1840, billable 1104.
-// pre-tax income 60000/0.75 = 80000; revenue needed 92000; rate 92000/1104 = 83.33.
 test('hourly rate grosses up for tax and unbillable time', () => {
   const r = hourlyRate({
     targetIncome: 60000, businessExpenses: 12000, hoursPerWeek: 40,
@@ -117,9 +115,7 @@ test('the naive rate is reported for comparison and is much lower', () => {
   assert.ok(r.rate > r.naiveRate * 2, 'the real rate is more than double the naive one');
 });
 
-// Charging the naive rate: bill 1104 hours at 32.6087 = 36000 revenue,
-// less 12000 expenses = 24000 pre-tax, less 25% tax = 18000 take-home.
-// The user asked for 60000, so the naive rate delivers less than a third.
+// Charging the naive rate: bill 1104 hours at 32.6087 = 36000 revenue, less 12000 expenses = 24000 pre-tax, less 25% tax = 18000 take-home.
 test('the naive rate is shown against the take-home it would really produce', () => {
   const r = hourlyRate({
     targetIncome: 60000, businessExpenses: 12000, hoursPerWeek: 40,
@@ -241,9 +237,7 @@ test('profitAt reports the loss below break-even and profit above it', () => {
 
 /* ------------------------------------------------------------ craft fair */
 
-// Booth 120 + travel 45 + other 20 = 185 cash. 9 hours at 20 = 180 time.
-// Average sale 28 with 35% materials: contribution 18.20 a sale.
-// Cash covered after ceil(185/18.20) = 11 sales; everything after ceil(365/18.20) = 21.
+// Booth 120 + travel 45 + other 20 = 185 cash. 9 hours at 20 = 180 time. Average sale 28 with 35% materials: contribution 18.20 a sale.
 test('market stall reports both break-even points', () => {
   const r = craftFair({
     boothFee: 120, travel: 45, otherCosts: 20, hours: 9, hourlyRate: 20,

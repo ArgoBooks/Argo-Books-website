@@ -17,9 +17,6 @@ test('num() clamps blanks, junk, and negatives to zero', () => {
 });
 
 // A candle batch: $24 wax + $3 wicks + $18 jars + $9 fragrance = $54 for 12.
-// materials 54/12 = 4.50 | 180min batch / 12 = 15min each, at $20/hr = 5.00
-// overhead 1.25
-// unit cost 10.75 | at 150% markup price = 26.875 | profit 16.125 | margin 60%
 test('candle batch divides materials across the yield', () => {
   const r = computeCraft({
     materials: [24, 3, 18, 9],

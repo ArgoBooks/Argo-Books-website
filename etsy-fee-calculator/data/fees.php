@@ -19,9 +19,7 @@ return [
 
     // Charged identically regardless of where the shop is based.
     'shared' => [
-        // Etsy bills the listing fee in USD, so sellers outside the US see a
-        // converted amount on their bill. The field is editable on the page for
-        // exactly that reason.
+        // Etsy bills the listing fee in USD, so sellers outside the US see a converted amount on their bill. The field is editable on the page for exactly that reason.
         'listing_fee'             => 0.20,
         'transaction_pct'         => 0.065,   // of item price + shipping charged + gift wrap
         'offsite_ads_under'       => 0.15,    // under $10k in trailing-365-day sales

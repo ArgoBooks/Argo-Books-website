@@ -49,9 +49,7 @@ if (!function_exists('invgen_doc_config')) {
                 // Default editable labels (mirrored to JS)
                 'document_title'      => 'INVOICE',
                 'due_date_label'      => 'Due Date',
-                // Placeholder for the recipient (Bill To) address box. Echoed
-                // raw so the &#10; line breaks survive; values are developer-
-                // defined, never user input.
+                // Placeholder for the recipient (Bill To) address box. Echoed raw so the &#10; line breaks survive; values are developer- defined, never user input.
                 'recipient_placeholder' => 'Client name&#10;Address&#10;City, State ZIP',
                 // Extra default-label overrides merged over the engine defaults
                 // (keyed by data-label name). Empty for the invoice baseline.
@@ -119,9 +117,7 @@ if (!function_exists('invgen_doc_config')) {
                 'due_date_label'      => 'Delivery Date',
                 // The recipient of a PO is the supplier you're ordering from.
                 'recipient_placeholder' => 'Vendor name&#10;Address&#10;City, State ZIP',
-                // "Bill To" -> "Vendor"; the separate "PO Number" meta field
-                // would be redundant on a PO (the document's own # is the PO
-                // number), so it becomes a free "Reference" field.
+                // "Bill To" becomes "Vendor", and a PO's own number is the PO number, so that meta field becomes a free Reference.
                 'label_overrides'     => [
                     'billTo'         => 'Vendor',
                     'poNumber'       => 'Reference',

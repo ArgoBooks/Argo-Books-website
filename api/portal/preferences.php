@@ -55,20 +55,7 @@ try {
     if ($hasReminders) {
         $remindersEnabled = filter_var($data['sendPaymentReminders'], FILTER_VALIDATE_BOOLEAN) ? 1 : 0;
 
-        // reminders_enabled_at is the cutoff the dunning cron compares due
-        // dates against, so switching reminders on must never release a
-        // backlog of invoices that went overdue while they were off.
-        //
-        // SET-clause order matters, the same way it does in
-        // record_portal_payment() (see the comment at portal-helper.php:397):
-        // MySQL evaluates SET assignments left to right and later clauses see
-        // the NEW value. reminders_enabled_at MUST be assigned BEFORE
-        // reminders_enabled so its CASE tests the OLD flag; reverse them and
-        // the condition is always false and the cutoff never moves.
-        //
-        // Re-stamped on EVERY 0->1 transition, not just the first, so a
-        // company that disables for six months and re-enables does not
-        // suddenly chase half a year of old invoices.
+        // reminders_enabled_at is the cutoff the dunning cron reads, so switching reminders on must not release a backlog of invoices that went overdue.
         $stmt = $pdo->prepare(
             'UPDATE portal_companies
              SET reminders_enabled_at = CASE

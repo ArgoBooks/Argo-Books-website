@@ -18,9 +18,7 @@ $root = dirname(__DIR__, 3);
 require_once $root . '/vendor/autoload.php';
 Dotenv\Dotenv::createMutable($root, '.env.testing')->load();
 
-// Refuse to serve against anything but the test database. Without this a
-// missing .env.testing would silently point the samples at real data, and they
-// create records.
+// Refuse to serve against anything but the test database. Without this a missing .env.testing would silently point the samples at real data, and they create records.
 if (($_ENV['DB_NAME'] ?? '') !== 'argo_books_test') {
     http_response_code(500);
     header('Content-Type: application/json');

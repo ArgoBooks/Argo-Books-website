@@ -92,9 +92,7 @@ function validateAndGetTier($pdo, $license_key, $device_id) {
     if (!empty($license_key)) {
         // Check if it's a Premium key (starts with PREM-)
         if (strpos($license_key, 'PREM-') === 0) {
-            // Require the key to be redeemed AND linked to an active, unexpired
-            // subscription before granting premium tier (mirrors receipt/invoice
-            // usage). An unredeemed promo code must not count as premium.
+            // Premium needs the key redeemed and tied to an active subscription, as receipt and invoice usage require, so an unredeemed promo code does not count.
             $stmt = $pdo->prepare("
                 SELECT subscription_id, redeemed_at
                 FROM premium_subscription_keys

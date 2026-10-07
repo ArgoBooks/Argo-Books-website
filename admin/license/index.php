@@ -84,11 +84,7 @@ function get_premium_subscription_keys()
     $keys = [];
 
     try {
-        // Only genuine free/promo keys. Paid subscriptions auto-create a row in
-        // this table (so the desktop app can redeem the paid key), but those are
-        // not free keys and must not show in this list. Exclude any key tied to a
-        // paid subscription; keep unredeemed keys (no subscription yet) and keys
-        // redeemed into a free_key subscription.
+        // Only genuine free and promo keys: a paid subscription also creates a row here so the app can redeem it, and those are excluded.
         $stmt = $pdo->query("
             SELECT k.*,
                    s.end_date AS subscription_end_date,
@@ -554,10 +550,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $email_success = 0;
 
             try {
-                // Update credit_balance for selected subscriptions. Env filter
-                // prevents a stale prod form submit from mutating sandbox subs
-                // (and vice versa). Without it, only the follow-up SELECT was
-                // env-scoped, which is too late.
+                // Filtered by environment so a stale form submit cannot change the other environment's subscriptions.
                 $stmt = $pdo->prepare("
                     UPDATE premium_subscriptions
                     SET credit_balance = credit_balance + ?
@@ -684,9 +677,7 @@ foreach ($premium_subscriptions as $sub) {
     if ($sub['status'] === 'active') $active_ai_subs++;
 }
 
-// Buckets for the stat cards. Expired keys are redeemed keys whose term has
-// run out, so they're counted separately rather than inflating "Redeemed":
-// total = redeemed + expired + available.
+// Buckets for the stat cards. Expired keys are redeemed keys whose term has run out, so they're counted separately rather than inflating "Redeemed": total = redeemed + expired + available.
 $unredeemed_keys = 0;
 $redeemed_keys = 0;
 $expired_keys = 0;
@@ -882,9 +873,7 @@ include __DIR__ . '/../admin_header.php';
                                         <td><?php echo htmlspecialchars($sub['username'] ?? 'N/A'); ?></td>
                                         <td><?php echo htmlspecialchars($sub['email']); ?></td>
                                         <?php
-                                            // Show what the customer is actually billed (most recent completed
-                                            // payment), not the env-computed snapshot in s.amount, which can
-                                            // differ (e.g. a PayPal plan priced below the configured amount).
+                                            // Shows the latest completed payment, since s.amount can differ from it.
                                             $billedAmount = $sub['last_paid_amount'] ?? $sub['amount'];
                                         ?>
                                         <td><?php echo ucfirst($sub['billing_cycle']); ?> - $<?php echo number_format((float) $billedAmount, 2); ?></td>
@@ -1199,8 +1188,6 @@ include __DIR__ . '/../admin_header.php';
                             $captured = (int) $b['captured'];
                             $verified = (int) $b['verified'];
                             // Capture is measured against REDEEMED, not against the whole batch.
-                            // Unsold codes have nobody to ask, so counting them would read as a
-                            // failure of the prompt rather than of the deal.
                             $redeemPct = $total > 0 ? round($redeemed / $total * 100) : 0;
                             $capturePct = $redeemed > 0 ? round($captured / $redeemed * 100) : 0;
                             $verifyPct = $captured > 0 ? round($verified / $captured * 100) : 0;

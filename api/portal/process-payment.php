@@ -47,10 +47,7 @@ $amount = floatval($data['amount']);
 $referenceNumber = generate_reference_number();
 $is_production = ($_ENV['APP_ENV'] ?? 'sandbox') === 'production';
 
-// payment_intent.succeeded can be recorded before the browser gets here, and
-// by then it has already cleared the balance. Checking the amount against that
-// balance would tell a customer who has been charged that the payment failed,
-// so an already-recorded payment is confirmed against Stripe alone.
+// payment_intent.succeeded can be recorded before the browser gets here, and by then it has already cleared the balance.
 $alreadyRecorded = $method === 'stripe'
     && is_string($data['payment_intent_id'] ?? null)
     && find_recorded_portal_payment($data['payment_intent_id'], (int) $invoice['company_id'], $invoice['invoice_id']) !== null;
@@ -156,9 +153,7 @@ function process_stripe_payment(array $invoice, array $data, float $amount, stri
     }
 
     if ($alreadyRecorded) {
-        // The balance the fee was computed from is gone, so take the fee
-        // checkout charged. record_portal_payment fills in a missing fee on a
-        // duplicate and never lowers one.
+        // The balance the fee was computed from is gone, so take the fee checkout charged. record_portal_payment fills in a missing fee on a duplicate and never lowers one.
         $processingFee = stripe_metadata_processing_fee($paymentIntent->metadata, $amount);
     }
 

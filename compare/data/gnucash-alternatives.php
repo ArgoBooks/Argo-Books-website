@@ -5,16 +5,14 @@
 // compare/compare-page.php; everything that makes this page itself is here.
 //
 // The FAQ entries feed both the visible accordion and the FAQPage JSON-LD, so
-// the two cannot drift apart the way the hand-written pairs used to.
+// the two cannot drift apart.
 
 if (!defined('ARGO_TEMPLATE_RENDER')) {
     http_response_code(404);
     exit;
 }
 
-// Competitor pricing, also read by compare/mockups/gnucash-alternatives.php.
-// GnuCash is free and open source with no paid tier, so there is no
-// competitor price to read here. The comparison is usability, not cost.
+// Competitor pricing, also read by compare/mockups/gnucash-alternatives.php. GnuCash is free and open source with no paid tier, so there is no competitor price to read here.
 
 return [
     'competitor' => 'GnuCash',

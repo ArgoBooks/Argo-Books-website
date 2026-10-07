@@ -47,9 +47,6 @@ function logMessage($message, $type = 'INFO') {
 logMessage('Starting subscription renewal check...');
 
 // Overlapping runs both read the same due list and both apply each renewal.
-// recently_renewed() narrows the window but is still a read-then-write, so two
-// runs a second apart can both pass it. The lock is what actually keeps a
-// second copy out while money and credit are being moved.
 if (!is_dir(__DIR__ . '/logs')) {
     @mkdir(__DIR__ . '/logs', 0755, true);
 }
@@ -83,10 +80,7 @@ $squareEnvironment = $isProduction ? 'production' : 'sandbox';
 
 // Find subscriptions due for renewal (within next 24 hours or already past due)
 try {
-    // Env filter prevents the cron in one environment from renewing
-    // subscriptions belonging to the other (dev/prod share a DB). Downstream
-    // queries are all scoped by subscription_id which is UNIQUE in the schema,
-    // so this single filter covers the whole pipeline.
+    // Env filter prevents the cron in one environment from renewing subscriptions belonging to the other (dev/prod share a DB).
     $stmt = $pdo->prepare("
         SELECT
             s.*,
@@ -128,12 +122,7 @@ foreach ($subscriptions as $subscription) {
 
     logMessage("Processing renewal for subscription: $subscriptionId (User: $userId, Method: $paymentMethod, Credit: $$creditBalance)");
 
-    // Decide credit/charge split (and add processing fee). Single source of
-    // truth lives in cron/lib/renewal_helpers.php so it can be unit-tested.
-    //
-    // Grandfathering: charge the base price locked at signup, not the current
-    // env price, so raising prices never re-prices existing customers. Legacy
-    // rows with no recorded signup_base_price fall back to the current env price.
+    // The split lives in cron/lib/renewal_helpers.php so it can be unit tested, and grandfathering charges the price locked at signup.
     $pricingConfig = get_pricing_config();
     $renewalConfig = $pricingConfig;
     $lockedBase = $subscription['signup_base_price'] ?? null;
@@ -161,10 +150,7 @@ foreach ($subscriptions as $subscription) {
 
     // Skip payment processing if fully covered by credit
     if ($amountToCharge <= 0 && $useCredit) {
-        // Same idempotency guard as the charged path below. Without it an
-        // overlapping run extends end_date a second time and deducts the
-        // customer's credit twice. recently_renewed() matches the
-        // payment_type='credit' row this branch writes.
+        // Same idempotency guard as the charged path below. Without it an overlapping run extends end_date a second time and deducts the customer's credit twice.
         if (recently_renewed($pdo, $subscriptionId)) {
             logMessage("Skipping $subscriptionId - already renewed within the last 23 hours", 'INFO');
             $skippedCount++;
@@ -177,10 +163,7 @@ foreach ($subscriptions as $subscription) {
             $newCreditBalance = $creditBalance - $creditUsed;
             $creditTransactionId = 'CREDIT_RENEWAL_' . strtoupper(bin2hex(random_bytes(8)));
 
-            // One transaction so the extension and the payment row that the
-            // guard above reads either both land or neither does. A half-written
-            // renewal would leave the subscription extended with nothing for the
-            // next run to recognise.
+            // One transaction so the extension and the payment row that the guard above reads either both land or neither does.
             $pdo->beginTransaction();
             try {
                 $stmt = $pdo->prepare("
@@ -282,10 +265,7 @@ foreach ($subscriptions as $subscription) {
             $newEndDate = calculateNewEndDate($subscription['end_date'], $billing);
             $newCreditBalance = $creditBalance - $creditUsed; // Deduct any used credit
 
-            // Wrap the two writes in a transaction so we can never end up with
-            // an extended subscription but no payment record (or vice versa).
-            // The charge has already been made by this point; if the DB writes
-            // fail we log loudly so an operator can fix the DB state manually.
+            // Wrap the two writes in a transaction so we can never end up with an extended subscription but no payment record (or vice versa).
             $pdo->beginTransaction();
             try {
                 $stmt = $pdo->prepare("
@@ -391,12 +371,7 @@ logMessage("Renewal processing complete. Success: $successCount, Failed: $failed
 // Also check for subscriptions that should be marked as expired
 $expiredCount = 0;
 try {
-    // Env filter for the same reason the renewal query above has one: only
-    // production runs crons, so without it a production run expires sandbox
-    // subscriptions and files a premium_churned event for each into
-    // production's funnel statistics.
-    //
-    // Pull the about-to-expire IDs first so we can fire one churn event per sub
+    // Filtered by environment because only production runs crons, so a run would otherwise expire sandbox subscriptions.
     $expiringStmt = $pdo->prepare("
         SELECT subscription_id FROM premium_subscriptions
         WHERE status = 'active' AND auto_renew = 0 AND end_date < NOW()
@@ -430,15 +405,7 @@ try {
     logMessage("Error marking expired subscriptions: " . $e->getMessage(), 'ERROR');
 }
 
-// Cleanup: clear stale previous_paypal_subscription_id values from PayPal
-// cycle switches that happened more than 7 days ago. The column exists only
-// to let the cancel webhook recognize an expected cancel event for the
-// pre-switch subscription; once that event has had a week to arrive, we no
-// longer need the back-reference.
-//
-// Cutoff is keyed on last_cycle_change_at, NOT updated_at, since updated_at gets
-// auto-bumped by every renewal/admin edit (ON UPDATE CURRENT_TIMESTAMP), so
-// for monthly subs it would never reach the 7-day threshold.
+// Clears previous_paypal_subscription_id more than seven days after a cycle switch, since it exists only for the cancel webhook.
 try {
     $stmt = $pdo->prepare("
         UPDATE premium_subscriptions
@@ -565,10 +532,7 @@ function processSquareRenewal($cardId, $amount, $subscriptionId, $email, $access
 
         // Create payment request with customer_id
         $paymentData = [
-            // Deterministic per (subscription, month) so a retry after a lost
-            // response reuses the key and Square dedups the charge instead of
-            // billing the card twice. A random key would let a lost-response
-            // retry double-charge.
+            // Deterministic per (subscription, month) so a retry after a lost response reuses the key and Square dedups the charge instead of billing the card twice.
             'idempotency_key' => hash('sha256', 'sqrenew_' . $subscriptionId . '_' . date('Y-m')),
             'source_id' => $cardId,
             'customer_id' => $customerId,

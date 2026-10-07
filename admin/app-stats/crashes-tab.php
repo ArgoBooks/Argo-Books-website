@@ -72,9 +72,7 @@ foreach ($crashFiles as $crashFile) {
         // the receivedAt fallback is "Y-m-d H:i:s", which don't sort together.
         $tsEpoch = $ts !== null ? (strtotime((string) $ts) ?: 0) : 0;
 
-        // Honour the page's date range, so this tab agrees with the charts. A
-        // report we can't date stays visible in every range: silently hiding a
-        // crash is worse than showing one that may be older than the window.
+        // Honour the page's date range, so this tab agrees with the charts.
         if ($tsEpoch > 0) {
             if ($tsEpoch > $rangeEndTs || ($rangeStartTs !== null && $tsEpoch < $rangeStartTs)) {
                 continue;
@@ -86,10 +84,7 @@ foreach ($crashFiles as $crashFile) {
             $crashDevices[$meta['authId']] = true;
         }
 
-        // Prefer the version/platform stamped into each crash at capture time,
-        // falling back to the upload's file-level values for older reports. This
-        // avoids attributing a crash to whatever version the app updated to
-        // before the report was uploaded on the next launch.
+        // Prefer the version/platform stamped into each crash at capture time, falling back to the upload's file-level values for older reports.
         $cVersion = (string) ($c['appVersion'] ?? $meta['appVersion']);
         $cPlatform = (string) ($c['platform'] ?? $meta['platform']);
         $crashVersions[$cVersion] = true;

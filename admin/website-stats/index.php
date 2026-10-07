@@ -14,18 +14,7 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
 $page_title = "Website Statistics";
 $page_description = "View comprehensive analytics, user statistics, and performance metrics";
 
-// ---------------------------------------------------------------------------
-// Automatic bucketing.
-//
-// The date-range selection itself lives in admin/date-range.php, shared with
-// the other dashboards. What stays here is the SQL-side bucketing: the chart
-// bucket (day / week / month) is derived from the range length rather than
-// chosen manually.
-//   - range  < 90 days  -> daily buckets
-//   - range  < 365 days -> weekly buckets (Sunday-start)
-//   - range >= 365 days -> monthly buckets
-// See ReportChartDataService.GetTimeBucket in the Avalonia repo.
-// ---------------------------------------------------------------------------
+// --- Automatic bucketing. ------------------------------------------------------------------------
 
 /**
  * Earliest record on this page, used as the floor for the "All Time" preset.

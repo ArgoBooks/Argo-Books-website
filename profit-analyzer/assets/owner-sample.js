@@ -18,9 +18,7 @@
     {source:'After ads',    target:'Profit',          value:4710}
   ];
 
-  // The surviving stream cools from steel-blue into emerald as it makes it
-  // through; every cost peels off in muted red so the leaks read as money lost
-  // and the profit stays the one green.
+  // The surviving stream cools from steel-blue into emerald as it makes it through; every cost peels off in muted red so the leaks read as money lost and the profit stays the one green.
   var C = {
     'Revenue':         '#6f8fb3',
     'Cost of goods':   '#d76b66',

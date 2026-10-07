@@ -19,10 +19,7 @@ function refund_square_get_client(array $company)
         throw new RuntimeException('Square access token not configured for company.');
     }
     $token = portal_decrypt($company['square_access_token']);
-    // Key off the company row (matches Stripe + PayPal) so a server-wide
-    // APP_ENV flip doesn't cause sandbox companies to hit live Square or
-    // vice-versa. The access token is already per-company, but the base URL
-    // must match the token's environment.
+    // Keyed off the company row as Stripe and PayPal are, so an APP_ENV flip cannot send a sandbox company to live Square: the base URL must match the token.
     $isProduction = ($company['environment'] ?? 'sandbox') === 'production';
     $baseUrl = $isProduction
         ? \Square\Environments::Production->value

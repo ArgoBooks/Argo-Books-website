@@ -95,9 +95,7 @@ function prepareCloneForCapture(invoice, clonedDoc) {
     const cloned = cloneInputs[i];
     if (!cloned) return;
 
-    // File inputs (the logo picker) carry a "C:\fakepath\..." value the
-    // browser exposes for security. Never render that as text; the chosen
-    // logo is drawn separately via [data-logo-rendered]. Drop the clone.
+    // A file input exposes "C: akepath\...", so it is never rendered: the logo is drawn through [data-logo-rendered].
     if (live.type === 'file') { cloned.remove(); return; }
 
     const isTextarea = cloned.tagName === 'TEXTAREA';

@@ -39,17 +39,10 @@ return [
   // <meta name="description">. Aim for 140 to 160 characters.
   'meta_description' => 'How to invoice clients without missing anything: what to put on the invoice, when to send it, and how to get paid faster.',
 
-  // JSON-LD type. 'Article' or 'HowTo'.
-  // HowTo only on genuinely procedural pieces (step-by-step instructions
-  // with a defined end state). When set to 'HowTo', any section with a
-  // `step_name` is emitted as a HowToStep, in document order.
+  // JSON-LD type. 'Article' or 'HowTo'. HowTo only on genuinely procedural pieces (step-by-step instructions with a defined end state).
   'schema_type' => 'HowTo',
 
-  // Guides hub category. Required. Controls which section of /guides/ the
-  // article appears under. One of:
-  //   'invoicing' | 'receipts-expenses' | 'bookkeeping' | 'choosing-software'
-  // Any unrecognized value falls into a trailing "More" section so the
-  // article is never silently dropped.
+  // Required. Which section of /guides/ the article sits under: invoicing, receipts-expenses, bookkeeping or choosing-software.
   'category' => 'invoicing',
 
   // Ordering within the category on /guides/. Lower lists first. Use
@@ -68,32 +61,14 @@ return [
   // 220 words per minute, rounded up.
   'reading_time_min' => 8,
 
-  // Optional. One extra stylesheet, loaded from guides/styles/. Filename
-  // only, matching [a-z0-9-]+\.css, so a data file cannot point elsewhere.
-  // Most articles are prose and need nothing. Use it for a piece built
-  // around code listings or comparison panels, so those rules stay out of
-  // the sheet every other article loads.
+  // Optional. One extra stylesheet from guides/styles/, a filename only, since most articles are prose and need none.
   'stylesheet' => null,
 
   // Optional. ISO 8601 duration. Only used when schema_type is 'HowTo'.
   // Example: 'PT15M' for fifteen minutes.
   'total_time_iso8601' => null,
 
-  // Optional. A single headline statistic, rendered as a large highlighted
-  // block between the byline and the intro. Use it only when the article
-  // exists to answer one numeric question ("what does X cost", "how long
-  // does Y take"). Omit the whole key on every other article.
-  //
-  //   label    Short line above the number. Plain text.
-  //   value    The number itself. Plain text. Required, or the block is
-  //            skipped. Keep it short, it renders very large.
-  //   unit     Optional suffix rendered smaller beside the value, e.g.
-  //            'CAD per year'.
-  //   footnote Optional line beneath. Trusted HTML, so it may include <a>
-  //            and <strong>.
-  //
-  // All four run through pricing_substitute(), so {quickbooks_plus} and the
-  // other pricing placeholders work here too.
+  // Optional. A single headline statistic, rendered as a large highlighted block between the byline and the intro.
   'hero_stat' => [
     'label' => 'Canadian small businesses pay',
     'value' => '$360 to $2,640',
@@ -105,10 +80,7 @@ return [
   // tell them what they will learn. Counts toward the 1500-word floor.
   'intro_html' => '<p>Replace this with 100 to 200 words of intro.</p>',
 
-  // Ordered array of content sections. Each becomes a <section> with an
-  // <h2> heading and a body of trusted HTML. For HowTo articles, give
-  // each step section a `step_name` and `step_text` so the JSON-LD
-  // generator picks it up.
+  // Ordered array of content sections. Each becomes a <section> with an <h2> heading and a body of trusted HTML.
   'sections' => [
     [
       // Required. <h2> heading.
@@ -117,26 +89,20 @@ return [
       // Optional. URL fragment. Defaults to "section-N".
       'anchor' => 'gather-details',
 
-      // Required. Trusted HTML for the section body. May include <h3>,
-      // <p>, <ul>, <ol>, <strong>, <em>, <a>, <table>. Counts toward
-      // the 1500-word floor.
+      // Required. Trusted HTML for the section body. May include <h3>, <p>, <ul>, <ol>, <strong>, <em>, <a>, <table>. Counts toward the 1500-word floor.
       'html' => '<p>Body of the section.</p>',
 
       // Optional, only used when schema_type is 'HowTo'.
       // The HowToStep `name` field.
       'step_name' => 'Gather your details',
 
-      // Optional, only used when schema_type is 'HowTo'.
-      // The HowToStep `text` field. If omitted, the template falls back
-      // to a strip_tags() of the html field.
+      // Optional, only used when schema_type is 'HowTo'. The HowToStep `text` field. If omitted, the template falls back to a strip_tags() of the html field.
       'step_text' => 'Pull together your business address, the client details, the invoice number, and what you are billing for.',
     ],
     // Add more entries here.
   ],
 
-  // Optional. Zero-based index into `sections`. The .tool-callout block
-  // renders AFTER the section at this index. Set to -1 to disable.
-  // Pick the section where the reader would naturally open the tool.
+  // Optional. Zero-based index into `sections`. The .tool-callout block renders AFTER the section at this index. Set to -1 to disable.
   'callout_after_section_index' => 0,
 
   // Optional. Text inside the tool callout. Two short lines: a sentence
@@ -144,16 +110,10 @@ return [
   'tool_callout_text' => 'Open the free invoice generator and fill in the fields as you read.',
   'tool_callout_cta' => 'Open the invoice generator',
 
-  // Optional. Site-relative URL the callout links to, e.g.
-  // '/features/receipt-scanning/' or '/downloads/'. When omitted, the
-  // callout points at the invoice generator with UTM tracking, which is
-  // the right default for invoicing articles. Set it for articles whose
-  // natural next step is a different page.
+  // Optional. Site-relative URL the callout links to, e.g. '/features/receipt-scanning/' or '/downloads/'.
   'tool_callout_url' => '/features/receipt-scanning/',
 
-  // Optional. 4 to 8 FAQ pairs. The template renders them as
-  // <h3>question</h3> followed by <p>answer</p>. Counts toward the
-  // 1500-word floor (answers only).
+  // Optional. 4 to 8 FAQ pairs. The template renders them as <h3>question</h3> followed by <p>answer</p>. Counts toward the 1500-word floor (answers only).
   'faqs' => [
     [
       'q' => 'How long should I wait before sending a reminder?',
@@ -162,16 +122,7 @@ return [
     // Add more entries here.
   ],
 
-  // Required. Slugs of related niche pages. Must contain at least 3.
-  // The article template renders a "Free invoice generators" section and
-  // prints a red dev-warning if fewer than 3 are listed. Use the exact slugs
-  // from the niches/data/*.php files that exist today.
-  //
-  // Set it to an explicit empty array to opt the article out of that block
-  // entirely. Do that only for articles outside the invoicing and bookkeeping
-  // clusters, where invoice-generator links would read as a stray advert.
-  // Omitting the key is not the same thing: that still renders the block and
-  // still warns, so a genuine oversight is caught.
+  // Required. At least three related niche slugs, or the template prints a dev warning where the generators section goes.
   'related_niche_slugs' => [
     'freelance',
     'contractor',

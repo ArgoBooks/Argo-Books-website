@@ -82,9 +82,7 @@ export const CANADA_FEDERAL = {
   quebecAbatement: 0.165, // QC residents' federal tax is reduced by 16.5%
 };
 
-// Provinces / territories. `bpa` is the provincial basic personal amount,
-// credited at `lowestRate` (the first bracket's rate). `surtax` (Ontario only)
-// applies to provincial tax after the BPA credit.
+// Provinces / territories. `bpa` is the provincial basic personal amount, credited at `lowestRate` (the first bracket's rate).
 export const PROVINCES = {
   AB: {
     name: 'Alberta',
@@ -237,10 +235,7 @@ export const PROVINCES = {
     name: 'Yukon',
     lowestRate: 0.064,
     bpa: 16452, // Yukon mirrors the federal basic personal amount
-    // Statutory rates: 6.4 / 9 / 10.9 / 12.8 / 15. (Some tables show 12.93%
-    // in the $181,440-$258,482 band; that is the *effective* rate once
-    // Yukon's BPA-supplement clawback is folded in, not the statutory rate.
-    // We model BPA as a flat credit, so we use the statutory 12.8% here.)
+    // Statutory rates 6.4 / 9 / 10.9 / 12.8 / 15. A table showing 12.93% gives the effective rate after the BPA clawback.
     brackets: [
       { upTo: 58523, rate: 0.064 },
       { upTo: 117045, rate: 0.09 },

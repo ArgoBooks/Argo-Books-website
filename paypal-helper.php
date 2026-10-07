@@ -285,9 +285,7 @@ function refundPayPalSale($saleId, $amount, $currency, $description = 'Cycle swi
         'description' => $description,
     ]);
 
-    // PayPal-Request-Id: deterministic per sale (no date component) so any
-    // retry — even days later — reuses the key and PayPal dedups the refund
-    // indefinitely, preventing an accidental double refund.
+    // The request id is deterministic per sale with no date in it, so any retry reuses the key and PayPal keeps refusing a second refund.
     $requestId = hash('sha256', 'refund_' . $saleId);
 
     $ch = curl_init($url);

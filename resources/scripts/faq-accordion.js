@@ -1,8 +1,6 @@
 // resources/scripts/faq-accordion.js
 //
-// The one FAQ accordion for the whole site. Replaces the copy of this logic
-// that used to sit inline in every compare page, industry page, pricing page,
-// article, and tool page.
+// The one FAQ accordion for the whole site, in place of a copy inline on every compare page, industry page, pricing page, article and tool page.
 //
 // Loaded automatically by partials/faq.php, so a page that renders its FAQ
 // through the partial needs no script wiring of its own.

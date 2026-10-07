@@ -9,10 +9,7 @@
 // groups every file by user, shows what each user did, and lets you delete a
 // user's files (e.g. your own test installs) one card at a time.
 
-// Direct-access guard. This partial is only valid when included by its parent
-// page (app-stats/index.php), which starts the session and verifies the admin
-// login. Requested directly, no session is started so $_SESSION is empty and we
-// fail closed. (An admin/.htaccess also denies *-tab.php as defense in depth.)
+// Direct-access guard. This partial is only valid when included by its parent page (app- stats/index.php), which starts the session and verifies the admin login.
 if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
     http_response_code(403);
     exit('Forbidden');
@@ -40,16 +37,12 @@ if (!function_exists('ua_set_language')) {
     }
 }
 
-// Tier and date range come from the page-level control bar, so this tab shows
-// the same slice as the charts. Defaulted here so the partial still renders if
-// it's ever included without them.
+// Tier and date range come from the page-level control bar, so this tab shows the same slice as the charts. Defaulted here so the partial still renders if it's ever included without them.
 $ua_tierFilter   = $tierFilter ?? 'all';
 $ua_rangeStartTs = $rangeStartTs ?? null;
 $ua_rangeEndTs   = $rangeEndTs ?? PHP_INT_MAX;
 
-// Collected by basename, so a file in both the current folder and the legacy root counts
-// once. The delete the cards post is handled by index.php before the page prints anything,
-// so it can redirect; see user-activity-files.php.
+// Collected by basename, so a file in both the current folder and the legacy root counts once.
 $ua_files = ua_collect_files();
 
 // ---- Aggregate per authId ---------------------------------------------------
@@ -59,9 +52,7 @@ $ua_users = []; // authId => aggregate
 // than sharing index.php's. See telemetry-dedupe.php for why duplicates exist.
 $ua_seenEventIds = [];
 
-// Surfaced under the filters rather than silently swallowed. Once the client-side
-// locking fix has rolled out, this should trend to zero for recent uploads; if it
-// doesn't, devices are still losing their "uploaded" flags somewhere.
+// Surfaced under the filters rather than silently swallowed.
 $ua_duplicatesCollapsed = 0;
 
 // Installs whose premium came from another environment's subscription, counted so
@@ -81,16 +72,10 @@ foreach ($ua_files as $name => $path) {
     $authId = $d['authId'] ?? '(no authId)';
     $geo    = $d['geoLocation'] ?? [];
 
-    // This tab is the ONE place the founder's own installs are visible. Every other
-    // read site (app-stats charts and KPIs, crashes, marketing funnel) skips them, so
-    // they never reach a real-user number. Here they render badged and are left out of
-    // the header tally instead.
+    // The one place the founder's own installs are visible, badged. Every other read skips them so they never reach a real-user number.
     $isFounder = is_founder_auth_id($authId);
 
-    // Sandbox is the one thing it does not show. The upload endpoint authenticates a
-    // license without checking which environment its subscription belongs to, so a test
-    // redemption lands here looking like a customer. An id with no subscription in this
-    // environment at all is the same story: either sandbox, or an account since deleted.
+    // Sandbox is the one thing it does not show, since the upload endpoint authenticates a licence without checking its environment, so a test looks like a customer.
     if (is_other_environment_auth_id($authId)) {
         $ua_otherEnvUsers[$authId] = true;
         continue;
@@ -193,18 +178,10 @@ foreach ($ua_files as $name => $path) {
     unset($u);
 }
 
-// A user whose files hold no events inside the selected range isn't part of this
-// view. Their file list is still complete on the card, because "Delete this
-// user" removes every file they uploaded, not just the ones in range.
+// A user whose files hold no events in the range is not part of this view, but the card still lists every file, because deleting a user removes all of them.
 $ua_users = array_filter($ua_users, function ($u) { return $u['events'] > 0; });
 
-// What a premium install is running on: the subscription key behind it, and whether
-// that key was redeemed rather than paid for. api/data/upload.php stamps a premium
-// authId as 'subscription:<subscription_id>', and redeem_premium_key() records the
-// subscription with payment_method = 'free_key'. That column is what separates a
-// promo or reseller key from someone who actually paid: both end up with a row in
-// premium_subscription_keys, because paid checkout auto-creates one too, so the key
-// table alone cannot tell them apart.
+// What a premium install is running on: the subscription key behind it, and whether that key was redeemed rather than paid for.
 $ua_subInfo = [];   // subscription_id => ['key' =>, 'batch' =>, 'isFreeKey' =>]
 $ua_subIds  = [];
 foreach ($ua_users as $ua_authId => $_ua_ignored) {
@@ -215,9 +192,7 @@ foreach ($ua_users as $ua_authId => $_ua_ignored) {
 if ($ua_subIds && isset($pdo)) {
     try {
         $ua_ph = implode(',', array_fill(0, count($ua_subIds), '?'));
-        // Ordered by key id so that if a subscription ever carries more than one key
-        // row, the newest is the one left on the card: that is the key the install is
-        // actually running on.
+        // Ordered by key id so that if a subscription ever carries more than one key row, the newest is the one left on the card: that is the key the install is actually running on.
         $ua_stmt = $pdo->prepare("
             SELECT s.subscription_id, s.payment_method, k.subscription_key, k.batch_label
             FROM premium_subscriptions s
@@ -249,9 +224,7 @@ foreach ($ua_users as $ua_authId => &$ua_u) {
 }
 unset($ua_u);
 
-// Where a free install came from. api/track-app-event.php stores the same device
-// hash on the install's app_first_run row that upload.php files telemetry under.
-// Installs reported before that field existed carry no hash and show nothing.
+// Where a free install came from. api/track-app-event.php stores the same device hash on the install's app_first_run row that upload.php files telemetry under.
 $ua_deviceHashes = [];
 foreach ($ua_users as $ua_authId => $_ua_ignored) {
     if (strncmp($ua_authId, 'device:', 7) === 0) {
@@ -306,11 +279,7 @@ if ($ua_deviceHashes && isset($pdo)) {
             unset($ua_ref);
         }
 
-        // A purchase happens in a browser and is filed against a visitor id, so it never
-        // reaches the telemetry this tab is built from. The install event above is the only
-        // thing holding both ids, which makes this the one join that can show a
-        // device's purchase. An install with no visitor id (a Microsoft Store or Homebrew
-        // download carries no token) cannot be joined and simply shows nothing.
+        // A purchase happens in a browser and is filed against a visitor id, so it never reaches the telemetry this tab is built from.
         $ua_visitorDevice = [];   // visitor id => device hash
         foreach ($ua_referrals as $ua_hash => $ua_r) {
             if (!empty($ua_r['visitorId'])) {

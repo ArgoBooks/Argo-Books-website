@@ -80,11 +80,7 @@ function process_contact_form()
 
     $to_email = 'contact@argorobots.com';
 
-    // The address stays noreply@argorobots.com because that is what SPF and DKIM
-    // authorise this server to send as; only the display name changes, so the inbox
-    // list says what the message is instead of "Argo Books" emailing itself.
-    // setFrom() is skipped entirely when from_email is null, so the name has to be
-    // passed alongside the address to take effect on the SMTP path.
+    // The address stays noreply@argorobots.com because that is what SPF and DKIM authorise, so only the display name changes.
     $preview = trim(preg_replace('/\s+/', ' ', strip_tags($message)));
     if (strlen($preview) > 140) {
         $preview = substr($preview, 0, 137) . '...';

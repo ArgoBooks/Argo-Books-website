@@ -13,10 +13,7 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
     exit;
 }
 
-// The User Activity tab's delete button posts here. It is answered with a redirect back to
-// the same URL rather than the page itself, so a refresh afterwards reloads the page instead
-// of the browser offering to send the delete a second time. This has to happen before any
-// output, which is why it is here and not in the tab.
+// The User Activity tab's delete button posts here.
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['del_files'])) {
     require_once __DIR__ . '/user-activity-files.php';
     ua_delete_posted_files((array)$_POST['del_files']);
@@ -41,15 +38,7 @@ if (!in_array($tierFilter, ['all', 'free', 'premium'], true)) {
     $tierFilter = 'all';
 }
 
-// Date range (shared presets: admin/date-range.php). It scopes the charts and
-// detail tables only. The Active Users KPI cards below are fixed-window metrics
-// by definition (DAU / WAU / MAU are always measured against today), so they are
-// computed from every event regardless of what is selected here.
-//
-// "All Time" can't resolve a floor up front the way the SQL pages do, since the
-// earliest telemetry event isn't known until the files are parsed. It's treated
-// as "no lower bound" during the parse and the display date is backfilled from
-// the oldest event afterwards.
+// Date range (shared presets: admin/date-range.php). It scopes the charts and detail tables only.
 $presets = date_range_presets();
 $selectedRange = selected_date_range_preset();
 $customStartRaw = $_GET['start'] ?? null;
@@ -108,11 +97,7 @@ function normalizeEvent($event, $sessionMeta = []) {
     // Geo-location: prefer event-level, fall back to session-level
     $geo = $event['geoLocation'] ?? $sessionMeta['geoLocation'] ?? null;
     if (isset($geo) && is_array($geo)) {
-        // The geolocation service returns a full name for some countries and a bare ISO
-        // code for others, so the same place could appear twice: once as "United States"
-        // and once as "US", splitting a chart bucket and missing its colour. country_name()
-        // maps a code to its name and returns anything else untouched, so it is safe to run
-        // over values that are already spelled out.
+        // The geolocation service gives a full name for some countries and a bare ISO code for others, which would split one place into two buckets.
         $normalized['country'] = country_name($geo['country'] ?? '') ?: 'Unknown';
         $normalized['region'] = $geo['region'] ?? '';
         $normalized['timezone'] = $geo['timezone'] ?? '';
@@ -177,8 +162,7 @@ function processEvent($event, $sourceFile, $sessionMeta = []) {
                     return ['category' => 'OpenExchangeRates', 'data' => $normalized];
 
                 // Kept in its own bucket so the bulk call and the per-date repair that follows it
-                // can be told apart. Under one name a failing bulk request looks like ordinary
-                // traffic, which is exactly how it went unnoticed.
+                // can be told apart.
                 case 'OpenExchangeRatesBatch':
                     return ['category' => 'OpenExchangeRatesBatch', 'data' => $normalized];
 
@@ -197,23 +181,14 @@ function processEvent($event, $sourceFile, $sessionMeta = []) {
             $normalized['LineNumber'] = $event['lineNumber'] ?? null;
             $normalized['MethodName'] = $event['methodName'] ?? '';
             $normalized['Context'] = $event['context'] ?? '';
-            // The app stamps severity from its own LogLevel. Warnings are expected,
-            // handled conditions, so they get their own bucket and never reach the
-            // Errors tab's charts or details table. Events uploaded before the field
-            // existed carry no severity and stay errors; we don't infer it from the
-            // error code. Either way the event still counts toward DAU and tier users,
-            // because that accounting happens before this bucket is used.
+            // Severity comes from the app's own LogLevel, and a warning is an expected handled condition, so warnings get their own bucket and never reach the Errors tab.
             $severity = strcasecmp((string)($event['severity'] ?? ''), 'Warning') === 0
                 ? 'Warning'
                 : 'Error';
             return ['category' => $severity, 'data' => $normalized];
 
         case 'Startup':
-            // ToReadyMs already contains ToFirstPaintMs rather than continuing from
-            // it, so the two are nested, not additive. Null on either means the app
-            // never reached that milestone (or predates the field), and null is kept
-            // rather than coerced to 0 so a missing measurement cannot pull an
-            // average down as though the launch were instant.
+            // ToReadyMs contains ToFirstPaintMs rather than continuing from it, so the two are nested. A null means the app never got there and is kept, not made 0.
             $normalized['ToMainMs']            = isset($event['toMainMs']) ? (int)$event['toMainMs'] : null;
             $normalized['ToFirstPaintMs']      = isset($event['toFirstPaintMs']) ? (int)$event['toFirstPaintMs'] : null;
             $normalized['ToServicesReadyMs']   = isset($event['toServicesReadyMs']) ? (int)$event['toServicesReadyMs'] : null;
@@ -283,9 +258,7 @@ if (empty($dataDirs)) {
         ];
         $mauThreshold = time() - 30 * 86400;
 
-        // First- and last-seen per user for the Active Users KPI cards: tier-filtered like
-        // the rest of the page, but never date-range filtered, so the cards keep measuring
-        // against today no matter which range is selected.
+        // Tier-filtered like the rest of the page but never date-filtered, so the Active Users cards keep measuring against today.
         $kpiLastSeen  = [];
         $kpiFirstSeen = [];
         $dauThreshold = strtotime('today');
@@ -316,18 +289,12 @@ if (empty($dataDirs)) {
                 }
                 $fileAuthId = $fileData['authId'] ?? '';
 
-                // Never let the founder's own installs count toward app stats. This one
-                // skip covers the whole file, so it keeps them out of tier counts, DAU,
-                // geo, versions, features, usage, API and errors in a single place. The
-                // User Activity tab reads the same files separately and does show them.
+                // Never let the founder's own installs count toward app stats.
                 if (is_founder_auth_id($fileAuthId)) {
                     continue;
                 }
 
-                // Nor an install whose premium came from another environment. The upload
-                // endpoint authenticates a license without checking which environment its
-                // subscription belongs to, so a sandbox test redemption would otherwise sit
-                // in production's charts as a real premium user.
+                // Nor an install whose premium came from another environment, since the upload endpoint does not check which environment a licence belongs to.
                 if (is_other_environment_auth_id($fileAuthId)) {
                     continue;
                 }
@@ -349,9 +316,7 @@ if (empty($dataDirs)) {
                 $includeFile = $tierFilter === 'all' || $tierFilter === $fileTier;
 
                 foreach ($fileData['events'] as $event) {
-                    // Collapse re-uploads before any accounting: a duplicate must not
-                    // reach tier stats or DAU either, or one launch reads as several
-                    // users' worth of activity.
+                    // Collapse re-uploads before any accounting: a duplicate must not reach tier stats or DAU either, or one launch reads as several users' worth of activity.
                     if (telemetry_is_duplicate_event($event, $fileAuthId, $seenEventIds)) {
                         continue;
                     }
@@ -476,9 +441,7 @@ $rangeDisplay = format_date_range($rangeStart, $rangeEnd);
 $aggregatedData['range']['start'] = $rangeStart->format('Y-m-d');
 $aggregatedData['range']['end']   = $rangeEnd->format('Y-m-d');
 
-// Convert aggregated data to JSON for JavaScript. Escape HTML-meaningful characters
-// (<, >, &, ', ") as \u00xx so a telemetry string containing "</script>" cannot break
-// out of the inline <script> context where this is emitted.
+// Convert aggregated data to JSON for JavaScript.
 $jsonData = json_encode(
     $aggregatedData,
     JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_SLASHES
@@ -656,9 +619,7 @@ include __DIR__ . '/../admin_header.php';
                             'free' => 'Free',
                             'premium' => 'Premium',
                         ];
-                        // Preserve the current tab across a tier switch (section-tabs.js keeps
-                        // it in ?tab=). Whitelist against the real tabs to avoid reflecting
-                        // arbitrary input into the href.
+                        // Preserve the current tab across a tier switch (section-tabs.js keeps it in ?tab=).
                         $validTabs = ['active-users', 'user-activity', 'geographic', 'versions', 'features', 'usage', 'api', 'errors', 'crashes'];
                         $currentTab = in_array($_GET['tab'] ?? '', $validTabs, true) ? $_GET['tab'] : '';
                         foreach ($tierLabels as $tierKey => $label):

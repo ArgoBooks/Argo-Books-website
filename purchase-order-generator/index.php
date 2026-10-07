@@ -15,9 +15,7 @@ require_once __DIR__ . '/../invoice-generator/doc-config.php';
 $doc_type = 'purchase-order';
 $dc = invgen_doc_config($doc_type);
 
-// Server-side page view. track_page_view() filters admins, bots, and duplicates
-// itself, so calling it unconditionally is safe. Skip during PHP CLI smoke
-// tests (no $_SERVER['REMOTE_ADDR'], no real visitor).
+// Server-side page view. track_page_view() filters admins, bots, and duplicates itself, so calling it unconditionally is safe.
 if (PHP_SAPI !== 'cli') {
     require_once __DIR__ . '/../statistics.php';
     track_page_view('pogen_tool');
@@ -44,9 +42,7 @@ $page_schema_json = json_encode([
   'url' => $dc['canonical_url'],
 ], JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
 
-// Mirror the JS-relevant config to window.DOC_CONFIG so the shared engine
-// modules (state/pdf/docx/main) know this is a purchase order. Emitted into the
-// <head> via $extra_head, ahead of main.js which loads at end of <body>.
+// Mirror the JS-relevant config to window.DOC_CONFIG so the shared engine modules (state/pdf/docx/main) know this is a purchase order.
 $extra_head = '<script>window.DOC_CONFIG = '
     . json_encode(invgen_doc_config_js($dc), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT)
     . ';</script>';

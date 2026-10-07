@@ -52,15 +52,7 @@ if ($row['revert_until'] && strtotime($row['revert_until']) < time()) {
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $pdo->beginTransaction();
-    // Stale-token guard: only revert if the company is currently on the
-    // new_email from THIS change request. Without this predicate, a 30-day-old
-    // revert link can silently undo a later legitimate change
-    // (A->B then B->C; the old A->B link stomps owner back to A).
-    //
-    // email_verified_at is restored to whatever the old address had, not left on the
-    // stamp the new address earned. old_email_verified_at is NULL when the old address
-    // never answered a code, and reverting to it has to put the company back to
-    // unverified rather than let it inherit a mark it never earned.
+    // Reverts only when the company is still on this request's new_email, so a month-old link cannot undo a later change.
     $upd = $pdo->prepare(
         "UPDATE portal_companies SET owner_email = ?, email_verified_at = ?
          WHERE id = ? AND owner_email = ?"

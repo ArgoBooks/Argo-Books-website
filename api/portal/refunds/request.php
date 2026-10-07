@@ -31,9 +31,7 @@ refund_ensure_company_active($company);
 global $pdo;
 $raw = file_get_contents('php://input') ?: '';
 
-// require_key=true: refund creation is a financial mutation; a retry
-// without the header could create duplicate refund_requests (and dual
-// email codes / dual provider calls when the user reuses the request_id).
+// Refund creation is a financial mutation, so a retry without the header could create a second request, a second code and a second provider call.
 with_idempotency($pdo, (int)$company['id'], $raw, function() use ($pdo, $company, $raw) {
     $body = json_decode($raw, true);
     if (!is_array($body)) {

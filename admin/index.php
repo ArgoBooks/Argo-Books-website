@@ -13,24 +13,11 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
 try {
     global $pdo;
 
-    // Filter every query to the current runtime environment so the prod
-    // dashboard never includes sandbox test data (and vice versa). Both envs
-    // share the same DB; rows are tagged at insert time. Safe to interpolate
-    // because current_environment() returns one of 'production' or 'sandbox'.
+    // Every query is filtered to the current environment because both share one database, and interpolating is safe since current_environment() returns one of two constants.
     $env = current_environment();
 
-    // --- MRR (Monthly Recurring Revenue) last 12 months ---
-    // True MRR: the recurring run-rate at the end of each month, i.e. the
-    // normalized monthly value of every subscription that was live then. This is
-    // NOT cash collected that month (that is the cumulative-revenue chart below),
-    // so the line stays flat while a customer is subscribed and only moves when
-    // someone subscribes or cancels. Yearly plans are divided by 12.
-    //
-    // "Live at month end" = created on/before month end, not yet cancelled, and
-    // either still marked active (an auto-renewing plan whose next renewal date
-    // may fall before today) or paid through past month end. The status check is
-    // what keeps the current month from reading $0 before this month's renewal
-    // payment has posted.
+    // --- MRR for the last 12 months ---
+    // The run-rate live at each month end, which is not cash collected in the month.
     $stmt = $pdo->query("
         SELECT
             DATE_FORMAT(months.month_date, '%Y-%m') as month,
@@ -85,14 +72,8 @@ try {
     ");
     $revenue_before_window = round((float)$stmt->fetch(PDO::FETCH_ASSOC)['total'], 2);
 
-    // --- Active vs Inactive license counts per month (last 12 months) ---
-    // For each month, count subscriptions active at the end of that month. A sub
-    // is active if it existed by month end, was not yet cancelled, and is either
-    // still marked active (an auto-renewing plan whose next renewal may fall later
-    // this month) or paid through past month end. The status check keeps the
-    // current month from flipping a live sub to "inactive" before its renewal
-    // payment posts. Inactive is the exact complement, so the two never overlap.
-    // Mirrors the MRR "live at month end" logic above.
+    // --- Active vs inactive licences per month ---
+    // A subscription counts when it existed by month end and was active or paid past it.
     $stmt = $pdo->query("
         SELECT
             DATE_FORMAT(months.month_date, '%Y-%m') as month,
@@ -227,9 +208,7 @@ try {
     $revenue_all = 0;
 }
 
-// Affiliate commission currently owed across the whole program. Revenue figures
-// above are gross (before this), so this surfaces the liability separately.
-// Resilient: 0 if the affiliate tables aren't created on this server yet.
+// Affiliate commission currently owed across the whole program. Revenue figures above are gross (before this), so this surfaces the liability separately.
 $affiliate_owed = affiliate_program_totals($env)['owed'];
 
 // Build arrays for last 12 months

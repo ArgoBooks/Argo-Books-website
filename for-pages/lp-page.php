@@ -4,8 +4,7 @@
 // Shared template for the paid-ad landing pages at /for-{trade}/. Content lives
 // in for-pages/data/{slug}.php.
 //
-// Each landing page used to be a standalone ~380-line file, and about 70% of
-// every one of them was the same skeleton: the same head, hero, benefit grid,
+// About 70% of a landing page is skeleton shared with every other one: the same head, hero, benefit grid,
 // "what Argo Books isn't" block, pricing strip, cross-links, FAQ and CTA. Ten
 // pages meant ten identical edits for any layout change, and they had already
 // drifted (three of them carry an extra guide link, one an extra stylesheet).
@@ -65,7 +64,7 @@ $pricing_url  = '../pricing/?source=' . $cta_source;
 $page_url = 'https://argorobots.com/' . $slug . '/';
 
 // The visible accordion and the FAQPage JSON-LD come from one array, so the two
-// cannot drift apart the way the hand-written pairs used to.
+// cannot drift apart.
 $faqs = $d['faqs'];
 ?>
 <!DOCTYPE html>

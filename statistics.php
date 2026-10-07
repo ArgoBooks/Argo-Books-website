@@ -26,9 +26,7 @@ function is_likely_bot($user_agent)
         // Search / SEO crawlers
         'Googlebot', 'bingbot', 'DuckDuckBot', 'YandexBot', 'Baiduspider', 'Sogou',
         'Slurp', 'Applebot', 'AhrefsBot', 'SemrushBot', 'MJ12bot', 'DotBot', 'rogerbot',
-        // Google's non-"Googlebot" crawlers. These don't contain the substring
-        // "Googlebot", so they slipped the line above and flooded referral_visits
-        // (esp. Google-InspectionTool, which fires on Search Console URL inspection).
+        // Google's non-"Googlebot" crawlers. These don't contain the substring "Googlebot", so they slipped the line above and flooded referral_visits (esp.
         'GoogleOther', 'Google-InspectionTool', 'Storebot-Google', 'Feedfetcher-Google',
         'APIs-Google', 'GoogleProducer',
         // AI / dataset crawlers
@@ -113,9 +111,7 @@ function is_datacenter_ip($ip)
         return false;
     }
 
-    // Parsed once per request into [network, mask] integer pairs. The list is
-    // long enough now that re-splitting every CIDR string on every call would
-    // be wasteful, and this runs on every tracked hit.
+    // Parsed once per request into [network, mask] integer pairs.
     static $cidrs = null;
     // Plain addresses from the env var, matched verbatim. This is the only
     // path that can match an IPv6 client.
@@ -123,9 +119,7 @@ function is_datacenter_ip($ip)
 
     if ($cidrs === null) {
         $ranges = [
-            // Google Cloud Platform. GCP is scattered well beyond 34/8 and 35/8;
-            // these extra blocks were confirmed from scraper traffic that slipped
-            // the two /8s above (104.154/15, 104.196/14, 146.148, 136.112/12, ...).
+            // Google Cloud Platform, which is scattered well beyond 34/8 and 35/8; these extra blocks came from scraper traffic that slipped those two.
             '34.0.0.0/8', '35.0.0.0/8',
             '104.154.0.0/15', '104.196.0.0/14', '104.199.0.0/16',
             '130.211.0.0/16', '136.112.0.0/12', '146.148.0.0/17',
@@ -186,8 +180,7 @@ function is_datacenter_ip($ip)
             '45.79.0.0/16', '69.164.192.0/18', '74.207.224.0/19', '97.107.128.0/18',
             '139.162.0.0/16', '143.42.0.0/16', '170.187.0.0/16', '176.58.96.0/19',
             '178.79.128.0/18', '198.58.96.0/19',
-            // Alibaba Cloud. Its Singapore and Hong Kong regions (47.74/15,
-            // 47.88/14, 149.129/16, 161.117/16) are the single biggest reason
+            // Alibaba Cloud, whose Singapore and Hong Kong regions are the single biggest reason
             // Singapore ranked second in the country breakdown.
             '8.208.0.0/12', '39.96.0.0/11',
             // /16 not /14: 47.53-47.55 is Shaw (Canadian consumer ISP).
@@ -265,18 +258,7 @@ function is_datacenter_ip($ip)
             '167.94.146.0/24', '167.248.133.0/24', '147.185.132.0/24',
             '198.235.24.0/24', '199.45.154.0/24', '199.244.88.0/24',
             '205.169.39.0/24', '205.210.31.0/24', '87.236.176.0/24',
-            // ---------------------------------------------------------------
-            // Identified by CLUSTERING, not by ASN ownership: a /24 holding 10+
-            // distinct addresses that each viewed exactly one page is automated
-            // whoever announces it. Kept at the exact /24 observed rather than
-            // widened to a guessed aggregate.
-            //
-            // Do NOT extend this group below ~10 addresses per /24. Consumer
-            // ISPs are indistinguishable at 3-4 (142.59.68.0/24 is Telus/Shaw,
-            // 72.152-72.153 is AT&T), and adding those cuts real customers.
-            // Put later findings in DATACENTER_IP_RANGES in .env instead, so
-            // they can be tuned without a deploy.
-            // ---------------------------------------------------------------
+            // --- Identified by CLUSTERING, not by ASN ownership: a /24 holding 10+ ---------------
             '5.133.192.0/24', '5.181.14.0/24', '8.231.32.0/24',
             '27.115.124.0/24', '40.160.252.0/24', '62.169.135.0/24',
             '66.132.172.0/24', '66.132.195.0/24', '91.231.89.0/24',

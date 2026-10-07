@@ -150,9 +150,7 @@ function pa_gemini_chat_multi(array $requests, int $maxConcurrent = 5): array
 /** Build (but do not execute) a Gemini curl handle for one chat request. */
 function pa_gemini_build_handle(string $systemPrompt, string $userPrompt, int $maxTokens, float $temperature, string $key)
 {
-    // The C# client imposes no ceiling; a wide analysis batch (up to 40 columns
-    // across many 1-column sheets) can compute a budget above 16k. Cap at 32k so
-    // that's never silently truncated, while still guarding against runaway values.
+    // A wide batch can work out a budget above 16k, so the cap is 32k and nothing is cut without a word.
     $maxTokens = max(1, min($maxTokens, 32000));
     $temperature = max(0.0, min(2.0, $temperature));
 

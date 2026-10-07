@@ -50,10 +50,7 @@ function welcome_link_install(PDO $pdo, string $machine_uuid, string $visitor_id
         $find->execute([$env, $machine_uuid]);
         $row = $find->fetch();
 
-        // The app posts app_first_run before opening the browser, so a missing row
-        // means the post failed or the machine id is not ours. Either way there is
-        // nothing to attach to and inventing a row would put a phantom install in
-        // the funnel.
+        // The app posts app_first_run before opening the browser, so a missing row means the post failed or the machine id is not ours.
         if ($row === false) {
             return 'no_install';
         }
@@ -71,9 +68,7 @@ function welcome_link_install(PDO $pdo, string $machine_uuid, string $visitor_id
         $src_row = $src->fetch();
         $source_code = $src_row === false ? null : $src_row['source_code'];
 
-        // attribution_method records that this came from the welcome page rather
-        // than a verified token, so the two are never confused when reading the
-        // funnel back. The IS NULL guard makes a repeat visit a no-op.
+        // attribution_method records that this came from the welcome page rather than a verified token, so the two are never confused when reading the funnel back.
         $upd = $pdo->prepare(
             "UPDATE referral_events
                 SET visitor_id = ?,

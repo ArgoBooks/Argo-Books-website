@@ -143,9 +143,7 @@ $page_schema_json = json_encode([
 
 $breadcrumb_schema_json = argo_breadcrumb_schema(['Home' => '/', 'Guides' => $canonical_url]);
 
-// This hub is the only page on the lighter Fraunces weights, so it asks for the
-// 'editorial-light' set. CSP already permits fonts.googleapis.com (style-src)
-// and fonts.gstatic.com (font-src) per the project's .htaccess.
+// This hub is the only page on the lighter Fraunces weights, so it asks for the 'editorial-light' set.
 $extra_head = argo_font_links('editorial-light', '')
     . '<link rel="stylesheet" href="' . INVGEN_BASE . '/guides/styles/hub.css">'
     . '<link rel="stylesheet" href="' . INVGEN_BASE . '/resources/styles/site-search.css">'

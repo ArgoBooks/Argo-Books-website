@@ -124,9 +124,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } // end rate limit check
 }
 
-// On success, return the user to the page they were trying to reach before
-// signing up (set by require_login), otherwise their profile. Same validation
-// as login.php: only local, non-protocol-relative paths are honored.
+// On success, return the user to the page they were trying to reach before signing up (set by require_login), otherwise their profile.
 if ($success) {
     if (!empty($_SESSION['redirect_after_login'])) {
         $redirect = $_SESSION['redirect_after_login'];

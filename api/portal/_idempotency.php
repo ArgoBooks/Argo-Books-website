@@ -33,11 +33,7 @@ declare(strict_types=1);
 function with_idempotency(PDO $pdo, int $company_id, string $raw_body, callable $handler, bool $require_key = false): void {
     $key = $_SERVER['HTTP_IDEMPOTENCY_KEY'] ?? null;
     if (!$key) {
-        // Financial mutation endpoints (refund create, refund confirm) pass
-        // $require_key=true so a network retry from the desktop without a
-        // key can't create duplicate refund_requests or fire the provider
-        // call twice. Endpoints that don't create new state (status reads,
-        // some cancel flows) leave $require_key=false and run uncached.
+        // A financial endpoint passes $require_key=true, so a retry from the desktop without a key cannot create a second refund request.
         if ($require_key) {
             http_response_code(400);
             header('Content-Type: application/json');
@@ -58,10 +54,7 @@ function with_idempotency(PDO $pdo, int $company_id, string $raw_body, callable 
     }
     $body_hash = hash('sha256', $raw_body);
 
-    // Atomic claim: exactly one concurrent INSERT succeeds when two
-    // requests race with the same (company_id, key). rowCount === 1
-    // means we own the slot; rowCount === 0 means another caller is
-    // already handling (or has finished handling) this key.
+    // An atomic claim: exactly one INSERT wins when two requests race on the same key, and rowCount says which caller owns the slot.
     $claim = $pdo->prepare("
         INSERT INTO refund_idempotency_cache
             (company_id, idempotency_key, body_hash, response_status, response_body)
@@ -109,9 +102,7 @@ function with_idempotency(PDO $pdo, int $company_id, string $raw_body, callable 
     $stmt->execute([$company_id, $key]);
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
     if (!$row) {
-        // Race: row was released or expired between the INSERT attempt
-        // and this SELECT. Restart the flow once: the second pass will
-        // either claim cleanly or hit a now-present cache entry.
+        // The row was released or expired between the INSERT and this SELECT, so the flow restarts once and then either claims or finds the cache.
         with_idempotency($pdo, $company_id, $raw_body, $handler);
         return;
     }

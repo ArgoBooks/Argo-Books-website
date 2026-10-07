@@ -116,10 +116,7 @@ function handle_publish_quote(): void
 
     $quoteData = json_encode($data['quoteData'] ?? $data);
 
-    // An answered quote is what the customer agreed to or turned down, so a plain resend
-    // leaves it exactly as they saw it. It used to keep the answer but replace the contents,
-    // which left an acceptance attached to a quote the customer never read. Only a revision,
-    // which the app sends after asking the user, replaces an answered quote.
+    // An answered quote is what the customer agreed to or turned down, so a resend leaves it exactly as they saw it.
     $keepAsAnswered = $existing && !$decision['clearResponse'] && $status !== 'cancelled';
 
     try {

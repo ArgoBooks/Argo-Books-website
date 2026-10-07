@@ -137,9 +137,7 @@ function pa_compute_analytics(array $normalized): array
 
         $nodes = []; $links = [];
         if ($netProfit >= 0) {
-            // Profit case: a waterfall — revenue peels off each cost, the remainder
-            // survives to the next stage, and the final remainder is Profit. Safe
-            // because every intermediate remainder stays >= profit >= 0.
+            // A waterfall: revenue peels off each cost and the remainder carries on, which holds because every remainder stays at or above profit.
             $nodes = ['Revenue' => round($revTotal)];
             $surv = 'Revenue'; $survVal = $revTotal;
             $stages = [
@@ -160,12 +158,7 @@ function pa_compute_analytics(array $normalized): array
                 $surv = $nextName; $survVal = $nextVal;
             }
         } else {
-            // Loss case: revenue can't supply the cost outflow, so a balanced
-            // revenue→cost waterfall is impossible — it would need a fake inflow
-            // (a "shortfall" stream) that reads like income and flips the arrows
-            // backwards. Instead show a clean cost breakdown: Total costs fans out
-            // into its categories. Revenue, net loss, and margin live in the KPI
-            // cards and the focal stat directly above the chart.
+            // Revenue cannot cover the costs here, so a balanced waterfall would need a fake inflow that reads like income.
             $nodes = ['Total costs' => round($expTotal)];
             $cats = array_filter([
                 'Cost of goods'   => $cogs,
@@ -310,9 +303,8 @@ function pa_compute_analytics(array $normalized): array
         ];
     }
 
-    // ---- Geographic (from customer + supplier countries) ----
-    // Country names are canonicalized to the world map's GeoJSON names ("USA" ->
-    // "United States") so the choropleth actually colours in.
+    // --- Geographic (customer and supplier countries) ---
+    // Names are canonicalised to the map's GeoJSON names, or the choropleth colours nothing.
     $destCountries = [];
     foreach ($revenue as $r) {
         $c = pa_canon_country(pa_customer_country($customers, $r['customerId'] ?? ''));

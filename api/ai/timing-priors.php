@@ -28,9 +28,7 @@ $dotenv->safeLoad();
 set_portal_headers();
 require_method(['GET']);
 
-// Optional identity, used ONLY to bucket the rate limit (no auth required to read).
-// The licence is checked against the database; the device header is whatever the caller
-// typed, so a licensed request must not end up in the bucket its own header names.
+// Used only to bucket the rate limit, with no auth needed to read. The licence is checked against the database, where the device header is whatever the caller typed.
 $license = authenticate_license_request();
 $deviceHash = $license ? null : authenticate_device_request();
 $rateLimitId = $license

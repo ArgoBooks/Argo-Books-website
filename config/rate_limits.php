@@ -60,25 +60,18 @@ function rate_limits(): array
         'quote_email_company' => [_rl_env('RL_QUOTE_EMAIL_COMPANY_MAX', 50), _rl_env('RL_QUOTE_EMAIL_COMPANY_WINDOW', 3600)],
         'quote_email_ip' => [_rl_env('RL_QUOTE_EMAIL_IP_MAX', 20), _rl_env('RL_QUOTE_EMAIL_IP_WINDOW', 3600)],
 
-        // The hourly IP ceilings above still allow hundreds of messages a day from one
-        // connection, and a spammer runs around the clock, so each free path also has a
-        // daily one.
+        // The hourly IP ceilings above still allow hundreds of messages a day from one connection, and a spammer runs around the clock, so each free path also has a daily one.
         'quote_email_ip_daily' => [_rl_env('RL_QUOTE_EMAIL_IP_DAILY_MAX', 100), _rl_env('RL_QUOTE_EMAIL_IP_DAILY_WINDOW', 86400)],
         'purchase_order_email_ip_daily' => [_rl_env('RL_PURCHASE_ORDER_EMAIL_IP_DAILY_MAX', 100), _rl_env('RL_PURCHASE_ORDER_EMAIL_IP_DAILY_WINDOW', 86400)],
         'accountant_email_ip_daily' => [_rl_env('RL_ACCOUNTANT_EMAIL_IP_DAILY_MAX', 100), _rl_env('RL_ACCOUNTANT_EMAIL_IP_DAILY_WINDOW', 86400)],
 
-        // AI work we pay for per call. Sized for the largest legitimate import: spreadsheet
-        // import sends up to 100 rows per call, ten at a time, and the rescue path can reach
-        // ~500 calls for one 10,000-row sheet. Image scans also spend a monthly quota per call,
-        // but text calls do not, so for those these two ceilings are the only bound on cost.
+        // Sized for the largest honest import: a spreadsheet sends up to 100 rows a call and the rescue path can reach about 500 calls.
         'ai_completions' => [_rl_env('RL_AI_COMPLETIONS_MAX', 600), _rl_env('RL_AI_COMPLETIONS_WINDOW', 900)],
         'ai_completions_ip' => [_rl_env('RL_AI_COMPLETIONS_IP_MAX', 600), _rl_env('RL_AI_COMPLETIONS_IP_WINDOW', 900)],
         'ai_priors' => [_rl_env('RL_AI_PRIORS_MAX', 120), _rl_env('RL_AI_PRIORS_WINDOW', 900)],
         'bank_extract' => [_rl_env('RL_BANK_EXTRACT_MAX', 30), _rl_env('RL_BANK_EXTRACT_WINDOW', 900)],
         'bank_extract_ip' => [_rl_env('RL_BANK_EXTRACT_IP_MAX', 60), _rl_env('RL_BANK_EXTRACT_IP_WINDOW', 900)],
-        // A diagnostic file is offered only after an import fails, so a handful an hour
-        // from one device is already generous. Low on purpose: this is the one endpoint
-        // that writes a customer's own file to our disk.
+        // A diagnostic file is offered only after an import fails, so a handful an hour from one device is already generous.
         'import_diagnostic' => [_rl_env('RL_IMPORT_DIAGNOSTIC_MAX', 5), _rl_env('RL_IMPORT_DIAGNOSTIC_WINDOW', 3600)],
 
         // Exchange rates: a wide ceiling, because the app asks for single dates while transactions
@@ -139,10 +132,7 @@ function rate_limits(): array
         'community_report' => [_rl_env('RL_COMMUNITY_REPORT_MAX', 10), _rl_env('RL_COMMUNITY_REPORT_WINDOW', 3600)],
         'contact_form' => [_rl_env('RL_CONTACT_FORM_MAX', 3), _rl_env('RL_CONTACT_FORM_WINDOW', 600)],
 
-        // Telemetry and crash uploads, which keep their own counters in temp files. Every run of
-        // the app uploads on start and on close as well as every 20 minutes, and a flush over
-        // 500 events splits into several requests, so a free ceiling in single digits drops data
-        // from anyone who restarts a few times in an hour.
+        // Telemetry and crash uploads, which keep their own counters in temp files.
         'telemetry_upload_premium' => [_rl_env('RL_TELEMETRY_UPLOAD_PREMIUM_MAX', 100), _rl_env('RL_TELEMETRY_UPLOAD_PREMIUM_WINDOW', 3600)],
         'telemetry_upload_free' => [_rl_env('RL_TELEMETRY_UPLOAD_FREE_MAX', 30), _rl_env('RL_TELEMETRY_UPLOAD_FREE_WINDOW', 3600)],
         'telemetry_upload_free_ip' => [_rl_env('RL_TELEMETRY_UPLOAD_FREE_IP_MAX', 120), _rl_env('RL_TELEMETRY_UPLOAD_FREE_IP_WINDOW', 3600)],
@@ -159,11 +149,7 @@ function rate_limits(): array
         // The public API, counted per key per minute and advertised in the account endpoint.
         'api_v1_per_minute' => [_rl_env('RL_API_V1_PER_MINUTE_MAX', 120), _rl_env('RL_API_V1_PER_MINUTE_WINDOW', 60)],
 
-        // What bounds the API's storage. Creates are counted per company rather than per key, and
-        // counted whatever happens to the object afterwards, because a key can import or reject
-        // its own objects and so empty any cap on what is waiting. A free company needs only a
-        // made-up device id, so companies and keys are capped per IP to stop a script multiplying
-        // the daily allowance.
+        // Creates are counted per company rather than per key, and counted whatever happens to the object, because that is what bounds storage.
         'api_v1_creates_per_day' => [_rl_env('RL_API_V1_CREATES_PER_DAY_MAX', 5000), _rl_env('RL_API_V1_CREATES_PER_DAY_WINDOW', 86400)],
         'api_account_create_ip' => [_rl_env('RL_API_ACCOUNT_CREATE_IP_MAX', 10), _rl_env('RL_API_ACCOUNT_CREATE_IP_WINDOW', 86400)],
         'api_key_create_ip' => [_rl_env('RL_API_KEY_CREATE_IP_MAX', 30), _rl_env('RL_API_KEY_CREATE_IP_WINDOW', 86400)],

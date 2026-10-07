@@ -248,16 +248,8 @@ function send_feedback_request_email(int $licenseId, string $email): bool
     return $sent;
 }
 
-/* ===========================================================================
- * No-account opt-in list (marketing_subscribers): double opt-in lifecycle.
- *
- * Flow: create_pending_subscriber() inserts a 'pending' row + sends a confirm
- * email -> the visitor clicks the link -> confirm_subscriber() flips it to
- * 'confirmed'. Only 'confirmed' rows receive broadcasts (enforced by
- * should_send_marketing_email('...','newsletter')). One-click unsubscribe is
- * handled by unsubscribe_subscriber_by_token(), reachable from
- * /unsubscribe/marketing.php?s=<token>.
- * ========================================================================= */
+// --- No-account opt-in list (marketing_subscribers) ---
+// Double opt-in: a pending row, a confirmation email, confirmed by the link.
 
 /**
  * Display names for marketing_subscribers.source. The endpoint that accepts a sign-up keeps its

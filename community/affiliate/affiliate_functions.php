@@ -90,9 +90,7 @@ if (!function_exists('affiliate_source_within_window')) {
             if (empty($visitor_id)) {
                 return true; // no visitor to trace a click for; don't strip
             }
-            // A cookie refreshes on every click, so measure the window from the
-            // most recent click for this source: credit the affiliate if they were
-            // clicked at all within the window, even if there's also an older click.
+            // Measured from the most recent click, because a cookie refreshes on every click and the affiliate is credited if any was inside the window.
             $stmt = $pdo->prepare(
                 'SELECT MAX(created_at) FROM referral_events
                   WHERE visitor_id = ? AND source_code = ? AND environment = ?'
@@ -152,9 +150,7 @@ if (!function_exists('compute_commission')) {
             if ($when === false || $when < $start || $when >= $window_end) {
                 continue; // outside the per-subscription commission window
             }
-            // The charged amount = subscription price + processing fee. Reverse
-            // the fee (amount = base*(1+pct/100) + fixed) so commission is paid
-            // on the subscription price only. Floor at 0 for credit/$0 charges.
+            // The charged amount = subscription price + processing fee. Reverse the fee (amount = base*(1+pct/100) + fixed) so commission is paid on the subscription price only.
             $base = round(((float) $p['amount'] - $fee_fixed) / (1 + $fee_percent / 100), 2);
             $base_total += max(0.0, $base);
         }
@@ -226,10 +222,7 @@ if (!function_exists('affiliate_earnings_breakdown')) {
         $fee  = affiliate_processing_fee_config();
         $hold = affiliate_hold_days();
 
-        // Base = subscription price with the processing fee stripped back out.
-        // seasoned = charge is older than the hold window (past refund risk).
-        // Computed once per row in the derived table so each bound parameter is
-        // used a single time (required with emulated prepares disabled).
+        // Base = subscription price with the processing fee stripped back out. seasoned = charge is older than the hold window (past refund risk).
         $sql = "
             SELECT
               COALESCE(SUM(CASE WHEN t.seasoned = 1 THEN t.base ELSE 0 END), 0) AS eligible_base,
@@ -392,9 +385,7 @@ if (!function_exists('get_affiliate_stats')) {
     {
         global $pdo;
 
-        // Clicks: every recorded visit to this source. referral_visits is not
-        // environment-scoped (no column), so this counts all-time clicks; the
-        // money figures above are the env-scoped numbers that matter.
+        // referral_visits has no environment column, so this counts clicks for all time, where the money figures above are scoped.
         $clicks_stmt = $pdo->prepare('SELECT COUNT(*) FROM referral_visits WHERE source_code = ?');
         $clicks_stmt->execute([$source_code]);
         $clicks = (int) $clicks_stmt->fetchColumn();

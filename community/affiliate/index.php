@@ -57,9 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } elseif ($desired_tail !== '' && affiliate_source_code_taken('aff-' . $desired_tail)) {
                 $error_message = 'That referral link is already taken. Please choose another.';
             } else {
-                // Reserve the source_code now; the referral_links row is created
-                // on approval so the link stays dead until then. Blank tail falls
-                // back to an auto-generated aff-<username> code.
+                // Reserve the source_code now; the referral_links row is created on approval so the link stays dead until then.
                 $source_code = $desired_tail !== '' ? 'aff-' . $desired_tail : generate_affiliate_source_code($user['username']);
                 try {
                     $stmt = $pdo->prepare('INSERT INTO affiliates (user_id, source_code, status, payout_method, payout_email, application_reason, promo_url, environment) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');

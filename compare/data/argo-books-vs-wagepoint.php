@@ -53,9 +53,7 @@ return [
         ['CPP, EI &amp; income tax from CRA tables', 'no', 'yes', 'yes'],
         ['Every province and territory', 'no', 'yes', 'yes'],
         ['Quebec deductions (QPP, QPIP)', 'no', 'yes', 'yes'],
-        // Revenu Quebec accepts a software-printed RL-1 only from software it has
-        // certified, and requires XML above five slips. Argo Books produces the
-        // figures on a worksheet; it cannot file them.
+        // Revenu Quebec accepts a software-printed RL-1 only from software it has certified, and requires XML above five slips.
         ['RL-1 slips filed with Revenu Quebec', 'no', 'no', 'yes'],
         ['Pay stubs', 'no', 'yes', 'yes'],
         ['T4 slips &amp; summary (PDF)', 'no', 'yes', 'yes'],

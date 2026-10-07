@@ -304,15 +304,7 @@ function record_portal_payment(array $params): array
     $status = $params['status'] ?? 'completed';
     $paymentEnvironment = $params['payment_environment'] ?? null;
 
-    // Use INSERT ... ON DUPLICATE KEY UPDATE to prevent race conditions on duplicate payments.
-    // SCHEMA REQUIREMENT: A UNIQUE index on `provider_payment_id` is required in portal_payments
-    // for this to work correctly. e.g.: ALTER TABLE portal_payments ADD UNIQUE INDEX (provider_payment_id);
-    //
-    // The two callers (process-payment.php and the Stripe webhook's
-    // payment_intent.succeeded handler) race in normal operation. The
-    // customer-portal call knows processing_fee; the webhook does not (it
-    // passes 0). GREATEST() lets the second insert backfill a previously-
-    // zero fee without ever overwriting a real value with zero.
+    // INSERT ... ON DUPLICATE KEY UPDATE needs the UNIQUE index on provider_payment_id to stop a duplicate payment.
     $stmt = $pdo->prepare(
         'INSERT INTO portal_payments
          (company_id, invoice_id, customer_name, amount, processing_fee,
@@ -343,10 +335,7 @@ function record_portal_payment(array $params): array
     $paymentId = $pdo->lastInsertId();
 
     if ($affectedRows !== 1 && !empty($providerPaymentId)) {
-        // Duplicate payment detected. Return existing reference.
-        // 'inserted' => false lets callers (refund webhooks especially)
-        // skip follow-up updates that should only run on first insert,
-        // avoiding double-application on webhook retries.
+        // A duplicate: the existing reference comes back with 'inserted' => false, so a caller skips the follow-up updates that belong to a first insert.
         $stmt = $pdo->prepare(
             'SELECT reference_number FROM portal_payments WHERE provider_payment_id = ? LIMIT 1'
         );
@@ -360,22 +349,11 @@ function record_portal_payment(array $params): array
         ];
     }
 
-    // Update invoice balance if payment completed.
-    // Subtract only the invoice portion (excluding processing fee) from the balance.
-    // The processing fee covers payment provider costs and is not part of the invoice total.
+    // Update invoice balance if payment completed. Subtract only the invoice portion (excluding processing fee) from the balance.
     if ($status === 'completed') {
         $invoiceAmount = max(0, $amount - $processingFee);
 
-        // Single atomic UPDATE so two concurrent payments can never read the
-        // same balance and overwrite each other (lost-update race).
-        //
-        // SET-clause order matters here: MySQL evaluates SET assignments
-        // left-to-right and references to a column in subsequent assignments
-        // see the NEW (just-assigned) value. We need the CASE to compare
-        // against the OLD balance_due, so `status = CASE …` MUST come BEFORE
-        // `balance_due = GREATEST(…)`; otherwise a $50 payment on a $100
-        // invoice would compute new_balance=50 then evaluate (50 - 50 <= 0)
-        // and incorrectly set status='paid' instead of 'partial'.
+        // One atomic UPDATE so two concurrent payments cannot read the same balance and overwrite each other, with the SET order deciding what the CASE reads.
         $stmt = $pdo->prepare(
             'UPDATE portal_invoices
              SET status = CASE
@@ -389,21 +367,7 @@ function record_portal_payment(array $params): array
         );
         $stmt->execute([$invoiceAmount, $invoiceAmount, $invoiceAmount, $companyId, $invoiceId]);
 
-        // Tell the merchant. This point is only reachable on a genuine first
-        // insert: the duplicate branch above returns early, and the UNIQUE
-        // index on provider_payment_id means that when the synchronous path
-        // and the provider webhook race the same payment, exactly one of them
-        // gets rowCount() == 1 and arrives here. No extra dedupe needed.
-        //
-        // Hooked inside this helper rather than at the call sites because five
-        // of them funnel through here (process-payment.php, checkout.php, and
-        // the stripe/square/paypal webhooks); editing each one would guarantee
-        // the sixth gets forgotten.
-        //
-        // Refunds carry status 'refunded' so they never enter this block, and
-        // a failure here must never change what this function returns: a dead
-        // SMTP relay cannot be allowed to fail a Stripe webhook, which would
-        // only be retried into the duplicate path anyway.
+        // Only reachable on a genuine first insert, because the duplicate branch returns early and the UNIQUE index settles a race.
         if ($amount > 0) {
             try {
                 send_owner_payment_notification([
@@ -499,12 +463,7 @@ function get_available_payment_methods(array $company): array
     if (!empty($company['stripe_account_id'])) {
         $methods[] = 'stripe';
     }
-    // PayPal portal Connect is intentionally not exposed. The OAuth flow
-    // can't onboard Business merchants (Log in with PayPal userinfo refuses
-    // Business-account tokens), and proper onboarding requires PayPal
-    // Partner Referrals API which is gated behind Platforms & Marketplaces
-    // enrollment. Existing rows with paypal_merchant_id (from prior testing)
-    // are deliberately ignored here so PayPal won't appear as a pay option.
+    // PayPal portal Connect is intentionally not exposed.
     if (!empty($company['square_merchant_id'])) {
         $methods[] = 'square';
     }
@@ -631,9 +590,7 @@ function send_invoice_notification(array $params): array
     $currency = $params['currency'] ?? 'USD';
     $dueDate = $params['dueDate'] ?? '';
     $invoiceUrl = $params['invoiceUrl'] ?? '';
-    // Default to true to match the schema's column default (pass_processing_fee
-    // DEFAULT 1). Older callers that don't pass the flag still get the
-    // fee-inclusive headline number that the customer will see on the portal.
+    // Default to true to match the schema's column default (pass_processing_fee DEFAULT 1).
     $passProcessingFee = !array_key_exists('passProcessingFee', $params)
         ? true
         : !empty($params['passProcessingFee']);
@@ -649,11 +606,7 @@ function send_invoice_notification(array $params): array
 
     $currencySymbol = argo_currency_display_symbol($currency);
 
-    // The customer will be charged balance + processing fee on the payment
-    // portal page. The headline amount in the email must match that number,
-    // otherwise the customer is surprised at checkout. When the company has
-    // chosen to absorb the fee (passProcessingFee=false), Amount Due stays
-    // at the raw balance.
+    // The headline amount has to match what the portal charges, balance plus processing fee, or the customer is surprised at checkout.
     $balanceFloat = floatval($balanceDue);
     $processingFee = ($passProcessingFee && $balanceFloat > 0)
         ? floatval(calculate_invoice_processing_fee($balanceFloat, $currency))
@@ -750,10 +703,7 @@ function send_invoice_reminder(array $params): array
 
     $currencySymbol = argo_currency_display_symbol($currency);
 
-    // Identical fee maths to send_invoice_notification, and it has to stay
-    // identical: if this reminder quotes a different number than the checkout
-    // page actually charges, the customer stops trusting the amount and does
-    // not pay. See the comment on that function for the reasoning.
+    // The fee maths matches send_invoice_notification and has to, because a reminder quoting a different number than the checkout charges loses trust.
     $balanceFloat = floatval($balanceDue);
     $processingFee = ($passProcessingFee && $balanceFloat > 0)
         ? floatval(calculate_invoice_processing_fee($balanceFloat, $currency))
@@ -787,10 +737,7 @@ function send_invoice_reminder(array $params): array
         ? 'This is a final reminder that the invoice below from <strong>' . $safeCompany . '</strong> is still unpaid.'
         : 'This is a reminder that the invoice below from <strong>' . $safeCompany . '</strong> is now past due.';
 
-    // The disregard line is the single most important sentence in a dunning
-    // email. The merchant may have recorded a cash payment that has not
-    // reached us yet, and accusing a paying customer of not paying costs far
-    // more than a missed reminder.
+    // The disregard line is the single most important sentence in a dunning email.
     $closing = 'If you have already paid, please disregard this reminder. '
         . 'If you have any questions about this invoice, please contact ' . $safeCompany . ' directly.';
 
@@ -808,9 +755,7 @@ function send_invoice_reminder(array $params): array
         $fromEmail = env('INVOICE_DEFAULT_FROM_EMAIL', 'noreply@argorobots.com');
         $fromName = env('INVOICE_DEFAULT_FROM_NAME', 'Argo Books');
 
-        // Point replies at the merchant when we have a verified address for
-        // them. A chase email that bounces replies into a noreply mailbox is
-        // worse than not sending it.
+        // Point replies at the merchant when we have a verified address for them. A chase email that bounces replies into a noreply mailbox is worse than not sending it.
         $replyTo = ($replyToEmail !== '' && filter_var($replyToEmail, FILTER_VALIDATE_EMAIL))
             ? $replyToEmail
             : $fromEmail;
@@ -966,9 +911,7 @@ function send_owner_payment_notification(array $params): array
         return ['success' => false, 'message' => 'No valid owner email'];
     }
 
-    // Required here rather than at file scope: every portal page pulls in this
-    // helper, and email_sender.php loads email.css plus the whole styled-email
-    // machinery that only this one function needs.
+    // Required here rather than at file scope, because every portal page pulls in this helper and only this function needs the styled-email machinery.
     require_once __DIR__ . '/../../email_sender.php';
 
     $invoiceId = (string)($params['invoiceId'] ?? '');
@@ -987,9 +930,7 @@ function send_owner_payment_notification(array $params): array
     $methodLabel = $methodLabels[$paymentMethod] ?? ucfirst($paymentMethod);
 
     $currencySymbol = argo_currency_display_symbol($currency);
-    // The invoice is credited with the payment minus the processing fee, the
-    // same split record_portal_payment applies to balance_due. Reporting the
-    // gross here would not match what the owner sees against the invoice.
+    // The invoice is credited with the payment minus the processing fee, the same split record_portal_payment applies to balance_due.
     $invoiceAmount = max(0, $amount - $processingFee);
 
     $amountSafe = htmlspecialchars($currencySymbol . number_format($invoiceAmount, 2) . ' ' . $currency);

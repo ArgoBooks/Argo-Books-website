@@ -20,12 +20,7 @@ $docsPath = isset($pageCategory) ? '../../' : '';
 
 $fullTitle = $pageTitle . ' - Argo Books Documentation';
 
-// Sub-pages are served at /documentation/pages/<category>/<slug>.php. This used
-// to emit https://argorobots.com/documentation/ for every one of them, which
-// told search engines the index was the canonical version of all 36 pages and
-// kept them out of the results individually. documentation/index.php sets its
-// own canonical and does not include this file, so the fallback below is only a
-// safety net for a page that forgets to set the two variables.
+// Each sub-page points at itself, so search engines are not told the index is the canonical page for all of them.
 $canonicalUrl = 'https://argorobots.com/documentation/';
 if (isset($pageCategory) && isset($currentPage)) {
     $canonicalUrl = 'https://argorobots.com/documentation/pages/'

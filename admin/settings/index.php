@@ -135,9 +135,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Current notification prefs for rendering. Read straight from the DB so a save
-// in this same request is reflected. On a failed save, fall back to the posted
-// values so the admin doesn't lose their edits.
+// Current notification prefs for rendering. Read straight from the DB so a save in this same request is reflected.
 $prefs = $pdo->query('SELECT * FROM admin_notification_prefs WHERE id = 1')->fetch();
 if (!$prefs) {
     $prefs = [
@@ -173,9 +171,7 @@ $notif_groups = [
     ],
 ];
 
-// Alerts that are always sent. Listed so they are visible rather than hidden in a footnote,
-// but with no toggle, because turning any of them off would mean finding out about a problem
-// from a customer instead of from the system.
+// Listed with no toggle, because turning one off would mean hearing about a problem from a customer instead.
 $notif_always = [
     'Safety' => [
         ['Refund blocked', 'When the refund safety check stops a refund from going through.'],

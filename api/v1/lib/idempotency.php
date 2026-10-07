@@ -68,9 +68,7 @@ function api_with_idempotency(int $accountId, string $rawBody, callable $handler
     $bodyHash = hash('sha256', $rawBody);
 
     $claim = $pdo->prepare(
-        // Keyed on (account_id, idempotency_key). An account is one Argo Books
-        // company, which is the only scope this API has, so nothing narrower is
-        // needed here. api_rate_limits is keyed the same way.
+        // Keyed on (account_id, idempotency_key). An account is one Argo Books company, which is the only scope this API has, so nothing narrower is needed here.
         "INSERT INTO api_idempotency_cache
              (account_id, idempotency_key, body_hash, response_status, response_body)
          VALUES (?, ?, ?, 0, '')
@@ -93,9 +91,7 @@ function api_with_idempotency(int $accountId, string $rawBody, callable $handler
     $row = $stmt->fetch();
 
     if (!$row) {
-        // The key is past its 24 hours and the cleanup has not reached it yet, or the
-        // claim was released between our INSERT and this SELECT. An expired row has to
-        // go before restarting, or the INSERT finds it again and this never ends.
+        // The key is past its 24 hours or the claim was released in between, so the stale row goes before restarting or the INSERT finds it again.
         $pdo->prepare(
             'DELETE FROM api_idempotency_cache
               WHERE account_id = ? AND idempotency_key = ?
@@ -156,12 +152,7 @@ function api_run_claimed_handler(int $accountId, string $key, callable $handler)
     try {
         $handler();
     } catch (ApiResponseSent $sent) {
-        // Only reachable under API_TESTING, where api_json throws instead of
-        // exiting. That is the handler FINISHING, not failing, so the response
-        // has to be persisted exactly as the shutdown hook would have done in
-        // production. Treating it as a crash would release the claim and let a
-        // replay run the handler a second time, which is the one thing this
-        // whole mechanism exists to prevent.
+        // Only reachable under API_TESTING, where api_json throws instead of exiting.
         $state->persist = false;
         while (ob_get_level() > $level) {
             ob_end_clean();

@@ -48,9 +48,7 @@ if (!$license && !$deviceHash) {
     exit;
 }
 
-// Rate limit. Premium users get a higher cap; free users get a tighter one to
-// discourage abuse without penalising real small-business usage. Both windows
-// are 1 hour.
+// Rate limit. Premium users get a higher cap; free users get a tighter one to discourage abuse without penalising real small-business usage. Both windows are 1 hour.
 if ($license) {
     $rateLimitName = 'purchase_order_email';
     $rateLimitKey = 'po_email_' . ($license['license_key_hash'] ?? get_client_ip());
@@ -72,9 +70,7 @@ if (rate_limit_hit($rateLimitName, $rateLimitKey, 'purchase_order_email')) {
     exit;
 }
 
-// The X-Device-Id of a free request is self-asserted, so rotating the header would get past
-// the limit above. An IP cannot be rotated the same way, and mail sent from this domain by a
-// stranger costs the sending reputation invoice delivery depends on.
+// The X-Device-Id of a free request is self-asserted, so rotating the header would get past the limit above.
 if (!$license) {
     $clientIp = get_client_ip();
     if (rate_limit_hit('purchase_order_email_ip', $clientIp)) {

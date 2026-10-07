@@ -187,9 +187,7 @@ try {
         exit;
     }
 
-    // Sniff the MIME type when fileinfo is available. If the extension is
-    // missing, finfo_open() returns false; skip the sniff in that case and rely
-    // on the JSON content validation below, rather than emit warnings.
+    // Sniff the MIME type when fileinfo is available.
     $finfo = finfo_open(FILEINFO_MIME_TYPE);
     if ($finfo !== false) {
         $mime = finfo_file($finfo, $uploaded['tmp_name']);

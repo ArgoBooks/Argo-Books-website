@@ -30,9 +30,7 @@ if ($raw === false || strlen($raw) > 2 * 1024 * 1024) {
 
 $ip = get_client_ip();
 $isLocal = in_array($_SERVER['REMOTE_ADDR'] ?? '', ['127.0.0.1', '::1'], true);
-// check_and_record rather than a bare check: nothing else writes to this
-// bucket, so a check on its own would read a counter that is permanently 0
-// and the limit could never trip.
+// check_and_record rather than a bare check: nothing else writes to this bucket, so a check on its own would read a counter that is permanently 0 and the limit could never trip.
 if (!$isLocal && rate_limit_hit('web_receipt_export', $ip)) {
     header('Retry-After: ' . rate_limit_window('web_receipt_export'));
     rx_fail(429, 'Too many exports. Please try again in ' . rate_limit_wait_phrase('web_receipt_export') . '.');

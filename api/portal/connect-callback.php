@@ -110,10 +110,7 @@ function handle_stripe_callback(PDO $db, int $companyId, bool $is_production, bo
         : ($_ENV['STRIPE_SANDBOX_SECRET_KEY'] ?? '');
     \Stripe\Stripe::setApiKey($secretKey);
 
-    // Look up the stored Stripe account ID for this company. The account is
-    // held in stripe_pending_account_id until onboarding completes; only then
-    // is it promoted to stripe_account_id (which status/checkout treat as
-    // "connected").
+    // Look up the stored Stripe account ID for this company.
     $stmt = $db->prepare('SELECT stripe_account_id, stripe_pending_account_id FROM portal_companies WHERE id = ?');
     $stmt->execute([$companyId]);
     $row = $stmt->fetch();

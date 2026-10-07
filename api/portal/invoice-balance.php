@@ -69,30 +69,7 @@ $updated = 0;
 $notFound = 0;
 $rejected = 0;
 
-// Prepared once, reused per item.
-//
-// SET-clause order is load-bearing here, the same trap documented in
-// record_portal_payment() (portal-helper.php, "Single atomic UPDATE"). MySQL
-// evaluates SET assignments left to right and later clauses see the NEW value:
-//
-//   1. `status = CASE ...` MUST come BEFORE `balance_due = ...`, so the CASE
-//      compares against the OLD balance. Reverse them and a partial payment
-//      evaluates against the already-reduced balance and marks the invoice
-//      'paid' when it is only 'partial'.
-//   2. `external_paid` and `total_amount` MUST be assigned AFTER every
-//      expression that reads them, so the delta is computed from the OLD
-//      stored values. Reverse those and the delta collapses to zero and the
-//      balance never moves.
-//
-// The delta is relative, never absolute:
-//     new_balance = old_balance - ((externalPaid_new - externalPaid_old)
-//                                - (total_new - total_old))
-// More paid outside the portal lowers the balance; a raised total raises it.
-// Because both this and record_portal_payment() only ever ADJUST the stored
-// value rather than overwrite it, the two are commutative and each is
-// serialized by the InnoDB row lock, so they can interleave in either order
-// and still land on the same number. It also means a repeat push with
-// unchanged numbers is a zero delta, which is what makes retries safe.
+// MySQL evaluates SET left to right, so status is computed before balance_due and the CASE reads the pre-payment balance.
 $updateStmt = $pdo->prepare(
     'UPDATE portal_invoices
      SET status = CASE
@@ -132,14 +109,7 @@ $lookupStmt = $pdo->prepare(
     'SELECT id, currency FROM portal_invoices WHERE company_id = ? AND invoice_id = ? LIMIT 1'
 );
 
-// The stored invoice HTML is a snapshot taken when Argo Books published the
-// invoice, so once anything is paid it keeps showing the original totals with
-// no Amount Paid row. Argo Books re-renders and sends it whenever that would
-// be wrong.
-//
-// JSON_SET patches only this one key: invoice_data also holds lineItems,
-// addresses and notes, which the non-custom portal template renders from, and
-// replacing the whole document would drop them.
+// The stored invoice HTML is a snapshot taken when Argo Books published the invoice, so once anything is paid it keeps showing the original totals with no Amount Paid row.
 $htmlStmt = $pdo->prepare(
     'UPDATE portal_invoices
      SET invoice_data = JSON_SET(COALESCE(invoice_data, JSON_OBJECT()), "$.customInvoiceHtml", ?),
@@ -171,9 +141,7 @@ foreach ($items as $item) {
         continue;
     }
 
-    // Existence and currency are validated with a read, but the balance maths
-    // below is still a relative delta, so a payment landing between this
-    // SELECT and the UPDATE cannot corrupt the result.
+    // The balance maths below is a relative delta, so a payment landing between this SELECT and the UPDATE cannot spoil it.
     $lookupStmt->execute([$companyId, $invoiceId]);
     $existing = $lookupStmt->fetch();
 
@@ -183,9 +151,7 @@ foreach ($items as $item) {
         continue;
     }
 
-    // A currency change after publish would apply a delta denominated in one
-    // currency against a balance denominated in another. Refuse rather than
-    // silently corrupt the balance.
+    // A currency change after publish would apply a delta denominated in one currency against a balance denominated in another. Refuse rather than silently corrupt the balance.
     $claimedCurrency = isset($item['currency']) && is_string($item['currency'])
         ? strtoupper(preg_replace('/[^A-Za-z]/', '', $item['currency']))
         : '';

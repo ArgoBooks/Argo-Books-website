@@ -41,10 +41,7 @@ if (isset($_SESSION['awaiting_2fa']) && $_SESSION['awaiting_2fa'] === true) {
     $show_2fa_form = true;
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['verify_code'])) {
-        // Rate limit 2FA attempts (max 5 per 15 minutes, per IP). Without this,
-        // an attacker holding valid credentials could brute-force the 6-digit
-        // code at full speed. Atomic check+record so concurrent requests can't
-        // slip past the cap.
+        // Rate limit 2FA attempts (max 5 per 15 minutes, per IP). Without this, an attacker holding valid credentials could brute-force the 6-digit code at full speed.
         if (rate_limit_hit('admin_2fa', $clientIp)) {
             $error = 'Too many verification attempts. Please wait ' . rate_limit_wait_phrase('admin_2fa') . ' before trying again.';
         } else {
@@ -67,9 +64,7 @@ if (isset($_SESSION['awaiting_2fa']) && $_SESSION['awaiting_2fa'] === true) {
                     rate_limit_clear('admin_2fa', $clientIp);
                     rate_limit_clear('admin_login', $clientIp);
 
-                    // If the user ticked "Trust this device for 30 days",
-                    // issue a token so subsequent logins from this browser
-                    // can skip the TOTP step (password is still required).
+                    // A ticked "trust this device" box issues a token so later logins from this browser skip TOTP, with the password still required.
                     if (!empty($_POST['trust_device'])) {
                         $u = get_user_by_username($username);
                         if ($u) {
@@ -117,19 +112,14 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
             $actual_username = $user['username']; // Get actual username with correct case
 
             if (is_2fa_enabled($actual_username)) {
-                // If the browser has a valid "trust this device" cookie for
-                // this admin, skip the TOTP step. The password was just
-                // verified above; the cookie alone never grants access.
+                // The password was verified above, so a valid trust-this-device cookie skips the TOTP step; the cookie alone never grants access.
                 $trusted_for = verify_trusted_device_cookie($clientIp);
                 if ($trusted_for !== null && strcasecmp($trusted_for, $actual_username) === 0) {
                     session_regenerate_id(true);
                     $_SESSION['admin_logged_in'] = true;
                     $_SESSION['admin_username'] = $actual_username;
 
-                    // Mirror the normal 2FA-success path: a successful login
-                    // (whether by TOTP or trust cookie) resets both buckets so
-                    // prior failed 2FA attempts don't bite the user when their
-                    // trust cookie eventually expires.
+                    // A successful login by either route resets both buckets, so earlier failed 2FA attempts do not bite once the trust cookie expires.
                     rate_limit_clear('admin_2fa', $clientIp);
                     rate_limit_clear('admin_login', $clientIp);
 
@@ -140,9 +130,7 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
                     exit;
                 }
 
-                // 2FA is enabled, show the verification form. Don't clear the
-                // password-attempt counter yet. We only count this as success
-                // once 2FA also passes.
+                // 2FA is enabled, show the verification form. Don't clear the password-attempt counter yet. We only count this as success once 2FA also passes.
                 $_SESSION['awaiting_2fa'] = true;
                 $_SESSION['temp_username'] = $actual_username;
                 $show_2fa_form = true;

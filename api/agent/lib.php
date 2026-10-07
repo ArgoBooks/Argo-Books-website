@@ -439,8 +439,7 @@ function agent_overview(PDO $pdo): array
     ];
 
     // The funnel comes from the functions behind the admin Funnel page, so the agent sees the
-    // figures the owner sees: people, not rows. A raw count of referral_events includes bots
-    // and counts one person several times, and reads several times too high.
+    // figures the owner sees: people, not rows.
     $out = [
         'how_the_funnel_is_counted' => 'Distinct people, with bots left out, exactly as on the admin Funnel page. '
             . 'landing and downloads_page count visitors whose page view was confirmed by the browser. '

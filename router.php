@@ -9,9 +9,8 @@ $path    = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?? '/';
 $decoded = rawurldecode($path);
 $safe    = strpos($decoded, '..') === false;
 
-// --- 1. <FilesMatch> / <Files> deny rules -----------------------------------
-// These are not RewriteRules, so they have to be spelled out. Without them
-// .env, the schema dump and composer manifests are served as plain text.
+// --- 1. <FilesMatch> / <Files> deny rules ---
+// Spelled out because they are not RewriteRules, so .env would otherwise be served as text.
 $blocked = '#/\.env'
          . '|\.(sql|log|key|pem|ppk|p12|pfx|bak|old|orig|save|swp|dist)$'
          . '|^/composer\.(json|lock)$#i';
@@ -107,28 +106,21 @@ foreach (argo_rewrite_rules($docRoot . '/.htaccess') as $rule) {
     $_SERVER['SCRIPT_FILENAME'] = $file;
 
     // PHP sets the working directory to the running script's own directory.
-    // Including from here would leave it at the document root, breaking the
-    // relative paths some pages use (downloads/index.php reads
-    // '../resources/downloads/', for one).
     chdir(dirname($file));
     require $file;
     exit;
 }
 
-// --- 3. mod_dir DirectorySlash ----------------------------------------------
-// Apache 301s /downloads to /downloads/. The built-in server serves the
-// directory's index.php at the unslashed URL instead, leaving the browser to
-// resolve href="style.css" as /style.css, so page-level stylesheets 404 while
-// the ../resources/ ones still resolve. Looks like a broken stylesheet.
+// --- 3. mod_dir DirectorySlash ---
+// Apache redirects /downloads to /downloads/; the built-in server serves the index unslashed.
 if ($path !== '/' && substr($path, -1) !== '/' && $safe && is_dir($docRoot . $decoded)) {
     $qs = $_SERVER['QUERY_STRING'] ?? '';
     header('Location: ' . $path . '/' . ($qs !== '' ? '?' . $qs : ''), true, 301);
     exit;
 }
 
-// --- 4. 404 -----------------------------------------------------------------
-// When nothing matches, the built-in server walks up the tree for an index.php
-// and serves it, so a typo'd URL renders the homepage with a 200.
+// --- 4. 404 ---
+// The built-in server walks up for an index.php, so a typo would render the homepage with a 200.
 if ($path !== '/' && $safe) {
     $target = $docRoot . $decoded;
     $dir    = rtrim($target, '/');

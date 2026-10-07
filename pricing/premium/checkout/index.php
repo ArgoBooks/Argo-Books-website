@@ -76,17 +76,12 @@
         ? $_GET['billing']
         : 'monthly';
 
-    // Payment method now gets chosen here rather than on /pricing/premium/.
-    // main.js swaps between providers in place, so the page is never reloaded
-    // for a method change and each provider's SDK initialises at most once.
+    // The method is chosen here, and main.js swaps providers in place so the page never reloads for a change of method.
     $method = isset($_GET['method']) && in_array($_GET['method'], ['stripe', 'paypal', 'square'], true)
         ? $_GET['method']
         : '';
 
-    // The cycle-switch flow hides the method picker (see below), so a missing
-    // or malformed ?method= there would leave the page with nothing to act on.
-    // Only PayPal subscribers ever reach checkout for a cycle switch, so this
-    // has to resolve before the Stripe default below.
+    // The cycle-switch flow hides the method picker (see below), so a missing or malformed ?method= there would leave the page with nothing to act on.
     if ($is_cycle_switch && $method === '') {
         $method = 'paypal';
     }
@@ -138,11 +133,7 @@
     $renewalFee = calculate_processing_fee($renewalBase);
     $renewalTotal = $renewalBase + $renewalFee;
 
-    // Both cycles' figures, computed here and handed to the page so the cycle
-    // switcher can update the summary without a reload. Every amount is
-    // server-computed: the browser only swaps pre-rendered strings, it never
-    // does money math, and process-subscription.php recomputes the charge from
-    // the posted billing cycle regardless ("never trust client amount").
+    // Both cycles are computed here and handed to the page, so the switcher updates the summary without a reload.
     $cycleFigures = [];
     foreach (['monthly', 'yearly'] as $cyc) {
         $cycBase  = ($cyc === 'yearly') ? $yearlyPrice : $monthlyPrice;
@@ -161,12 +152,7 @@
         ];
     }
 
-    // Cycle-switch refund disclosure banner: PayPal only. Stripe and
-    // Square cycle switches are handled entirely by switch-billing-cycle-
-    // ajax.php and never reach this checkout page; the banner below is
-    // therefore correctly suppressed for non-PayPal users because
-    // $cycleSwitchOldCycle stays empty and the render guard at line ~172
-    // checks it.
+    // PayPal only: a Stripe or Square cycle switch goes through switch-billing-cycle-ajax.php and never reaches this page.
     $cycleSwitchRefundEstimate = 0.0;
     $cycleSwitchOldCycle = '';
     if ($is_cycle_switch && $existing_subscription
@@ -269,10 +255,7 @@
             <?php endif; ?>
 
             <?php
-            // Cycle switcher. Hidden for the payment-method-change and
-            // cycle-switch flows, where the cycle is already settled upstream
-            // and letting it change here would desync the order summary from
-            // what those flows are about to charge.
+            // Hidden for the method-change and cycle-switch flows, where the cycle is settled upstream and changing it here would desync.
             if (!$is_changing_method && !$is_cycle_switch): ?>
                 <!-- Real hrefs so this works without JS; main.js intercepts and
                      swaps the figures in place, same as the method picker. -->
@@ -310,11 +293,7 @@
             </div>
 
             <?php
-            // Hidden for the cycle-switch flow. switch-billing-cycle.php only
-            // routes PayPal subscribers here (Stripe and Square switch via
-            // switch-billing-cycle-ajax.php), and the proration disclosure above
-            // is written for PayPal. Letting someone pick Stripe here would open
-            // a second subscription alongside the PayPal one they still hold.
+            // Hidden for the cycle-switch flow, which routes only PayPal subscribers here and shows the proration disclosure above.
             if (!$is_cycle_switch): ?>
             <div class="method-picker">
                 <h3>Payment method</h3>

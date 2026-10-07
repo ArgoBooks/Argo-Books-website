@@ -38,10 +38,7 @@ if (!in_array($req['state'], ['pending_code','code_verified','cooling_off'], tru
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // State-guarded UPDATE: the cooling-off promoter cron can transition this
-    // row to 'processing' or 'completed' between the SELECT above and this
-    // UPDATE. Without the state predicate, this clobbers a finalized refund
-    // back to 'cancelled' and the books diverge from the provider.
+    // State-guarded, because the cooling-off cron can move this row on between the SELECT above and this UPDATE.
     $upd = $pdo->prepare("
         UPDATE refund_requests
         SET state='cancelled', state_reason='cancelled_by_email_link', cancel_token = NULL, updated_at = NOW()

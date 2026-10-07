@@ -67,15 +67,10 @@ if (!hash_equals($row['code_hash'], $expected)) {
 }
 
 // The pending address from the verification row becomes the owner_email.
-// Companies registered via the legacy paths already have owner_email set;
-// only write it when it's currently empty (set-initial-email flow).
 $pendingEmail = (string)($row['email'] ?? '');
 $writeOwnerEmail = empty($company['owner_email']) && $pendingEmail !== '';
 
-// Another company may hold this address, usually one whose file was deleted locally:
-// nothing tells the server that happened, so the record outlives it. Entering the code
-// proves control of the address, so it moves here and is cleared there rather than being
-// refused. The old record is kept, only unlinked, so its invoices and payments survive.
+// Another company may hold this address, usually one whose file was deleted locally: nothing tells the server that happened, so the record outlives it.
 $previousHolder = null;
 if ($writeOwnerEmail) {
     $stmt = $pdo->prepare(

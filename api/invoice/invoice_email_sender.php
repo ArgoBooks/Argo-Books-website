@@ -45,10 +45,7 @@ class InvoiceEmailSender
             $textBody = $data['text'] ?? strip_tags(str_replace(['<br>', '<br/>', '<br />', '</p>'], "\n", $htmlBody));
             [$htmlBody, $textBody] = $this->withLoopFooter($htmlBody, $textBody);
 
-            // Strip CR/LF + control bytes from every value that ends up in an
-            // email header. The desktop client supplies subject / to / from /
-            // replyTo / bcc and a malicious payload could otherwise inject
-            // Bcc: or other headers via the mail() fallback path.
+            // Strips CR/LF and control bytes from every value that reaches an email header, because the client supplies them and could inject Bcc through the mail() fallback.
             $headerSafe = static fn($v) => preg_replace('/[\r\n\x00-\x1f]+/', ' ', (string) $v);
             $fromEmail = $headerSafe($fromEmail);
             $fromName = $headerSafe($fromName);

@@ -94,9 +94,7 @@ if (strlen($content) > IMPORT_DIAGNOSTIC_MAX_BYTES) {
     send_error_response(413, 'File is too large.', 'PAYLOAD_TOO_LARGE');
 }
 
-// Taken from the authenticated header, never from the body. It is the same
-// sha256(X-Device-Id) that api/track-app-event.php files an install under, so a
-// file here joins to the device on the user activity tab.
+// Taken from the authenticated header, never from the body.
 $rawDeviceId = (string) ($_SERVER['HTTP_X_DEVICE_ID'] ?? '');
 $deviceHash = $rawDeviceId !== '' ? hash('sha256', $rawDeviceId) : '';
 

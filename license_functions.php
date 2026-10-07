@@ -11,12 +11,7 @@ require_once __DIR__ . '/track_referral_event.php';
 function generate_license_key($type = 'premium')
 {
     // Alphabet excludes ambiguous characters (no 0 1 I L O U), matching
-    // generate_pairing_short_code() in api/sync/sync-helper.php. Keys get read off
-    // a screen and retyped by hand, most of all the batches sold through resellers,
-    // and a key rejected over an O that was really a 0 is a support ticket at best
-    // and a chargeback at worst. Keys issued before this change still contain the
-    // full set and still validate: lookup is an exact match on the stored string,
-    // so nothing here is applied on the way in.
+    // generate_pairing_short_code() in api/sync/sync-helper.php.
     $chars = '23456789ABCDEFGHJKMNPQRSTVWXYZ';
 
     $prefix = 'PREM';
@@ -202,12 +197,7 @@ function redeem_premium_key($key, $device_id) {
             current_environment()
         ]);
 
-        // Mark the key as redeemed, but only if it is still unredeemed. The
-        // "AND redeemed_at IS NULL" guard makes this claim atomic: if two
-        // requests race to redeem the same key, the database lets exactly one
-        // UPDATE match. The loser sees rowCount() === 0, undoes its speculative
-        // subscription insert, and falls through to the re-redemption path (so
-        // one key can never mint two active subscriptions).
+        // The redeemed_at IS NULL guard makes the claim atomic, so when two requests race for one key exactly one UPDATE matches.
         $stmt = $pdo->prepare("
             UPDATE premium_subscription_keys
             SET redeemed_at = NOW(),
@@ -226,9 +216,7 @@ function redeem_premium_key($key, $device_id) {
 
         $pdo->commit();
 
-        // Fire premium_signup for free-key redemption. No premium_paid because
-        // no money changed hands. The desktop app's HTTP client has a non-browser
-        // UA so allow_bot=true bypasses the standard filter.
+        // Fire premium_signup for free-key redemption. No premium_paid because no money changed hands.
         try {
             $visitorId   = $_COOKIE[ARGO_VISITOR_COOKIE] ?? null;
             $sourceCode  = $_SESSION['referral_source']   ?? null;
@@ -404,9 +392,7 @@ function _recreate_subscription_for_key($key, $device_id) {
     global $pdo;
 
     try {
-        // Fetch the key's metadata. redeemed_at/created_at anchor the recreated
-        // term to the ORIGINAL start, so a customer whose subscription row went
-        // missing doesn't get an extra fresh term starting today.
+        // redeemed_at and created_at anchor a recreated term to the original start, so a customer whose subscription row went missing gets no extra term.
         $stmt = $pdo->prepare("
             SELECT duration_months, redeemed_at, created_at
             FROM premium_subscription_keys

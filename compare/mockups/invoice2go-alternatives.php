@@ -13,9 +13,7 @@
                                 <clipPath id="dmClipinvoice2go"><rect x="1" y="1" width="638" height="458" rx="18"/></clipPath>
                             </defs>
                             <?php
-                                // Bars are scaled against a 50 top of scale. Invoice2Go
-                                // publishes in USD; competitors.json holds
-                                // the CAD conversion, so these bars and labels are all CAD.
+                                // Bars sit against a 50 top of scale. Invoice2Go publishes in USD and competitors.json holds the CAD figure, so these are all CAD.
                                 $barX0  = 205;
                                 $barMax = 340;
                                 $scaleTop = 50;

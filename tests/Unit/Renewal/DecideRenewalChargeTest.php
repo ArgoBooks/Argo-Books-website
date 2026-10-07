@@ -12,9 +12,7 @@ final class DecideRenewalChargeTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        // Mirrors .env.testing values so the test is self-contained
-        // even if .env.testing later drifts. The processing-fee values are
-        // also set in .env.testing so calculate_processing_fee() agrees.
+        // Mirrors .env.testing values so the test is self-contained even if .env.testing later drifts.
         $this->config = [
             'premium_monthly_price' => 10.00,
             'premium_yearly_price'  => 100.00,
@@ -33,9 +31,7 @@ final class DecideRenewalChargeTest extends TestCase
 
     public function test_partial_credit_charges_difference_plus_fee(): void
     {
-        // Credit $3 against monthly $10: charges (10 - 3) + fee on the
-        // remainder. Computing the expected total via calculate_processing_fee
-        // keeps this robust to fee-config changes in .env.testing.
+        // Credit $3 against monthly $10: charges (10 - 3) + fee on the remainder.
         $decision = decide_renewal_charge(3.00, 'monthly', $this->config);
 
         $this->assertFalse($decision['useCredit']);

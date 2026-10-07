@@ -110,9 +110,7 @@ function funnel_render_details_modal(
     if (empty($rows)) {
         return '';
     }
-    // Only breakdowns that carry first-touch attribution (referrer, entry page)
-    // have the free/paid counts. Detecting them rather than taking another
-    // parameter keeps the country/region/city call sites unchanged.
+    // Only breakdowns that carry first-touch attribution (referrer, entry page) have the free/paid counts.
     $show_users = false;
     foreach ($rows as $r) {
         if (!empty($r['free']) || !empty($r['paid'])) {
@@ -466,12 +464,7 @@ function get_app_activation_stats(?string $period_start = null): array
 {
     require_once __DIR__ . '/../../founder_identity.php'; // is_founder_auth_id()
 
-    // "Activation" = the user did a real bookkeeping action (got value from the
-    // app), as opposed to setup/scaffolding (creating a customer, supplier,
-    // product, or rentable item), cosmetic changes (theme/language), or backups.
-    // DataImported covers both bank-statement and spreadsheet imports: the app
-    // tags which kind in a field it doesn't send to the server, so they can't be
-    // told apart here, but either one counts as a real action.
+    // Activation means a real bookkeeping action, as against setting up records, changing the theme or looking around.
     $activationFeatures = [
         'InvoiceCreated', 'ExpenseCreated', 'RevenueCreated', 'PaymentRecorded',
         'ReceiptScanned', 'DataImported', 'ReportGenerated',
@@ -748,15 +741,11 @@ include __DIR__ . '/../admin_header.php';
         $funnel_counts = get_funnel_stage_counts($funnel_period_start_dt, $funnel_source_filter ?: null);
         $per_source = get_funnel_per_source($funnel_period_start_dt, current_environment());
 
-        // Source-survey breakdown: unattributed installs only (visitor_id IS NULL),
-        // so it doesn't matter whether a specific source pill is selected. It
-        // always reflects "users we couldn't attribute by token".
+        // Source-survey breakdown: unattributed installs only (visitor_id IS NULL), so it doesn't matter whether a specific source pill is selected.
         $survey_breakdown = get_unattributed_survey_breakdown($funnel_period_start_dt, current_environment());
         $survey_goals = get_survey_goal_breakdown($funnel_period_start_dt, current_environment());
 
-        // Plausible-style breakdowns for the channel donut, the referrer /
-        // campaign bar lists, and the map / country / region / city
-        // lists. Each row carries visits + attributed revenue.
+        // Plausible-style breakdowns for the channel donut, the referrer / campaign bar lists, and the map / country / region / city lists. Each row carries visits + attributed revenue.
         $analytics = build_funnel_analytics($funnel_period_start_dt, $funnel_source_filter ?: null, $referral_links);
 
         $total_spend = 0.0;
@@ -972,16 +961,10 @@ include __DIR__ . '/../admin_header.php';
         $bd_region   = funnel_render_bar_list($analytics['regions'],   ['revenue' => false, 'limit' => 9, 'empty' => 'No region data yet. Collecting going forward.']);
         $bd_city     = funnel_render_bar_list($analytics['cities'],    ['revenue' => false, 'limit' => 9, 'empty' => 'No city data yet. Collecting going forward.']);
 
-        // Page breakdowns (popular / entry / exit) come from the site-wide
-        // page_view stream, not the referral funnel, so they ignore the source
-        // pill and only honor the period window.
+        // Page breakdowns (popular / entry / exit) come from the site-wide page_view stream, not the referral funnel, so they ignore the source pill and only honor the period window.
         $pages       = funnel_page_breakdowns($funnel_period_start_dt);
 
         // Entry pages come from the referral funnel, not the page_view stream.
-        // track_page_view() stores a page *name* ("invgen_tool"), so those rows
-        // cannot be joined to the funnel and would show zero installs against
-        // every page. Sourcing all three columns from referral_events keeps
-        // visits, installs and payments on one definition of a visitor.
         $entry_rows = $analytics['entry_pages'] ?? [];
 
         $bd_popular  = funnel_render_bar_list($pages['popular'], ['revenue' => false, 'limit' => 9, 'empty' => 'No page views in this period yet.']);
@@ -1123,9 +1106,7 @@ include __DIR__ . '/../admin_header.php';
             $survey_unanswered = (int)$survey_breakdown['unanswered'];
             $survey_total = array_sum($survey_by_answer) + $survey_unanswered;
             $survey_show = $survey_total > 0;
-            // The choices come from the same file the app is served, so a source added
-            // there is drawn here too. An answer whose choice has since been removed
-            // keeps its key as its label rather than dropping out of the chart.
+            // The choices come from the same file the app is served, so a source added there is drawn here too.
             require_once __DIR__ . '/../../config/survey_options.php';
             $survey_option_labels = survey_choice_labels('options');
             foreach (array_keys($survey_by_answer) as $answered) {
@@ -1133,10 +1114,7 @@ include __DIR__ . '/../admin_header.php';
             }
             $survey_option_order = array_keys($survey_option_labels);
 
-            // Build chart arrays (skip zero-count buckets so the doughnut isn't
-            // cluttered with empty legend entries). Unanswered is included as a
-            // gray slice at the end so the totals still add up to the unattributed
-            // install volume.
+            // Build chart arrays (skip zero-count buckets so the doughnut isn't cluttered with empty legend entries).
             $survey_chart_rows = [];
             foreach ($survey_option_order as $opt) {
                 $c = (int)($survey_by_answer[$opt] ?? 0);
@@ -1231,33 +1209,13 @@ include __DIR__ . '/../admin_header.php';
         <?php endforeach; ?>
 
         <?php
-            // Users by source. get_funnel_per_source() has always returned first_runs
-            // alongside everything else, but nothing rendered it: the rows were used only
-            // to total spend and revenue. Answering "where did the people who actually ran
-            // the app come from" meant clicking each source pill in turn and writing the
-            // numbers down.
-            //
-            // Sorted by installs, not by landings as the query is, because a source with
-            // 800 visitors and no installs tells you less than one with four visitors and
-            // three installs.
-            // A source nobody has ever arrived through is a dead link, not a result. 41 of
-            // 168 are in that state, and they pad the table and the export without ever
-            // saying anything. Dropped outright rather than left to the toggle, which is
-            // about sources that brought visitors but no users: a different question.
-            //
-            // The install and paying guards are belt and braces. Attribution should not be
-            // able to record either without a landing, but if it ever did, that row would
-            // be worth seeing rather than silently discarded.
+            // Users by source, from the first_runs the funnel query already returns, which answers where the people came from.
             $install_rows = array_values(array_filter($per_source, static function ($r) {
                 return (int)$r['landings'] > 0
                     || (int)$r['first_runs'] > 0
                     || (int)$r['paying'] > 0;
             }));
             // Columns read left to right as the funnel runs, landings through to paying.
-            // The sort deliberately does not follow that: rows are ordered by the far end,
-            // paying then installs, so the sources that produced someone sit at the top
-            // rather than the ones that merely produced traffic. Paying is all zeroes today,
-            // in which case this falls through to installs and nothing looks different.
             usort($install_rows, static function ($a, $b) {
                 return ((int)$b['paying'] <=> (int)$a['paying'])
                     ?: ((int)$b['first_runs'] <=> (int)$a['first_runs'])
@@ -1272,9 +1230,7 @@ include __DIR__ . '/../admin_header.php';
                     $sources_with_installs++;
                     $attributed_installs += (int)$r['first_runs'];
                 }
-                // Every source, including the ones the on-screen toggle hides. A CSV is
-                // for slicing elsewhere, and an export that silently mirrors a checkbox
-                // is the kind of thing you only notice after trusting a total.
+                // Every source, including the ones the on-screen toggle hides.
                 $install_export[] = [
                     referral_display_name($r['category'], $r['name'], $r['source_code']),
                     (string)$r['source_code'],
@@ -1329,9 +1285,7 @@ include __DIR__ . '/../admin_header.php';
                             <?php foreach ($install_rows as $row): ?>
                                 <?php
                                     $runs = (int)$row['first_runs'];
-                                    // Hidden only when a source produced neither. A payment
-                                    // without an attributed install is unlikely but possible,
-                                    // and hiding that row would bury the best thing on the page.
+                                    // Hidden only when a source produced neither, since a payment with no install is unlikely but possible.
                                     $no_users = $runs === 0 && (int)$row['paying'] === 0;
                                 ?>
                                 <tr<?php echo $no_users ? ' data-no-installs="1"' : ''; ?>>

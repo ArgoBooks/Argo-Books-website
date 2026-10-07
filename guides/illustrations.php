@@ -66,9 +66,7 @@ function _article_illustration_definitions(): array
 SVG,
         ],
 
-        // Forecast: solid past line continuing as a dotted future projection,
-        // inside a widening confidence band. The signature visual for the
-        // predictive-analytics / forecasting cluster.
+        // Forecast: solid past line continuing as a dotted future projection, inside a widening confidence band. The signature visual for the predictive-analytics / forecasting cluster.
         'forecast' => [
             'kind' => 'spot',
             'svg' => <<<'SVG'

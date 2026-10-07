@@ -31,7 +31,7 @@ if ($deviceId) {
     $rateLimitId = 'ip_' . substr(hash('sha256', get_client_ip()), 0, 16);
 }
 // Shares the 'rates_' bucket with the batch endpoint; kept generous so the per-date fallback never
-// trips it during a legitimate import (the app no longer fans out on a rate-limit).
+// trips it during a legitimate import (the app does not fan out on a rate limit).
 if (rate_limit_hit('exchange_rates', $rateLimitId, 'rates')) {
     send_rate_limited_response('exchange_rates');
 }

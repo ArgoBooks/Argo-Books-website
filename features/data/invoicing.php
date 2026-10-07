@@ -4,9 +4,7 @@
 // Content for /features/invoicing/. Layout lives in
 // features/feature-page.php.
 //
-// The plan limits below read from $pricing. They were written as PHP tags
-// inside a quoted string, which never evaluates, so the page used to show
-// the tag itself to visitors and put it in the FAQ structured data.
+// The plan limits below read from $pricing. A PHP tag inside a quoted string never evaluates, so write the value, not the tag.
 
 if (!defined('ARGO_TEMPLATE_RENDER')) {
     http_response_code(404);

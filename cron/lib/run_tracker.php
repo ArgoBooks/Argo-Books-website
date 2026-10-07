@@ -38,11 +38,7 @@ function cron_run_start(PDO $pdo, string $cronName): int
         $stmt->execute([$cronName]);
         $runId = (int) $pdo->lastInsertId();
 
-        // Safety net: if the process dies before cron_run_finish() runs (fatal
-        // Error, timeout, OOM, or an early return that forgets to finish), mark
-        // the orphaned row as errored at shutdown so it doesn't sit as 'running'
-        // forever and show a permanent "Running" pill. No-op once finished, since
-        // the WHERE clause only matches rows still in 'running'.
+        // A shutdown hook marks an orphaned row as errored, because a fatal, a timeout or an early return never reaches cron_run_finish().
         register_shutdown_function(static function () use ($pdo, $runId) {
             try {
                 $stmt = $pdo->prepare(
@@ -117,9 +113,7 @@ function cron_runs_prune(PDO $pdo): void
             return;
         }
 
-        // The derived table is not optional. MySQL refuses a subquery that
-        // selects from the same table an UPDATE or DELETE is modifying, and
-        // wrapping it in a second SELECT is what gets around that.
+        // MySQL refuses a subquery reading the table an UPDATE is changing, so wrapping it in a second SELECT is what gets round that.
         $pdo->prepare(
             'DELETE FROM cron_runs
               WHERE started_at < DATE_SUB(NOW(), INTERVAL ' . CRON_RUN_RETENTION_DAYS . ' DAY)

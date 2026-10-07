@@ -91,9 +91,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!$post) {
             $response['message'] = 'Post not found';
         } else {
-            // Add the comment with the logged-in user_id so the row is
-            // associated correctly from the start (and so the post-author
-            // self-reply guard inside add_comment() works).
+            // Add the comment with the logged-in user_id so the row is associated correctly from the start (and so the post-author self-reply guard inside add_comment() works).
             $comment = add_comment($post_id, $username, $email, $content, $user_id);
 
             if ($comment) {

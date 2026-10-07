@@ -12,9 +12,7 @@ declare(strict_types=1);
  *   *\/5 * * * * /usr/bin/php /home/argorobots/public_html/cron/refund_stale_processing_reconcile.php
  */
 
-// Only allow CLI, or CGI cron (no REMOTE_ADDR means not a web request).
-// Without this, the provider-reconciliation loop and completion-notification
-// path is exposed over HTTP.
+// Only allow CLI, or CGI cron (no REMOTE_ADDR means not a web request). Without this, the provider- reconciliation loop and completion-notification path is exposed over HTTP.
 if (php_sapi_name() !== 'cli' && !empty($_SERVER['REMOTE_ADDR'])) {
     http_response_code(403);
     die('Access denied. This script can only be run via CLI/cron.');
@@ -77,10 +75,7 @@ foreach ($rows as $r) {
                     $reconciled++;
                 }
             } elseif (in_array($found->status, ['failed','canceled'], true)) {
-                // CAS guard: same rationale as the success branch above,
-                // a webhook (or another reconciler) may have flipped this
-                // row to 'completed' between our SELECT and this UPDATE,
-                // and we must not overwrite that with 'failed'.
+                // Only the UPDATE that still finds this row processing wins, so a webhook or another run is not overwritten.
                 $upd = $pdo->prepare("UPDATE refund_requests SET state='failed', state_reason = ?, cancel_token = NULL, updated_at = NOW() WHERE id = ? AND state IN ('processing','cooling_off')");
                 $upd->execute([$found->failure_reason ?? $found->status, $r['id']]);
                 if ($upd->rowCount() > 0) {

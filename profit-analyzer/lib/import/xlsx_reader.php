@@ -109,9 +109,7 @@ function pa_xlsx_shared_strings(string $xml): array
     if (!@$reader->XML($xml)) {
         return [];
     }
-    // NB: do not call $reader->next() here — combined with the while(read()) loop
-    // it double-advances and drops every other <si>. Letting read() traverse into
-    // the (ignored) children is correct and keeps the shared-string index intact.
+    // NB: do not call $reader->next() here — combined with the while(read()) loop it double- advances and drops every other <si>.
     while ($reader->read()) {
         if ($reader->nodeType === XMLReader::ELEMENT && $reader->localName === 'si') {
             $node = $reader->readOuterXml();

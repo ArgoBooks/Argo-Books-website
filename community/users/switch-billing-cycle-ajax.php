@@ -139,11 +139,7 @@ try {
 
             try {
                 if ($confirmedPaymentIntentId) {
-                    // SCA retry path: fetch existing PI, verify ownership and
-                    // status, then read the proration snapshot back from PI
-                    // metadata. Re-computing here would drift from what was
-                    // actually charged if the user took time to complete 3DS
-                    // (cents-level but breaks the audit trail).
+                    // SCA retry path: fetch existing PI, verify ownership and status, then read the proration snapshot back from PI metadata.
                     $paymentIntent = \Stripe\PaymentIntent::retrieve($confirmedPaymentIntentId);
                     $piMeta = $paymentIntent->metadata ?? null;
                     $metaSubId = $piMeta['subscription_id'] ?? null;
@@ -153,11 +149,7 @@ try {
                         echo json_encode(['success' => false, 'error' => 'Payment verification failed']);
                         exit;
                     }
-                    // Reject replay attacks where the PI was created for a
-                    // different cycle direction. Without this, a successful
-                    // monthly->yearly PI could be replayed with new_cycle=monthly
-                    // and the DB write would mix yearly amounts/end_date with
-                    // billing_cycle=monthly (free year exploit).
+                    // Reject replay attacks where the PI was created for a different cycle direction.
                     if ($metaNewCycle !== $newCycle) {
                         echo json_encode([
                             'success' => false,
@@ -182,9 +174,7 @@ try {
                     $proration['existing_credit_consumed'] = (float) ($piMeta['existing_credit_consumed'] ?? $proration['existing_credit_consumed']);
                     $transaction_id = $paymentIntent->id;
                 } else {
-                    // Fresh charge: embed the proration snapshot in PI metadata
-                    // so the SCA retry path can read it back instead of
-                    // recomputing (recomputation drifts as time passes).
+                    // The proration snapshot rides in the payment intent's metadata, so the SCA retry reads it back rather than working it out again later.
                     $params = [
                         'amount'         => intval(round($immediateChargeTotal * 100)),
                         'currency'       => 'cad',
@@ -211,13 +201,7 @@ try {
                         $params['customer'] = $stripeCustomerId;
                     }
 
-                    // Deterministic idempotency key: same subscription + new
-                    // cycle + day always produces the same key, so a double-
-                    // click, two open tabs, or an SCA-abandon-then-retry within
-                    // 24h returns the original PaymentIntent instead of
-                    // creating a second one. Salted with the secret key so
-                    // dev/prod environments can never collide. Mirrors the
-                    // Square idempotency pattern below.
+                    // One key per subscription, cycle and day, so a double click or an abandoned SCA retry within 24 hours returns the original payment.
                     $stripeIdempotencyKey = hash(
                         'sha256',
                         'cycleswitch_' . $subscription_id . '_' . $newCycle . '_'
@@ -376,10 +360,7 @@ try {
         exit;
     }
 
-    // Idempotency: if a cycle_change row already exists for this transaction
-    // id, skip the insert. Triggered by SCA replay (same confirmed_payment_
-    // intent_id submitted twice), Stripe idempotency-key dedup on rapid
-    // double-click, or two-tab race on the same gateway-side payment id.
+    // Idempotency: if a cycle_change row already exists for this transaction id, skip the insert.
     $auditCurrency = $premium_subscription['currency'] ?? 'CAD';
     // Env-scope the dedupe so a cycle_change row from the other environment
     // doesn't suppress the audit row in this one (shared DB).

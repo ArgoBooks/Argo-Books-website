@@ -24,9 +24,7 @@ $dotenv->load();
 
 require_once __DIR__ . '/../db_connect.php';
 
-// db_connect.php sets $pdo = null on PDOException. Without this guard the
-// later $pdo->prepare(...) would throw a PHP Error (not PDOException), bypass
-// our catches, and fall back to an unhandled 500. Tell Resend to retry instead.
+// db_connect.php sets $pdo to null on a PDOException, and a later prepare() would throw an Error the catches below miss.
 if (!($pdo instanceof PDO)) {
     error_log('Resend webhook: $pdo is not available (db_connect failed).');
     http_response_code(500);
@@ -77,12 +75,7 @@ $data      = $event['data'];
 
 $resendEmailId = isset($data['email_id']) ? (string) $data['email_id'] : null;
 
-// Resend always includes email_id on the email.* events we subscribe to.
-// If it's missing, the event is malformed (or a non-email event we don't
-// store). We can't dedupe without it: the (message_id, event_type) UNIQUE
-// key treats NULLs as distinct, so a NULL message_id would let retries
-// accumulate duplicate rows. 200 OK so Resend stops retrying, but skip the
-// insert. Defense-in-depth: should never fire in normal Resend traffic.
+// Without email_id the event cannot be deduplicated, since the unique index is (message_id, event_type), so it is dropped.
 if ($resendEmailId === null || $resendEmailId === '') {
     error_log('Resend webhook: event missing email_id; skipping insert.');
     http_response_code(200);
@@ -111,11 +104,7 @@ $occurredAt = isset($event['created_at']) ? (string) $event['created_at'] : '';
 // what format_iso8601_for_mysql() does when created_at is present.
 $occurredAtSql = $occurredAt !== '' ? format_iso8601_for_mysql($occurredAt) : gmdate('Y-m-d H:i:s');
 
-// Match the event back to an outreach lead by recipient address. We send each
-// lead at most once, so the most recent contacted lead with a matching email
-// is the right target. If no match, this is almost certainly a non-outreach
-// email sent through the same Resend account (premium receipts, etc.), so we
-// 200 OK silently so Resend doesn't retry, but we don't store the event.
+// Each lead is sent at most once, so the most recently contacted lead with that address is the right match.
 $leadId = null;
 if ($primaryTo !== '') {
     try {
@@ -163,9 +152,7 @@ try {
     exit('DB error');
 }
 
-// Side effects for terminal-bad events. Permanent bounce and spam complaint
-// both mean we should never re-send to this address. Temporary bounces (soft)
-// are recorded but don't suppress.
+// Side effects for terminal-bad events. Permanent bounce and spam complaint both mean we should never re-send to this address. Temporary bounces (soft) are recorded but don't suppress.
 $shouldSuppress = false;
 $suppressReason = null;
 if ($shortType === 'bounced') {

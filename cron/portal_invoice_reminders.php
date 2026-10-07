@@ -67,10 +67,8 @@ function reminders_abort(PDO $pdo, string $message): never
     exit(1);
 }
 
-// ─── Lock file to prevent overlapping runs ───
-// A lock that cannot be created is recorded, not swallowed. Exiting silently here
-// is indistinguishable from the cron never firing, and with no shell on the server
-// that is expensive to diagnose.
+// --- Lock file to prevent overlapping runs ---
+// A lock that cannot be created is recorded, since exiting quietly looks like no run.
 $lockDir = __DIR__ . '/logs';
 if (!is_dir($lockDir) && !@mkdir($lockDir, 0755, true) && !is_dir($lockDir)) {
     reminders_abort($pdo, "cannot create $lockDir (check permissions)");
@@ -188,9 +186,7 @@ try {
             cron_metric_incr('stage' . $stage . '_sent');
             $logLine("Sent stage {$stage} for invoice {$inv['invoice_id']} to {$now['customer_email']} ({$daysOverdue}d overdue)");
         } else {
-            // Deliberately not retried. The next stage still fires on schedule,
-            // so a transient SMTP failure costs one touch instead of risking a
-            // duplicate. Retrying is how you end up sending four reminders.
+            // Deliberately not retried. The next stage still fires on schedule, so a transient SMTP failure costs one touch instead of risking a duplicate.
             $pdo->prepare('UPDATE portal_invoice_reminders SET status = "failed", error_message = ? WHERE id = ?')
                 ->execute([substr((string)($result['message'] ?? 'unknown'), 0, 255), $reminderId]);
             $failed++;

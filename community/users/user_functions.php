@@ -503,10 +503,7 @@ namespace {
         $old_avatar_row = $stmt->fetch();
         $old_avatar = $old_avatar_row['avatar'] ?? '';
 
-        // Derive the extension from the server-validated MIME type, never from
-        // the client-supplied filename. This stops an attacker from saving a
-        // valid image under a .php name. (The upload dir also blocks script
-        // execution via .htaccess, so this is defense in depth.)
+        // Derive the extension from the server-validated MIME type, never from the client-supplied filename. This stops an attacker from saving a valid image under a .php name.
         $mime_to_ext = [
             'image/jpeg' => 'jpg',
             'image/png'  => 'png',
@@ -524,9 +521,7 @@ namespace {
             return false;
         }
 
-        // Re-encode the image from its decoded pixels so anything appended after
-        // the real image data (e.g. a GIF/PHP polyglot) is discarded. The raw
-        // uploaded bytes are never written to disk.
+        // Re-encoded from the decoded pixels so anything appended after the image data is dropped, and the uploaded bytes never reach disk.
         $src_bytes = file_get_contents($file['tmp_name']);
         $image = ($src_bytes !== false) ? @imagecreatefromstring($src_bytes) : false;
         if ($image === false) {
@@ -658,9 +653,7 @@ namespace {
             // Store the intended destination for after login
             $_SESSION['redirect_after_login'] = $redirect;
 
-            // Get the web path to login.php based on where this file is located
-            // __DIR__ gives us the filesystem path to community/users/
-            // We need to convert this to a web-accessible URL
+            // __DIR__ gives the filesystem path, which has to become a web path for the redirect to login.
             $doc_root = realpath($_SERVER['DOCUMENT_ROOT']);
             $login_dir = __DIR__;
 

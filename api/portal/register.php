@@ -66,16 +66,7 @@ if (!empty($ownerEmail)) {
     $existing = $stmt->fetch();
 
     if ($existing) {
-        // One portal record per owner email, so a second company on the same address lands
-        // on the first one's record. Previously it kept that record's name and logo, which
-        // meant a new company silently inherited the identity of an older one, including
-        // one deleted locally: the server is never told about a deleted company file.
-        //
-        // A different name means a different company is claiming the record, so it takes
-        // over the name and drops the stale logo reference. A matching name is the same
-        // company re-registering (a company file that lost its key, a restored backup),
-        // so nothing is touched. The logo file itself is left on disk: guessing wrong here
-        // would delete a live company's branding, and an orphan file costs only space.
+        // One portal record per owner email, so a second company on the same address lands on the first one's record.
         $incomingName = trim((string)($data['companyName'] ?? ''));
         $claimingRecord = $incomingName !== '' && $incomingName !== $existing['company_name'];
 
@@ -84,11 +75,7 @@ if (!empty($ownerEmail)) {
         $rotatedHash = hash('sha256', $rotatedKey);
         try {
             if ($claimingRecord) {
-                // email_verified_at goes too. The claiming company has proven nothing about
-                // the address, and rows predating that column were backfilled as verified,
-                // so an inherited stamp can demand a confirmation code from an address
-                // nobody ever confirmed. owner_email stays, since it is how the record was
-                // found and is what the new owner asked for.
+                // email_verified_at goes too, because the claiming company has proven nothing about the address.
                 $rotateStmt = $pdo->prepare(
                     'UPDATE portal_companies
                      SET api_key_hash = ?, company_name = ?, company_logo_url = NULL,
@@ -153,10 +140,7 @@ try {
 
 $companyId = (int)$pdo->lastInsertId();
 
-// Issue an email verification code immediately. The desktop will collect it
-// from the user via the verify-email confirmation modal. Until verified,
-// portal_companies.email_verified_at stays NULL and refund endpoints will
-// return 412. Other endpoints (invoice publishing, sync) remain available.
+// The code goes out at once and the desktop collects it, and refunds stay blocked while email_verified_at is NULL.
 $emailVerificationRequired = false;
 if (!empty($ownerEmail)) {
     try {

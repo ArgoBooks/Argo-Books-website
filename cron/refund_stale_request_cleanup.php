@@ -11,9 +11,7 @@ declare(strict_types=1);
  *   0 * * * * /usr/bin/php /home/argorobots/public_html/cron/refund_stale_request_cleanup.php
  */
 
-// Only allow CLI, or CGI cron (no REMOTE_ADDR means not a web request).
-// Without this, this endpoint over HTTP lets anyone cancel pending refund
-// requests and purge the idempotency cache.
+// Only allow CLI, or CGI cron (no REMOTE_ADDR means not a web request). Without this, this endpoint over HTTP lets anyone cancel pending refund requests and purge the idempotency cache.
 if (php_sapi_name() !== 'cli' && !empty($_SERVER['REMOTE_ADDR'])) {
     http_response_code(403);
     die('Access denied. This script can only be run via CLI/cron.');
@@ -39,10 +37,7 @@ $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 $cancelled = 0;
 foreach ($rows as $r) {
-    // CAS guard: only cancel if the row is still pending_code AND still
-    // stale. Without this, a user who confirms the code between our SELECT
-    // and this UPDATE would have their (now cooling_off) request cancelled
-    // out from under them. Audit only on an actual transition.
+    // Cancelled only while the row is still pending_code and still stale, so a code confirmed in between is not undone.
     $upd = $pdo->prepare("UPDATE refund_requests
         SET state='cancelled', state_reason='code_window_expired', cancel_token = NULL, updated_at = NOW()
         WHERE id = ? AND state = 'pending_code' AND created_at < DATE_SUB(NOW(), INTERVAL 1 HOUR)");

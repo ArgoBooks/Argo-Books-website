@@ -28,9 +28,7 @@ $platformPatterns = [
     'win'       => 'Argo Books Installer V.{version}.exe',
     'mac-arm64' => 'ArgoBooks-{version}-osx-arm64.zip',
     'mac-intel' => 'ArgoBooks-{version}-osx-x64.zip',
-    // Kept because it is the slug that has been public since before there were two macOS
-    // builds. Apple Silicon is the safer default of the two: it is every Mac sold since
-    // 2020, and an Intel owner who lands here has the picker on the downloads page.
+    // Kept because it is the slug that has been public since before there were two macOS builds.
     'mac'       => 'ArgoBooks-{version}-osx-arm64.zip',
     'linux'     => 'ArgoBooks-{version}-linux-x64.AppImage',
 ];
@@ -116,11 +114,7 @@ function serveFile(array $installer): void
         ],
     ]);
 
-    // Embed the visitor token into the served filename so the installer can
-    // extract it during install, letting us join "ad click -> install" without
-    // sending PII through the filename (verification on the API side re-hashes
-    // recent visitor_ids and compares, so this is one-way). Falls back to the
-    // plain filename if the visitor has no cookie or no secret is configured.
+    // The visitor token rides in the served filename so the installer can read it during install, which joins an ad click to an install without PII.
     $served_filename = $installer['filename'];
     $visitor_id = $_COOKIE[ARGO_VISITOR_COOKIE] ?? null;
     if ($visitor_id && preg_match('/^[0-9a-f-]{36}$/i', $visitor_id)) {
@@ -163,11 +157,7 @@ function serveFile(array $installer): void
 $requestedVersion  = $_GET['version']  ?? null;
 $requestedPlatform = $_GET['platform'] ?? null;
 
-// Optional ?source= from direct-download links on the paid landing pages
-// (e.g. /download/avalonia/win?source=paid-lp-contractors). First-touch only,
-// same rule as track_referral_visit() in statistics.php: an existing session
-// source (set on the original landing) always wins, this is just the fallback
-// for visitors whose session was lost between landing and download.
+// Optional ?source= from direct-download links on the paid landing pages (e.g. /download/avalonia/win?source=paid-lp-contractors).
 if (!isset($_SESSION['referral_source'])
     && !empty($_GET['source'])
     && preg_match('/^[a-zA-Z0-9_-]{1,50}$/', $_GET['source'])) {
@@ -181,8 +171,6 @@ if (!$requestedPlatform || !isset($platformPatterns[$requestedPlatform])) {
 }
 
 // Validate the version format before it is ever used to build a filesystem path.
-// The /download/avalonia/<ver>/<platform> rewrite already constrains this, but
-// the script is also reachable directly, so guard here too (blocks ../ traversal).
 if ($requestedVersion !== null && !preg_match('/^\d+\.\d+\.\d+$/', $requestedVersion)) {
     http_response_code(400);
     die('Invalid version format.');

@@ -96,9 +96,7 @@ try {
         exit;
     }
 
-    // Already on record. Reported as success because from the app's side there is nothing left
-    // to do, and re-sending a verification email to an address we already hold is a good way to
-    // look like a spammer.
+    // Reported as success because the app has nothing left to do, and a second verification email to an address we hold looks like spam.
     $existing = trim((string) ($row['email'] ?? '')) !== ''
         || trim((string) ($row['customer_email'] ?? '')) !== '';
 

@@ -59,10 +59,7 @@ try {
             if (($result['cancelled_subs'] ?? 0) > 0) {
                 logPurge("Cancelled {$result['cancelled_subs']} active subscription(s) for user $username (#$userId)");
             }
-            // deleted=0 means the row was already gone (concurrent removal,
-            // manual cleanup, etc). The transaction still committed cleanly,
-            // so don't count it as a failure, but don't claim we deleted
-            // something we didn't, either.
+            // deleted=0 means the row was already gone (concurrent removal, manual cleanup, etc).
             if (($result['deleted'] ?? 0) > 0) {
                 logPurge("Deleted account: $username (#$userId) - scheduled at {$account['deletion_scheduled_at']}");
                 $deletedCount++;

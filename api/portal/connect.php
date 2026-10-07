@@ -71,11 +71,7 @@ function initiate_connect(array $company, string $provider): void
             try {
                 \Stripe\Stripe::setApiKey($secretKey);
 
-                // Check if this company already has a Stripe Express account,
-                // either fully connected (stripe_account_id, onboarding done)
-                // or in-progress (stripe_pending_account_id). The connected ID
-                // is only written by the callback once onboarding completes,
-                // so "connected" status never shows before it's real.
+                // Either fully connected or still onboarding: stripe_account_id is written only by the callback, so a pending id means neither.
                 $stripeAccountId = null;
                 $stmtCheck = $pdo->prepare(
                     'SELECT stripe_account_id, stripe_pending_account_id FROM portal_companies WHERE id = ?'
@@ -121,9 +117,7 @@ function initiate_connect(array $company, string $provider): void
                     ]);
                     $stripeAccountId = $account->id;
 
-                    // Store as PENDING only. stripe_account_id (which the
-                    // status endpoint and checkout treat as "connected") is
-                    // written by the callback after onboarding completes.
+                    // Stored as pending only, because the callback writes stripe_account_id once onboarding finishes.
                     $stmtStore = $pdo->prepare(
                         'UPDATE portal_companies SET stripe_pending_account_id = ?, updated_at = NOW() WHERE id = ?'
                     );
@@ -145,13 +139,7 @@ function initiate_connect(array $company, string $provider): void
             break;
 
         case 'paypal':
-            // PayPal portal Connect is intentionally disabled. PayPal's
-            // "Log in with PayPal" userinfo endpoint refuses tokens issued to
-            // Business accounts, so the OAuth flow can't onboard real
-            // merchants. Re-enabling requires migrating to PayPal Partner
-            // Referrals API, which is gated behind Platforms & Marketplaces
-            // enrollment. Desktop app hides the PayPal Connect button;
-            // this guard catches any direct API call that still arrives.
+            // PayPal portal Connect is intentionally disabled.
             send_error_response(503, 'PayPal portal Connect is not currently supported. Use Stripe or Square instead.', 'PROVIDER_UNSUPPORTED');
             break;
 

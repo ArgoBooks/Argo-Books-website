@@ -249,10 +249,7 @@ function pa_bridge_to_contract(array $results, string $filename): array
         ], $byKey['invoices']);
     }
 
-    // Invoice-based businesses (freelancers, agencies) upload invoices, not a
-    // "sales" sheet. When there's no revenue but there are invoices, derive
-    // revenue rows from them so the dashboard/customers/taxes still light up.
-    // Only when revenue is absent, to avoid double-counting a sale that has both.
+    // Invoice-based businesses (freelancers, agencies) upload invoices, not a "sales" sheet.
     if (empty($entities['revenue']) && !empty($entities['invoices'])) {
         $entities['revenue'] = array_map(function ($inv) {
             $amount = (float)($inv['subtotal'] ?? 0);
@@ -285,9 +282,7 @@ function pa_bridge_to_contract(array $results, string $filename): array
         }
     }
 
-    // Detect the dominant currency and convert every monetary field into it
-    // (historical per-row rates). Runs after invoice->revenue synthesis so the
-    // synthesized rows are converted too. Returns the ISO code for meta/labeling.
+    // Detect the dominant currency and convert every monetary field into it (historical per-row rates). Runs after invoice->revenue synthesis so the synthesized rows are converted too.
     $currency = pa_apply_currency($entities);
 
     return [

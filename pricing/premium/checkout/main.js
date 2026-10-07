@@ -171,10 +171,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  // PHP always resolves a method (Stripe unless the URL or the cycle-switch
-  // flow says otherwise), so this normally mounts the preselected form on load.
-  // Guarded anyway so an unexpected value initialises nothing rather than
-  // throwing.
+  // PHP always resolves a method (Stripe unless the URL or the cycle-switch flow says otherwise), so this normally mounts the preselected form on load.
   activateMethod(subscription.method, false);
 
   function setupPayPalCheckout() {

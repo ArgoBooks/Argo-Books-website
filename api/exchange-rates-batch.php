@@ -133,16 +133,7 @@ $insertStmt = $pdo->prepare(
      ON DUPLICATE KEY UPDATE rates = VALUES(rates), fetched_at = NOW()"
 );
 
-// Fetched concurrently, not one after another.
-//
-// This request is a batch only between the app and here; upstream still needs one
-// call per date, and running them in series meant an import waited the sum of every
-// round trip. Five cold dates was routinely fifteen seconds, with the desktop app
-// showing nothing, which reads as a hang. Concurrently it costs about as long as the
-// slowest single date.
-//
-// Windowed rather than all at once: $maxOerCalls is 30, and thirty simultaneous
-// connections is the kind of thing an upstream rate limiter exists to stop.
+// Fetched together rather than one after another, because upstream still needs a call per date and in series an import waited the sum of every round trip.
 $concurrency = 8;
 
 foreach (array_chunk(array_values($datesToFetch), $concurrency) as $chunk) {
@@ -168,11 +159,7 @@ foreach (array_chunk(array_values($datesToFetch), $concurrency) as $chunk) {
     do {
         $status = curl_multi_exec($multi, $running);
         if ($running) {
-            // Blocks until something moves, rather than spinning on the CPU.
-            // select() returns -1 when there is no descriptor to wait on, which
-            // libcurl can do while resolving a name. It did not happen in testing
-            // here (one already-resolved host), so this is a guard rather than a
-            // fix: without it that case would busy-loop for the whole fetch.
+            // Blocks until something moves, rather than spinning on the CPU. select() returns -1 when there is no descriptor to wait on, which libcurl can do while resolving a name.
             if (curl_multi_select($multi, 1.0) === -1) {
                 usleep(1000);
             }

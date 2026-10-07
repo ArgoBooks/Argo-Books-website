@@ -84,9 +84,7 @@ if (!$sent['success']) {
     pae_fail(500, "We couldn't send the email just now. Please try again.");
 }
 
-// Optional: double opt-in to the marketing list. This is independent of the
-// results email above and never blocks it. A confirmation email is sent; the
-// subscriber is only added to the broadcast list after they click confirm.
+// Optional: double opt-in to the marketing list. This is independent of the results email above and never blocks it.
 $subscribeStatus = 'skipped';
 if ($subscribe) {
     $subscribeStatus = create_pending_subscriber($email, 'profit_analyzer', 'newsletter', $ip);

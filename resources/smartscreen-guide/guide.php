@@ -37,14 +37,7 @@ if (!function_exists('detectBrowserForGuide')) {
 
 $guide_asset_base = $guide_asset_base ?? '../';
 
-// Browser-specific walkthroughs for the SmartScreen / download warning.
-// Add more browsers by dropping a key here + saving screenshots to
-// resources/images/smartscreen-guide/<browser>-step-N.svg.
-//
-// Only Edge gets an illustrated, browser-specific keep-guide: Edge reliably nags
-// on downloads and we have accurate screenshots for it. Other browsers (Chrome,
-// Firefox, etc.) rarely warn on a signed installer, and we can't verify their
-// exact dialogs, so they fall through to the Windows launch step alone.
+// Add a browser by dropping a key here and saving screenshots to resources/images/smartscreen- guide/<browser>-step-N.svg.
 $smartScreenGuides = [
     'edge' => [
         'browser_name' => 'Microsoft Edge',
@@ -69,9 +62,7 @@ $smartScreenGuides = [
     ],
 ];
 
-// Windows launch step. Appended as the final step of the walkthrough (after the
-// browser's "keep" steps), because the "Windows protected your PC" prompt appears
-// when the installer is opened. One combined step on purpose.
+// Windows launch step. Appended as the final step of the walkthrough (after the browser's "keep" steps), because the "Windows protected your PC" prompt appears when the installer is opened.
 $windowsLaunchStep = [
     'title' => 'Open the installer. If Windows shows "Windows protected your PC", click More info, then Run anyway.',
     'image' => $guide_asset_base . 'resources/images/smartscreen-guide/windows-step.svg',

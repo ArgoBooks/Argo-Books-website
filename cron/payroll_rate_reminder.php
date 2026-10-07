@@ -56,14 +56,7 @@ if ($month === 12) {
     exit(0);
 }
 
-// Two windows, for two different messages.
-//
-// The first is the working reminder: CRA publishes about a month before an edition takes
-// effect, so by the 10th the numbers exist and there is time to gather and check them.
-//
-// The second is the chase, three days out. It exists because a date-based reminder tells you
-// to do something and never tells you whether you did, and this is a deadline where finding
-// out late means every customer's payroll has already stopped.
+// Two windows for two messages: CRA publishes about a month before an edition takes effect, so by the 10th the numbers exist.
 if ($day >= 10 && $day <= 20) {
     $stage = 'prepare';
 } elseif ($day >= ($month === 12 ? 29 : 28)) {
@@ -76,9 +69,7 @@ if ($day >= 10 && $day <= 20) {
 
 cron_metric_set('in_window', 1);
 
-// The whole point of the reminder is to get this file onto the server, so if it is already
-// there the job is done and there is nothing worth saying. This is what makes the chase
-// silent when it should be: an alert that fires whether or not you acted stops being read.
+// The whole point of the reminder is to get this file onto the server, so if it is already there the job is done and there is nothing worth saying.
 $rateFile   = __DIR__ . '/../resources/downloads/payroll/' . $edition . '.json';
 $filePresent = is_file($rateFile);
 
@@ -89,9 +80,7 @@ if ($filePresent) {
     exit(0);
 }
 
-// One email per stage per window. Checking cron_runs rather than adding a table keeps the
-// state where every other cron already keeps it, and a re-run on the same day cannot send
-// twice. The stage is part of the key so the chase is not suppressed by the earlier reminder.
+// One email per stage per window. Checking cron_runs rather than adding a table keeps the state where every other cron already keeps it, and a re-run on the same day cannot send twice.
 $already = $pdo->prepare("
     SELECT COUNT(*) FROM cron_runs
     WHERE cron_name = 'payroll_rate_reminder'

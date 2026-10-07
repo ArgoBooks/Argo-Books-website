@@ -39,9 +39,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
     rs_fail(405, 'method_not_allowed', 'Use POST to scan a receipt.');
 }
 
-// PHP empties $_POST/$_FILES when the body exceeds post_max_size. Detect that up
-// front so an oversized upload gets a clear message instead of a generic auth or
-// "no file" error (a real scan request always has $_FILES populated).
+// PHP empties $_POST/$_FILES when the body exceeds post_max_size.
 if (empty($_FILES) && empty($_POST) && (int)($_SERVER['CONTENT_LENGTH'] ?? 0) > 1024 * 1024) {
     rs_fail(413, 'too_large', 'That image is too large. Please use a photo under 10 MB.');
 }
@@ -51,15 +49,11 @@ $perVisitor = $cfg['web_receipt_scan_daily_limit'];
 $globalCap  = $cfg['web_receipt_scan_global_daily_cap'];
 
 $ip = get_client_ip();
-// Use REMOTE_ADDR (real TCP peer), not get_client_ip(), for the local-dev
-// bypass: get_client_ip() can honor X-Forwarded-For behind a trusted proxy, so
-// a spoofed "X-Forwarded-For: 127.0.0.1" must NOT be able to skip auth + limits.
+// REMOTE_ADDR rather than get_client_ip() for the local bypass, because a forwarded header could otherwise claim to be 127.0.0.1.
 $isLocal = in_array($_SERVER['REMOTE_ADDR'] ?? '', ['127.0.0.1', '::1'], true);
 
-// --- 1. Auth: a valid scan pass (issued after a Turnstile solve) OR a fresh
-// Turnstile token. The pass is signed, IP-bound, and short-lived; it lets the
-// rest of a bulk batch run concurrently without a new token per request.
-// Skipped on local dev so testing isn't blocked. ---
+// --- 1. Auth: a scan pass or a fresh Turnstile token ---
+// The pass is signed, IP-bound and short-lived, so the rest of a bulk batch can run at once.
 $turnstileToken = $_POST['turnstile_token'] ?? '';
 $scanPass = $_POST['scan_pass'] ?? '';
 if (!$isLocal) {
@@ -71,9 +65,8 @@ if (!$isLocal) {
 // A fresh short-lived pass the client reuses for the rest of a bulk batch.
 $authPass = $isLocal ? '' : rs_make_pass($ip);
 
-// --- 2. Identify the visitor. The daily limits are reserved ATOMICALLY just
-// before the paid Gemini call (below), so invalid uploads don't consume a scan
-// and concurrent bulk requests can't overshoot the cap. ---
+// --- 2. Identify the visitor ---
+// The daily limit is taken just before the paid call, so an invalid upload costs nothing.
 $fingerprint = preg_replace('/[^a-zA-Z0-9]/', '', (string)($_POST['fingerprint'] ?? ''));
 $fpKey = $fingerprint !== '' ? $fingerprint : 'anon';
 
@@ -119,9 +112,7 @@ if ($geminiKey === '') {
     rs_fail(500, 'config', 'Scanner is not configured. Please try again later.');
 }
 
-// Downscale + EXIF-rotate + re-encode to JPEG under ~4 MB before sending,
-// mirroring the desktop ReceiptImageHelper. Keeps Gemini token cost and latency
-// down and fixes rotated phone photos.
+// Downscale + EXIF-rotate + re-encode to JPEG under ~4 MB before sending, mirroring the desktop ReceiptImageHelper. Keeps Gemini token cost and latency down and fixes rotated phone photos.
 $jpeg = rs_preprocess_image($tmp, $mime);
 @unlink($tmp); // store nothing past this point
 if ($jpeg === null) {
@@ -129,12 +120,8 @@ if ($jpeg === null) {
 }
 $base64 = base64_encode($jpeg);
 
-// --- Reserve a scan slot ATOMICALLY just before the paid call. Using
-// check_and_record (not check-then-record) closes the race where concurrent
-// bulk requests each pass a plain check and overshoot the cap. Order: per-
-// visitor, per-IP, then the global cost cap LAST so it never over-counts. Only
-// requests that reach the Gemini call consume a slot (invalid/undecodable
-// uploads were already rejected above). ---
+// --- Reserve a scan slot ---
+// Taken just before the paid call, because check-then-record lets requests overshoot the cap.
 if (!$isLocal) {
     if (check_and_record_rate_limit($fpKey, $perVisitor, RS_WINDOW, 'web_receipt_fp')) {
         rs_fail(429, 'rate_limited', "You've used your free scans for today. Get Argo Books free to keep scanning and save them as expenses.",
@@ -383,9 +370,7 @@ function rs_call_gemini(string $key, string $model, string $mime, string $base64
     }
     $data = json_decode($resp, true);
     $candidate = $data['candidates'][0] ?? [];
-    // gemini-3.x models spend hidden "thinking" tokens out of maxOutputTokens. The
-    // budget above comes from RECEIPT_SCAN_MAX_OUTPUT_TOKENS in .env (shared with the
-    // app receipt scanner); log any non-STOP finish so future truncation is visible.
+    // gemini-3.x models spend hidden "thinking" tokens out of maxOutputTokens.
     $finish = $candidate['finishReason'] ?? null;
     if ($finish !== null && $finish !== 'STOP') {
         error_log('[receipt-scan] non-STOP finishReason=' . $finish);

@@ -39,9 +39,7 @@ if (!function_exists('founder_auth_ids')) {
             return $ids;
         }
 
-        // Deploy does not ship .env, so production's copy is edited by hand and may
-        // still use the pre-rename name. Falling back keeps founder detection working
-        // no matter which lands first. Drop EXCLUDED_AUTH_IDS once prod .env is updated.
+        // Deploy does not ship .env, so production's copy is edited by hand and may still use the pre-rename name.
         $raw = $_ENV['FOUNDER_AUTH_IDS'] ?? getenv('FOUNDER_AUTH_IDS');
         if (!is_string($raw) || trim($raw) === '') {
             $raw = $_ENV['EXCLUDED_AUTH_IDS'] ?? getenv('EXCLUDED_AUTH_IDS');

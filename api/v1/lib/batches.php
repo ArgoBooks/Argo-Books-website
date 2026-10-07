@@ -129,9 +129,7 @@ function api_handle_create_batch(array $auth): void
 
                 $localRef = isset($localRefs[$publicId]) ? substr((string) $localRefs[$publicId], 0, 120) : null;
 
-                // The import_status = 'pending' predicate is what makes this
-                // safe against two desktops draining the same queue: the second
-                // one's UPDATE matches nothing and the whole batch rolls back.
+                // The import_status = 'pending' predicate is what makes two desktops draining one queue safe: the second matches nothing and rolls back.
                 $stmt = $pdo->prepare(
                     'UPDATE ' . $target['table'] . '
                         SET import_status = ?, import_batch_id = ?, imported_at = NOW(), local_ref = ?

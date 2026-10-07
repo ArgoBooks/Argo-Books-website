@@ -44,8 +44,6 @@ if (!$email) {
 global $pdo;
 
 // Refuse if owner_email is already set: must go through Change flow.
-// Include the current value so the client can reconcile its local state if
-// the user is just trying to recover (e.g. local .argo lost the email).
 if (!empty($company['owner_email'])) {
     http_response_code(409);
     header('Content-Type: application/json; charset=utf-8');
@@ -60,14 +58,9 @@ if (!empty($company['owner_email'])) {
     exit;
 }
 
-// Deliberately no "already in use" rejection here. A company file deleted on someone's
-// computer never reaches the server, so its portal record holds the address for good and
-// the owner can never use their own email again. Receiving the code proves control of the
-// address, so the address moves at confirm time instead.
+// No rejection for an address already in use: a company file deleted on someone's computer never reaches the server, so its record would hold their address for good.
 
-// Throttle code sends. Since owner_email is no longer written here, a caller
-// could otherwise loop this endpoint to send unlimited emails. Same limits
-// as /verify-email/request.php: max 3 codes per rolling 24h, 60s apart.
+// Throttle code sends. Same limits as /verify-email/request.php: max 3 codes per rolling 24h, 60s apart.
 $stmt = $pdo->prepare("
     SELECT COUNT(*) AS c, MAX(created_at) AS latest
     FROM email_verifications
@@ -90,9 +83,7 @@ try {
     $pdo->prepare("UPDATE email_verifications SET consumed_at = COALESCE(consumed_at, NOW()) WHERE company_id = ? AND purpose = 'registration' AND consumed_at IS NULL")
         ->execute([$company['id']]);
 
-    // Issue verification code (purpose='registration' so the existing
-    // /verify-email/confirm.php endpoint accepts it). The pending email
-    // rides on this row; owner_email is only written on confirm.
+    // Issue verification code (purpose='registration' so the existing /verify-email/confirm.php endpoint accepts it).
     $code = refund_generate_code();
     $hash = refund_hash_code($code, (string)$company['id']);
     $pdo->prepare("INSERT INTO email_verifications (company_id, email, purpose, code_hash, expires_at) VALUES (?, ?, 'registration', ?, DATE_ADD(NOW(), INTERVAL 10 MINUTE))")

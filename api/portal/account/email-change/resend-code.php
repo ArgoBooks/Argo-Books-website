@@ -40,9 +40,7 @@ if ($row['state'] !== $expected_state) {
     send_error_response(409, 'Wrong state for this resend target.', 'WRONG_STATE');
 }
 
-// Per-change-request throttle. Count code_sent audit entries (initial issue +
-// any resends) in the last hour for this change_id. 5 codes/hour gives the
-// user enough room to retry both legs while preventing inbox-spam.
+// Per-change-request throttle. Count code_sent audit entries (initial issue + any resends) in the last hour for this change_id.
 $stmt = $pdo->prepare("
     SELECT COUNT(*) FROM refund_audit_log
     WHERE email_change_request_id = ?

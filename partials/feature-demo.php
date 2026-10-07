@@ -20,9 +20,9 @@ require_once __DIR__ . '/../resources/icons.php';
 require_once __DIR__ . '/../resources/includes/site-base-path.php';
 
 /**
- * Site base path for asset URLs inside the panels. The markup used to sit in
- * feature-tour.php and read a \ local; inside these functions that
- * variable is out of scope, so it resolved to an empty string and broke the
+ * Site base path for asset URLs inside the panels. Read here rather than from a
+ * local in feature-tour.php, which is out of scope inside these functions and
+ * would resolve to an empty string, breaking the
  * logo on every subfolder install.
  */
 function argo_feature_demo_base(): string

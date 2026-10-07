@@ -31,9 +31,7 @@ test('num() coerces blanks, junk, and negatives to zero', () => {
   assert.strictEqual(num('12.50'), 12.5);
 });
 
-// $28 item + $5 shipping = $33 order.
-// listing 0.20 | transaction 33*.065=2.145 | processing 33*.03+0.25=1.24
-// fees 3.585 | costs 6+8+4.50=18.50 | profit 33-3.585-18.50=10.915
+// $28 item + $5 shipping = $33 order. listing 0.20 | transaction 33*.065=2.145 | processing 33*.03+0.25=1.24 fees 3.585 | costs 6+8+4.50=18.50 | profit 33-3.585-18.50=10.915
 test('US sale: every fee line and the profit', () => {
   const r = computeSale({
     itemPrice: 28, shippingCharged: 5, listingFee: 0.20,

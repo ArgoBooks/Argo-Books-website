@@ -31,13 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     }
 }
 
-// Release the session lock now that auth + CSRF have been read. PHP's default
-// file session handler holds an EXCLUSIVE lock from session_start() until the
-// request ends, so without this a long-running action (drafting a batch of
-// emails takes a while) blocks every other request carrying the same session
-// cookie at its own session_start() — admin pages AND public pages like the
-// landing page would hang until it finished. No handler below writes to
-// $_SESSION, so closing it here is safe.
+// Released now that auth and CSRF have been read, because PHP holds an exclusive session lock until the request ends, so a long action would hang every request on the same cookie.
 session_write_close();
 
 // Ensure tables exist
@@ -213,9 +207,7 @@ function get_leads($pdo)
         $where[] = 'ol.company_size = ?';
         $params[] = $company_size;
     }
-    // Source filter groups UI + cron variants together (google_places and
-    // google_places_auto both match "google_places"; shopify_auto matches
-    // "shopify") so admins don't have to think about the channel split.
+    // The filter groups the UI and cron variants together, so an admin does not have to think about the channel split.
     if ($source) {
         if ($source === 'google_places') {
             $where[] = "ol.source IN ('google_places', 'google_places_auto')";
@@ -226,9 +218,7 @@ function get_leads($pdo)
             $params[] = $source;
         }
     } else {
-        // Editorial and Creator leads have their own channel tabs (their source
-        // is requested explicitly there). Keep them out of the default Email
-        // leads list so the channels stay organized and separate.
+        // Editorial and Creator leads have their own channel tabs (their source is requested explicitly there).
         $where[] = "ol.source NOT IN ('editorial_auto', 'creator_auto')";
     }
     if ($search) {
@@ -541,11 +531,7 @@ function generate_draft($pdo)
         json_response(['success' => false, 'message' => $result['error']], 500);
     }
 
-    // The AI size gate (Layer 3 of the outreach auto-filter) can decide
-    // mid-draft that this lead is a chain/corp/institution and disqualify it
-    // instead of returning a draft. log_activity + status update were already
-    // done inside disqualify_lead(); surface it to the admin with a 409 so
-    // the UI can show "Disqualified" rather than render an empty subject/body.
+    // The AI size gate (Layer 3 of the outreach auto-filter) can decide mid-draft that this lead is a chain/corp/institution and disqualify it instead of returning a draft.
     if (!empty($result['disqualified'])) {
         json_response([
             'success' => false,
@@ -583,10 +569,7 @@ function send_outreach_email($pdo)
         json_response(['success' => false, 'message' => 'No draft to send'], 400);
     }
 
-    // Guard against sending to disqualified leads. The auto-filter (chain
-    // domain, place type, AI size gate) caught this lead for a reason; if
-    // the admin really wants to override, they can clear status='disqualified'
-    // on the row directly. Refusing here keeps the UI's bulk-send flow safe.
+    // The auto-filter caught this lead for a reason, so a send is refused here; an admin who means to override can clear status='disqualified' on the row.
     if (($lead['status'] ?? '') === 'disqualified') {
         $reasonTag = $lead['disqualified_reason'] ?? 'unspecified';
         json_response([
@@ -595,18 +578,7 @@ function send_outreach_email($pdo)
         ], 409);
     }
 
-    // Guard against re-sending to the same lead. Cold-outreach resends are
-    // a spam-filter red flag and we never want this to happen by accident,
-    // whether from the detail modal, the bulk-send flow, or a stray API call.
-    //
-    // Exception: if the previous send bounced (status='email_bounced'), the
-    // earlier attempt didn't reach a real inbox, so a deliberate retry after
-    // the admin has fixed the address isn't a duplicate. Reset sent_at and
-    // status so send_outreach_lead's atomic claim works and the post-send
-    // CASE in cron/lib/outreach_helpers.php can promote status back to
-    // 'contacted'. The suppression list still blocks sends to the bounced
-    // address itself; if the admin didn't actually fix the email, the new
-    // send attempt will be caught and refused as 'suppressed' instead.
+    // A resend is a spam-filter red flag, so it is refused whatever the caller, unless the previous send bounced.
     if (!empty($lead['sent_at'])) {
         if (($lead['status'] ?? '') === 'email_bounced') {
             $pdo->prepare("UPDATE outreach_leads SET sent_at = NULL, status = 'approved' WHERE id = ?")
@@ -628,9 +600,7 @@ function send_outreach_email($pdo)
         json_response(['success' => true, 'message' => 'Email sent successfully']);
     }
 
-    // Skip outcomes (already sent / suppressed) are logged inside
-    // send_outreach_lead, so don't double-log them as failures here. Map each
-    // to an honest user-facing message and HTTP code.
+    // Skip outcomes (already sent / suppressed) are logged inside send_outreach_lead, so don't double-log them as failures here. Map each to an honest user-facing message and HTTP code.
     if ($reason === 'already_sent') {
         json_response([
             'success' => false,
@@ -761,9 +731,7 @@ function import_csv($pdo)
 
         $email = isset($columnIndex['email']) ? trim($row[$columnIndex['email']] ?? '') : '';
 
-        // Dedup by email so re-importing the same CSV (or one that overlaps
-        // with previously imported leads) doesn't create duplicate rows that
-        // would each get their own outreach email.
+        // Deduplicated by email so re-importing a CSV that overlaps an earlier one does not make a second row and a second email.
         if ($email !== '') {
             $dedupStmt->execute([$email]);
             if ($dedupStmt->fetchColumn()) {

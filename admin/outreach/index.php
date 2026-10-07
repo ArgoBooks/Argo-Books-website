@@ -17,9 +17,7 @@ if (empty($_SESSION['csrf_token'])) {
 require_once __DIR__ . '/tabs/settings.php';
 require_once __DIR__ . '/tabs/followups.php';
 
-// Dispatch POST submissions from tab-specific forms BEFORE any output so
-// redirects via header() still work. CSRF: every state-changing tab form
-// must include the session csrf_token; reject anything that doesn't match.
+// POSTs from the tab forms are handled before any output so a header() redirect still works, and each must carry the session csrf_token.
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['tab'])) {
     $postedToken = $_POST['csrf_token'] ?? '';
     $sessionToken = $_SESSION['csrf_token'] ?? '';

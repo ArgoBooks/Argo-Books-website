@@ -13,9 +13,7 @@ return [
   // 'pdf', 'word', 'classic-pdf', 'ribbon-google-sheets'.
   'slug' => '',
 
-  // 'format-generic' (e.g. /invoice-template/pdf/) or 'style-format'
-  // (e.g. /invoice-template/elegant-pdf/). Drives layout choices in
-  // template-page.php (presence of grid vs. preview, etc.).
+  // 'format-generic' or 'style-format', which drives the layout choices in template-page.php.
   'kind' => 'format-generic',
 
   // For style-format pages only. One of: classic, modern, formal, elegant, ribbon.

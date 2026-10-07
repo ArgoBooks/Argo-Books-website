@@ -3,9 +3,8 @@
 /**
  * Web font <link> tags for the public site.
  *
- * Every page used to carry its own copy of the preconnect pair plus a Google
- * Fonts URL, and the URLs had already drifted into four different sets. That
- * drift is the reason this file exists: changing a typeface or a weight meant
+ * One copy of the preconnect pair and the Google Fonts URL for the whole site.
+ * Per-page copies drift apart, and then changing a typeface or a weight means
  * finding and editing more than fifty <head> blocks, and missing one showed up
  * as a page rendering in a fallback face.
  *

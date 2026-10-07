@@ -5,7 +5,7 @@
 // compare/compare-page.php; everything that makes this page itself is here.
 //
 // The FAQ entries feed both the visible accordion and the FAQPage JSON-LD, so
-// the two cannot drift apart the way the hand-written pairs used to.
+// the two cannot drift apart.
 
 if (!defined('ARGO_TEMPLATE_RENDER')) {
     http_response_code(404);

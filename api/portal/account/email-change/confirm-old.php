@@ -39,9 +39,7 @@ if ($row['state'] !== 'pending') {
     send_error_response(409, 'Change request is in state ' . $row['state'], 'WRONG_STATE');
 }
 
-// Expiry check: mirrors the refund-code flow. A nullable expires_at means
-// the code was never issued (or this row predates the expiry column); reject
-// safely rather than letting an unbounded code be used.
+// A null expires_at means the code was never issued, so it is rejected rather than treated as unbounded. Mirrors the refund-code flow.
 if (empty($row['old_email_code_expires_at']) || strtotime($row['old_email_code_expires_at']) < time()) {
     audit_log($pdo, (int)$company['id'], 'code_failed', 'owner', null, null, $change_id, [
         'target' => 'old', 'reason' => 'expired',
@@ -49,9 +47,7 @@ if (empty($row['old_email_code_expires_at']) || strtotime($row['old_email_code_e
     send_error_response(410, 'Code expired. Request a new one.', 'CODE_EXPIRED');
 }
 
-// Attempt-counter check: 5 wrong tries cancels the change request, matching
-// refunds/confirm.php. Without this an API-key holder can brute-force the
-// 6-digit code indefinitely.
+// Attempt-counter check: 5 wrong tries cancels the change request, matching refunds/confirm.php. Without this an API-key holder can brute-force the 6-digit code indefinitely.
 if ((int)$row['old_email_code_attempts'] >= 5) {
     $pdo->prepare("UPDATE email_change_requests SET state='cancelled' WHERE id = ? AND state = 'pending'")
         ->execute([$change_id]);

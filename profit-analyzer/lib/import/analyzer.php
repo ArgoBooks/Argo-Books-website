@@ -345,8 +345,7 @@ function pa_tier1_entities(array $sheet, array $analysis, ?string $country): arr
     }
 
     // Amount columns to inspect for in-cell currency (mirrors CurrencyImportPreparer's
-    // MoneyTargets). Currency lives in the cell number format, surfaced as a token in
-    // $sheet['currencyRows']; falls back to the cell text (for CSV / symbols typed inline).
+    // MoneyTargets).
     $moneyTargets = ['total', 'amount', 'unit price', 'subtotal'];
     $amountCols = [];
     foreach ($headers as $i => $h) {

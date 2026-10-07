@@ -27,14 +27,10 @@ $argo_yearly  = (int) $pricing['premium_yearly_price'];
 
 $providers = get_payroll_competitors();
 
-// The headcount the page renders on first paint. Chosen because it is the size
-// where the per-employee fee has clearly overtaken the base fee but the
-// business is still small enough to be doing payroll itself.
+// The headcount on first paint, chosen because the per-employee fee has clearly overtaken the base fee at that size.
 $default_headcount = 5;
 
-// Each provider's cheapest plan that allows unlimited pay runs, not its
-// cheapest plan outright: Wagepoint and QuickBooks both sell a Solo tier capped
-// at one pay run a month, which a business paying biweekly cannot buy.
+// Each provider's cheapest plan that allows unlimited pay runs, since a Solo tier capped at one run a month is no comparison.
 $rows = [];
 foreach ($providers as $slug => $brand) {
     $pick = null;
@@ -88,9 +84,7 @@ $page_url = 'https://argorobots.com/payroll/';
 $title    = 'Canadian Payroll Software, Flat Rate | T4s and CPP/EI | Argo Books';
 $meta_description = 'Canadian payroll without the per-employee bill. CPP, EI and income tax from the CRA\'s own tables, every province plus Quebec, pay stubs, and T4 slips with the XML the CRA accepts. $' . $argo_monthly . ' CAD a month, however many people you pay.';
 
-// Purchase-decision questions only. /features/payroll/ covers how the feature
-// works and emits its own FAQPage JSON-LD, so nothing asked there is repeated
-// here; duplicate FAQ markup on one domain splits its own authority.
+// Purchase questions only: /features/payroll/ covers how it works and emits its own FAQPage, and duplicate markup hurts.
 $faqs = [
     [
         'q' => 'What does it cost if I have ten employees?',

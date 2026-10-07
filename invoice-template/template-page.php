@@ -141,9 +141,7 @@ ob_start();
          width="600" height="450">
 
     <?php
-      // CTA varies by format. PDF and Word link into the live tool with
-      // ?template=<style>; Excel serves a static file; Google Docs/Sheets
-      // open a "Make a copy" Google URL.
+      // CTA varies by format. PDF and Word link into the live tool with ?template=<style>; Excel serves a static file; Google Docs/Sheets open a "Make a copy" Google URL.
       $cta_label = '';
       $cta_href  = '';
       $cta_event = 'invgen_template_cta_clicked';

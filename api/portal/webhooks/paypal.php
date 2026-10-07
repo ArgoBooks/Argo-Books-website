@@ -108,9 +108,7 @@ curl_setopt_array($ch, [
 ]);
 $verifyRaw = curl_exec($ch);
 if ($verifyRaw === false) {
-    // Network failure during verification: 503 forces a retry rather than
-    // either acknowledging an unverified payload or 400-ing a payload that
-    // might actually be legitimate.
+    // Network failure during verification: 503 forces a retry rather than either acknowledging an unverified payload or 400-ing a payload that might actually be legitimate.
     error_log('Portal PayPal webhook: verify-webhook-signature request failed: ' . curl_error($ch));
     http_response_code(503);
     exit;
@@ -166,20 +164,12 @@ switch ($eventType) {
         break;
 
     case 'PAYMENT.CAPTURE.REFUNDED':
-        // The resource is the capture itself; the refund metadata is in
-        // resource.links / resource.note_to_payer / resource.invoice_id.
-        // For refunds initiated via our /refunds/ flow we set invoice_id =
-        // 'argo_request_<id>' so we can reconcile back to refund_requests.
+        // The resource is the capture itself; the refund metadata is in resource.links / resource.note_to_payer / resource.invoice_id.
         error_log('Portal PayPal webhook: Payment refunded for capture ' . ($data['resource']['id'] ?? 'unknown'));
 
-        // Insert negative-amount portal_payments row + flip original (mirrors
-        // the Stripe webhook behavior). Best-effort; wrap in try/catch so a
-        // missing original row doesn't 500 the webhook.
+        // Insert negative-amount portal_payments row + flip original (mirrors the Stripe webhook behavior).
         try {
-            // For PAYMENT.CAPTURE.REFUNDED, `resource` is the refund object;
-            // `links[rel=up]` points at the parent capture. Falling back to
-            // resource.id covers older webhook formats where the refund's
-            // own id is the only available identifier.
+            // On PAYMENT.CAPTURE.REFUNDED the resource is the refund and links[rel=up] is its capture; resource.id covers older webhook formats.
             $refundAmount = (float)($data['resource']['amount']['value'] ?? 0);
             $refundCurrency = strtoupper($data['resource']['amount']['currency_code'] ?? 'USD');
             $invoiceTag = $data['resource']['invoice_id'] ?? '';
@@ -200,12 +190,6 @@ switch ($eventType) {
             }
 
             // Find original payment by capture id (provider_transaction_id) OR by order id (provider_payment_id).
-            // No status filter: once cumulative refunds cover the original, the row
-            // flips to 'refunded' (see refund_record_ledger). A subsequent webhook
-            // (an out-of-order redelivery, a late goodwill refund, or a refund issued
-            // via the PayPal dashboard after the flip) must still find the row,
-            // otherwise the negative-amount insert silently no-ops and books drift.
-            // amount > 0 still excludes sibling refund rows. Mirrors the Stripe path.
             $stmt = $pdo->prepare("
                 SELECT * FROM portal_payments
                 WHERE (provider_transaction_id = ? OR provider_payment_id = ?)
@@ -216,9 +200,7 @@ switch ($eventType) {
             $original = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if ($original) {
-                // Key the refund row by the refund's own id so multiple
-                // partial refunds against the same capture produce distinct
-                // rows (capture-id keying collides on the second refund).
+                // Keyed by the refund's own id, because keying by the capture collides on a second partial refund.
                 $refundProviderPaymentId = 'refund_' . ($refundId ?: $captureId);
                 $recordResult = record_portal_payment([
                     'company_id' => $original['company_id'],
@@ -231,15 +213,11 @@ switch ($eventType) {
                     'provider_transaction_id' => $captureId,
                     'reference_number' => generate_reference_number(),
                     'status' => 'refunded',
-                    // Inherit the original payment's environment so a misconfigured
-                    // APP_ENV can't tag a refund with a different env than the
-                    // payment it offsets.
+                    // Inherit the original payment's environment so a misconfigured APP_ENV can't tag a refund with a different env than the payment it offsets.
                     'payment_environment' => $original['payment_environment'] ?? ($is_production ? 'production' : 'sandbox'),
                 ]);
                 if (!empty($recordResult['inserted'])) {
-                    // Invoice reconciliation (mirrors apply_stripe_refund_to_db).
-                    // Scope cumulative-refund SUM to this specific capture so
-                    // refunds on a sibling capture can't flip the wrong payment.
+                    // The cumulative refund total is scoped to this capture, so a refund on a sibling cannot flip the wrong payment.
                     $sumStmt = $pdo->prepare(
                         "SELECT COALESCE(SUM(amount), 0) AS refunded_total
                          FROM portal_payments
@@ -256,9 +234,7 @@ switch ($eventType) {
                             ->execute([$original['id']]);
                     }
 
-                    // Update invoice balance/status. SET-clause order matters:
-                    // status CASE must see pre-update balance_due. Mirrors the
-                    // Stripe path.
+                    // Update invoice balance/status. SET-clause order matters: status CASE must see pre-update balance_due. Mirrors the Stripe path.
                     $pdo->prepare(
                         'UPDATE portal_invoices
                          SET status = CASE
@@ -280,9 +256,7 @@ switch ($eventType) {
                     $rstmt->execute([$argoId]);
                     $rr = $rstmt->fetch(PDO::FETCH_ASSOC);
                     if ($rr && $rr['state'] !== 'completed' && $rr['state'] !== 'cancelled') {
-                        // CAS guard: only the UPDATE that actually flips the
-                        // state notifies, so a race with the synchronous
-                        // execute path can't fire two completion emails.
+                        // Only the UPDATE that actually flips the state notifies, so a race with the synchronous path cannot send two completion emails.
                         $upd = $pdo->prepare("UPDATE refund_requests SET state='completed', provider_refund_id = ?, completed_at = NOW(), cancel_token = NULL, updated_at = NOW() WHERE id = ? AND state IN ('processing','cooling_off')");
                         $upd->execute([$refundId, $argoId]);
                         if ($upd->rowCount() > 0) {

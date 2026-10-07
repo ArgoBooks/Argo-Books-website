@@ -8,9 +8,7 @@ $page_title = 'Free Invoice Generator | Argo Books';
 $page_description = 'Free online invoice generator. No signup required. Download PDF or Word.';
 $canonical_url = 'https://argorobots.com/invoice-generator/';
 
-// Server-side page view. track_page_view() filters admins, bots, and duplicates
-// itself, so calling it unconditionally is safe. Skip during PHP CLI smoke
-// tests (no $_SERVER['REMOTE_ADDR'], no real visitor).
+// Server-side page view. track_page_view() filters admins, bots, and duplicates itself, so calling it unconditionally is safe.
 if (PHP_SAPI !== 'cli') {
     require_once __DIR__ . '/../statistics.php';
     defer_client_page_view('invgen_tool');

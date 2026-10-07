@@ -30,9 +30,7 @@ function api_serialize_endpoint(array $row, ?string $secret = null): array
         'created'         => api_timestamp($row['created_at'] ?? null),
     ];
 
-    // Only ever present on the create response. After that we still hold the
-    // secret (we have to, to sign with it), but there is no reason to hand it
-    // back on every list call and every reason not to.
+    // Present only on the create response: the secret is still held because signing needs it, but there is no reason to return it on every list.
     if ($secret !== null) {
         $out['signing_secret'] = $secret;
     }

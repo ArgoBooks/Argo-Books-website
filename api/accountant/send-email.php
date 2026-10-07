@@ -79,11 +79,7 @@ if (rate_limit_hit($rateLimitName, $rateLimitKey, 'accountant_email')) {
         'Email rate limit exceeded. Please try again in ' . rate_limit_wait_phrase($rateLimitName) . '.');
 }
 
-// The X-Device-Id of a free request is self-asserted, so rotating the header would get past
-// the limit above. An IP cannot be rotated the same way, so a per-IP ceiling bounds what one
-// origin can send however many device IDs it invents. That matters more here than server load:
-// mail sent from this domain by a stranger costs the reputation invoice email depends on.
-// Premium requests are exempt, their key is checked against the database.
+// The X-Device-Id of a free request is self-asserted, so rotating the header would get past the limit above.
 if (!$license) {
     $clientIp = get_client_ip();
     if (rate_limit_hit('accountant_email_ip', $clientIp)) {

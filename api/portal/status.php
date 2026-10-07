@@ -77,10 +77,7 @@ send_json_response(200, [
         'squareConnected' => !empty($company['square_merchant_id']),
         'squareEmail' => $company['square_email'] ?? null,
     ],
-    // The server is authoritative for these: the cron and the payment webhooks
-    // read them while Argo Books is closed, so the desktop treats its copy as a
-    // cache and converges on this block. That is also what restores the
-    // settings after a reinstall or on a second machine.
+    // The server is authoritative for these: the cron and the payment webhooks read them while Argo Books is closed, so the desktop treats its copy as a cache and converges on this block.
     'preferences' => [
         'sendPaymentReminders' => (bool)($company['reminders_enabled'] ?? false),
         'remindersEnabledAt' => portal_iso_datetime($company['reminders_enabled_at'] ?? null),

@@ -54,9 +54,7 @@ return [
         ],
     ],
 
-    // Points at /payroll/ rather than /pricing/. Somebody reading this section
-    // is weighing a per-employee bill against a flat one, and that page has the
-    // calculator that answers it with their own headcount.
+    // Points at /payroll/ rather than /pricing/, because that page has the calculator for a per- employee bill against a flat one.
     'midcta_h2' => 'Payroll without the per-employee bill',
     'midcta_p' => 'Included with Premium at $' . $argo_monthly . ' a month, however many people you pay. See what you are paying per head today.',
     'midcta_href' => '../../payroll/',

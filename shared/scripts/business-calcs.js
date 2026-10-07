@@ -134,9 +134,7 @@ export function hourlyRate(input) {
     rate: billableHours > 0 ? revenueNeeded / billableHours : 0,
     dayRate: billableHours > 0 ? (revenueNeeded / billableHours) * 8 : 0,
 
-    // The naive figure people start from, and what it would really leave them
-    // with. Showing the resulting take-home is far more legible than showing a
-    // shortfall against a revenue number the reader never sees.
+    // The naive figure people start from and what it really leaves them, since take-home reads better than a shortfall.
     naiveRate,
     naiveTakeHome: Math.max(0, (naiveRate * billableHours - expenses) * (1 - taxPct)),
   };

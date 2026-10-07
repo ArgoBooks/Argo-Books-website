@@ -10,9 +10,7 @@
  *   4. HTTP Referer header mapped to a known channel (AI chats, social sites)
  */
 
-// Staging password wall. dev-gate.php gates the dev subdomain only; it checks
-// HTTP_HOST and is a no-op on production, so including it here is safe on
-// every page that tracks referrals (which is every public page).
+// dev-gate.php gates the dev subdomain only and is a no-op on production, so including it here is safe on every public page.
 require_once __DIR__ . '/dev-gate.php';
 
 require_once __DIR__ . '/statistics.php';
@@ -94,9 +92,7 @@ $auto_directory = null;
 if (isset($_GET['source']) && !empty($_GET['source'])) {
     $candidate = trim($_GET['source']);
     if (preg_match('/^[a-zA-Z0-9_-]+$/', $candidate)) {
-        // Google Ads sources require a gclid. Google auto-tagging adds a signed
-        // gclid to every real ad click; bots that scrape URLs with `?source=google-ads-...`
-        // almost never include one, so its absence is a strong fake-click signal.
+        // Google auto-tagging puts a signed gclid on every real ad click, so a `?source=google- ads-...` URL without one is almost certainly a bot.
         $is_google_ads = strpos($candidate, 'google-ads-') === 0;
         if (!$is_google_ads || !empty($_GET['gclid'])) {
             $resolved_source = $candidate;
@@ -115,10 +111,7 @@ if ($resolved_source === null && !empty($_GET['utm_source'])) {
     }
 }
 
-// 3. ?ref= param mapped to a known channel. Product Hunt and many directory
-// sites auto-append ?ref=<site>. Accepted only when it matches a known channel
-// (never as a raw source), since ref is also used for affiliate IDs and
-// self-referencing domains.
+// A ?ref= value is accepted only when it matches a known channel and never as a raw source, because ref also carries affiliate ids.
 if ($resolved_source === null && !empty($_GET['ref'])) {
     $ref = strtolower(trim($_GET['ref']));
     $sources = get_auto_referral_sources();
@@ -152,13 +145,7 @@ if ($resolved_source === null && !empty($_SERVER['HTTP_REFERER'])) {
 }
 
 if ($resolved_source !== null) {
-    // Auto-register guides-hub, per-article (guide-*) and invoice-generator
-    // (invgen-*) sources so they show up in the referral admin without manual
-    // setup, the same way UTM and referrer sources self-register. Ad and sponsor
-    // sources are still added by hand so their names and targets stay curated.
-    // Outreach (outreach-*) is intentionally NOT auto-registered: its codes
-    // encode lead id + A/B variant for the outreach dashboard, and there can be
-    // thousands, so it stays in its own admin rather than the referral list.
+    // Guide and invoice-generator sources register themselves so they appear in the referral admin without being set up by hand.
     if ($resolved_source === 'guides-hub' || strncmp($resolved_source, 'guide-', 6) === 0) {
         $auto_name = $resolved_source === 'guides-hub'
             ? 'Guides hub'
@@ -174,18 +161,13 @@ if ($resolved_source !== null) {
 
     $tracked = track_referral_visit($resolved_source, $_SERVER['REQUEST_URI']);
 
-    // For an auto-detected directory, only create the referral_links row once a
-    // real visit lands (track_referral_visit returns false for bots, our own
-    // non-tracked IP, and same-IP repeats). This keeps scraped/junk ?ref= values
-    // from ever appearing in the admin list.
+    // For an auto-detected directory, only create the referral_links row once a real visit lands (track_referral_visit returns false for bots, our own non-tracked IP, and same-IP repeats).
     if ($tracked && $auto_directory !== null) {
         ensure_auto_referral_link($auto_directory['code'], $auto_directory['name']);
     }
 }
 
-// Fire a landing event for every page that requires this file. Tracks
-// visitors with no source too (resolved_source = null) so the funnel
-// captures "direct/unknown" traffic alongside paid sources.
+// Fire a landing event for every page that requires this file. Tracks visitors with no source too (resolved_source = null) so the funnel captures "direct/unknown" traffic alongside paid sources.
 track_referral_event('landing', [
     'source_code' => $resolved_source,
     'event_data'  => [

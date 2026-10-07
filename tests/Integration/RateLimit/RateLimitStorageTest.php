@@ -22,16 +22,7 @@ final class RateLimitStorageTest extends DatabaseTestCase
 
     private function uniqueIp(string $tag): string
     {
-        // 192.0.2.0/24 is reserved for documentation (RFC 5737), so these can
-        // never collide with real traffic.
-        //
-        // The /24 only holds 254 hosts, so drawing each address at random
-        // collides roughly 1 run in 254 for any test that needs two distinct
-        // IPs. A per-process counter makes distinctness exact for the first
-        // 254 calls; the random starting offset keeps two PHPUnit processes
-        // running at once from walking the same addresses in step.
-        //
-        // $tag is unused, kept because it documents intent at the call site.
+        // 192.0.2.0/24 is reserved for documentation (RFC 5737), so these can never collide with real traffic.
         static $base = null;
         static $next = 0;
         if ($base === null) {
@@ -138,9 +129,7 @@ final class RateLimitStorageTest extends DatabaseTestCase
         $ip = $this->uniqueIp('check_at');
         record_rate_limit_attempt($ip, self::PREFIX);
         record_rate_limit_attempt($ip, self::PREFIX);
-        // Already at 2; with limit=2 the next check_and_record sees the
-        // bucket already at the cap and refuses (returns true) without
-        // incrementing.
+        // Already at 2; with limit=2 the next check_and_record sees the bucket already at the cap and refuses (returns true) without incrementing.
         $this->assertTrue(check_and_record_rate_limit($ip, 2, 900, self::PREFIX));
         $this->assertSame(2, $this->storedCount($ip), 'a blocked attempt must not be counted');
         $this->assertTrue(is_rate_limited($ip, 2, 900, self::PREFIX));
@@ -157,9 +146,7 @@ final class RateLimitStorageTest extends DatabaseTestCase
         check_and_record_rate_limit($ip, 1, 900, self::PREFIX);
         $this->assertTrue(check_and_record_rate_limit($ip, 1, 900, self::PREFIX));
 
-        // Age the bucket to just past the window, then hammer it while it is
-        // still (nominally) tripped. If a blocked call re-anchored the window,
-        // the next allowed call below would still be blocked.
+        // Age the bucket to just past the window, then hammer it while it is still (nominally) tripped.
         $this->ageBucket($ip, 1000);
         $this->assertFalse(check_and_record_rate_limit($ip, 1, 900, self::PREFIX));
         $this->assertSame(1, $this->storedCount($ip), 'expired bucket must reset to 1');

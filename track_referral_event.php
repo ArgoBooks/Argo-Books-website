@@ -201,9 +201,7 @@ function track_referral_event(string $event_type, array $opts = []): bool
         return false;
     }
 
-    // Same IP exclusion as the visit/page-view trackers: owner's own
-    // connection + crawler netblocks. allow_bot (CLI / desktop app) bypasses
-    // it too, since those legitimately post from server-side / app contexts.
+    // Same IP exclusion as the visit/page-view trackers: owner's own connection + crawler netblocks.
     if (!$allow_bot && is_nontracked_ip($_SERVER['REMOTE_ADDR'] ?? null)) {
         return false;
     }
@@ -213,10 +211,7 @@ function track_referral_event(string $event_type, array $opts = []): bool
         return false;
     }
 
-    // Distinguish "caller omitted visitor_id" (mint from cookie) from
-    // "caller explicitly passed null" (record unattributed). Without this,
-    // app_first_run retries from an untokenized installer would mint a
-    // fresh UUID each time and inflate counts.
+    // Distinguish "caller omitted visitor_id" (mint from cookie) from "caller explicitly passed null" (record unattributed).
     if (array_key_exists('visitor_id', $opts)) {
         $visitor_id = $opts['visitor_id'];
     } else {
@@ -241,10 +236,7 @@ function track_referral_event(string $event_type, array $opts = []): bool
         $event_data_json = json_encode($opts['event_data'], JSON_UNESCAPED_SLASHES);
     }
 
-    // Page-view events (fired server-side on every page load) start unconfirmed
-    // and are promoted to confirmed by a client-side JS beacon, so headless bots
-    // that never run JS are excluded from the funnel. Real action / webhook
-    // events aren't page views, so they're confirmed on insert.
+    // A page view starts unconfirmed and a client-side beacon promotes it, so a bot that never runs JS stays out of the funnel.
     $js_confirmed = in_array($event_type, ['landing', 'downloads_page'], true) ? 0 : 1;
 
     try {
@@ -335,8 +327,7 @@ function get_referral_source_for_visitor(string $visitor_id): ?string
  * Fire a subscription-keyed funnel event (premium_paid / premium_churned) from
  * a webhook, cron, or portal handler.
  *
- * Wraps the resolve-attribution + track + log dance those call sites used to
- * copy-paste. Attribution (visitor_id / source_code / user_id) is resolved
+ * Wraps resolve-attribution, track and log for those call sites. Attribution (visitor_id / source_code / user_id) is resolved
  * from the subscription's premium_signup event; $fallbacks fills any field
  * that resolves to null (browser contexts pass their cookie/session values so
  * a missing signup event still attributes).

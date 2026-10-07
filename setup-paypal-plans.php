@@ -29,10 +29,7 @@ $pricing = get_pricing_config();
 $monthlyBase = $pricing['premium_monthly_price'];
 $yearlyBase  = $pricing['premium_yearly_price'];
 
-// PayPal bills the plan's fixed_price with no fee added, but the card flow
-// (Stripe/Square) charges base + processing fee, and every receipt prints
-// base + fee. To keep all payment methods and the receipt consistent, bake the
-// processing fee into the PayPal plan price so PayPal charges the same total.
+// PayPal bills the plan's fixed_price with no fee added, but the card flow (Stripe/Square) charges base + processing fee, and every receipt prints base + fee.
 $monthlyPrice = $monthlyBase + calculate_processing_fee($monthlyBase);
 $yearlyPrice  = $yearlyBase + calculate_processing_fee($yearlyBase);
 

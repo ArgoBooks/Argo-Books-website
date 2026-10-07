@@ -81,10 +81,7 @@ const STYLES = {
   },
   elegant: {
     label: 'Elegant',
-    // Georgia serif + indigo accent, mirroring the live tool's Elegant
-    // template. The docx export marks the INVOICE wordmark with a thin
-    // indigo bottom rule on the right header cell (handled in
-    // buildHeaderTable via the same path as Ribbon).
+    // Georgia serif + indigo accent, mirroring the live tool's Elegant template.
     headingFont: 'Georgia',
     headingColor: '6366F1',
     headerFill: null,
@@ -141,9 +138,7 @@ async function buildXlsx(styleId) {
     views: [{ showGridLines: false }],
   });
 
-  // Six-column layout (A-F). Wider Description (A:C merged), tight Qty/Rate,
-  // a comfortable Amount column. Totals labels live in D:E, values in F so
-  // they sit directly under the Amount column.
+  // Six-column layout (A-F). Wider Description (A:C merged), tight Qty/Rate, a comfortable Amount column. Totals labels live in D:E, values in F so they sit directly under the Amount column.
   ws.getColumn('A').width = 22;
   ws.getColumn('B').width = 16;
   ws.getColumn('C').width = 12;
@@ -441,9 +436,7 @@ function buildHeaderTable(style, styleId) {
 
   const rightCellBorders = {
     top: noBorder,
-    // Ribbon and Elegant both anchor their wordmark with a thin accent
-    // rule under the INVOICE cell. Other styles either fill the cell
-    // (none currently) or leave it borderless.
+    // Ribbon and Elegant both anchor their wordmark with a thin accent rule under the INVOICE cell. Other styles either fill the cell (none currently) or leave it borderless.
     bottom: (styleId === 'ribbon' || styleId === 'elegant')
       ? { style: BorderStyle.SINGLE, size: 6, color: style.accentColor }
       : noBorder,

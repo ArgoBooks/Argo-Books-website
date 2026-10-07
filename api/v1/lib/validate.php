@@ -104,9 +104,7 @@ function api_coerce_field(string $name, array $field, $value, int $accountId)
             return $value;
 
         case 'amount':
-            // Minor units, like Stripe. Accepts an integer or an integral
-            // numeric string; a decimal is rejected outright rather than
-            // silently rounded, because guessing at money is how books break.
+            // Minor units, as Stripe uses. A decimal is rejected rather than rounded, because guessing at money is how books go wrong.
             if (is_int($value)) {
                 return $value;
             }

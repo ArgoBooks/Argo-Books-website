@@ -48,10 +48,7 @@ if (!flock($lockFp, LOCK_EX | LOCK_NB)) {
 // ─── Configuration ───
 
 define('DAILY_SEND_LIMIT', (int) ($_ENV['OUTREACH_DAILY_SEND_LIMIT'] ?? 10));
-// Follow-ups have their own daily cap, separate from first-touch sends.
-// With the multi-touch sequence (touches 2 through N), this cap applies
-// across ALL touch positions combined. Default 75; raise via env var
-// (OUTREACH_DAILY_FOLLOWUP_LIMIT) once domain reputation supports more.
+// Follow-ups have their own daily cap, separate from first-touch sends. With the multi-touch sequence (touches 2 through N), this cap applies across ALL touch positions combined.
 define('DAILY_FOLLOWUP_LIMIT', (int) ($_ENV['OUTREACH_DAILY_FOLLOWUP_LIMIT'] ?? 75));
 define('DAILY_DRAFT_LIMIT', (int) ($_ENV['OUTREACH_DAILY_DRAFT_LIMIT'] ?? 100));
 
@@ -93,8 +90,7 @@ function setState($pdo, $key, $value)
     $stmt->execute([$key, $value]);
 }
 
-// ══════════════════════════════════════════════════════════════
-//  MAIN PIPELINE
+// ══════════════════════════════════════════════════════════════ MAIN PIPELINE
 // ══════════════════════════════════════════════════════════════
 
 logPipeline('=== Outreach Pipeline Starting ===');
@@ -104,15 +100,12 @@ global $pdo;
 $cronRunId = $dryRun ? 0 : cron_run_start($pdo, 'outreach_pipeline');
 
 try {
-    // ─── Master kill-switch: admin can disable the entire outreach system
-    // from the Settings tab. When off, the server cron still fires but does
-    // nothing until re-enabled.
+    // ─── Master kill-switch: admin can disable the entire outreach system from the Settings tab.
+    // When off, the server cron still fires but does nothing until re-enabled.
     $outreachEnabled = getState($pdo, 'outreach_enabled', '1');
     if ($outreachEnabled !== '1') {
         logPipeline('Outreach is DISABLED via admin Settings (outreach_enabled != "1"). Pipeline exiting without running any steps.');
-        // Finish cleanly: this is a normal no-op, not a crash. Without this the
-        // run row would stay 'running' and the admin Crons pill would read
-        // "Running" forever while outreach is toggled off.
+        // Finish cleanly: this is a normal no-op, not a crash.
         cron_run_finish($pdo, $cronRunId, 'ok');
         return;
     }
@@ -122,10 +115,8 @@ try {
         stepGenerateDrafts($pdo, $dryRun);
     }
 
-    // ─── STEP 4: Auto-Approve ───
-    // Runtime-toggled via outreach_pipeline_state.auto_send_mode
-    // ('auto' | 'review'). Defaults to 'auto' on a DB that hasn't had the
-    // toggle set yet. Admin can flip to review-mode in the Settings tab.
+    // ─── STEP 4: Auto-Approve ─── Runtime-toggled via outreach_pipeline_state.auto_send_mode
+    // ('auto' | 'review'). Defaults to 'auto' on a DB that hasn't had the toggle set yet.
     $autoSendMode = getState($pdo, 'auto_send_mode', 'auto');
     if (($runAll || $draftOnly) && $autoSendMode === 'auto') {
         stepAutoApprove($pdo, $dryRun);
@@ -138,25 +129,20 @@ try {
         stepSendEmails($pdo, $dryRun);
     }
 
-    // ─── STEP 5.5: Halt Follow-ups (replies / unsubscribes / bounces) ───
-    // Also runs in --draft-only so we don't waste Gemini drafts on leads who
-    // have already replied/unsubscribed/bounced since the last run.
+    // --- Step 5.5: halt follow-ups (replies, unsubscribes, bounces) ---
+    // Runs in --draft-only too, so no Gemini draft is spent on a lead who has already replied.
     if ($runAll || $sendOnly || $draftOnly) {
         stepHaltFollowups($pdo, $dryRun);
     }
 
-    // ─── STEP 5.6: Draft Follow-ups (Gemini, lazy ~1 day before send) ───
-    // Always runs regardless of send mode. Drafting itself is harmless.
-    // The review-vs-auto gating happens INSIDE stepDraftFollowups (which
-    // advances drafted → approved only when auto_send_mode = 'auto').
+    // ─── STEP 5.6: Draft Follow-ups (Gemini, lazy ~1 day before send) ─── Always runs regardless
+    // of send mode. Drafting itself is harmless.
     if ($runAll || $sendOnly || $draftOnly) {
         stepDraftFollowups($pdo, $dryRun);
     }
 
-    // ─── STEP 6: Send Follow-ups ───
-    // Step 6 always runs; review-vs-auto gating is implicit in row statuses.
-    // (Review mode: rows stay 'drafted' awaiting admin approval, not picked
-    // up by the WHERE status='approved' query.)
+    // ─── STEP 6: Send Follow-ups ─── Step 6 always runs; review-vs-auto gating is implicit in row
+    // statuses.
     if ($runAll || $sendOnly) {
         stepSendFollowups($pdo, $dryRun);
     }
@@ -165,9 +151,7 @@ try {
     cron_run_finish($pdo, $cronRunId, 'ok');
 
 } catch (Throwable $e) {
-    // Throwable, not Exception: also catch PHP Errors (TypeError, OOM-adjacent
-    // fatals) so a non-Exception failure still records 'error' instead of
-    // leaving the run row orphaned as 'running'.
+    // Throwable, not Exception: also catch PHP Errors (TypeError, OOM-adjacent fatals) so a non- Exception failure still records 'error' instead of leaving the run row orphaned as 'running'.
     logPipeline("Pipeline fatal error: " . $e->getMessage(), 'ERROR');
     cron_run_finish($pdo, $cronRunId, 'error', $e->getMessage());
     exit(1);
@@ -179,8 +163,7 @@ try {
     }
 }
 
-// ══════════════════════════════════════════════════════════════
-//  STEP IMPLEMENTATIONS
+// ══════════════════════════════════════════════════════════════ STEP IMPLEMENTATIONS
 // ══════════════════════════════════════════════════════════════
 
 function stepGenerateDrafts($pdo, $dryRun)
@@ -233,9 +216,7 @@ function stepGenerateDrafts($pdo, $dryRun)
                 logPipeline("Draft generation failed for {$lead['business_name']}: {$result['error']}", 'ERROR');
                 $failed++;
             } elseif (!empty($result['disqualified'])) {
-                // AI size gate rejected this lead. log_activity + status update
-                // were already done inside disqualify_lead(); just surface it
-                // in the pipeline log for the daily summary.
+                // disqualify_lead() has already logged it and set the status, so this only surfaces it in the pipeline log for the daily summary.
                 logPipeline("Disqualified by AI size gate: {$lead['business_name']} ({$result['reason']}: {$result['detail']})");
                 $disqualified++;
             } else {
@@ -264,11 +245,7 @@ function stepAutoApprove($pdo, $dryRun)
 {
     logPipeline('--- Step 4: Auto-Approve Drafts ---');
 
-    // Approve all leads that have a draft but haven't been approved yet.
-    // Excludes disqualified leads as a belt-and-suspenders guard: disqualify_lead()
-    // already clears approval_status, but if a draft was created before the
-    // disqualify (e.g. via the AI gate post-draft retroactive backfill) we
-    // don't want to re-approve it here.
+    // Disqualified leads are excluded as a second guard, in case a draft was made before the lead was disqualified.
     $stmt = $pdo->prepare("
         SELECT id, business_name
         FROM outreach_leads
@@ -325,10 +302,7 @@ function stepSendEmails($pdo, $dryRun)
 
     logPipeline("Already sent $sentToday today. Will send up to $remaining more.");
 
-    // Find approved leads with drafts that haven't been sent.
-    // status != 'disqualified' is a safety net: disqualify_lead() resets
-    // approval_status, but explicitly excluding here means a disqualified row
-    // can never appear in the send queue regardless of approval_status state.
+    // status != 'disqualified' is a safety net, so a disqualified row can never be picked up for sending.
     $stmt = $pdo->prepare("
         SELECT id, business_name, email, draft_subject, draft_body, unsubscribe_token
         FROM outreach_leads

@@ -54,10 +54,7 @@ if ($action === 'cancel') {
         header('Location: /admin/payments/index.php?msg=cannot_cancel');
         exit;
     }
-    // State-guarded UPDATE: the cooling-off promoter cron can flip this row
-    // to 'processing' (and fire the gateway) between the SELECT above and
-    // this UPDATE. Without the predicate, the admin's cancel would clobber
-    // an already-finalized refund.
+    // State-guarded, because the cooling-off cron can move this row to processing between the SELECT above and this UPDATE.
     $upd = $pdo->prepare("
         UPDATE refund_requests
         SET state='cancelled', state_reason = ?, cancel_token = NULL, updated_at = NOW()
@@ -80,11 +77,7 @@ if ($action === 'force_fail') {
         header('Location: /admin/payments/index.php?msg=invalid_state');
         exit;
     }
-    // Same state-guard pattern as the cancel branch above. cancel_token = NULL
-    // closes a narrow race: the cooling-off promoter cron can flip cooling_off
-    // → processing between our SELECT and this UPDATE, carrying the token
-    // forward. Clearing it here keeps the public cancel link from leaking
-    // terminal state after force_fail.
+    // The same state guard as the cancel branch, and clearing cancel_token closes the race the cron can open in between.
     $upd = $pdo->prepare("
         UPDATE refund_requests
         SET state='failed', state_reason = ?, cancel_token = NULL, updated_at = NOW()

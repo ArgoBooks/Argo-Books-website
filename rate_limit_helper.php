@@ -136,12 +136,7 @@ function rate_limit_gc(PDO $pdo): void
  */
 function rate_limit_touch(PDO $pdo, string $key, int $maxAttempts, int $windowSeconds): ?int
 {
-    // Read left to right: the IF() condition runs first, setting the insert id
-    // to the bucket's count within the current window (0 once it has expired).
-    // If that prior count is already at the cap the row is left completely
-    // untouched, so a blocked attempt costs nothing and doesn't extend the
-    // window. Otherwise the count becomes prior + 1, and first_attempt_at is
-    // re-anchored only when the old window had run out.
+    // Read left to right: the IF() sets the insert id to the bucket's count in the window, and a count already at the cap leaves the row untouched, so a blocked attempt costs nothing.
     $sql = 'INSERT INTO rate_limit_counters (bucket_key, attempt_count, first_attempt_at)
             VALUES (?, LAST_INSERT_ID(0) + 1, UTC_TIMESTAMP())
             ON DUPLICATE KEY UPDATE

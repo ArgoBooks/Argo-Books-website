@@ -142,14 +142,7 @@ function refund_paypal_preflight(array $company, string $order_id, int $requeste
 }
 
 function refund_paypal_issue(array $company, array $request): array {
-    // If preflight already resolved a capture, use it; otherwise re-resolve.
-    // Background callers (cooling-off promoter, stale-processing cron) hit
-    // this path because preflight ran in a different request. We must NOT
-    // call refund_paypal_preflight here: it uses `exit` on every error
-    // path (transient HTTP failures, missing capture, etc.) which would
-    // abort the entire cron loop without ever marking the refund 'failed'.
-    // Use the silent resolver that THROWS instead so the outer
-    // refund_execute_against_provider catch can update state correctly.
+    // A capture resolved by preflight is reused; a background caller ran preflight in another request, so it resolves one here instead.
     $capture_id = $GLOBALS['__paypal_preflight_capture_id'] ?? null;
     if (!$capture_id) {
         $capture_id = refund_paypal_resolve_capture_id($company, $request['provider_payment_id']);

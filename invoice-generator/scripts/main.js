@@ -843,9 +843,7 @@ async function init() {
   })();
   state = loadDraft(nicheDefaults);
 
-  // If we landed on a niche page with defaults AND localStorage had no draft,
-  // the niche defaults won. Fire an event so the admin conversion dashboard
-  // can attribute niche-page hydration distinctly from generic visits.
+  // If we landed on a niche page with defaults AND localStorage had no draft, the niche defaults won.
   if (!hadLocalDraftBefore && nicheDefaults && typeof nicheDefaults === 'object') {
     const slug = (typeof window !== 'undefined' && window.INVOICE_NICHE_SLUG)
       ? String(window.INVOICE_NICHE_SLUG)
@@ -853,17 +851,7 @@ async function init() {
     trackEvent(`${EVP}_niche_default_used`, slug);
   }
 
-  // Share-link URL parameters override the persisted draft for THIS session
-  // only. Whitelist lives in url-params.js (template, currency, from, billTo,
-  // invoiceNumber, paymentTerms, taxRatePercent, taxRateMode). Used by the
-  // /invoice-template/{style}-{format}/ landing pages (template only) and by
-  // the "Copy share link" button (full whitelist).
-  //
-  // We deliberately do NOT saveDraft here: if a user with a real in-progress
-  // invoice clicks a marketing/share link, navigating back to /invoice-generator/
-  // with no query should restore their original draft. Any actual edit triggers
-  // saveDraft via onAnyInput, so the merged state persists the moment the user
-  // engages with the pre-filled invoice.
+  // Share-link URL parameters override the persisted draft for THIS session only.
   try {
     const { parseShareLink } = await import(`${BASE}/invoice-generator/scripts/url-params.js`);
     const { TEMPLATES } = await import(`${BASE}/invoice-generator/scripts/templates.js`);
@@ -872,9 +860,6 @@ async function init() {
     if (Object.keys(fromUrl).length > 0) {
       Object.assign(state, fromUrl);
       // Currency carries a paired locale that drives Intl.NumberFormat output.
-      // Object.assign only sets the explicitly named keys, so when a share
-      // link sets currency we mirror the LOCALE_FOR_CURRENCY mapping that
-      // setCurrency() applies on UI changes.
       if (fromUrl.currency) {
         state.locale = LOCALE_FOR_CURRENCY[fromUrl.currency] || 'en-US';
       }

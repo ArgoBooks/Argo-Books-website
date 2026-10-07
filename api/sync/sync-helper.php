@@ -37,7 +37,7 @@ function resolve_owner_identity(): ?string
  *
  * A free desktop is known by its device id and a Premium one by its license key,
  * so entering a key changed who the desktop was. Its phones stayed under the old
- * identity: they kept sending receipts to a queue the desktop no longer read, and
+ * identity, sending receipts to a queue the desktop does not read, and
  * the desktop listed no phones at all. The desktop sends both headers, so the
  * rows filed under its device id are moved to its license here.
  *
@@ -159,7 +159,7 @@ function create_pairing_token(string $ownerHash, string $companyUid, string $com
  *
  * Mutually exclusive with the short-code claim path: the DELETE's
  * `status = 'pending'` guard means a pairing already claimed via
- * claim_pairing_code() (status='claimed') can no longer be redeemed here, and
+ * claim_pairing_code() (status='claimed') cannot be redeemed here, and
  * rowCount() === 1 is the single source of truth for "this call won the
  * redeem," mirroring claim_pairing_code()'s atomic UPDATE guard.
  */
@@ -240,12 +240,7 @@ function claim_pairing_code(string $rawCode, string $phonePublicKey, string $dev
     $deviceToken = bin2hex(random_bytes(32));
     $deviceTokenHash = hash('sha256', $deviceToken);
 
-    // The device row and the pairing's device_token_hash must land together: a
-    // thrown exception here would otherwise strand a 'claimed' row with a NULL
-    // device_token_hash (unusable, but no longer claimable either). Only start
-    // (and commit/roll back) a transaction if the caller isn't already inside
-    // one, since MySQL doesn't nest transactions and PHPUnit's DatabaseTestCase
-    // wraps every test in its own outer transaction.
+    // The device row and the pairing's token hash have to land together, or a throw strands a claimed row that is unusable and unclaimable.
     $ownTransaction = !$pdo->inTransaction();
     if ($ownTransaction) {
         $pdo->beginTransaction();

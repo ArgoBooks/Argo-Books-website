@@ -40,10 +40,7 @@ if (!$input) {
 
 // Extract common fields
 $email = $input['email'] ?? $input['payer_email'] ?? '';
-// Only CAD is supported. Never trust a client-supplied currency: it is stored
-// on the subscription and used for PayPal refund currency, so a bad value
-// corrupts records and breaks refunds. The actual gateway charge is already
-// hardcoded to CAD.
+// Only CAD is supported, and a client-supplied currency is never trusted: it is stored on the subscription and decides the currency a PayPal refund goes out in.
 $currency = 'CAD';
 $billing = $input['billing'] ?? 'monthly';
 $paymentMethod = $input['payment_method'] ?? 'unknown';
@@ -90,10 +87,7 @@ try {
     exit();
 }
 
-// Serialize concurrent checkout requests for the same user so a double-submit
-// can't create two subscriptions: the existing-subscription check and the
-// INSERT below are not otherwise atomic. The lock auto-releases when the
-// request (DB connection) ends.
+// Serialised per user so a double submit cannot create two subscriptions, because the check for an existing one and the INSERT below are not atomic together.
 try {
     $lockStmt = $pdo->prepare("SELECT GET_LOCK(?, 10)");
     $lockStmt->execute(["premium_checkout_$userId"]);
@@ -120,9 +114,7 @@ $existingSubscription = null;
 $subscriptionStillValid = false;
 
 try {
-    // Env filter: same user_id can have a sandbox sub on dev and a production
-    // sub on prod (shared DB). Without this filter, prod checkout could pick
-    // up the dev sub and mistake it for an active production subscription.
+    // Filtered by environment because dev and production share one database, so a production checkout could otherwise read a sandbox row as an active subscription.
     $stmt = $pdo->prepare("
         SELECT * FROM premium_subscriptions
         WHERE user_id = ? AND status IN ('active', 'cancelled', 'payment_failed')
@@ -173,10 +165,7 @@ try {
             if ($isPayPalSubscription) {
                 // PayPal Subscriptions API - recurring billing handled by PayPal
                 $paypalSubscriptionId = $input['paypal_subscription_id'] ?? $input['subscriptionID'] ?? '';
-                // Validate format at entry: the id ends up in the DB and in
-                // outbound URL paths to PayPal (cancel, refund). Reject
-                // anything that doesn't match the alphanumeric+hyphen format
-                // before it can persist or reach an API call.
+                // Validated at entry because the id is stored and then put into PayPal URL paths for cancel and refund.
                 require_once __DIR__ . '/../../../paypal-helper.php';
                 if (!isValidPayPalResourceId($paypalSubscriptionId)) {
                     $pdo->rollBack();
@@ -187,11 +176,7 @@ try {
                 $transactionId = $paypalSubscriptionId;
                 $paymentToken = $paypalSubscriptionId; // Store subscription ID as token
             } else {
-                // One-time PayPal payments are NOT supported here. This endpoint
-                // only creates recurring subscriptions, and there is no
-                // server-side capture verification for a one-off order id, so
-                // trusting a client-supplied orderID would let a logged-in user
-                // create a paid subscription without actually paying. Reject it.
+                // One-time payments are rejected: nothing here verifies a capture for an order id, so a client-supplied one would buy a subscription without paying.
                 $pdo->rollBack();
                 error_log("Rejected unsupported one-time PayPal payment. user_id=$userId");
                 echo json_encode(['success' => false, 'error' => 'Unsupported PayPal payment type']);
@@ -404,16 +389,11 @@ try {
         // Update existing subscription with new payment method and billing cycle
         $subscriptionId = $existingSubscription['subscription_id'];
 
-        // Calculate new amount based on billing cycle (from centralized config).
-        // $newAmount is the base price (used for signup_base_price / grandfathering);
-        // $newAmountCharged includes the processing fee and is what goes in the
-        // amount column, keeping it consistent with the new-signup path.
+        // $newAmount is the base price grandfathering locks in; $newAmountCharged adds the processing fee and is what the amount column holds, as on a new signup.
         $newAmount = ($billing === 'yearly') ? $pricingConfig['premium_yearly_price'] : $pricingConfig['premium_monthly_price'];
         $newAmountCharged = $newAmount + calculate_processing_fee($newAmount);
 
-        // Determine the new end date:
-        // - If subscription still valid (end_date > now) AND not charged: keep existing end_date
-        // - If charged (new subscription period): calculate new end_date from now
+        // A subscription still inside its paid period keeps its end date, unless this charges for a new period.
         $existingEndDate = $existingSubscription['end_date'];
         $newEndDate = $existingEndDate; // Default: keep existing
 
@@ -424,12 +404,7 @@ try {
                 : date('Y-m-d H:i:s', strtotime('+1 month'));
         }
 
-        // PayPal cycle-switch path: pre-compute proration + refund details.
-        // PayPal billing engine handles its own first-cycle charge on
-        // activation, so override end_date to today + new cycle. The cancel
-        // and refund happen post-commit (see below). We MUST proceed even
-        // if some prereqs fail, because by this point the new PayPal sub already
-        // exists on PayPal's side; rolling back here would orphan it.
+        // PayPal bills its own first cycle on activation, so the end date becomes today plus the new cycle, and a failed prereq must not roll back a subscription that already exists there.
         $isPayPalCycleSwitch = (
             $cycleSwitch
             && $paymentMethod === 'paypal'
@@ -440,11 +415,7 @@ try {
             require_once __DIR__ . '/../../../paypal-helper.php';
             require_once __DIR__ . '/../../../community/users/user_functions.php';
 
-            // Re-read the row INSIDE the transaction with FOR UPDATE so a
-            // concurrent renewal webhook or admin edit between the line-100
-            // SELECT and this UPDATE can't be silently overwritten. Money-
-            // handling code: read fresh, hold the lock for the duration of
-            // the cycle-switch decision and write.
+            // Re-read inside the transaction with FOR UPDATE, so a renewal webhook or an admin edit between the earlier SELECT and this write is not overwritten.
             try {
                 $stmt = $pdo->prepare("
                     SELECT * FROM premium_subscriptions
@@ -468,15 +439,9 @@ try {
             // authoritative row state under the row lock.
             $existingSubscription = $lockedSubscription;
 
-            // Defense-in-depth guards (confirm page also enforces these but
-            // process-subscription.php is reachable via direct POST, so it
-            // must enforce independently). All rejections happen before any
-            // DB writes or PayPal-side state changes.
+            // Checked again here because this endpoint is reachable by direct POST, and every rejection happens before any write and before anything changes at PayPal.
 
-            // Status: cycle switch requires an active sub. The
-            // existingSubscription query at line 100 includes cancelled and
-            // payment_failed for general payment-method updates, so it must be
-            // stricter here.
+            // A cycle switch needs an active subscription, which is stricter than the query above, since that one also accepts cancelled and payment_failed for payment-method updates.
             if (($existingSubscription['status'] ?? '') !== 'active') {
                 $pdo->rollBack();
                 error_log("Cycle switch rejected: subscription not active. user_id=$userId, status=" . ($existingSubscription['status'] ?? 'unknown'));
@@ -484,10 +449,7 @@ try {
                 exit();
             }
 
-            // Cooldown: 5 min between cycle changes. Prevents two-tab races
-            // (PayPal generates distinct sub ids per approval, so the anti-
-            // replay check below doesn't catch concurrent approvals: the
-            // cooldown does) and rapid double-click double-billing.
+            // Five minutes between cycle changes, which catches two approvals at once that the anti-replay check below cannot, because PayPal issues a different id for each approval.
             if (!empty($existingSubscription['last_cycle_change_at'])
                 && (time() - strtotime($existingSubscription['last_cycle_change_at'])) < 300) {
                 $pdo->rollBack();
@@ -498,9 +460,7 @@ try {
 
             $oldPaypalSubId = $existingSubscription['paypal_subscription_id'] ?? '';
 
-            // Anti-replay: new sub id MUST differ from existing row's id.
-            // PayPal generates a new id on each approval, so this should
-            // always hold; failure means a replay attack or a bug.
+            // PayPal issues a new id on each approval, so the same id arriving twice is a replay.
             if ($oldPaypalSubId === $paypalSubscriptionId) {
                 $pdo->rollBack();
                 echo json_encode(['success' => false, 'error' => 'Replay rejected: same PayPal subscription id']);
@@ -514,10 +474,7 @@ try {
                 exit();
             }
 
-            // No-sale-yet hard reject. Without a completed PayPal sale we
-            // have nothing to refund against; proceeding would charge the
-            // user for the new cycle and silently forfeit the prorated value
-            // of the unused old period. Confirm page also guards this.
+            // Without a completed sale there is nothing to refund against, so the switch would charge for the new cycle and forfeit the unused part of the old one.
             $sale = getMostRecentPayPalSale($subscriptionId);
             if (!$sale) {
                 $pdo->rollBack();
@@ -549,11 +506,7 @@ try {
         }
 
         if ($isPayPalCycleSwitch) {
-            // PayPal cycle-switch UPDATE: writes previous_paypal_subscription_id
-            // (race fix for the cancel webhook) and stamps last_cycle_change_at.
-            // credit_balance is intentionally NOT touched here. It gets set
-            // post-commit based on refund outcome so a failed refund doesn't
-            // also wipe out the user's existing credit.
+            // previous_paypal_subscription_id is what lets the cancel webhook ignore itself. credit_balance is set after the commit instead, so a failed refund cannot wipe the credit already held.
             $stmt = $pdo->prepare("
                 UPDATE premium_subscriptions
                 SET payment_method = ?,
@@ -589,10 +542,7 @@ try {
                 $subscriptionId
             ]);
 
-            // Audit row in payment history. The real $0 sale row gets
-            // written by the PAYMENT.SALE.COMPLETED webhook when PayPal
-            // bills the new sub. Skip if a row with this transaction_id
-            // already exists (rare double-submit guard).
+            // Only the audit row: the real $0 sale row arrives with the PAYMENT.SALE.COMPLETED webhook. Skipped when a double submit has already written one.
             try {
                 $auditCurrency = $existingSubscription['currency'] ?? 'CAD';
                 // Env-scope the dedupe so a cycle_change row recorded by the
@@ -655,14 +605,7 @@ try {
 
         $pdo->commit();
 
-        // PayPal cycle-switch post-commit: cancel the OLD PayPal sub,
-        // then issue the prorated refund, then send email. Order matters:
-        //   - Cancel AFTER commit so the cancel webhook (which we deliberately
-        //     trigger) finds previous_paypal_subscription_id already set and
-        //     ignores itself via the race fix.
-        //   - Refund LAST so a refund failure doesn't undo a successful switch.
-        //   - Each step's failure is logged critical and surfaced as a warning
-        //     to the user, but never rolls back the cycle switch.
+        // Cancel after the commit, so the cancel webhook finds previous_paypal_subscription_id set and ignores itself, and refund last, so a failed refund cannot undo a switch that went through.
         $switchWarnings = [];
         if ($isPayPalCycleSwitch && $paypalCycleSwitchData) {
             $sw = $paypalCycleSwitchData;
@@ -700,13 +643,7 @@ try {
                 $switchWarnings[] = "We couldn't issue your prorated refund automatically because no recent PayPal payment was found. Please contact support if you expected a refund.";
             }
 
-            // 3. Resolve credit_balance based on refund outcome:
-            //    - Refund succeeded: any unrefunded excess (refund cap > sale amount)
-            //      carries forward as credit. typically 0.
-            //    - Refund failed or skipped: restore the user's original credit so
-            //      they don't lose entitlement on top of missing the refund.
-            //    Done as a separate UPDATE post-commit so a failed refund leaves
-            //    credit intact.
+            // Credit is resolved after the commit: a refund that went through carries any excess forward, and one that did not restores the original credit so entitlement is not lost as well.
             $totalRefundableValue = (float) $sw['proration']['prorated_credit'] + $sw['existing_credit'];
             if ($refundSucceeded) {
                 $creditBalanceAfter = max(0, round($totalRefundableValue - (float) $sw['refund_amount'], 2));
@@ -742,10 +679,7 @@ try {
             }
         }
 
-        // If this cycle switch raised the customer's effective rate (e.g. they
-        // had an older, lower locked-in price), say so plainly so a higher
-        // charge isn't a surprise. Compare monthly-equivalent rates, and only
-        // when we have a recorded old locked price to compare against.
+        // Says so plainly when the switch raises the rate, comparing monthly equivalents, so a bigger charge is no surprise to somebody on an older locked-in price.
         $priceIncreaseNote = '';
         $oldLockedBase = $existingSubscription['signup_base_price'] ?? null;
         if ($oldLockedBase !== null && (float) $oldLockedBase > 0) {
@@ -842,14 +776,7 @@ try {
             current_environment()
         ]);
 
-        // Create the redeemable license-key row so the desktop app can activate
-        // this paid subscription. The customer's "license key" IS the
-        // subscription_id (that's what the receipt email shows). The desktop
-        // redeem endpoint only looks in premium_subscription_keys, so without
-        // this row a paid key is rejected as invalid. redeemed_at is preset and
-        // device_id is NULL so the first redemption routes through
-        // _handle_re_redemption(), which binds the device to the existing
-        // subscription instead of creating a duplicate one.
+        // The desktop app redeems against premium_subscription_keys, so a paid key is rejected without this row. device_id stays NULL so the first redemption binds to this subscription.
         $stmt = $pdo->prepare("
             INSERT INTO premium_subscription_keys (
                 subscription_key, email, duration_months,
@@ -870,17 +797,12 @@ try {
         $referralSource = $_SESSION['referral_source'] ?? null;
         $visitorId      = $_COOKIE[ARGO_VISITOR_COOKIE] ?? null;
 
-        // The session value is lost if the buyer created their account or logged
-        // in between landing and paying (both reset the PHP session), so fall
-        // back to the durable visitor cookie's first-touch source.
+        // Creating an account or logging in resets the session, so the durable visitor cookie's first-touch source is the fallback.
         if (empty($referralSource) && !empty($visitorId)) {
             $referralSource = get_referral_source_for_visitor($visitorId);
         }
 
-        // Enforce the affiliate referral cookie window: an affiliate is only
-        // credited when their first click on this visitor is recent enough. Stale
-        // affiliate clicks drop attribution so no commission is earned on a sale
-        // the affiliate didn't meaningfully drive. Non-affiliate sources pass through.
+        // An affiliate is credited only when their click on this visitor is recent enough, so a stale click earns no commission on a sale it did not drive.
         if (!empty($referralSource)) {
             require_once __DIR__ . '/../../../community/affiliate/affiliate_functions.php';
             if (!affiliate_source_within_window($visitorId, $referralSource, current_environment())) {
@@ -897,9 +819,7 @@ try {
             }
         }
 
-        // Fire premium_signup + premium_paid events and backfill all prior
-        // funnel events for this visitor so attribution stays attached to
-        // the subscription even across logged-out browse sessions.
+        // Backfills this visitor's earlier funnel events too, so attribution stays attached across sessions they browsed logged out.
         try {
             track_referral_event('premium_signup', [
                 'visitor_id'      => $visitorId,
@@ -943,10 +863,7 @@ try {
             error_log("Failed to send Premium subscription email: " . $e->getMessage());
         }
 
-        // Notify the team that a new paying customer just signed up. Best-effort:
-        // a failed notification must never affect the customer's checkout. Mirrors
-        // the admin-alert pattern used by the PayPal price-drift guard below.
-        // Gated by the admin's notification preferences (Settings > Notifications).
+        // Best effort and gated by the admin's notification preferences, so a failed notification never affects the customer's checkout.
         try {
           if (admin_notification_enabled('notify_new_customer')) {
             $providerNames = ['paypal' => 'PayPal', 'stripe' => 'Stripe', 'square' => 'Square'];
@@ -983,12 +900,7 @@ try {
             error_log("Failed to send new-customer admin notification: " . $e->getMessage());
         }
 
-        // PayPal price-drift guard. PayPal bills the plan's baked-in price, not
-        // the amount we compute here, so a stale plan (e.g. created before a
-        // price change and never regenerated) silently charges the wrong amount
-        // while the receipt shows ours. Compare what PayPal will actually bill
-        // against what we recorded and alert if they differ, so we catch it
-        // before a customer does. Best-effort: never let it break checkout.
+        // PayPal bills the plan's baked-in price rather than the amount computed here, so a stale plan charges the wrong amount while the receipt shows ours. Best effort, never blocking checkout.
         if ($paypalSubscriptionId) {
             try {
                 require_once __DIR__ . '/../../../paypal-helper.php';

@@ -97,10 +97,7 @@ if (rate_limit_hit('api_key_create_ip', get_client_ip())) {
 
 $label = substr(trim((string) ($body['label'] ?? '')), 0, 100);
 
-// The name is the only thing telling two keys apart in the app: the secret is never
-// shown again and the hint is a dozen characters of hex. Checked here rather than
-// only in the app because the app hides its own key from that list, so it cannot see
-// the collision, and because two devices can create at once.
+// The name is all that tells two keys apart in the app, since the secret is shown once and the hint is a few characters. Checked here because the app hides its own key.
 if ($label !== '') {
     $dupe = $pdo->prepare(
         'SELECT 1 FROM api_keys WHERE account_id = ? AND revoked_at IS NULL AND LOWER(label) = LOWER(?) LIMIT 1'

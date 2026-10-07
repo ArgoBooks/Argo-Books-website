@@ -59,9 +59,7 @@ if (PHP_SAPI !== 'cli') {
     defer_client_page_view('invgen_article_' . $safe_slug_for_event);
 }
 
-// Cap at 50: referral source_code columns are VARCHAR(50). Long slugs are
-// truncated deterministically so the visit and the auto-registered link still
-// match on the same value.
+// Capped at 50 because referral source_code is VARCHAR(50), and truncated the same way every time so the visit and the auto-registered link still match on one value.
 $invgen_ref = substr('guide-' . $slug, 0, 50);
 $utm_qs = '?source=' . htmlspecialchars($invgen_ref)
         . '&amp;utm_source=invoice-generator&amp;utm_medium=article&amp;utm_campaign=phase1';
@@ -72,9 +70,7 @@ $page_title = $data['meta_title'] ?? ($data['h1'] . ' | Argo Books');
 $page_description = $data['meta_description'] ?? '';
 $canonical_url = 'https://argorobots.com/' . $slug . '/';
 
-// Reading time, computed from the actual body (intro + sections + FAQ text) at
-// ~220 words per minute, rounded up. This replaces the hand-set
-// reading_time_min field so the badge always matches the real length.
+// Worked out from the body text at about 220 words a minute and rounded up, so the badge always matches the real length of the article.
 $reading_text = (string) ($data['intro_html'] ?? '');
 foreach ($data['sections'] as $sec) {
     $reading_text .= ' ' . (string) ($sec['html'] ?? '');
@@ -83,9 +79,7 @@ foreach (($data['faqs'] ?? []) as $faq) {
     $reading_text .= ' ' . (string) ($faq['q'] ?? '') . ' ' . (string) ($faq['a'] ?? '');
 }
 $reading_text = preg_replace('/\{\{illustration:[a-z0-9-]+\}\}/', ' ', $reading_text);
-// Resolve pricing placeholders first. Unresolved, {argo_premium_monthly} counts
-// as three words where the "$15" it becomes counts as none, so every placeholder
-// on the page pushed the estimate up.
+// Pricing placeholders are resolved first: {argo_premium_monthly} counts as three words where the "$15" it becomes counts as none, which pushed every estimate up.
 $reading_text = pricing_substitute($reading_text);
 $reading_time_min = max(1, (int) ceil(str_word_count(strip_tags($reading_text)) / 220));
 
@@ -150,10 +144,7 @@ $breadcrumb_schema_json = argo_breadcrumb_schema([
   $data['h1'] => $canonical_url,
 ]);
 
-// FAQPage schema, emitted only when the article defines FAQs. Built from the
-// same q/a pairs rendered in the body below so the structured data and the
-// visible content stay in lockstep (Google requires the match for FAQ rich
-// results). Answers are plain text, so tags are stripped defensively.
+// Built from the same question and answer pairs the body renders, because Google requires the structured data to match what the reader sees. Answers are stripped to plain text.
 $faq_schema_json = null;
 if (!empty($data['faqs'])) {
     $faq_entities = [];
@@ -186,11 +177,7 @@ if ($faq_schema_json !== null) {
     $extra_head .= "\n<script type=\"application/ld+json\">" . $faq_schema_json . "</script>";
 }
 
-// An article may name one extra stylesheet under guides/styles/. Most articles
-// are prose and need nothing; a piece built around code blocks or comparison
-// panels brings its own rules rather than pushing them into the sheet every
-// other article loads. Filename only, so a data file cannot point at an
-// arbitrary URL.
+// An article built around code blocks or comparison panels brings its own rules rather than pushing them into the sheet every other article loads. A filename only, never a URL.
 if (!empty($data['stylesheet']) && preg_match('/^[a-z0-9-]+\.css$/', (string)$data['stylesheet'])) {
     $extra_head .= "\n<link rel=\"stylesheet\" href=\"" . INVGEN_BASE
         . '/guides/styles/' . $data['stylesheet'] . "\">";
@@ -202,11 +189,7 @@ $callout_after = isset($data['callout_after_section_index']) ? (int)$data['callo
 $tool_callout_text = $data['tool_callout_text'] ?? 'Open the free invoice generator and fill in your details now.';
 $tool_callout_cta = $data['tool_callout_cta'] ?? 'Open the invoice generator';
 
-// Optional site-relative callout target (e.g. '/features/receipt-scanning/').
-// When unset, the callout points at the invoice generator. Either way it
-// carries ?source so the funnel attributes the click to this article. The
-// href is built with HTML-encoded ampersands and echoed raw (do not wrap in
-// htmlspecialchars, or the &amp; entities double-encode).
+// Carries ?source either way, so the funnel credits the click to this article. The href holds encoded ampersands and is echoed raw, since htmlspecialchars would double-encode them.
 $tool_callout_url = $data['tool_callout_url'] ?? null;
 if ($tool_callout_url !== null) {
     $callout_sep = strpos($tool_callout_url, '?') !== false ? '&amp;' : '?';
@@ -215,15 +198,11 @@ if ($tool_callout_url !== null) {
     $tool_callout_href = INVGEN_BASE . '/invoice-generator/' . $utm_qs . '&amp;placement=inline';
 }
 
-// Tag every internal link in the article body with ?source so a click through
-// to downloads, features, or the generator is credited to this article.
-// Leaves external links, anchors, and already-tagged links untouched.
+// Every internal link in the body carries ?source, so a click through to downloads, features or the generator is credited to this article. External, anchor and tagged links are left alone.
 if (!function_exists('article_tag_source')) {
     function article_tag_source(string $html, string $source): string
     {
-        // Single-segment paths that are articles or the guides hub are content
-        // navigation, not "main site" destinations, so they stay clean (no
-        // tracking params on internal cross-links, which is better for SEO).
+        // An article or the guides hub is content navigation rather than a main site destination, so those links stay clean, which is better for search as well.
         static $skip = null;
         if ($skip === null) {
             $skip = ['guides' => true];
@@ -295,11 +274,7 @@ ob_start();
   </header>
 
   <?php
-    // Optional headline statistic. Articles whose whole point is a single
-    // number (what something costs, how long something takes) can lead with
-    // it here instead of burying it in the intro prose. Absent on most
-    // articles, in which case nothing renders. `footnote` is trusted author
-    // HTML so it can carry links; the rest is escaped plain text.
+    // An article whose whole point is one number can lead with it rather than bury it in the intro. `footnote` is trusted author HTML so it can carry links; the rest is escaped.
     $hero = is_array($data['hero_stat'] ?? null) ? $data['hero_stat'] : null;
   ?>
   <?php if ($hero !== null && !empty($hero['value'])): ?>
@@ -324,9 +299,7 @@ ob_start();
   </section>
 
   <?php
-    // Table of contents, built from the section headings. The anchor fallback
-    // mirrors the section loop below so every link resolves. Skipped on very
-    // short articles where a TOC adds nothing.
+    // Built from the section headings, with the anchor fallback mirroring the section loop below so every link resolves. A very short article gets none.
     $toc = [];
     foreach ($data['sections'] as $i => $section) {
         if (empty($section['h2'])) {
@@ -392,10 +365,7 @@ ob_start();
       fn($s) => is_string($s) && preg_match('/^[a-z0-9-]+$/', $s)
     ));
 
-    // An explicit empty array opts out of the block: not every article belongs
-    // to the invoice-generator cluster, and "Free invoice generators" under a
-    // piece that has nothing to do with invoicing reads as a stray advert.
-    // A missing key is still an oversight, so it renders and warns as before.
+    // An explicit empty array opts out, because "Free invoice generators" under a piece with nothing to do with invoicing reads as a stray advert. A missing key still warns.
     $niches_opted_out = array_key_exists('related_niche_slugs', $data)
       && count($related_niche_slugs) === 0;
   ?>
@@ -454,9 +424,7 @@ ob_start();
 
 </article>
 <?php
-// Code blocks expand first, before the link and illustration passes. Their
-// contents are raw source, so they must be escaped by the component before
-// anything else walks the body looking for markup.
+// Code blocks expand first, because their contents are raw source and must be escaped by the component before anything else walks the body looking for markup.
 $body_content = article_expand_code_blocks(ob_get_clean());
 $body_content = article_expand_illustrations(article_apply_link_class(article_prefix_internal_links($body_content)));
 
@@ -466,9 +434,7 @@ $theme_toggle = true;
 
 $extra_scripts = '';
 
-// Articles that call argo_code_block() pull in the shared component's styling
-// and its copy button. Detected from the rendered body so an article needs no
-// flag of its own, and articles without code pay nothing.
+// Detected from the rendered body, so an article that calls argo_code_block() pulls in the shared styling and its copy button while one without code pays nothing.
 if (strpos($body_content, 'class="code-block') !== false) {
     $extra_head .= "\n<link rel=\"stylesheet\" href=\"" . INVGEN_BASE . '/resources/styles/code-block.css">';
     $extra_scripts .= '<script src="' . INVGEN_BASE . '/resources/scripts/code-block.js" defer></script>';
@@ -534,9 +500,7 @@ document.addEventListener('DOMContentLoaded', function () {
 </script>
 HTML;
 
-// Editorial header nav for guide pages. Content/credibility links only,
-// deliberately no Pricing or buy CTA so the page reads as a blog, not a
-// funnel. The shared tool layout renders this only when it is set.
+// Content and credibility links only, with no pricing or buy button, so a guide reads as a blog rather than a funnel. The shared tool layout renders this only when it is set.
 $header_nav = [
   ['label' => 'Guides',        'href' => 'guides/'],
   ['label' => 'Docs',          'href' => 'documentation/'],

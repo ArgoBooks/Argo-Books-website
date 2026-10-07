@@ -126,9 +126,7 @@ function getOrCreateUsageRecord($pdo, $identifier, $monthly_limit) {
         return $record;
     }
 
-    // environment has to be supplied explicitly, not left to the column default:
-    // it is part of the unique key, so the ON DUPLICATE KEY clause only matches
-    // the right row when all three key columns are in the INSERT.
+    // environment is supplied explicitly rather than left to the column default, because it is part of the unique key.
     $stmt = $pdo->prepare("
         INSERT INTO invoice_send_usage (license_key, usage_month, send_count, monthly_limit, environment)
         VALUES (?, ?, 0, ?, ?)

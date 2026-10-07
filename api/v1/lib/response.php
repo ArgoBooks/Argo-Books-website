@@ -18,9 +18,7 @@ function api_send_common_headers(): void
     header('Request-Id: ' . api_request_id());
     header('Cache-Control: no-store');
     header('X-Content-Type-Options: nosniff');
-    // The API is called server-to-server. No browser origin is trusted, so no
-    // Access-Control-Allow-Origin is emitted: a key must never sit in frontend
-    // JavaScript, and refusing CORS is the cheapest way to discourage it.
+    // No Access-Control-Allow-Origin, because the API is called server to server and a key must never sit in front-end JavaScript.
 }
 
 /**

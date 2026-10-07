@@ -124,9 +124,7 @@ function _google_encryption_keys(): array
         throw new RuntimeException('Neither GOOGLE_ENCRYPTION_KEY nor GOOGLE_CLIENT_SECRET is configured.');
     }
 
-    // Use the dedicated key when available, falling back to the derived one.
-    // Both are returned for decryption so old ciphertext keeps working after
-    // GOOGLE_ENCRYPTION_KEY is introduced.
+    // Use the dedicated key when available, falling back to the derived one. Both are returned for decryption so old ciphertext keeps working after GOOGLE_ENCRYPTION_KEY is introduced.
     return [
         'primary' => $dedicatedKey ?? $derivedKey,
         'fallback' => $dedicatedKey !== null ? $derivedKey : null,

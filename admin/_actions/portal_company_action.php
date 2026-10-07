@@ -75,11 +75,7 @@ switch ($action) {
         }
 
         $pdo->beginTransaction();
-        // Stale-token guard: only revert if the company is currently on the
-        // new_email from THIS change request. Without this predicate, admin
-        // reverting an older completed request can stomp a newer email
-        // change (A->B then B->C; reverting the A->B record sets owner back
-        // to A even though the user is now legitimately on C).
+        // Stale-token guard: only revert if the company is currently on the new_email from THIS change request.
         $upd = $pdo->prepare(
             "UPDATE portal_companies SET owner_email = ?
              WHERE id = ? AND owner_email = ?"

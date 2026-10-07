@@ -4,8 +4,7 @@
 // Shared template for every page under /features/. Content lives in
 // features/data/{slug}.php.
 //
-// Each feature page used to be a standalone ~390-line file, and roughly 69% of
-// every one of them was the same skeleton: the same meta block, the same hero
+// Roughly 69% of a feature page is skeleton shared with every other one: the same meta block, the same hero
 // shell, how-it-works steps, split product blocks, mid-page CTA, benefit grid,
 // privacy block, who-it's-for grid, FAQ, related cards and outro. A layout
 // change meant eleven identical edits.

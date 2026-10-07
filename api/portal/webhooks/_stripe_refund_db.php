@@ -37,10 +37,7 @@ function apply_stripe_refund_to_db(
     bool $isProduction,
     ?string $refundId = null
 ): bool {
-    // Find the original payment regardless of its status: partial-refund
-    // scenarios leave it in 'completed' AND we still want the second refund
-    // webhook to land. Matching only on status='completed' was the previous
-    // behavior and dropped subsequent partial refunds entirely.
+    // Find the original payment regardless of its status: partial-refund scenarios leave it in 'completed' AND we still want the second refund webhook to land.
     $stmt = $pdo->prepare(
         'SELECT id, company_id, invoice_id, customer_name, currency, amount, status
          FROM portal_payments
@@ -54,20 +51,12 @@ function apply_stripe_refund_to_db(
         return false;
     }
 
-    // Key the negative-payment row by the individual Refund ID when known so
-    // multiple partial refunds on one charge produce distinct rows. Fall back
-    // to the payment-intent-derived key for legacy callers (older tests) that
-    // exercise a single full-refund scenario.
+    // Keyed by the individual refund id when known, so several partial refunds on one charge make separate rows, with the older key as a fallback.
     $refundKey = $refundId !== null
         ? 'refund_' . $refundId
         : 'refund_' . $providerPaymentId;
 
-    // Capture whether the refund row was newly inserted. record_portal_payment
-    // is idempotent via the UNIQUE index on provider_payment_id; if Stripe
-    // retries the same Refund event, the second call no-ops here. We must
-    // also skip the invoice balance / original-payment-status updates below
-    // on those retries; otherwise the refund would be double-applied to
-    // the invoice.
+    // record_portal_payment is idempotent on provider_payment_id, so a retried Stripe event no-ops and the invoice update is skipped with it.
     $recordResult = record_portal_payment([
         'company_id' => $originalPayment['company_id'],
         'invoice_id' => $originalPayment['invoice_id'],
@@ -87,12 +76,7 @@ function apply_stripe_refund_to_db(
         return true;
     }
 
-    // Flip the original payment to 'refunded' only once cumulative refunds
-    // cover the original amount. Scope the sum to refunds against THIS
-    // specific charge (provider_transaction_id = chargeId), not the whole
-    // invoice, so refunds on a sibling payment for the same invoice can't
-    // inflate this total and incorrectly flip the wrong payment. Tiny
-    // epsilon for cent-level float drift.
+    // Flip the original payment to 'refunded' only once cumulative refunds cover the original amount.
     $sumStmt = $pdo->prepare(
         "SELECT COALESCE(SUM(amount), 0) AS refunded_total
          FROM portal_payments
@@ -112,12 +96,7 @@ function apply_stripe_refund_to_db(
         $stmt->execute([$originalPayment['id']]);
     }
 
-    // MySQL evaluates SET assignments left-to-right; later expressions see
-    // already-updated columns. Compute status BEFORE updating balance_due so
-    // the CASE reads the pre-refund balance; otherwise a partial refund
-    // (e.g. $50 of $100 paid) computes "balance_due_new (=$50) + refund
-    // (=$50) >= total (=$100)" → TRUE → status flips to "sent" instead of
-    // "partial".
+    // MySQL evaluates SET left to right, so status is computed before balance_due and the CASE reads the pre-refund balance.
     $stmt = $pdo->prepare(
         'UPDATE portal_invoices
          SET status = CASE
@@ -164,10 +143,7 @@ function apply_stripe_charge_refunds(
     $stmt->execute([$providerPaymentId]);
     $row = $stmt->fetch();
     if (!$row) {
-        // No matching portal payment: likely a charge that didn't originate
-        // from the customer portal (e.g. license/subscription, or a refund
-        // for a deleted/migrated record). Log so support can trace
-        // disappearing-refund tickets.
+        // No matching portal payment means the charge came from somewhere else, such as a subscription, so it is logged for support to trace.
         error_log("Portal Stripe webhook: charge.refunded for {$charge->id} (PI {$providerPaymentId}) has no matching portal payment row");
         return;
     }
@@ -175,9 +151,7 @@ function apply_stripe_charge_refunds(
     $zeroDecimalCurrencies = ['BIF','CLP','DJF','GNF','JPY','KMF','KRW','MGA','PYG','RWF','UGX','VND','VUV','XAF','XOF','XPF'];
     $divisor = in_array($refundCurrency, $zeroDecimalCurrencies) ? 1 : 100;
 
-    // Always one row per Refund, keyed by its id. The desktop refund flow
-    // writes the same key, so a refund it already recorded is a no-op here,
-    // and each partial refund gets its own row.
+    // Always one row per Refund, keyed by its id. The desktop refund flow writes the same key, so a refund it already recorded is a no-op here, and each partial refund gets its own row.
     $refunds = stripe_charge_refunds($charge, $connectedAccount);
     foreach ($refunds as $refundObj) {
         $refundAmount = ($refundObj->amount ?? 0) / $divisor;
@@ -192,10 +166,7 @@ function apply_stripe_charge_refunds(
         );
     }
 
-    // Reconcile against refund_requests if this refund was initiated by our
-    // /api/portal/refunds/ flow (refund metadata carries argo_request_id).
-    // Idempotent: no-op if already completed; transitions processing/cooling_off
-    // → completed otherwise.
+    // Matched back to refund_requests when the refund came from our own flow, which its metadata says. Idempotent, so a repeat does nothing.
     try {
         require_once __DIR__ . '/../_audit.php';
         require_once __DIR__ . '/../_refund_helpers.php';
@@ -206,9 +177,7 @@ function apply_stripe_charge_refunds(
                 $stmt->execute([(int)$argoRequestId]);
                 $req = $stmt->fetch(PDO::FETCH_ASSOC);
                 if ($req && $req['state'] !== 'completed' && $req['state'] !== 'cancelled') {
-                    // CAS guard so a race with the synchronous execute
-                    // path can't fire two completion notifications. Only
-                    // the UPDATE that flips the state actually notifies.
+                    // Only the UPDATE that actually flips the state notifies, so a race with the synchronous path cannot send two notifications.
                     $upd = $pdo->prepare("UPDATE refund_requests SET state='completed', provider_refund_id = ?, completed_at = NOW(), cancel_token = NULL, updated_at = NOW() WHERE id = ? AND state IN ('processing','cooling_off')");
                     $upd->execute([$refundObj->id, (int)$argoRequestId]);
                     if ($upd->rowCount() > 0) {

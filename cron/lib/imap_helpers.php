@@ -122,9 +122,7 @@ function imap_is_bounce($senderEmail, $subject = '')
 {
     $senderEmail = strtolower(trim($senderEmail));
 
-    // Resend uses SES infrastructure; bounces can come from either provider.
-    // Exact-domain match (not substring) to avoid false positives from addresses
-    // like user@resend.com.example.com.
+    // Resend uses SES infrastructure; bounces can come from either provider. Exact-domain match (not substring) to avoid false positives from addresses like user@resend.com.example.com.
     $atPos = strrpos($senderEmail, '@');
     $domain = $atPos !== false ? substr($senderEmail, $atPos + 1) : '';
     $bounceDomains = ['resend.com', 'amazonses.com', 'email-smtp.amazonaws.com'];

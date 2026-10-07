@@ -315,7 +315,7 @@
     }
     function close(){ modal.hidden=true; }
 
-    // The page's email row no longer sends directly — it opens the modal so the
+    // The page's email row opens the modal rather than sending directly, so the
     // user can confirm their address and choose the opt-in before anything sends.
     form.addEventListener('submit', function(e){ e.preventDefault(); open(); });
     modal.querySelectorAll('[data-close]').forEach(function(el){ el.addEventListener('click', close); });

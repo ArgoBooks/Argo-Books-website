@@ -158,10 +158,7 @@ final class SampleCodeTest extends TestCase
     {
         parent::setUp();
 
-        // Every language variant of an example uses the same documented
-        // Idempotency-Key, which is right for a reader running one of them and
-        // wrong for a harness running all five. Clearing the claims makes each
-        // sample the first caller, so each is tested as written.
+        // Every language variant of an example uses the same documented Idempotency-Key, which is right for a reader running one of them and wrong for a harness running all five.
         $GLOBALS['pdo']->prepare('DELETE FROM api_idempotency_cache WHERE account_id = ?')
             ->execute([self::$accountId]);
     }

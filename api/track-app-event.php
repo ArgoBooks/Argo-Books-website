@@ -143,9 +143,7 @@ function survey_first_run_row_id(string $machine_uuid): ?int
     return $row === false ? null : (int)$row['id'];
 }
 
-// Both surveys update the existing app_first_run row for this machine_uuid in
-// place rather than inserting a new event row (a single first-run row per machine
-// is the funnel's source of truth).
+// Both surveys update the existing app_first_run row for this machine_uuid in place rather than inserting a new event row (a single first-run row per machine is the funnel's source of truth).
 if ($event_type === 'signup_survey' || $event_type === 'exit_survey') {
     require_once __DIR__ . '/../config/survey_options.php';
 
@@ -154,10 +152,7 @@ if ($event_type === 'signup_survey' || $event_type === 'exit_survey') {
     }
 
     if ($event_type === 'signup_survey') {
-        // "Where did you hear about Argo Books?", and from 2.0.20 "What did you come
-        // to do?" beside it. Older versions send only the first. A newer one sends
-        // only the second when the source is already known, either because the
-        // install came through a tracked link or because it was answered earlier.
+        // "Where did you hear about Argo Books?" and, from 2.0.20, "What did you come to do?". An older app sends only the first, a newer one only the second when the source is known.
         [$answer, $other_text] = survey_read_choice($data, 'answer', 'other_text', 'options', false);
         [$goal, $goal_text] = survey_read_choice($data, 'goal', 'goal_other_text', 'goals', false);
         if ($answer === null && $goal === null) {
@@ -176,9 +171,7 @@ if ($event_type === 'signup_survey' || $event_type === 'exit_survey') {
     try {
         $row_id = survey_first_run_row_id($machine_uuid);
         if ($row_id === null) {
-            // The answer arrived before first-run was logged. The app only asks
-            // after the first-run marker is written, so this is exceptional.
-            // Respond 200 with deferred=true so the client doesn't retry forever.
+            // The answer arrived before first-run was logged. The app only asks after the first-run marker is written, so this is exceptional.
             echo json_encode(['success' => true, 'deferred' => true]);
             exit;
         }
@@ -283,11 +276,7 @@ if ($visitor_id !== null) {
     }
 }
 
-// Dedup: skip if we've already logged a first_run for this machine in this
-// environment. Sandbox and production share a database, so an unscoped check
-// let a test install permanently suppress the real one from the same machine.
-// When visitor_id is null (token didn't resolve), dedupe by machine_uuid
-// alone so retries from an untokenized installer don't create multiple rows.
+// Dedup: skip if we've already logged a first_run for this machine in this environment.
 if ($machine_uuid !== '') {
     try {
         if ($visitor_id !== null) {

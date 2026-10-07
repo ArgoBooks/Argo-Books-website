@@ -15,9 +15,7 @@ $premium_yearly  = (float) $pricing['premium_yearly_price'];    // e.g. 100.00
 $rate            = 0.50;
 $commission_rate_pct = (int) round($rate * 100);
 $window_months   = 12;
-// Referral attribution window: how long a click keeps crediting the affiliate.
-// Pulled from the same env-backed setting the checkout enforces, so the copy can
-// never claim a window the commission logic doesn't actually honor.
+// Read from the same env-backed setting the checkout enforces, so the copy can never claim a window the commission logic does not honour.
 $cookie_days     = affiliate_attribution_days();
 $c_month         = $premium_monthly * $rate;                    // per-month commission, monthly plan
 $c_year          = $premium_yearly * $rate;                     // per-customer commission, yearly plan

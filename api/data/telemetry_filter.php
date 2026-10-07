@@ -172,26 +172,13 @@ function filter_telemetry_event(array $event): ?array
             return $base + [
                 'action' => telemetry_validate_enum($event['action'] ?? null, TELEMETRY_SESSION_ACTIONS),
                 'durationSeconds' => telemetry_clean_int($event['durationSeconds'] ?? null),
-                // Wall clock from launch to quit, so it counts a window left open
-                // overnight as use. Kept because every past session is measured that
-                // way, but activeSeconds below is the one to chart.
-                //
-                // Seconds the app was actually being driven: input gaps longer than the
-                // client's idle threshold are excluded. Absent on SessionStart and on
-                // ends from builds predating the field, where null means "not measured"
-                // rather than zero.
+                // Wall clock from launch to quit, so an overnight window counts as use. activeSeconds below is the one to chart.
                 'activeSeconds' => telemetry_clean_int($event['activeSeconds'] ?? null),
                 // The screen they were on when they quit.
                 'lastPage' => telemetry_clean_string($event['lastPage'] ?? null, 64),
-                // Whether the app shut down normally. False marks a SessionEnd the app
-                // reconstructed on its next launch after a force-quit, OS restart, or
-                // power loss. Absent on SessionStart, and on ends from builds predating
-                // the flag, so readers must treat a missing value as clean.
+                // False marks an end the app rebuilt on its next launch after a force quit, and a missing value has to be read as clean.
                 'clean' => isset($event['clean']) ? (bool)$event['clean'] : null,
                 // High-water memory marks in MB, sampled once a minute while the app ran.
-                // Absent on SessionStart, on ends reconstructed after a force-quit, and on
-                // builds predating the fields. Capped at 256GB so a garbled payload cannot
-                // skew an average.
                 'peakManagedMemoryMb' => telemetry_clean_int($event['peakManagedMemoryMb'] ?? null, 262144),
                 'peakWorkingSetMb' => telemetry_clean_int($event['peakWorkingSetMb'] ?? null, 262144),
             ];
@@ -199,18 +186,14 @@ function filter_telemetry_event(array $event): ?array
         case 'FeatureUsage':
             return $base + [
                 'featureName' => telemetry_validate_enum($event['featureName'] ?? null, TELEMETRY_FEATURE_NAMES),
-                // Free-form detail the app attaches to a feature event (checklist
-                // step id, import source, chart type). Cleaned, not enum-checked,
-                // so new context values don't need a server change to survive.
+                // Free-form detail the app attaches to a feature event (checklist step id, import source, chart type).
                 'context' => telemetry_clean_string($event['context'] ?? null, 64),
                 'durationMs' => telemetry_clean_int($event['durationMs'] ?? null),
             ];
 
         case 'Error':
             $severity = telemetry_validate_enum($event['severity'] ?? null, TELEMETRY_ERROR_SEVERITIES);
-            // "Unknown" is not a severity the app can send. Builds older than v2.0.12
-            // omit the field entirely, and the dashboard's rule is that a missing
-            // severity means Error rather than a guess from the error code.
+            // "Unknown" is not a severity the app can send.
             if ($severity === 'Unknown') {
                 $severity = 'Error';
             }
@@ -224,12 +207,7 @@ function filter_telemetry_event(array $event): ?array
                 'methodName' => telemetry_clean_string($event['methodName'] ?? null, 128),
             ];
 
-            // Warning text is authored by us at the call site, so it is safe to keep and
-            // it is the only thing that makes a warning actionable: the code alone rarely
-            // says what happened. Error text is an exception's own Message, which we do
-            // not control and which can quote a filename, a company name or a server
-            // response, so it stays dropped. sourceFile + lineNumber locate an error
-            // precisely enough without it.
+            // Warning text is authored by us at the call site, so it is safe to keep and it is the only thing that makes a warning actionable: the code alone rarely says what happened.
             if ($severity === 'Warning') {
                 $out['message'] = telemetry_clean_string($event['message'] ?? null, 300);
             }
@@ -255,32 +233,20 @@ function filter_telemetry_event(array $event): ?array
             ];
 
         case 'CompanyProfile':
-            // Who the user actually is, sent once per session for the open company.
-            // Unlike every other event type this is not anonymous: a sole trader's
-            // company name is frequently their own name. It is disclosed in
-            // /legal/privacy.php under "Business Profile Data" and it is why that page
-            // no longer calls desktop telemetry anonymous. Do not widen this list
-            // without updating that page in the same change.
+            // Who the user is, once per session. Unlike every other event this is not anonymous, since a sole trader's company is often their own name.
             return $base + [
                 'companyName' => telemetry_clean_string($event['companyName'] ?? null, TELEMETRY_COMPANY_PROFILE_MAX),
                 'businessType' => telemetry_clean_string($event['businessType'] ?? null, TELEMETRY_COMPANY_PROFILE_MAX),
                 'industry' => telemetry_clean_string($event['industry'] ?? null, TELEMETRY_COMPANY_PROFILE_MAX),
                 'country' => telemetry_clean_string($event['country'] ?? null, 64),
-                // ISO 4217, so three letters is the real bound; 8 leaves room for a
-                // malformed value to arrive intact rather than truncated into a
-                // different currency's code.
+                // ISO 4217, so three letters is the real bound; 8 leaves room for a malformed value to arrive intact rather than truncated into a different currency's code.
                 'currency' => telemetry_clean_string($event['currency'] ?? null, 8),
-                // The language the app is displayed in, as its English name. Not the same
-                // question as country: an English app in a non-English country is what
-                // tells us which translations are actually used rather than just shipped.
+                // The language the app is displayed in, as its English name.
                 'language' => telemetry_clean_string($event['language'] ?? null, 64),
             ];
 
         case 'CompanyScale':
-            // How much is in the open company file, so a file someone is evaluating is
-            // separable from one they run a business on. Counts only: unlike CompanyProfile
-            // above, nothing here identifies anyone, so it needs no separate disclosure.
-            // Capped well above any plausible file so a corrupt payload cannot skew a chart.
+            // How much is in the open company file, so a file someone is evaluating is separable from one they run a business on.
             return $base + [
                 'expenses'   => telemetry_clean_int($event['expenses'] ?? null, 10000000),
                 'revenues'   => telemetry_clean_int($event['revenues'] ?? null, 10000000),
@@ -296,19 +262,13 @@ function filter_telemetry_event(array $event): ?array
             ];
 
         case 'Startup':
-            // Launch timing, one event per run. toFirstPaintMs covers everything before
-            // the app can draw anything (runtime load, assembly mapping, first-run AV
-            // scan) and is the part a splash screen cannot cover. Capped at ten minutes:
-            // a machine resumed from sleep mid-launch can otherwise report hours.
+            // Launch timing, one event per run. toFirstPaintMs covers everything before the app can draw, which a splash screen cannot cover.
             return $base + [
                 // toMainMs is the first line of our own code, so everything before it is
                 // the OS and the .NET runtime starting up.
                 'toMainMs' => telemetry_clean_int($event['toMainMs'] ?? null, 600000),
                 'toFirstPaintMs' => telemetry_clean_int($event['toFirstPaintMs'] ?? null, 600000),
-                // Marks between the splash and the window, so the gap between them can be
-                // attributed instead of guessed at: services, shell view model, the other
-                // view models, then the window object before its first layout. All are
-                // measured from process start, so they nest rather than sum.
+                // Marks between the splash and the window, so the gap can be attributed rather than guessed at.
                 'toServicesReadyMs' => telemetry_clean_int($event['toServicesReadyMs'] ?? null, 600000),
                 'toShellViewModelMs' => telemetry_clean_int($event['toShellViewModelMs'] ?? null, 600000),
                 'toViewModelsReadyMs' => telemetry_clean_int($event['toViewModelsReadyMs'] ?? null, 600000),

@@ -178,14 +178,7 @@ try {
     }
 
     if ($action === 'increment') {
-        // Deliberately does NOT increment any more. api/ai/completions.php now takes the
-        // scan as part of the request that actually calls Gemini, which is what makes the
-        // limit hold against a client that under-reports or skips this call entirely.
-        //
-        // Kept as an accepted no-op rather than removed, because every installed build
-        // still calls it after each successful scan. Removing it would 400 those clients,
-        // and incrementing here as well would bill every scan twice. Returning the current
-        // status keeps their usage display correct.
+        // Counted by the request that calls Gemini instead, which is what makes the limit hold when a client under-reports or skips this call.
         echo json_encode(buildResponse($scan_count, $monthly_limit, $tier));
         exit();
     }

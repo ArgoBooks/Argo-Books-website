@@ -126,9 +126,7 @@ function settings_tab_render($pdo)
     // fresh install keeps behaving as before.
     $outreachEnabled = settings_tab_get_state($pdo, 'outreach_enabled', '1') === '1';
 
-    // Current state. Default to 'auto' before the admin has explicitly picked
-    // a mode, matching the cron pipeline's default in
-    // cron/outreach_pipeline.php so the UI and the pipeline always agree.
+    // Defaults to 'auto' before a mode is picked, matching the cron pipeline, so the page and the pipeline always agree.
     $autoSendMode = settings_tab_get_state($pdo, 'auto_send_mode', 'auto');
     if (!in_array($autoSendMode, ['auto', 'review'], true)) $autoSendMode = 'auto';
 

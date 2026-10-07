@@ -11,10 +11,7 @@
 
 header('Content-Type: application/json; charset=utf-8');
 
-// The analysis makes several sequential Gemini calls; give it room. Keep running
-// even if the client disconnects (e.g. the user hits Cancel) so the analysis
-// completes and still records the daily usage — Cancel must not be a way to dodge
-// the rate limit.
+// Several Gemini calls in a row need room, and it keeps going after a disconnect so the analysis finishes and is recorded.
 @set_time_limit(300);
 ignore_user_abort(true);
 
@@ -36,10 +33,8 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
     pa_fail(405, 'method_not_allowed', 'Use POST to upload a file.');
 }
 
-// --- Rate limit (the limit message IS the pitch). Check only here; we record
-// AFTER a successful analysis so failed/invalid uploads (which never hit the
-// paid AI) don't burn a user's daily quota. Loopback (local dev) is exempt so
-// testing isn't capped — real visitors are never on 127.0.0.1. ---
+// --- Rate limit (the message is the pitch) ---
+// Recorded after a successful analysis, so an invalid upload does not burn the day's quota.
 $ip = get_client_ip();
 $paLocal = in_array($ip, ['127.0.0.1', '::1'], true);
 if (!$paLocal && rate_limit_exceeded('profit_analyzer', $ip)) {
@@ -88,8 +83,5 @@ if (!$paLocal) {
     rate_limit_record('profit_analyzer', $ip);
 }
 
-// Return both the chart-ready analytics and the full NormalizedData. Under
-// Option A the server stores nothing, so the client keeps `normalized` for the
-// session and posts it back to download.php / email.php to build the cleaned
-// spreadsheet on demand.
+// Return both the chart-ready analytics and the full NormalizedData.
 echo json_encode(['ok' => true, 'analytics' => $analytics, 'normalized' => $normalized]);

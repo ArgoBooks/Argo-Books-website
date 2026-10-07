@@ -40,10 +40,7 @@ function api_authenticate(): array
 {
     global $pdo;
 
-    // Per-key rate limiting cannot help here, because a request that fails to
-    // authenticate has no key to count against. Without an IP bucket, an
-    // attacker can spend our database on unlimited key lookups for free.
-    // Only failures count, so a busy legitimate integration never trips it.
+    // A request that fails to authenticate has no key to count against, so without an IP bucket an attacker gets unlimited key lookups. Only failures count.
     $ip = get_client_ip();
     if (rate_limit_exceeded('api_auth_failure', $ip, 'apiauth')) {
         header('Retry-After: ' . rate_limit_window('api_auth_failure'));
@@ -92,20 +89,13 @@ function api_authenticate(): array
         api_error(401, 'authentication_error', 'invalid_api_key', 'The API key provided is not valid.');
     }
     if ($row['revoked_at'] !== null) {
-        // Deliberately NOT counted against the address. A revoked key is a key we
-        // issued, not a guess, and the bucket is per-address with no key in it: an
-        // integration still retrying a key its merchant revoked would fill the
-        // bucket and lock that address out of every OTHER merchant's key as well.
+        // A revoked key is one we issued rather than a guess, and the bucket holds no key, so counting it would lock an address out over one stale integration.
         api_error(401, 'authentication_error', 'api_key_revoked', 'This API key has been revoked by the account owner.');
     }
     if ((int) $row['is_active'] !== 1) {
         api_error(403, 'invalid_request_error', 'account_inactive', 'The Argo Books account behind this key is not active.');
     }
-    // Checked on every request rather than only when the key was made, or a key minted during
-    // one paid month would keep working after the subscription ended. A key-created (free_key)
-    // subscription counts in either environment, because validating the key moves it to
-    // whichever site the app last used. A paid one only counts where it was paid, so a sandbox
-    // test payment never buys production access.
+    // Checked on every request rather than only when the key was made, or a key minted during a paid month would keep working after the subscription ended.
     $premium = in_array($row['subscription_status'], ['active', 'cancelled'], true)
         && strtotime((string) $row['subscription_end']) > time()
         && ($row['subscription_environment'] === current_environment() || $row['payment_method'] === 'free_key');

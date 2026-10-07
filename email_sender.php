@@ -39,9 +39,7 @@ function get_admin_notification_prefs()
         return $cache;
     }
 
-    // Seed the default row once. Default destination mirrors the address the
-    // customer/cancellation alerts historically hardcoded, so behaviour is
-    // unchanged until an admin edits it.
+    // Seed the default row once. Default destination mirrors the address the customer/cancellation alerts historically hardcoded, so behaviour is unchanged until an admin edits it.
     $pdo->prepare(
         "INSERT IGNORE INTO admin_notification_prefs (id, notification_email)
          VALUES (1, 'contact@argorobots.com')"
@@ -87,12 +85,7 @@ function admin_notification_enabled($key)
     return (int)$prefs[$key] === 1;
 }
 
-// Note: send_post_reply_email() and send_mention_email() defined below
-// call into helpers from email_marketing.php (should_send_marketing_email,
-// community_user_unsubscribe_url, mark_marketing_sent). Callers of those
-// senders must require_once email_marketing.php themselves. We don't
-// require it here to avoid a circular include. email_marketing.php
-// already requires this file.
+// The reply and mention senders below go through email_marketing.php, so a caller must respect its gate rather than call mail() itself.
 
 /**
  * Build an HTML <li> list of Premium plan features from plans.json.
@@ -127,9 +120,7 @@ function _premium_feature_list_items($prefix = '')
  */
 function send_styled_email($to_email, $subject, $body_content, $header_style = '', $from_email = null, $from_name = null, $reply_to = null, $extra_headers = [], $preheader = null, $format = 'html', &$message_id = null)
 {
-    // sanitize_header_value() strips CR/LF and ASCII control chars so
-    // user-controlled fields can't inject Bcc/Cc/etc into the mail()
-    // fallback's concatenated header string.
+    // sanitize_header_value() strips CR/LF and ASCII control chars so user-controlled fields can't inject Bcc/Cc/etc into the mail() fallback's concatenated header string.
     $to_email = sanitize_header_value($to_email);
     $subject = (string) sanitize_header_value($subject);
     $from_email = sanitize_header_value($from_email);
@@ -150,18 +141,14 @@ function send_styled_email($to_email, $subject, $body_content, $header_style = '
             $preheaderHtml = '<div style="display:none;max-height:0;overflow:hidden;font-size:1px;line-height:1px;color:transparent;mso-hide:all;">' . $safePreheader . '</div>';
         }
 
-        // Map style keywords to CSS classes. 'premium' is the blue Argo Books Premium
-        // header used by subscription mail; 'purple' remains the generic second
-        // accent for affiliate, portal and refund mail; 'blue' is the default.
+        // 'premium' is the blue subscription header, 'purple' the accent for affiliate, portal and refund mail, 'blue' the default.
         $header_class_map = [
             'premium' => 'header-premium',
             'purple'  => 'header-purple',
         ];
         $header_class = $header_class_map[$header_style] ?? 'header-blue';
 
-        // Subjects can be admin-authored or AI-generated; escape for the
-        // HTML <title> context. The raw subject still goes to SMTP/mail()
-        // as the email Subject header below.
+        // Subjects can be admin-authored or AI-generated; escape for the HTML <title> context. The raw subject still goes to SMTP/mail() as the email Subject header below.
         $titleEscaped = htmlspecialchars((string) $subject, ENT_QUOTES, 'UTF-8');
 
         $email_body = <<<HTML
@@ -190,9 +177,7 @@ function send_styled_email($to_email, $subject, $body_content, $header_style = '
             HTML;
     }
 
-    // Synthesize the Message-ID up-front so both transport paths use the same
-    // value. Callers that want to thread a future reply (e.g. the outreach
-    // follow-up sender) capture this via the &$message_id out-param.
+    // Synthesize the Message-ID up-front so both transport paths use the same value.
     $generated_message_id = '<' . bin2hex(random_bytes(16)) . '@argorobots.com>';
 
     // Use SMTP relay if configured, otherwise fall back to mail()
@@ -409,9 +394,7 @@ function send_notification_email($type, $data)
 function send_password_reset_email($email, $token, $username)
 {
     $username = htmlspecialchars($username, ENT_QUOTES, 'UTF-8');
-    // Build the reset link from the configured SITE_URL, never from the request
-    // Host header. A forged Host would otherwise place a valid reset token in a
-    // link pointing at an attacker's domain (account-takeover vector).
+    // Built from the configured SITE_URL and never from the request Host header, because a forged Host would put a working reset token in a link to an attacker's domain.
     $reset_link = site_url('/community/users/reset_password.php?token=' . $token);
 
     $body = <<<HTML
@@ -918,10 +901,7 @@ function send_premium_subscription_cancelled_email($email, $subscriptionId, $end
     $accessUntil = date('F j, Y', strtotime($endDate));
     $site_url = site_url();
 
-    // Rendered as a list, not a comma-joined sentence: the feature labels are
-    // written as short benefit phrases and several contain commas of their own,
-    // which turned the old run-on sentence into an unreadable string. This also
-    // matches the other Premium emails, which already use this helper.
+    // A list rather than a sentence, because several feature labels contain commas of their own and ran together unreadably.
     $featureList = _premium_feature_list_items();
 
     $body = <<<HTML

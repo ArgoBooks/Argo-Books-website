@@ -95,16 +95,7 @@ function send_outreach_lead($pdo, $lead, &$reason = null)
     $id = $lead['id'];
     $email = $lead['email'];
 
-    // Atomic claim BEFORE sending. Without this, two simultaneous callers
-    // (admin "Send" tab + cron stepSendEmails, or two tabs) can both pass
-    // their pre-fetch sent_at check and both invoke SMTP.
-    //
-    // This sets sent_at = NOW() up front so only one process wins. If the
-    // SMTP send subsequently fails, we restore sent_at = NULL below so the
-    // lead remains sendable. The remaining failure mode is a process crash
-    // between this claim and the actual send. sent_at would stay set with
-    // no email having gone out. That's preferable to duplicate sends to a
-    // prospect, and is recoverable by manually clearing sent_at.
+    // Claimed by setting sent_at before sending, so two callers cannot both pass their pre-fetch check and reach SMTP. A failed send restores NULL below; a crash in between leaves it set.
     $claimStmt = $pdo->prepare(
         "UPDATE outreach_leads SET sent_at = NOW() WHERE id = ? AND sent_at IS NULL"
     );
@@ -149,24 +140,16 @@ function send_outreach_lead($pdo, $lead, &$reason = null)
     $trackedUrl = 'https://argorobots.com/?source=' . $sourceCode;
     $unsubUrl = 'https://argorobots.com/unsubscribe?t=' . $unsubscribeToken;
 
-    // Personal name, not the brand: this is 1:1 outreach and the body opens with
-    // "I'm Evan, the developer of Argo Books". It also has to match the From name
-    // used by send_followup_row(), since follow-ups thread as Re: replies into
-    // this same conversation and a display name that changes mid-thread looks
-    // broken to the recipient.
+    // A personal name, because this is one to one outreach and the body opens with "I'm Evan". It has to match send_followup_row(), since follow-ups thread into the same conversation.
     $fromName = 'Evan';
     $preheader = null;
     $format = 'html';
 
-    // Creator/affiliate outreach ships without an unsubscribe line by request,
-    // so the defensive re-injection below is skipped for those leads. Every
-    // other lead type still gets it if the draft body somehow lost the link.
+    // Creator and affiliate outreach ships without an unsubscribe line by request, so the defensive re-injection below is skipped for those leads and applies to every other kind.
     $isCreatorLead = strtolower((string) ($lead['source'] ?? '')) === 'creator_auto';
 
     if ($format === 'plain') {
-        // Plain text: keep URLs bare so they remain clickable in plain-text
-        // clients while still carrying the tracking source param. No HTML
-        // escaping, no <a> wrapping.
+        // URLs stay bare so they are clickable in a plain-text client while still carrying the tracking parameter, which means no HTML escaping and no anchor tags.
         $body = (string) $lead['draft_body'];
         $body = preg_replace('#https?://argorobots\.com/?(?![\w?/])#', $trackedUrl, $body);
         $body = str_replace('{UNSUBSCRIBE_URL}', $unsubUrl, $body);
@@ -226,11 +209,7 @@ function send_outreach_lead($pdo, $lead, &$reason = null)
     );
 
     if ($result) {
-        // sent_at was already set by the upfront claim. Update the rest of
-        // the post-send fields here. The COALESCE on original_message_id and
-        // next_followup_due_at means a re-send (manual resend or retry after
-        // a transient failure) won't overwrite the original Message-ID or
-        // push out the follow-up schedule.
+        // sent_at is already set by the claim above. COALESCE stops a re-send overwriting the original Message-ID or pushing out the follow-up schedule.
         $stmt = $pdo->prepare("UPDATE outreach_leads SET
             status = CASE WHEN status NOT IN ('replied','interested','not_interested','onboarded','email_bounced') THEN 'contacted' ELSE status END,
             first_contact_date = COALESCE(first_contact_date, NOW()),
@@ -728,9 +707,7 @@ function detect_established_signals(string $html): array
     $yearsExperience = null;
     $phrase = null;
 
-    // "20+ years", "over 25 years", "more than 30 years", "25 years of experience",
-    // "20 years in business". Require the word "year(s)" plus an experience/business
-    // qualifier nearby so we don't match unrelated "N years" copy.
+    // Requires the word year beside an experience or business qualifier, so unrelated copy such as "5 years ago" does not read as a long-established business.
     $expPatterns = [
         '/\b(?:over|more than|nearly|almost)?\s*(\d{1,2})\s*\+?\s*years?\s+(?:of\s+)?(?:experience|expertise|in\s+business|serving|in\s+the\s+industry|of\s+service)\b/i',
         '/\b(?:experience|expertise|in\s+business|serving|in\s+the\s+industry)\s+(?:for\s+)?(?:over|more than)?\s*(\d{1,2})\s*\+?\s*years?\b/i',
@@ -1020,9 +997,7 @@ function scrape_email_from_website($url)
 {
     if (empty($url)) return null;
 
-    // Normalize once and use the same value for the cache key AND the live
-    // scrape, otherwise leading/trailing whitespace produces avoidable scrape
-    // failures and cache mismatches between what we look up and what we store.
+    // Normalised once for both the cache key and the live scrape, so stray whitespace cannot cause a scrape failure or a mismatch between what is looked up and what is stored.
     $url = rtrim(trim($url), '/');
     if ($url === '') return null;
 
@@ -1234,9 +1209,7 @@ function call_gemini($systemPrompt, $userPrompt)
 
     $result = json_decode($response, true);
 
-    // Treat MAX_TOKENS as an error so callers don't accept truncated output.
-    // Gemini 2.5 Flash has thinking enabled by default and thinking tokens
-    // count against maxOutputTokens, so a partial response is a real risk.
+    // MAX_TOKENS counts as an error so no caller accepts truncated output: thinking tokens come out of maxOutputTokens, which makes a partial response a real risk.
     $finishReason = $result['candidates'][0]['finishReason'] ?? '';
     if ($finishReason === 'MAX_TOKENS') {
         return ['error' => 'Gemini output truncated (MAX_TOKENS): increase maxOutputTokens or shorten the prompt'];
@@ -1422,26 +1395,11 @@ function generate_draft_for_lead($pdo, $lead)
     $id = $lead['id'];
 
     // ─── Layer 3: AI Size Gate ───
-    // Catch chains/corporations/institutions that slipped past Layer 1+2
-    // before we spend Gemini tokens on summary + draft. Failures here
-    // pass-through (do NOT block drafting) so a transient Gemini outage
-    // can't stall the pipeline. Layers 1+2 are the strong guards.
-    //
-    // Scope: only auto-discovered leads (sources ending in '_auto' such as
-    // 'google_places_auto' and 'shopify_auto'). Manually-added leads
-    // (source='manual', 'csv_import', etc.) bypass the gate on the
-    // assumption that the admin has already vetted them. The gate re-runs
-    // on every draft regeneration for an auto lead: the Gemini Flash call
-    // is cheap enough (~$0.0001/lead) that we don't bother caching the
-    // verdict in a column.
+    // Catches chains and institutions that passed layers 1 and 2, for auto-discovered leads only, and lets a failure through so an outage cannot stall the pipeline.
     $sourceVal = strtolower((string) ($lead['source'] ?? ''));
-    // Editorial (roundup) leads are publications, not small businesses, so the
-    // AI size gate and the newness gate below don't apply. They also arrive with
-    // their article context pre-summarized, so the SMB summary call is skipped.
+    // Editorial leads are publications rather than small businesses, so the size and newness gates do not apply, and their article context arrives already summarised.
     $isEditorial = ($sourceVal === 'editorial_auto');
-    // Creator/affiliate-partner leads are content creators and publications, not
-    // small businesses, so they skip the SMB size/newness gates just like
-    // editorial. Their pitch is an affiliate-recruitment email, not feedback.
+    // Creator leads are content creators rather than small businesses, so they skip the same gates, and their pitch is an invitation to the affiliate programme.
     $isCreator = ($sourceVal === 'creator_auto');
     $isAutoLead = str_ends_with($sourceVal, '_auto') && !$isEditorial && !$isCreator;
     if ($isAutoLead) {
@@ -1466,10 +1424,7 @@ function generate_draft_for_lead($pdo, $lead)
     }
 
     // ─── Creator/affiliate outreach: fixed template, no AI ───
-    // The AI drafts for creators kept inventing specifics about the channel
-    // (fake claims about their content, audience, etc.). A plain template with
-    // the creator's name inserted is honest and predictable, so creators skip
-    // the whole Gemini path below.
+    // A template with the creator's name is honest and predictable, where a drafted one invents specifics about their channel.
     if ($isCreator) {
         $creatorName = outreach_display_name($lead['contact_name'] ?? '')
             ?: outreach_display_name($lead['business_name'] ?? '');
@@ -1482,11 +1437,7 @@ function generate_draft_for_lead($pdo, $lead)
             . "I think your audience would be a good fit, so I'd like to invite you to join our affiliate program. You'd earn 50% recurring commission on the first 12 months of Premium for anyone who upgrades through your referral link. It's free to join, with a real-time dashboard and PayPal payouts: https://argorobots.com/affiliates\n\n"
             . "I can give you Premium access to Argo Books so you can try it yourself and see whether it's a fit for your audience.\n\n"
             . "If you're interested, just reply and I'll send over the details.\n\n"
-            // No unsubscribe line here by request. The send-time fallback in
-            // send_outreach_lead() is also skipped for creator leads, otherwise
-            // it would re-append one. Note this is a deliberate departure from
-            // CASL, which requires an unsubscribe mechanism in every commercial
-            // electronic message including cold B2B outreach.
+            // No unsubscribe line here by request, and the send-time fallback is skipped for creator leads so it cannot re-append one, which departs from CASL deliberately.
             . "Thanks,\nEvan\nArgo Books";
 
         // Same per-lead unsubscribe substitution the AI path uses further down.
@@ -1506,10 +1457,7 @@ function generate_draft_for_lead($pdo, $lead)
     }
 
     // ─── Editorial (roundup) outreach: fixed template, no AI ───
-    // Same reasoning as creators: these emails don't need to differ per
-    // recipient, and the AI tended to invent article specifics (fake titles,
-    // tools the list doesn't actually cover). A plain template with the author
-    // name and their article URL inserted is honest, predictable, and free.
+    // Same reason as creators: these need no variation, and a drafted one invents article specifics.
     if ($isEditorial) {
         $authorName = outreach_display_name($lead['contact_name'] ?? '');
         $greeting = $authorName !== '' ? "Hi {$authorName}," : 'Hi there,';
@@ -1546,17 +1494,7 @@ function generate_draft_for_lead($pdo, $lead)
     }
 
     // ─── Newness gate ───
-    // Argo Books targets NEW / early businesses that likely haven't settled on
-    // accounting software yet. Skip auto-discovered leads whose own website
-    // shows clear "established" signals (old founding year, "20+ years
-    // experience", decades of service). Two layers: a free regex pass, then an
-    // AI judgment for softer signals. Both pass-through on failure so a fetch
-    // miss or Gemini hiccup never blocks legitimate outreach.
-    //
-    // We fetch the homepage once here and hand the text to summarize_business
-    // below, so this adds at most one HTTP GET (and only at first draft, when
-    // no business_summary is stored yet). On regenerate, the lead was already
-    // vetted, so we skip the re-check.
+    // Skips an auto lead whose own site shows it is long established, by regex then AI, both letting a failure through.
     $prefetchedSiteText = null;
     if ($isAutoLead && empty($lead['business_summary']) && !empty($lead['website'])) {
         $fetched = fetch_website_text($lead['website']);
@@ -1723,9 +1661,7 @@ Return ONLY the JSON, no other text.";
 
     $parsed = json_decode($content, true);
     if (!$parsed || !isset($parsed['subject']) || !isset($parsed['body'])) {
-        // AI returned invalid/truncated JSON. Save a clear placeholder body
-        // (not the raw broken response) and mark needs_review so the admin
-        // sees what happened and can regenerate.
+        // A placeholder body is saved rather than the broken response, and needs_review is set so the admin can see what happened and regenerate it.
         $fallbackSubject = "Quick question for {$lead['business_name']}";
         $placeholderBody = "[Draft generation failed: Gemini returned malformed or truncated output. Click Regenerate to try again.]";
         $stmt = $pdo->prepare("UPDATE outreach_leads SET draft_subject = ?, draft_body = ?, drafted_at = NOW(), approval_status = 'needs_review', status = CASE WHEN status IN ('new','approved') THEN 'draft_generated' ELSE status END WHERE id = ?");
@@ -1759,11 +1695,7 @@ Return ONLY the JSON, no other text.";
         }
     }
 
-    // Substitute the {UNSUBSCRIBE_URL} placeholder with the real per-lead URL
-    // now (was previously deferred to send time). Saving the real URL means
-    // the admin sees the actual link when reviewing the draft instead of the
-    // raw placeholder. The send-side still handles the placeholder defensively
-    // for any old drafts that pre-date this change.
+    // The real per-lead URL replaces {UNSUBSCRIBE_URL} here, so the admin reviews the actual link. The send side still handles a draft that still carries the placeholder.
     $unsubscribeToken = $lead['unsubscribe_token'] ?? null;
     if (empty($unsubscribeToken)) {
         $unsubscribeToken = bin2hex(random_bytes(32));

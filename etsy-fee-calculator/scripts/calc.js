@@ -116,9 +116,7 @@ export function priceForProfit(input, rates) {
 
   let orderTotal = (target + fixed + costs) / (1 - rate);
 
-  // Past the per-order Offsite Ads cap the fee stops scaling with price, so it
-  // moves from the variable side of the equation to the fixed side and the
-  // price has to be solved again.
+  // Past the per-order Offsite Ads cap the fee stops scaling with price, so it moves from the variable side of the equation to the fixed side and the price has to be solved again.
   if (adsRate > 0 && orderTotal * adsRate > rates.offsiteAdsCap) {
     rate -= adsRate;
     orderTotal = (target + fixed + rates.offsiteAdsCap + costs) / (1 - rate);

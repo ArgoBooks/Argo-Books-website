@@ -56,10 +56,7 @@ $webhookId = $isProduction
     ? ($_ENV['PAYPAL_LIVE_WEBHOOK_ID'] ?? '')
     : ($_ENV['PAYPAL_SANDBOX_WEBHOOK_ID'] ?? '');
 
-// Verify webhook signature: mandatory in BOTH sandbox and production. Without
-// a configured webhook ID we cannot verify the request and any unauthenticated
-// caller could POST fake billing events to extend subscriptions or insert
-// payment rows.
+// Verify webhook signature: mandatory in BOTH sandbox and production.
 if (empty($webhookId)) {
     $envLabel = $isProduction ? 'production' : 'sandbox';
     error_log("CRITICAL: PayPal webhook ID not configured in $envLabel - rejecting request");
@@ -182,14 +179,7 @@ function handleSubscriptionCancelled($resource) {
         throw new Exception("Missing subscription ID in cancelled event");
     }
 
-    // Race fix for cycle-switch flow: when a user switches PayPal billing
-    // cycles, we cancel the old subscription server-side AFTER committing
-    // the new one to the DB. The cancel triggers a BILLING.SUBSCRIPTION.
-    // CANCELLED webhook for the OLD id. Without this guard, the handler
-    // below would mark the row (now pointing at the NEW sub) as cancelled
-    // and zero out credit_balance. The previous_paypal_subscription_id
-    // column is set in the same transaction as paypal_subscription_id, so
-    // this lookup is deterministic and survives webhook delivery delays.
+    // Race fix for cycle-switch flow: when a user switches PayPal billing cycles, we cancel the old subscription server-side AFTER committing the new one to the DB.
     $stmt = $pdo->prepare("
         SELECT subscription_id FROM premium_subscriptions
         WHERE previous_paypal_subscription_id = ?
@@ -407,19 +397,7 @@ function handlePaymentCompleted($resource) {
         : 30 * 86400;
     $secsUntilEnd = strtotime($subscription['end_date']) - time();
 
-    // Idempotent initial-capture handling.
-    // Checkout (process-subscription.php) records the first PayPal payment
-    // immediately, using the PayPal subscription id as a placeholder
-    // transaction_id, because the real sale id isn't known until PayPal
-    // actually captures the money and fires THIS webhook. So the very first
-    // PAYMENT.SALE.COMPLETED for a subscription is that same initial charge,
-    // NOT a renewal. Without this guard it fails the duplicate check above
-    // (the id differs), gets booked as a renewal, and both double-counts the
-    // payment and pushes end_date out a second time. Detect it (still within
-    // the first billing cycle, and no cycle switch has happened) and attach
-    // the real sale id to the placeholder row instead of inserting anything.
-    // The initial premium_paid funnel event and receipt were already sent by
-    // checkout, so there is nothing else to do here.
+    // Checkout records the first payment with the subscription id as a placeholder transaction_id, so this stays idempotent.
     $withinFirstCycle = $secsUntilEnd > (0.7 * $cycleSecs);
     if ($withinFirstCycle && empty($subscription['last_cycle_change_at'])
         && reconcile_paypal_initial_capture($pdo, $subscription['subscription_id'], $billingAgreementId, $transactionId)
@@ -435,19 +413,7 @@ function handlePaymentCompleted($resource) {
 
     $paymentType = $paymentCount > 0 ? 'renewal' : 'initial';
 
-    // Detect "first bill after a cycle switch": process-subscription.php
-    // already set end_date and sent the cycle-changed email when the user
-    // approved the new PayPal sub. This webhook arrives whenever PayPal
-    // first bills the new sub (usually seconds, but can be hours if PayPal
-    // is queued or having an outage). Without this guard, the renewal
-    // handler would extend end_date a SECOND time and send a duplicate.
-    //
-    // Detection is deterministic: real renewals fire when end_date is at
-    // or near NOW. A cycle switch resets end_date to today + full cycle,
-    // so for the first-bill-after-switch case end_date is far in the
-    // future. Threshold is 70% of the cycle to allow some slack: even
-    // an "early" PayPal renewal won't arrive when end_date is still 70%
-    // of a cycle out, but a freshly-switched sub will be ~100%.
+    // Detect "first bill after a cycle switch": process-subscription.php already set end_date and sent the cycle-changed email when the user approved the new PayPal sub.
     $cycleSecs = ($subscription['billing_cycle'] === 'yearly')
         ? 365 * 86400
         : 30 * 86400;
@@ -455,12 +421,7 @@ function handlePaymentCompleted($resource) {
     $cycleSwitchFirstBill = !empty($subscription['last_cycle_change_at'])
         && $secsUntilEnd > (0.7 * $cycleSecs);
 
-    // Log the payment. The UNIQUE index on transaction_id is the real guard
-    // against a concurrent duplicate webhook delivery: if another process
-    // inserted this transaction between the earlier check and here, the insert
-    // throws a duplicate-key error and we bail out without extending end_date a
-    // second time. (Pre-migration, with no unique index, this simply never
-    // throws and behaviour is unchanged.)
+    // The UNIQUE index on transaction_id is the real guard, so a duplicate delivery cannot log the payment twice.
     try {
         $stmt = $pdo->prepare("
             INSERT INTO premium_subscription_payments (
@@ -495,9 +456,7 @@ function handlePaymentCompleted($resource) {
     ]);
 
     if ($cycleSwitchFirstBill) {
-        // First bill after a cycle switch: record the sale (above), but
-        // don't extend end_date and don't send a renewal email. Both were
-        // already handled when the user confirmed the switch.
+        // First bill after a cycle switch: record the sale (above), but don't extend end_date and don't send a renewal email. Both were already handled when the user confirmed the switch.
         logPayPalWebhookEvent('PAYMENT.SALE.COMPLETED', $resource, 'cycle_switch_first_bill_recorded');
     } elseif ($paymentType === 'renewal') {
         $billing = $subscription['billing_cycle'];

@@ -26,11 +26,7 @@ if ($view_env !== 'sandbox') {
     $view_env = 'production';
 }
 
-// SQL conditions for environment filtering (strict allowlist of hardcoded clauses).
-// These are safe to interpolate because $view_env is validated above and no user
-// input flows into the SQL fragments: only constant strings are assigned.
-// Production mode: only explicitly production-marked records
-// Sandbox mode: everything else (sandbox, unknown/NULL, empty)
+// Only constant strings are assigned here and $view_env is validated above, so interpolating these fragments into SQL carries no user input.
 if ($view_env === 'sandbox') {
     $env_sql = "(payment_environment IS NULL OR payment_environment != 'production')";
     $env_sql_p = "(p.payment_environment IS NULL OR p.payment_environment != 'production')";
@@ -43,9 +39,7 @@ if ($view_env === 'sandbox') {
     $env_sql_i = "(i.environment = 'production')";
 }
 
-// ============================================================
-// DATA QUERIES
-// ============================================================
+// --- DATA QUERIES --------------------------------------------------------------------------------
 
 // --- Overview Stats ---
 $total_revenue = 0;
@@ -376,10 +370,7 @@ try {
     $inflight_count = 0;
     $held_for_review_count = 0;
     try {
-        // INNER JOIN + env filter so the sandbox/production toggle scopes
-        // refund_requests the same way it scopes payments/companies above.
-        // Without this, production view shows sandbox refunds (and vice
-        // versa), causing admins to act on rows from the wrong environment.
+        // INNER JOIN + env filter so the sandbox/production toggle scopes refund_requests the same way it scopes payments/companies above.
         $stmt = $pdo->query("
             SELECT r.id, r.invoice_number, r.customer_name, r.amount_cents, r.currency,
                    r.provider, r.state, r.velocity_tier, r.state_reason,

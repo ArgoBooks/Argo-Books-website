@@ -51,9 +51,7 @@ if (!function_exists('telemetry_environment_subscription_ids')) {
                 $ids[(string)$sid] = true;
             }
         } catch (PDOException $e) {
-            // Fail open. A dashboard that hides every premium install because one query
-            // failed is worse than one showing a test install, so an unreadable table
-            // means "cannot tell" and everything stays visible.
+            // Fails open, because a dashboard hiding every premium install over one failed query is worse than one showing a test install.
             error_log('telemetry environment lookup failed: ' . $e->getMessage());
             $ids = null;
         }

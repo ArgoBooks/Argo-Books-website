@@ -47,9 +47,7 @@ $ft_keys = array_values(array_diff(argo_feature_demo_keys(), [$ft_skip ?? '']));
 
                 <div class="features-tabs-content">
                     <?php
-                    // Panel markup lives in partials/feature-demo.php so the landing page,
-                    // these comparison pages, and the feature-page heroes all render the
-                    // same demos from one source.
+                    // The panel markup lives in partials/feature-demo.php, so the landing page, these pages and the feature heroes share the demos.
                     foreach ($ft_keys as $ftIndex => $ftKey): ?>
                         <div class="tab-content<?= $ftIndex === 0 ? ' active' : '' ?>" id="tab-<?= $ftKey ?>">
                             <?= argo_feature_demo($ftKey) ?>

@@ -51,9 +51,7 @@ class PurchaseOrderEmailSender
                 . 'Sent with Argo Books, free accounting software for small businesses: '
                 . 'https://argorobots.com/downloads/?source=loop-po-email';
 
-            // Strip CR/LF and control bytes from any value that ends up in a
-            // header (Subject, To, From, Reply-To, Cc, Bcc) to prevent header
-            // injection via the mail() fallback path.
+            // Strip CR/LF and control bytes from any value that ends up in a header (Subject, To, From, Reply-To, Cc, Bcc) to prevent header injection via the mail() fallback path.
             $headerSafe = static fn($v) => preg_replace('/[\r\n\x00-\x1f]+/', ' ', (string) $v);
             $fromEmail = $headerSafe($fromEmail);
             $fromName = $headerSafe($fromName);

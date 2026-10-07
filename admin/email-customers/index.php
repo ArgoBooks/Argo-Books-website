@@ -48,9 +48,7 @@ function fetch_eligible_licenses(PDO $pdo, ?array $idFilter = null): array
           )
     ";
 
-    // The first two placeholders are the environment filters inside the
-    // last_active_at subqueries, so they have to stay at the head of the
-    // parameter list, ahead of the optional id filter appended below.
+    // The first two placeholders are the environment filters inside the subqueries, so they stay at the head of the parameter list.
     $params = [current_environment(), current_environment()];
     if ($idFilter !== null && count($idFilter) > 0) {
         $placeholders = implode(',', array_fill(0, count($idFilter), '?'));
@@ -113,8 +111,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $variant = is_active_user($row['last_active_at']) ? 'active' : 'inactive';
 
                     // Atomic claim: only proceed if no other request beat us to this row.
-                    // The IS NULL guard makes the operation idempotent under concurrent
-                    // admin sessions and protects against double-emailing the customer.
                     $claim = $pdo->prepare("UPDATE license_keys
                                             SET review_email_sent_at = NOW(),
                                                 review_email_variant = ?

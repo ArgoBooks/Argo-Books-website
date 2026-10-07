@@ -13,9 +13,7 @@
                                 <clipPath id="dmClipsquareinvoices"><rect x="1" y="1" width="638" height="458" rx="18"/></clipPath>
                             </defs>
                             <?php
-                                // Bars are scaled against a 40 top of scale. Square Invoices
-                                // publishes in CAD, so the labels carry the currency
-                                // and the bars are only a relative visual, not a conversion.
+                                // Bars sit against a 40 top of scale. Square publishes in CAD, so the bars are relative and the labels carry the currency.
                                 $barX0  = 205;
                                 $barMax = 340;
                                 $scaleTop = 40;

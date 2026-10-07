@@ -35,12 +35,7 @@ function handle_pull_payments(int $companyId): void
     $since = $_GET['since'] ?? null;
     $force = ($_GET['force'] ?? '0') === '1';
 
-    // The SELECT joins to refund_requests on provider_refund_id so refund rows
-    // (negative amount, status='refunded') carry their orchestration metadata
-    // (request id, reason) for the desktop's books reconciliation. Refund rows
-    // inserted by the existing _stripe_refund_db.php webhook use a
-    // 'refund_<original_payment_intent>' provider_payment_id convention; the
-    // join handles both that and the direct refund_id case.
+    // Joined to refund_requests on provider_refund_id so a refund row carries its request id and reason into the desktop's books.
     if ($force) {
         $stmt = $pdo->prepare(
             "SELECT pp.*, pi.invoice_token, pi.customer_token,
@@ -104,22 +99,7 @@ function handle_pull_payments(int $companyId): void
     while ($row = $stmt->fetch()) {
         $isRefund = $row['status'] === 'refunded' && (float)$row['amount'] < 0;
 
-        // For refund rows: figure out the originating payment's provider_payment_id
-        // so the desktop can link the local refund Payment back to its source.
-        //
-        // Preferred source: the joined refund_requests row's provider_payment_id,
-        // which is exactly the original payment's provider_payment_id (set when
-        // the refund request was created via api/portal/refunds/request.php).
-        //
-        // Fallbacks for refunds that didn't originate through our flow
-        // (e.g. issued via the Stripe Dashboard and only seen via webhook):
-        //   - portal_payments.provider_transaction_id usually holds the charge
-        //     id (ch_xxx), which is best-effort; the desktop can match this
-        //     against the original payment's stored charge id when available.
-        //   - As a last resort, strip "refund_", but note that for Stripe rows
-        //     keyed by individual refund id ("refund_<refundId>") this returns
-        //     the refund id, not the source payment id, so the link won't
-        //     resolve. Kept only for legacy single-full-refund rows.
+        // For refund rows: figure out the originating payment's provider_payment_id so the desktop can link the local refund Payment back to its source.
         $refundedProviderPaymentId = null;
         if ($isRefund) {
             if (!empty($row['refund_source_provider_payment_id'])) {

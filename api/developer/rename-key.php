@@ -37,9 +37,7 @@ if ($companyUid === '' || $keyId === '') {
 }
 
 if ($label === '') {
-    // An empty label would make the row fall back to showing the hint, which is
-    // indistinguishable from a key that was never named. Refuse instead, so the
-    // merchant is not left wondering which of their keys just lost its name.
+    // An empty label would make the row fall back to showing the hint, which is indistinguishable from a key that was never named.
     send_error_response(400, 'label cannot be empty.', 'INVALID_INPUT');
 }
 

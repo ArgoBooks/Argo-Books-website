@@ -37,9 +37,7 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
     exit('Forbidden');
 }
 
-// admin_session.php records every GET as the page to return to after re-login.
-// A file download is not a page: landing on it post-login would hand the admin a
-// CSV instead of a dashboard. Point it back at the tab the button lives on.
+// admin_session.php records every GET as the page to return to after re-login. A file download is not a page: landing on it post-login would hand the admin a CSV instead of a dashboard.
 $_SESSION['admin_return_to'] = '/admin/app-stats/?tab=user-activity';
 
 $allMode = (string)($_GET['all'] ?? '') === '1';
@@ -224,10 +222,8 @@ function ua_rows_for_user(array $files, string $authId, array &$seen, bool &$mat
     return $rows;
 }
 
-// ---- Work out who is being exported ------------------------------------------
-// One cheap pass over the files to learn which authId each belongs to, so the
-// all-users export can group by person without ever holding the whole site's
-// events at once. Each user's files are then re-read on their turn.
+// --- Work out who is being exported ---
+// One cheap pass to learn each file's authId, so the all-users export can group by person.
 
 $seenIds     = [];
 $matchedFile = false;
@@ -253,8 +249,6 @@ if ($allMode) {
     }
 
     // Most recently active first, which is the order the tab presents people in.
-    // Sorted on file mtime rather than event timestamps so this stays a metadata
-    // read: working out true recency would mean decoding everything twice.
     arsort($newestByAuth);
     $exportOrder = array_keys($newestByAuth);
     $matchedFile = $exportOrder !== [];
@@ -299,9 +293,7 @@ $out = fopen('php://output', 'w');
 // instead of showing mojibake.
 fwrite($out, "\xEF\xBB\xBF");
 
-// auth_id and is_founder only in the all-users file. Adding them to the single-user
-// export would repeat two constants on every row and change a format that already
-// has readers.
+// auth_id and is_founder only in the all-users file. Adding them to the single-user export would repeat two constants on every row and change a format that already has readers.
 $columns = array_merge(
     $allMode ? ['auth_id', 'is_founder'] : [],
     [

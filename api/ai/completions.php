@@ -35,17 +35,7 @@ if (rate_limit_hit('ai_completions', $rateLimitId, 'ai_license')) {
     send_rate_limited_response('ai_completions');
 }
 
-// Per-IP ceiling for the free (device) path only.
-// The X-Device-Id of a free request is self-asserted and not checked against any
-// record, so the per-identity limit above can be bypassed by rotating the header.
-// A per-IP cap closes that hole: the source IP can't be rotated like a header, so
-// it bounds total free AI usage from one origin regardless of how many device IDs
-// are sent. Premium (license-validated) requests are exempt because their key is
-// verified in the database and is not the abuse vector. This reuses the same
-// get_client_ip() that the license-validation and payment endpoints already rely
-// on in production. The ceiling is generous (well above the per-identity limit) so
-// genuine shared networks (offices/households behind one NAT) are not affected;
-// raise RL_AI_COMPLETIONS_IP_MAX if a large shared deployment ever legitimately hits it.
+// A per-IP ceiling for the free path only, because a free request's X-Device-Id is self-asserted, so the per-identity limit can be bypassed by rotating the header.
 if (!$license) {
     $clientIp = get_client_ip();
     if (rate_limit_hit('ai_completions_ip', $clientIp, 'ai_ip')) {
@@ -74,23 +64,12 @@ $temperature = max(0, min(2, (float)($data['temperature'] ?? 0.1)));
 $base64Image = $data['base64Image'] ?? null;
 $mimeType = $data['mimeType'] ?? 'image/jpeg';
 
-// Optional timing metadata sent by the desktop app so pooled duration priors can be
-// kept per operation (receipt scan vs spreadsheet analysis vs bank categorize, which
-// are otherwise indistinguishable here). Absent/older clients default to 'completion'.
+// Timing sent by the app so duration priors stay per operation, which this endpoint could not otherwise tell apart.
 $operation = isset($data['operation']) ? (string) $data['operation'] : 'completion';
 $sizeFeature = isset($data['sizeFeature']) && is_numeric($data['sizeFeature']) ? (int) $data['sizeFeature'] : null;
 $appPlatform = isset($data['platform']) ? (string) $data['platform'] : null;
 
-// Receipt scans on the gemini-3.x thinking models spend a large, variable chunk of
-// maxOutputTokens on hidden reasoning before writing the JSON answer, so budgets that
-// were fine on the old model now truncate mid-JSON. The receipt budget is authoritative
-// from .env (RECEIPT_SCAN_MAX_OUTPUT_TOKENS) and ignores whatever the client sent, so it
-// can be tuned for all client versions instantly (older builds still send 16000) without
-// an app release. Overrides the generic clamp above for this operation only.
-// Two flags, not one, because the second pass of a scan needs everything a first pass needs
-// EXCEPT the charge. The app re-sends the image when the extracted amounts do not reconcile
-// against the printed total; that is the app deciding to look again, not the user asking for a
-// second scan, and billing it meant ten receipts could cost twelve and the last be refused.
+// A thinking model spends a large, variable part of maxOutputTokens on hidden reasoning before the JSON, so a budget has to allow for it.
 $isReceiptWork = (($operation === 'receipt_scan' || $operation === 'receipt_verify') && !empty($base64Image));
 
 // Only the first pass is metered.
@@ -112,31 +91,14 @@ if (empty($geminiKey)) {
     send_error_response(500, 'Gemini AI service not configured on server.', 'CONFIG_ERROR');
 }
 
-// ---- Receipt-scan quota -----------------------------------------------------
-// Taken here, before a single byte goes to Gemini, because this is the request that
-// spends the money. It used to be enforced only by the client calling
-// api/receipt/usage.php's increment after a scan succeeded, which meant a client that
-// sent more requests than it reported, or skipped the call entirely, was unmetered.
-// The take is a conditional UPDATE, so a parallel batch cannot overrun the cap.
-//
-// Only receipt extraction is metered. Other AI operations (spreadsheet analysis, bank
-// categorization, plain completions) are covered by the rate limits above and have no
-// monthly allowance of their own.
-//
-// receipt_verify sits with those: it is the same billable receipt looked at twice, so it is
-// bounded by the rate limits rather than the monthly allowance. That does leave a caller able
-// to spend vision calls under receipt_verify without touching its allowance, capped by the
-// 60-per-15-minutes limiter above. Accepted deliberately: the alternative is charging a user
-// twice for one receipt, and the cap is the same one already trusted for every other unmetered
-// AI operation on this endpoint.
+// --- Receipt-scan quota ---
+// Taken before a byte goes to Gemini, because this is the request that spends the money.
 $scanQuotaIdentifier = null;
 $scanQuotaSettled = false;
 if ($isReceiptExtraction) {
     require_once __DIR__ . '/../receipt/scan_quota.php';
 
-    // The raw key, not the hash: usage.php keys premium rows on the key itself, and
-    // both endpoints have to land on the same row. Read the same headers
-    // authenticate_license_request() does, since it only hands back a hash.
+    // The raw key, not the hash: usage.php keys premium rows on the key itself, and both endpoints have to land on the same row.
     $rawLicenseKey = '';
     if (!empty($_SERVER['HTTP_X_LICENSE_KEY'])) {
         $rawLicenseKey = (string) $_SERVER['HTTP_X_LICENSE_KEY'];
@@ -166,10 +128,7 @@ if ($isReceiptExtraction) {
 
     $scanQuotaIdentifier = $identity['identifier'];
 
-    // The scan is paid for up front, so anything that stops a result reaching the user
-    // has to hand it back. A shutdown hook rather than a refund at each of the seven
-    // failure exits below: those all exit() immediately, and this also covers a fatal
-    // or a timeout, which no amount of call-site editing would.
+    // The scan is paid for up front, so a shutdown hook hands it back: the seven failure exits below all exit() at once, and this covers a fatal or a timeout too.
     register_shutdown_function(static function () use (&$scanQuotaSettled, &$scanQuotaIdentifier) {
         if ($scanQuotaSettled || $scanQuotaIdentifier === null) {
             return;
@@ -250,9 +209,7 @@ if (!empty($base64Image)) {
             send_error_response(502, 'Failed to process uploaded PDF.', 'UPSTREAM_ERROR');
         }
 
-        // Poll until the file is ACTIVE (Gemini processes uploads asynchronously)
-        // Polls up to 15 times at 500ms intervals (~7.5s max). If still PROCESSING after
-        // all polls, the file is used as-is (Gemini will reject it if not ready).
+        // Poll until the file is ACTIVE (Gemini processes uploads asynchronously) Polls up to 15 times at 500ms intervals (~7.5s max).
         $fileStatusUrl = "https://generativelanguage.googleapis.com/v1beta/{$uploadedFileName}";
         $maxPolls = 15;
         for ($i = 0; $i < $maxPolls; $i++) {
@@ -310,12 +267,7 @@ if ($isReceiptExtraction) {
     // maxOutputTokens; extraction is a structured OCR task, not a reasoning task.
     $generationConfig['thinkingConfig'] = ['thinkingLevel' => 'low'];
 
-    // Constrain generation to a strict schema. Without it, gemini-3.5-flash intermittently
-    // emits invalid JSON even in JSON mode (extra brackets, objects cut off mid-field) with
-    // finishReason=STOP - the model thinks it finished but the payload won't parse. A
-    // responseSchema forces constrained decoding, so the output is always well-formed JSON
-    // matching this shape. Fields are optional/nullable so the "not a receipt" error path and
-    // any missing values still work; the app reads every field defensively.
+    // Generation is held to a strict schema, because the model otherwise emits invalid JSON now and then even in JSON mode.
     $numberOrNull = ['type' => 'number', 'nullable' => true];
     $stringOrNull = ['type' => 'string', 'nullable' => true];
     $nameAmountItem = [
@@ -426,10 +378,7 @@ if (!empty($uploadedFileName)) {
     curl_exec($ch);
 }
 
-// Extract content + finish reason from the Gemini response. The gemini-3.x models can
-// split the answer across several parts (and emit separate "thought" parts), so read only
-// the earlier parts[0] would drop the tail and yield truncated JSON. Concatenate every
-// non-thought text part instead.
+// Extract content + finish reason from the Gemini response.
 $candidate = $responseData['candidates'][0] ?? [];
 $content = null;
 $parts = $candidate['content']['parts'] ?? [];
@@ -459,13 +408,7 @@ if (isset($responseData['usageMetadata'])) {
     ];
 }
 
-// Diagnostic: a finishReason other than STOP (most often MAX_TOKENS) means the
-// model stopped before completing, typically leaving truncated or empty JSON,
-// which is the likely cause of downstream "JsonReaderException" parse failures.
-// gemini-2.5-flash spends hidden "thinking" tokens out of maxOutputTokens, so a
-// small token budget can be exhausted before the JSON answer is written. Logged
-// only (response behaviour is unchanged) so truncation shows up in the PHP
-// error log. Grep the error log for "[gemini]" to find these.
+// A finishReason other than STOP, usually MAX_TOKENS, means the model stopped early and the JSON is truncated or empty.
 if ($finishReason !== null && $finishReason !== 'STOP') {
     error_log(sprintf(
         '[gemini] non-STOP finishReason=%s model=%s maxOutputTokens=%d tokens(prompt/out/total)=%d/%d/%d content=%s',
@@ -483,11 +426,7 @@ if ($content === null) {
     send_error_response(502, 'Invalid response from AI service.', 'UPSTREAM_ERROR');
 }
 
-// TEMPORARY DIAGNOSTIC: for receipt extraction, verify the JSON parses server-side. When it
-// doesn't, surface the real cause (finishReason, token usage, part count, and the tail of the
-// content where it cut off) as a normal {"error": ...} 200 response, which is the only shape the
-// desktop app displays verbatim. This replaces the cryptic client-side "truncated JSON" parse
-// error with something we can actually read, and confirms whether this deploy is even live.
+// TEMPORARY DIAGNOSTIC: for receipt extraction, verify the JSON parses server-side.
 $receiptContentUsable = true;
 if ($isReceiptExtraction) {
     json_decode($content);

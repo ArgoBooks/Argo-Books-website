@@ -147,10 +147,7 @@ final class ContractTest extends TestCase
         $emitted = array_unique($emitted);
         $this->assertNotEmpty($emitted, 'Found no error codes to check, so the scan is broken.');
 
-        // The public docs ship separately from the API itself, so that the API
-        // can run privately before anything is visible on the site. Skip rather
-        // than fail while that is the case; the check re-arms the moment the
-        // page lands, which is exactly when a missing row starts to matter.
+        // The public docs ship separately from the API itself, so that the API can run privately before anything is visible on the site.
         $docsPath = PROJECT_ROOT . '/documentation/pages/api/errors.php';
         if (!is_file($docsPath)) {
             $this->markTestSkipped('The public errors page has not shipped yet, so there is nothing to check codes against.');

@@ -26,8 +26,7 @@ if (!$authContext) {
     send_error_response(401, 'Missing device identifier.', 'UNAUTHORIZED');
 }
 
-// Counted per device and IP together. The device hash used to be passed as the bucket
-// prefix, which gave every device its own namespace, so rotating the header reset the count.
+// Counted per device and IP together, because a per-device namespace would let a rotated header reset the count.
 $ip = get_client_ip();
 $rateLimitId = substr($authContext['device_id_hash'], 0, 16) . ':' . $ip;
 if (rate_limit_hit('sheets_export', $rateLimitId)) {

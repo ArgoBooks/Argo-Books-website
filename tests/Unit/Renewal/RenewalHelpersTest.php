@@ -51,9 +51,7 @@ final class RenewalHelpersTest extends TestCase
 
     public function test_extends_from_now_when_end_date_is_in_past(): void
     {
-        // End date 30 days ago. Without the "stale end_date" guard, the new
-        // end date would be 30 days ago + 1 month ≈ now, potentially still in
-        // the past, risking another renewal pickup on the next cron run.
+        // An end date 30 days ago: without the stale guard the new one lands about now and could be picked up again.
         $pastEnd = $this->base->modify('-30 days')->format('Y-m-d H:i:s');
         $expectedMin = $this->base->modify('+27 days')->format('Y-m-d');
         $expectedMax = $this->base->modify('+33 days')->format('Y-m-d');

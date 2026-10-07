@@ -4,9 +4,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/_audit.php';
 require_once __DIR__ . '/../../email_sender.php';
 
-// ---------------------------------------------------------------
-// Code generation, hashing, and email helpers
-// ---------------------------------------------------------------
+// --- Code generation, hashing, and email helpers ---------------
 
 /** 6-digit zero-padded cryptographically-random verification code. */
 function refund_generate_code(): string {
@@ -48,9 +46,7 @@ function refund_mask_email(string $email): string {
     return substr($local, 0, 2) . str_repeat('*', max(1, strlen($local) - 2)) . '@' . $domain;
 }
 
-// ---------------------------------------------------------------
-// State-machine guards
-// ---------------------------------------------------------------
+// --- State-machine guards -------------------------------------
 
 /**
  * Reject the request with 409 if the current state isn't in $allowed.
@@ -96,10 +92,7 @@ function refund_ensure_company_active(array $company): void {
         ]);
         exit;
     }
-    // Refund verification codes are emailed to owner_email. Without it, the
-    // code goes nowhere and the user is stranded on the verify-code step.
-    // Catch this case explicitly with a clear message rather than silently
-    // issuing a code that can't be delivered.
+    // Verification codes go to owner_email, so without one the code goes nowhere and the user is stranded on the verify step. Said plainly, rather than issuing a code that cannot arrive.
     if (empty($company['owner_email'])) {
         http_response_code(412);
         header('Content-Type: application/json');
@@ -126,9 +119,7 @@ function refund_load_request(PDO $pdo, int $company_id, int $request_id): array 
     return $row;
 }
 
-// ---------------------------------------------------------------
-// Email senders for refund flow
-// ---------------------------------------------------------------
+// --- Email senders for the refund flow ------------------------
 
 function refund_email_send_code(string $to, string $code, string $invoice_number, int $amount_cents, string $currency): void {
     $amount_str = htmlspecialchars(number_format($amount_cents / 100, 2) . ' ' . $currency);
@@ -166,9 +157,7 @@ function refund_email_send_customer_refunded(string $to, ?string $customer_name,
     $business_safe = !empty($business_name) ? htmlspecialchars($business_name) : 'the merchant';
     $subject       = "Your refund for invoice $invoice_safe has been issued";
 
-    // Optional reason from the merchant: surfaced in a quoted block so the
-    // customer sees the explanation the business owner typed. The UI tells
-    // the owner that this will be shown.
+    // The merchant's reason is quoted so the customer reads the explanation the owner typed, which the owner is told will happen.
     $reason_html = '';
     if (!empty($reason)) {
         $reason_safe = nl2br(htmlspecialchars(trim($reason)));
@@ -232,17 +221,13 @@ function refund_notify_completion(PDO $pdo, array $req): void {
                 'to' => $invoice['customer_email'],
             ]);
         } catch (\Throwable $e) {
-            // Never let an SMTP hiccup roll back the refund. Log and move on;
-            // the owner has already been notified, so the operator can manually
-            // follow up with the customer if needed.
+            // An SMTP hiccup must never roll back the refund, and the owner has already been told, so the operator can follow the customer up by hand.
             error_log('refund_notify_completion customer email failed: ' . $e->getMessage());
         }
     }
 }
 
-// ---------------------------------------------------------------
-// Email senders for email-verification + email-change flows
-// ---------------------------------------------------------------
+// --- Email senders for email verification and email change ----
 
 function refund_email_send_registration_code(string $to, string $code): void {
     $body = <<<HTML
@@ -393,9 +378,7 @@ HTML;
     send_styled_email('contact@argorobots.com', $subject, $body, 'purple', null, null, $reply_to);
 }
 
-// ---------------------------------------------------------------
-// Provider execution dispatch
-// ---------------------------------------------------------------
+// --- Provider execution dispatch ------------------------------
 
 /**
  * Map a provider's refund-API response status to one of:
@@ -449,9 +432,7 @@ function refund_classify_provider_status(string $provider, ?string $status): str
 function refund_record_ledger(PDO $pdo, array $req, string $refund_id, ?array $company = null): bool {
     require_once __DIR__ . '/portal-helper.php'; // record_portal_payment + generate_reference_number
 
-    // Look up the original payment so the cumulative-refund check has a
-    // total to compare against. Missing original (manual entries, edge
-    // cases) just means we skip the status flip.
+    // The original payment gives the cumulative check a total to compare against, and a manual entry with no original simply skips the status flip.
     $stmt = $pdo->prepare(
         "SELECT * FROM portal_payments
          WHERE company_id = ? AND provider_payment_id = ? LIMIT 1"
@@ -479,14 +460,7 @@ function refund_record_ledger(PDO $pdo, array $req, string $refund_id, ?array $c
         return false; // webhook (or a prior call) already wrote this row
     }
 
-    // Cumulative-refund check: flip the original payment to 'refunded'
-    // only once refunds cover its full amount. Without this guard, a
-    // partial refund flips the original to 'refunded' and the books read
-    // as fully refunded.
-    //
-    // Compare in integer cents so a chain of partial refunds can't drift
-    // past the threshold due to repeated float rounding (e.g., three
-    // refunds of $0.10 each summing to $0.30000000000000004 in float).
+    // The original payment flips to refunded only once refunds cover its full amount, so a partial refund does not read as a full one. Compared in whole cents, so rounding cannot drift past it.
     if ($original) {
         $sumStmt = $pdo->prepare(
             "SELECT COALESCE(SUM(amount), 0) AS refunded_total
@@ -524,9 +498,7 @@ function refund_record_ledger(PDO $pdo, array $req, string $refund_id, ?array $c
  * provider. Returns true when this call moved the request to completed.
  */
 function refund_complete_from_stale_cron(PDO $pdo, array $req, array $company, string $refund_id): bool {
-    // Ledger first, same as refund_execute_against_provider: the webhook that
-    // would normally write this row never arrived, and without it the desktop
-    // never sees the refund.
+    // Ledger first, as in refund_execute_against_provider: the webhook that would write this row never arrived, and the desktop never sees the refund without it.
     refund_record_ledger($pdo, $req, $refund_id, $company);
 
     // CAS guard so a webhook arriving in the same window doesn't
@@ -593,9 +565,7 @@ function refund_execute_against_provider(PDO $pdo, array $company, int $request_
 
         $outcome = refund_classify_provider_status($req['provider'], $status);
 
-        // Always persist the provider_refund_id (even when staying in
-        // processing) so the webhook and the stale-processing cron can
-        // correlate this request to the provider's record.
+        // provider_refund_id is stored even while the request stays in processing, so the webhook and the stale-processing cron can tie this request to the provider's own record.
         if ($refund_id) {
             $pdo->prepare("UPDATE refund_requests SET provider_refund_id = ?, updated_at = NOW() WHERE id = ? AND provider_refund_id IS NULL")
                 ->execute([$refund_id, $request_id]);
@@ -616,13 +586,7 @@ function refund_execute_against_provider(PDO $pdo, array $company, int $request_
         }
 
         if ($outcome === 'processing') {
-            // Non-terminal status: the request stays in 'processing'.
-            // The provider webhook will flip to completed (and write the
-            // ledger row) when the money actually moves. If the webhook
-            // is lost, the stale-processing cron picks the request up
-            // 30 minutes after updated_at and reconciles via the
-            // provider's API. NO customer notification is sent here:
-            // we don't tell the customer the refund is done until it is.
+            // Still processing: the webhook flips it to completed when the money moves, and the cron picks it up 30 minutes later if that webhook is lost. The customer is told nothing yet.
             audit_log($pdo, (int)$company['id'], 'provider_pending', 'system', null, $request_id, null, [
                 'provider_status' => $status,
                 'provider_refund_id' => $refund_id,
@@ -630,22 +594,12 @@ function refund_execute_against_provider(PDO $pdo, array $company, int $request_
             return;
         }
 
-        // outcome === 'completed': write the negative-amount portal_payments
-        // row + invoice balance update BEFORE marking the refund_request
-        // completed. record_portal_payment is keyed on provider_payment_id
-        // ('refund_' . $refund_id) and is idempotent, so the webhook arriving
-        // after this is a no-op. This guarantees the desktop's books include
-        // the refund even when the webhook is delayed or lost.
+        // The negative portal_payments row and the balance update land before the request is marked completed, and record_portal_payment is idempotent, so a webhook arriving after is a no-op.
         if ($refund_id) {
             refund_record_ledger($pdo, $req, $refund_id, $company);
         }
 
-        // CAS-style transition: only flip if still in a pre-completed state.
-        // Guards against a race where the provider webhook arrives between
-        // refund_record_ledger above and this UPDATE: in that case the
-        // webhook's CAS update wins, this one is a no-op, and notification
-        // fires once over there.
-        // cancel_token = NULL alongside the terminal transition (see /failed/ note above).
+        // Flipped only from a pre-completed state, so if the provider's webhook gets there first its update wins, this one does nothing, and the customer hears once. cancel_token clears here.
         $upd = $pdo->prepare("UPDATE refund_requests SET state='completed', provider_refund_id = ?, completed_at = NOW(), cancel_token = NULL, updated_at = NOW() WHERE id = ? AND state IN ('processing','cooling_off')");
         $upd->execute([$refund_id, $request_id]);
         if ($upd->rowCount() === 0) {
@@ -666,12 +620,7 @@ function refund_execute_against_provider(PDO $pdo, array $company, int $request_
 
     } catch (\Throwable $e) {
         $msg = $e->getMessage();
-        // CAS guard: only mark as failed if still in an in-flight state.
-        // Without this, if the provider call succeeded but a later step in
-        // the try block throws (timeout reading response, audit_log fails,
-        // etc.) AND the webhook concurrently completed the request, this
-        // UPDATE would overwrite 'completed' with 'failed'. Audit only on
-        // an actual transition.
+        // Marked failed only from an in-flight state, so a throw after a successful provider call cannot overwrite a completion the webhook wrote. Audited only when the state really moves.
         $upd = $pdo->prepare("UPDATE refund_requests SET state='failed', state_reason = ?, cancel_token = NULL, updated_at = NOW() WHERE id = ? AND state IN ('processing','cooling_off')");
         $upd->execute([substr($msg, 0, 1000), $request_id]);
         if ($upd->rowCount() > 0) {

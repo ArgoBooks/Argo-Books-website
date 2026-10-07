@@ -25,9 +25,7 @@
 // H2 (the H1 already serves as that section's heading; adding another H2
 // would create a duplicate logical section).
 
-// _base.php defines INVGEN_BASE and the shared invgen_render_404() helper
-// that niche_render_404() at the bottom of this file delegates to. Must be
-// required BEFORE the 404 fallbacks fire below.
+// _base.php defines INVGEN_BASE and the shared invgen_render_404() helper that niche_render_404() at the bottom of this file delegates to. Must be required BEFORE the 404 fallbacks fire below.
 require_once __DIR__ . '/../partials/schema.php';
 require_once __DIR__ . '/../partials/faq.php';
 require_once __DIR__ . '/../shared/_base.php';
@@ -58,18 +56,14 @@ if (!is_array($data) || empty($data['h1'])) {
     exit;
 }
 
-// Server-side page view, scoped per niche so the admin dashboard can compare
-// niche pages without one slug drowning the others. Fire it AFTER the 404
-// guards so failed requests do not pollute statistics. Skip on PHP CLI.
+// Server-side page view, scoped per niche so the admin dashboard can compare niche pages without one slug drowning the others.
 if (PHP_SAPI !== 'cli') {
     require_once __DIR__ . '/../statistics.php';
     $safe_slug_for_event = preg_replace('/[^a-z0-9_-]/', '', $slug);
     defer_client_page_view('invgen_niche_' . $safe_slug_for_event);
 }
 
-// Referral source baked into every conversion-pitch CTA inside _fragment.php
-// when this page embeds the generator. The generic seed page uses 'invgen-tool'
-// since it's the unbranded landing URL; niche pages use 'invgen-{slug}'.
+// Referral source baked into every conversion-pitch CTA inside _fragment.php when this page embeds the generator.
 $invgen_ref = $slug === 'generic' ? 'invgen-tool' : ('invgen-' . $slug);
 
 // --- 3. Build page metadata ---------------------------------------------------
@@ -118,11 +112,8 @@ if ($slug !== 'generic') {
 }
 $breadcrumb_schema_json = argo_breadcrumb_schema($breadcrumb_crumbs);
 
-// --- 4b. Hreflang alternates --------------------------------------------------
-// Country-specific niche pages reference each other via hreflang so the right
-// page surfaces in the right region. Pages with the same `concept` and
-// different `country` codes are siblings. Pages without a country are the
-// x-default for the cluster. Generic landing page does not emit hreflang.
+// --- 4b. Hreflang alternates -------------------------------------------------- Country-specific
+// niche pages reference each other via hreflang so the right page surfaces in the right region.
 
 $hreflang_alternates = [];
 if (!empty($data['concept']) && !empty($data['country'])) {
@@ -165,11 +156,7 @@ if (function_exists('current_environment')) {
     $is_dev = current_environment() !== 'production';
 }
 
-// INVGEN_BASE has to be defined before the body buffer starts so the
-// related-niche and related-template anchors below can prefix their
-// hrefs. On Laragon the prefix is '/argo-books-website', on production
-// it is empty. Required again later for script paths (require_once
-// makes the second call a no-op).
+// INVGEN_BASE has to be defined before the body buffer starts so the related-niche and related- template anchors below can prefix their hrefs.
 require_once __DIR__ . '/../shared/_base.php';
 
 ob_start();
@@ -300,9 +287,7 @@ ob_start();
 $body_content = ob_get_clean();
 
 $extra_scripts = '';
-// Expose the niche slug so main.js can label its invgen_niche_default_used
-// event with which niche the defaults came from. Always emit even when there
-// are no generator defaults, so the JS side never has to guess.
+// The slug is emitted even with no generator defaults, so main.js can label its event with the niche they came from.
 $extra_scripts .= '<script>window.INVOICE_NICHE_SLUG = '
   . json_encode($slug, JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP)
   . ';</script>';

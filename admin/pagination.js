@@ -30,11 +30,7 @@ class TablePaginator {
 
         this.update();
 
-        // Auto-repaginate when rows are added or removed, so tables whose rows
-        // are injected or replaced by JavaScript/AJAX after load paginate the
-        // same way as server-rendered ones, with no per-page wiring. We only
-        // watch childList: the paginator toggles row display/classes, never the
-        // row set itself, so this can't loop. Debounced to one run per frame.
+        // Repaginates when rows change, so a table filled in by JavaScript after load paginates like a server-rendered one with no wiring.
         this._observerScheduled = false;
         this._observer = new MutationObserver(() => {
             if (this._observerScheduled) return;

@@ -14,11 +14,7 @@ if (!isset($_SESSION['user_id']) && isset($_COOKIE['remember_me'])) {
     check_remember_me();
 }
 
-// Pull the current app version + release date from the Sparkle update feed so
-// the homepage JSON-LD stays in sync with releases. Fallbacks cover the case
-// where the feed is missing or malformed; both values are echoed via
-// json_encode below so anything unexpected can't break the structured-data
-// block.
+// Pull the current app version + release date from the Sparkle update feed so the homepage JSON-LD stays in sync with releases.
 $current_version = '2.0.7';
 $current_release_date = '2026-01-01';
 $update_xml = @simplexml_load_file(__DIR__ . '/avalonia-update.xml');

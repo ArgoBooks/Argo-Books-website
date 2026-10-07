@@ -62,9 +62,7 @@ $d = require $data_file;
 $competitor = $d['competitor'];
 $page_url   = 'https://argorobots.com/compare/' . $slug . '/';
 
-// The visible accordion and the FAQPage JSON-LD are both built from $d['faqs'],
-// so the two can no longer disagree. Every page used to carry a hand-written
-// copy of the schema alongside the visible answers.
+// The accordion and the FAQPage JSON-LD both come from $d['faqs'], so the two cannot disagree.
 $faqs = $d['faqs'];
 
 // "Keep comparing" links. Each page picks its own set and order; the labels

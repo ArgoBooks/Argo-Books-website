@@ -31,12 +31,7 @@ global $pdo;
 $req = refund_load_request($pdo, (int)$company['id'], $id);
 refund_assert_state($req['state'], ['pending_code', 'code_verified', 'cooling_off'], 'cancel');
 
-// State-guarded UPDATE. The state check above and this UPDATE form a
-// classic TOCTOU window: the cooling-off promoter cron can promote the
-// request between them. Without the predicate, this UPDATE would clobber
-// a finalized refund back to 'cancelled' and the books would diverge
-// from the provider. rowCount = 0 means the cron beat us; surface as
-// 409 so the desktop can re-fetch the current state.
+// State-guarded, because the cooling-off cron can promote the request between the check above and this UPDATE.
 $upd = $pdo->prepare("
     UPDATE refund_requests
     SET state='cancelled', state_reason='cancelled_by_user', cancel_token = NULL, updated_at=NOW()

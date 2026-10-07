@@ -31,10 +31,7 @@
         if (target) target.classList.add('active');
     }
 
-    // Query params that, when present in the current URL, indicate a
-    // server-rendered "detail view". Clicking a tab while one of these is
-    // set should do a real navigation (not just a CSS swap), so the stale
-    // detail markup gets replaced by the fresh list view.
+    // Query params that, when present in the current URL, indicate a server-rendered "detail view".
     var DETAIL_VIEW_PARAMS = ['test_id'];
 
     function updateUrlOrReload(tabId) {

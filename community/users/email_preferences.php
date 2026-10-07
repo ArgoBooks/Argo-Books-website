@@ -54,10 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                    WHERE id = ?');
             $stmt->execute([$product_updates, $tips_onboarding, $reviews, $promotions, $community_digest, $user_id]);
 
-            // Sync suppressions: a previous one-click unsubscribe leaves a row in
-            // email_suppressions, and the send-time gate checks that table FIRST.
-            // When the user opts in here, those rows must be cleared or the
-            // pref column flip would have no effect.
+            // A one-click unsubscribe leaves a row in email_suppressions, which the send-time gate reads first, so opting in here has to clear those rows.
             $opted_in_contexts = [];
             if ($product_updates)  $opted_in_contexts[] = 'product_updates';
             if ($tips_onboarding)  $opted_in_contexts[] = 'tips_onboarding';

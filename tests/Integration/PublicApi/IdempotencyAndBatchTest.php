@@ -79,8 +79,8 @@ final class IdempotencyAndBatchTest extends ApiIntegrationTestCase
 
     /**
      * A key stays in the table past its 24 hours until the cleanup reaches it. Used
-     * again in that gap it has to run as a new request. It used to find its own
-     * expired row, restart, and find it again without end.
+     * again in that gap it has to run as a new request, without finding its own
+     * expired row and restarting on it.
      */
     public function testAKeyPastItsDayRunsAsANewRequest(): void
     {
