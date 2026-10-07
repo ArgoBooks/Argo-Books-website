@@ -220,7 +220,9 @@ foreach ($ua_users as $ua_authId => &$ua_u) {
     $ua_info = $ua_sid !== null ? ($ua_subInfo[$ua_sid] ?? null) : null;
     $ua_u['isKeyUser']  = $ua_info !== null && $ua_info['isFreeKey'];
     $ua_u['keyBatch']   = $ua_u['isKeyUser'] ? $ua_info['batch'] : null;
-    $ua_u['licenseKey'] = $ua_info !== null ? $ua_info['key'] : null;
+    // Shown only when it differs from the subscription id, which is the case for a key redeemed before the two became one value.
+    $ua_key = $ua_info !== null ? $ua_info['key'] : null;
+    $ua_u['licenseKey'] = ($ua_key !== null && $ua_key !== $ua_sid) ? $ua_key : null;
 }
 unset($ua_u);
 

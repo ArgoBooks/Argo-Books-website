@@ -160,7 +160,8 @@ function redeem_premium_key($key, $device_id) {
     try {
         $pdo->beginTransaction();
 
-        $subscriptionId = generate_license_key('premium');
+        // The key is the subscription id, as it is on a paid subscription, and a key redeems once so the id stays unique.
+        $subscriptionId = $key;
 
         // Calculate subscription dates
         $startDate = date('Y-m-d H:i:s');
@@ -436,7 +437,8 @@ function _recreate_subscription_for_key($key, $device_id) {
 
         $pdo->beginTransaction();
 
-        $newSubscriptionId = generate_license_key('premium');
+        // The same id the first redemption used, since the key is the id.
+        $newSubscriptionId = $key;
 
         // Create the premium subscription
         $stmt = $pdo->prepare("
