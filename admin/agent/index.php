@@ -53,8 +53,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 array_intersect_key($_POST, array_flip(['text', 'subject', 'body'])),
                 (string) ($_POST['note'] ?? '')
             );
+            $kind = $pdo->prepare('SELECT kind FROM agent_proposals WHERE id = ?');
+            $kind->execute([(int) ($_POST['id'] ?? 0)]);
+            $done = match (true) {
+                $kind->fetchColumn() !== 'email' => ['success', 'Approved and published.'],
+                agent_outreach_sending($pdo) => ['success', 'Approved. It goes out with the next outreach send, at 8:00 AM.'],
+                default => ['error', 'Approved, but it cannot go out: outreach is switched off in Admin, Outreach, Settings.'],
+            };
             $message = match ($status) {
-                'done' => ['success', 'Approved and carried out.'],
+                'done' => $done,
                 'rejected' => ['success', 'Rejected. The agent will be told why on its next run.'],
                 default => ['error', 'Approved, but it could not be carried out. The reason is on the Decided tab.'],
             };
@@ -100,6 +107,7 @@ $configured = [
     'Token for the agent (AGENT_API_TOKEN in .env, 32 characters or more)' => strlen($_ENV['AGENT_API_TOKEN'] ?? '') >= 32,
     'Read-only database user (AGENT_DB_USER in .env), for SQL' => ($_ENV['AGENT_DB_USER'] ?? '') !== '',
     'Gemini key (GEMINI_API_KEY in .env), for research' => ($_ENV['GEMINI_API_KEY'] ?? '') !== '',
+    'Outreach sending (the switch in Admin, Outreach, Settings). Approved emails wait while it is off' => agent_outreach_sending($pdo),
     'Playbook (api/agent/playbook.md)' => trim(agent_playbook()) !== '',
     'Facts file (api/agent/facts.md)' => trim(agent_facts()) !== '',
 ];

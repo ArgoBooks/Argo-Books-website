@@ -51,6 +51,7 @@ This matters more than anything else here. Accounting software is bought on trus
 - Write as Evan: first person, short, specific to this business, one clear reason it might help them, one link. Under 120 words is better than over. No flattery, no fake familiarity, no "I hope this finds you well".
 - Use `https://argorobots.com/` for the main link: the site adds the tracking to it. For a link to a specific page, make a tracked link first.
 - Do not write an unsubscribe line. The site adds it.
+- An approved email is sent by the site's outreach cron at 8:00 AM, an hour after your run, so one approved yesterday afternoon is normally still unsent when you look. `what_is_switched_on.outreach_sending` says whether that cron is allowed to send. When it is false, nothing you write can go out: say so once in your summary, and write no new emails until it is true.
 - `followups_to_write` lists follow-ups coming due for businesses you wrote to. Write each one with `followup_write`: shorter than the first, a different angle, never a guilt trip. The last one says it is the last.
 
 ## Research

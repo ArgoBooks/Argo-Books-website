@@ -129,6 +129,22 @@ function agent_finish_run(PDO $pdo, int $runId, string $summary): void
         ->execute([$summary, $runId, current_environment()]);
 }
 
+/** True when the Outreach page's own switch lets the cron send. An approved email waits while it is off. */
+function agent_outreach_sending(PDO $pdo): bool
+{
+    $value = $pdo->query("SELECT state_value FROM outreach_pipeline_state WHERE state_key = 'outreach_enabled'")->fetchColumn();
+    return $value === false || $value === '1';
+}
+
+/** How many emails the owner approved that the outreach cron has not sent yet. */
+function agent_emails_not_sent(PDO $pdo): int
+{
+    return (int) $pdo->query(
+        "SELECT COUNT(*) FROM outreach_leads
+          WHERE source = 'agent' AND approval_status = 'approved' AND sent_at IS NULL AND status != 'disqualified'"
+    )->fetchColumn();
+}
+
 function agent_log(PDO $pdo, ?int $runId, string $action, string $status, array $detail): void
 {
     $pdo->prepare('INSERT INTO agent_actions (environment, run_id, action, status, detail) VALUES (?, ?, ?, ?, ?)')

@@ -706,6 +706,8 @@ function agent_brief(PDO $pdo, int $runId, ?callable $http = null): array
         'what_is_switched_on' => [
             'posting' => agent_on($pdo, 'posting_enabled'),
             'outreach' => agent_on($pdo, 'outreach_enabled'),
+            'outreach_sending' => agent_outreach_sending($pdo),
+            'approved_emails_not_sent_yet' => agent_emails_not_sent($pdo),
             'posts_wait_for_approval' => agent_on($pdo, 'approve_posts'),
             'emails_wait_for_approval' => agent_on($pdo, 'approve_emails'),
             'sql' => ($_ENV['AGENT_DB_USER'] ?? '') !== '',
@@ -787,6 +789,10 @@ function agent_update_email(PDO $pdo, int $runId): ?array
                 ? ucfirst($platform) . ' sign-in runs out on ' . date('F j', $connection['expires_at']) . ' and needs connecting again'
                 : ucfirst($platform) . ' sign-in has run out, so nothing is being posted there';
         }
+    }
+    $notSent = agent_emails_not_sent($pdo);
+    if ($notSent > 0 && !agent_outreach_sending($pdo)) {
+        $needs[] = $count($notSent, 'approved email') . ' cannot go out, because outreach is switched off in Admin, Outreach, Settings';
     }
 
     $html = '';
