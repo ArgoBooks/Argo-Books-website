@@ -185,7 +185,8 @@ try {
         LEFT JOIN portal_payments p ON p.company_id = c.id
         WHERE $env_sql_c
         GROUP BY c.id
-        ORDER BY total_revenue DESC
+        -- Newest first among the companies that have taken nothing yet, which is most of them.
+        ORDER BY total_revenue DESC, c.created_at DESC
     ");
     $companies = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
@@ -671,6 +672,7 @@ include __DIR__ . '/../admin_header.php';
                                 <th>Total Payments</th>
                                 <th>Total Payments</th>
                                 <th>Last Payment</th>
+                                <th>Created</th>
                                 <th style="width: 40px;"></th>
                             </tr>
                         </thead>
@@ -688,10 +690,11 @@ include __DIR__ . '/../admin_header.php';
                                     <td><?php echo number_format($company['total_payments']); ?></td>
                                     <td>$<?php echo number_format($company['total_revenue'], 2); ?></td>
                                     <td><?php echo $company['last_payment_date'] ? date('M j, Y', strtotime($company['last_payment_date'])) : 'Never'; ?></td>
+                                    <td><?php echo $company['created_at'] ? date('M j, Y', strtotime($company['created_at'])) : 'Unknown'; ?></td>
                                     <td class="expand-arrow-cell"><span class="expand-arrow">&#9662;</span></td>
                                 </tr>
                                 <tr class="detail-row" id="company-detail-<?php echo $company['id']; ?>" style="display: none;">
-                                    <td colspan="6">
+                                    <td colspan="7">
                                         <div class="company-detail">
                                             <!-- General Info -->
                                             <div class="detail-section">
