@@ -791,7 +791,8 @@ include __DIR__ . '/../admin_header.php';
                 <div class="chart-row">
                     <div class="chart-container">
                         <h2>User Distribution by Country</h2>
-                        <canvas id="countryDistributionChart"></canvas>
+                        <!-- The canvas has a box of its own because Chart.js sizes it from its parent, which would otherwise be the whole card and leave the button no room. -->
+                        <div class="chart-canvas-box"><canvas id="countryDistributionChart"></canvas></div>
                         <!-- The chart draws the top fifteen, so the rest of the countries live behind this. main.js fills the list and shows the button. -->
                         <button type="button" class="bd-details-btn" data-details-target="countryDetailsModal" style="display:none;">See all details</button>
                     </div>

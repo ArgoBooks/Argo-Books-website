@@ -810,6 +810,9 @@ th.col-nowrap {
   flex-direction: column;
 }
 
+/* A canvas in a card that also holds a button takes the space the others leave, where min-height lets it shrink. */
+.chart-canvas-box { flex: 1; min-height: 0; position: relative; }
+
 .chart-container h2,
 .chart-container h3 {
   text-align: center;
@@ -2447,7 +2450,33 @@ th.col-nowrap {
 
 /* ─── "See all details" modal, shared by the funnel and app-stats ─────── */
 
-.bd-details-modal .modal-content { max-width: 560px; }
+/* The overlay and its box, so a page that defines no .modal of its own still gets one. */
+.bd-details-modal {
+    position: fixed;
+    z-index: 1000;
+    inset: 0;
+    overflow: auto;
+    background-color: var(--overlay-dark);
+}
+.bd-details-modal .modal-content {
+    background-color: var(--white);
+    margin: 5% auto;
+    padding: 32px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 560px;
+    box-shadow: 0 20px 25px -5px var(--shadow-default);
+}
+[data-theme="dark"] .bd-details-modal .modal-content { background-color: var(--gray-800); }
+.bd-details-modal .modal-close {
+    color: var(--admin-text);
+    float: right;
+    font-size: 32px;
+    font-weight: bold;
+    line-height: 1;
+    cursor: pointer;
+}
+[data-theme="dark"] .bd-details-modal .modal-close { color: var(--white); }
 .bd-details-modal h2 { margin-top: 0; color: var(--admin-text); }
 [data-theme="dark"] .bd-details-modal h2 { color: var(--white); }
 
