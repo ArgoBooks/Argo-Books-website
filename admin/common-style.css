@@ -810,6 +810,9 @@ th.col-nowrap {
   flex-direction: column;
 }
 
+/* The 60px below a chart is there for a card with nothing under it; a button sits in that space instead. */
+.chart-container.has-details { padding-bottom: 20px; }
+
 /* A canvas in a card that also holds a button takes the space the others leave, where min-height lets it shrink. */
 .chart-canvas-box { flex: 1; min-height: 0; position: relative; }
 

@@ -196,12 +196,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
     fillCountryDetails(rankedCountries);
 
-    // Sized from the list rather than trimming the list to the box: 28px a bar, plus the title, the axis and the details button.
+    // Sized from the list rather than trimming the list to the box: 28px a bar, plus the title and the axis.
     const countryCanvas = document.getElementById("countryDistributionChart");
-    const detailsBtn = document.querySelector('.bd-details-btn[data-details-target="countryDetailsModal"]');
-    const countryCard = countryCanvas.closest(".chart-container");
-    countryCard.style.height =
-      Math.max(300, labels.length * 28 + 90) + (detailsBtn ? 38 : 0) + "px";
+    countryCanvas.closest(".chart-container").style.height =
+      Math.max(300, labels.length * 28 + 90) + "px";
 
     new Chart(countryCanvas, {
       type: "bar",

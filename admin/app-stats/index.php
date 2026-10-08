@@ -789,7 +789,7 @@ include __DIR__ . '/../admin_header.php';
                 <h2 class="section-title">Geographic Analytics</h2>
                 
                 <div class="chart-row">
-                    <div class="chart-container">
+                    <div class="chart-container has-details">
                         <h2>User Distribution by Country</h2>
                         <!-- The canvas has a box of its own because Chart.js sizes it from its parent, which would otherwise be the whole card and leave the button no room. -->
                         <div class="chart-canvas-box"><canvas id="countryDistributionChart"></canvas></div>
