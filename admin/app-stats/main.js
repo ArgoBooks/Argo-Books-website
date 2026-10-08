@@ -135,6 +135,35 @@ document.addEventListener("DOMContentLoaded", function () {
   // Geographic Charts
   // Counts people, not events: each user (hashed IP, the same key the Active Users tab
   // uses) is counted once, under the country of their latest event that has one.
+  // Every country behind the chart's top fifteen, searchable. Built here rather than
+  // server-side because the counts are worked out from the payload already in the page.
+  function fillCountryDetails(ranked) {
+    const list = document.getElementById("countryDetailsList");
+    const btn = document.querySelector('.bd-details-btn[data-details-target="countryDetailsModal"]');
+    if (!list || !btn || ranked.length === 0) return;
+
+    const head = document.createElement("div");
+    head.className = "bd-details-row bd-details-head";
+    head.innerHTML = '<span class="bd-details-name">Country</span><span class="bd-details-visits">Users</span>';
+    list.replaceChildren(head);
+
+    ranked.forEach(([country, count]) => {
+      const row = document.createElement("div");
+      row.className = "bd-details-row";
+      row.setAttribute("data-name", country.toLowerCase());
+      const name = document.createElement("span");
+      name.className = "bd-details-name";
+      name.textContent = country;
+      const users = document.createElement("span");
+      users.className = "bd-details-visits";
+      users.textContent = count.toLocaleString();
+      row.append(name, users);
+      list.appendChild(row);
+    });
+
+    btn.style.display = "";
+  }
+
   function generateCountryDistributionChart(rawData) {
     const latestByUser = {};
     for (const events of Object.values(rawData.dataPoints)) {
@@ -159,12 +188,13 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
 
-    const sortedCountries = Object.entries(countryCounts)
-      .sort(([, a], [, b]) => b - a)
-      .slice(0, 15);
+    const rankedCountries = Object.entries(countryCounts).sort(([, a], [, b]) => b - a);
+    const sortedCountries = rankedCountries.slice(0, 15);
 
     const labels = sortedCountries.map(([country]) => country);
     const data = sortedCountries.map(([, count]) => count);
+
+    fillCountryDetails(rankedCountries);
 
     // One row per country, so the box is sized from the list rather than the list being
     // trimmed to the box. 28px a bar, plus room for the title and the axis beneath.

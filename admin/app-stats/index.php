@@ -792,6 +792,8 @@ include __DIR__ . '/../admin_header.php';
                     <div class="chart-container">
                         <h2>User Distribution by Country</h2>
                         <canvas id="countryDistributionChart"></canvas>
+                        <!-- The chart draws the top fifteen, so the rest of the countries live behind this. main.js fills the list and shows the button. -->
+                        <button type="button" class="bd-details-btn" data-details-target="countryDetailsModal" style="display:none;">See all details</button>
                     </div>
                 </div>
 
@@ -1218,4 +1220,14 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 </script>
+<div id="countryDetailsModal" class="modal bd-details-modal" style="display:none;">
+    <div class="modal-content">
+        <span class="modal-close bd-details-close">&times;</span>
+        <h2>Users by country</h2>
+        <input type="text" class="bd-details-search" placeholder="Search&hellip;" autocomplete="off" spellcheck="false">
+        <div class="bd-details-list bd-details-list-pairs" id="countryDetailsList"></div>
+    </div>
+</div>
+
+<script src="../details-modal.js?v=<?= filemtime(__DIR__ . '/../details-modal.js') ?>" defer></script>
 <script src="../preserve-scroll.js" defer></script>

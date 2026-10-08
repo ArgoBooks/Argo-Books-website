@@ -2427,3 +2427,97 @@ th.col-nowrap {
     color: var(--white);
     border-color: var(--gray-600);
 }
+
+.bd-details-btn {
+    margin-top: auto;
+    align-self: center;
+    background: none;
+    border: none;
+    color: var(--gray-500);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    padding: 14px 0 4px;
+}
+.bd-details-btn:hover { color: var(--admin-text); }
+[data-theme="dark"] .bd-details-btn { color: var(--white); }
+[data-theme="dark"] .bd-details-btn:hover { color: var(--white); }
+
+/* ─── "See all details" modal, shared by the funnel and app-stats ─────── */
+
+.bd-details-modal .modal-content { max-width: 560px; }
+.bd-details-modal h2 { margin-top: 0; color: var(--admin-text); }
+[data-theme="dark"] .bd-details-modal h2 { color: var(--white); }
+
+.bd-details-search {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1px solid var(--gray-input-border);
+    border-radius: 6px;
+    font-size: 14px;
+    box-sizing: border-box;
+    margin-bottom: 12px;
+}
+[data-theme="dark"] .bd-details-search {
+    background: var(--gray-700);
+    border-color: var(--black);
+    color: var(--white);
+}
+.bd-details-list { max-height: 60vh; overflow-y: auto; }
+.bd-details-row {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 16px;
+    align-items: center;
+    padding: 9px 6px;
+    border-bottom: 1px solid var(--gray-200);
+    font-size: 14px;
+}
+[data-theme="dark"] .bd-details-row { border-bottom-color: var(--gray-700); }
+.bd-details-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--admin-text); }
+[data-theme="dark"] .bd-details-name { color: var(--white); }
+.bd-details-visits {
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    color: var(--admin-text);
+    min-width: 56px;
+    text-align: right;
+}
+.bd-details-revenue {
+    font-variant-numeric: tabular-nums;
+    color: var(--amber-600);
+    min-width: 64px;
+    text-align: right;
+}
+[data-theme="dark"] .bd-details-visits { color: var(--white); }
+[data-theme="dark"] .bd-details-revenue { color: var(--amber-400); }
+
+/* Referrer and entry-page modals carry two extra attribution columns, so their
+   rows need a wider grid than the name/visits/revenue default above. */
+.bd-details-list-users .bd-details-row { grid-template-columns: 1fr auto auto auto auto; }
+/* A list of a name and one number, where the default grid leaves a third column empty. */
+.bd-details-list-pairs .bd-details-row { grid-template-columns: 1fr auto; }
+.bd-details-free,
+.bd-details-paid {
+    font-variant-numeric: tabular-nums;
+    min-width: 72px;
+    text-align: right;
+    color: var(--admin-text);
+}
+.bd-details-paid { font-weight: 600; }
+[data-theme="dark"] .bd-details-free,
+[data-theme="dark"] .bd-details-paid { color: var(--white); }
+
+/* Column headings, only rendered when the attribution columns are present. */
+.bd-details-head {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--gray-500);
+    border-bottom-width: 2px;
+}
+.bd-details-head span { font-weight: 600; }
+[data-theme="dark"] .bd-details-head { color: var(--white); }
+

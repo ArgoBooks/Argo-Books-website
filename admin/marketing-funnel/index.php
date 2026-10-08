@@ -2249,40 +2249,6 @@ include __DIR__ . '/../admin_header.php';
             }
         })();
 
-        // ----- "See all details" modals (referrer / country / region / city) -----
-        (function breakdownDetails() {
-            const close = modal => { modal.style.display = 'none'; };
-
-            document.querySelectorAll('.bd-details-modal').forEach(modal => {
-                const search = modal.querySelector('.bd-details-search');
-                const rows = Array.from(modal.querySelectorAll('.bd-details-row'));
-                const filter = () => {
-                    const q = (search.value || '').trim().toLowerCase();
-                    rows.forEach(r => { r.style.display = (!q || r.getAttribute('data-name').includes(q)) ? '' : 'none'; });
-                };
-                if (search) search.addEventListener('input', filter);
-                modal.querySelectorAll('.bd-details-close').forEach(x => x.addEventListener('click', () => close(modal)));
-                modal.addEventListener('mousedown', e => { if (e.target === modal) close(modal); });
-            });
-
-            document.querySelectorAll('.bd-details-btn[data-details-target]').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const modal = document.getElementById(btn.getAttribute('data-details-target'));
-                    if (!modal) return;
-                    modal.style.display = 'block';
-                    const search = modal.querySelector('.bd-details-search');
-                    if (search) { search.value = ''; search.dispatchEvent(new Event('input')); search.focus(); }
-                });
-            });
-
-            document.addEventListener('keydown', e => {
-                if (e.key !== 'Escape') return;
-                document.querySelectorAll('.bd-details-modal').forEach(m => {
-                    if (m.style.display === 'block') close(m);
-                });
-            });
-        })();
-
         // Card "Download" buttons. Every tab in the card is written into one CSV,
         // separated by a blank line and its own header row, which Excel and Sheets
         // both open cleanly. Done client-side from the payload already in the DOM
@@ -2345,4 +2311,5 @@ include __DIR__ . '/../admin_header.php';
     })();
 </script>
 <script>window.ADMIN_PRESERVE_SCROLL = ['.control-pill'];</script>
+<script src="../details-modal.js?v=<?= filemtime(__DIR__ . '/../details-modal.js') ?>" defer></script>
 <script src="../preserve-scroll.js" defer></script>
