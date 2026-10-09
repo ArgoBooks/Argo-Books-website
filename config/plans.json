@@ -22,6 +22,7 @@
             {"label": "See your numbers update in real time"},
             {"label": "Keep every receipt in one place"},
             {"label": "Send {free_invoice_monthly_limit} invoices a month"},
+            {"label": "Take card payments on any invoice"},
             {"label": "Scan {free_receipt_scan_monthly_limit} receipts a month, no typing"},
             {"label": "Import {ai_import_monthly_limit} spreadsheets a month"},
             {"label": "Import {bank_import_monthly_limit} bank statements a month"}
@@ -29,7 +30,7 @@
     },
     "premium": {
         "features": [
-            {"label": "Unlimited invoices and online payments"},
+            {"label": "Unlimited invoices"},
             {"label": "Scan {receipt_scan_monthly_limit} receipts a month, no typing"},
             {"label": "Import {premium_ai_import_monthly_limit} spreadsheets a month"},
             {"label": "Import {premium_bank_import_monthly_limit} bank statements a month"},

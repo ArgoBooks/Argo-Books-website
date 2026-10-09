@@ -234,10 +234,10 @@ $yearlySavings = ($monthlyPrice * 12) - $yearlyPrice;
             <div class="feature-detail animate-on-scroll">
                 <div class="feature-detail-text">
                     <h2>Send unlimited invoices and accept online payments</h2>
-                    <p>The free plan caps invoices at <?= (int) $pricing['free_invoice_monthly_limit'] ?> per month. Premium removes that limit entirely, and adds online payment links so customers can pay directly from the invoice by credit card.</p>
+                    <p>The free plan caps invoices at <?= (int) $pricing['free_invoice_monthly_limit'] ?> per month, and Premium removes that limit entirely. Online payment links come with either plan: connect Stripe or Square and customers can pay directly from the invoice by credit card.</p>
                     <ul class="feature-checklist">
                         <li><?= svg_icon('check', 20) ?><span>Unlimited invoices with no monthly cap</span></li>
-                        <li><?= svg_icon('check', 20) ?><span>Online payment links via Stripe, PayPal &amp; Square</span></li>
+                        <li><?= svg_icon('check', 20) ?><span>Online payment links via Stripe &amp; Square</span></li>
                         <li><?= svg_icon('check', 20) ?><span>Real-time status tracking from draft to paid</span></li>
                     </ul>
                 </div>

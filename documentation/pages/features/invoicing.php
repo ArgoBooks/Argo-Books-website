@@ -15,7 +15,7 @@ include __DIR__ . '/../../docs-header.php';
             integrated payment processing. Argo Books makes invoicing simple and efficient.</p>
 
             <div class="info-box">
-                <p><strong>Note:</strong> The free version includes up to <?= (int) $pricing['free_invoice_monthly_limit'] ?> invoices per month. <a href="../getting-started/version-comparison.php" class="link">Upgrade to Premium</a> for unlimited invoices and online payment integration.</p>
+                <p><strong>Note:</strong> The free version includes up to <?= (int) $pricing['free_invoice_monthly_limit'] ?> invoices per month. <a href="../getting-started/version-comparison.php" class="link">Upgrade to Premium</a> for unlimited invoices. Online payments work on either plan, once you connect Stripe or Square.</p>
             </div>
 
             <p>To let customers pay online, connect Stripe or Square first. See

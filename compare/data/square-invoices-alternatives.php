@@ -35,7 +35,7 @@ return [
         '<strong>Your whole books, not just billing.</strong> Expenses, receipts, inventory, reports and forecasting are built in, where Square Invoices covers the invoice and the payment.',
         '<strong>Yours, and offline.</strong> A native desktop app for Windows, macOS, and Linux. Your records open instantly with no internet, and your data stays on your machine rather than on Square\'s servers.',
         '<strong>AI that\'s built in.</strong> Receipt scanning turns a photo into a filed expense, and spreadsheet import brings your history across in one go.',
-        '<strong>You are not tied to one processor.</strong> Argo Books connects to your own Stripe, PayPal or Square account, so you keep your rates and your relationship.',
+        '<strong>You are not tied to one processor.</strong> Argo Books connects to your own Stripe or Square account, so you keep your rates and your relationship.',
         '<strong>Free to start, and honest about it.</strong> Both are free. Argo\'s free tier includes AI receipt scanning and inventory, which invoicing tools generally do not.',
     ],
 
@@ -112,7 +112,7 @@ return [
                             <p>Their Plus plan is $' . $sq_plus . ' CAD/month and adds custom templates, milestone payment schedules and project tracking.</p>'],
         ['q_html' => 'So why use Argo Books instead?', 'a_html' => '<p>Because invoicing is one part of running the books. Argo Books adds expense and revenue tracking, AI receipt scanning, inventory management, financial reports and predictive analytics.</p>
                             <p>It also works offline and keeps your data on your own computer, which Square Invoices does not do.</p>'],
-        ['q_html' => 'Can I still take card payments with Argo Books?', 'a_html' => '<p>Yes. Argo Books connects to your own Stripe, PayPal or Square account, so you keep your existing rates and payout schedule rather than being tied to one processor.</p>'],
+        ['q_html' => 'Can I still take card payments with Argo Books?', 'a_html' => '<p>Yes. Argo Books connects to your own Stripe or Square account, so you keep your existing rates and payout schedule rather than being tied to one processor.</p>'],
         ['q_html' => 'Does Argo Books work offline?', 'a_html' => '<p>Yes. Argo Books is a desktop application that runs natively on your computer, so it works even without an internet connection. Your data is stored locally with AES-256 encryption.</p>
                             <p>Square Invoices is cloud-based and needs a connection.</p>'],
         ['q_html' => 'Is Argo Books free as well?', 'a_html' => '<p>Yes. Argo Books has a free tier you can use forever, with no credit card and no trial period. It includes ' . (int) $pricing['free_invoice_monthly_limit'] . ' invoices a month plus AI receipt scanning and inventory.</p>

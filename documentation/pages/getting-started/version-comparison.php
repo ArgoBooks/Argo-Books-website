@@ -45,7 +45,7 @@ include __DIR__ . '/../../docs-header.php';
                         <!-- Ordered by how much the tiers differ: metered features first,
                              then premium-only, then everything included on both. -->
                         <tr>
-                            <td>Invoices & Payments</td>
+                            <td>Invoices</td>
                             <td><?= (int) $pricing['free_invoice_monthly_limit'] ?> invoices / month</td>
                             <td>Unlimited</td>
                         </tr>

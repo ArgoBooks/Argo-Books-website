@@ -43,7 +43,7 @@ return [
             'list' => [
                 'Outstanding and overdue totals on one screen',
                 'Automatic payment reminders on the schedule you set',
-                'Card payments through Stripe, PayPal or Square',
+                'Card payments through Stripe or Square',
             ],
             'img' => '../../resources/images/features/invoice-dashboard.svg',
             'img_alt' => 'The Argo Books invoice dashboard showing outstanding, paid and overdue totals with a list of recent invoices',
@@ -102,7 +102,7 @@ return [
     'faqs' => [
     [
         'q' => 'Can customers pay invoices online through Argo Books?',
-        'a' => 'Yes. Every invoice includes a secure online payment link so your customers can pay by credit card with a single click. Argo Books supports Stripe, Square, and PayPal. You choose which payment gateway works best for your business. Payments are tracked automatically, so you always know which invoices are outstanding and which have been paid.',
+        'a' => 'Yes. Every invoice includes a secure online payment link so your customers can pay by credit card with a single click. Argo Books supports Stripe and Square. You choose which one works best for your business. Payments are tracked automatically, so you always know which invoices are outstanding and which have been paid.',
     ],
     [
         'q' => 'Can I customize how my invoices look?',
