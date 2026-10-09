@@ -169,6 +169,7 @@ try {
                 'dueDate' => $inv['due_date'],
                 'invoiceUrl' => rtrim($portalBaseUrl, '/') . '/invoice/' . $inv['invoice_token'],
                 'passProcessingFee' => !empty($inv['pass_processing_fee']),
+                'canPay' => count(get_available_payment_methods($inv)) > 0,
                 'stage' => $stage,
                 'daysOverdue' => $daysOverdue,
                 'replyToEmail' => $replyTo,

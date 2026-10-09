@@ -578,6 +578,7 @@ function set_portal_headers(): void
  *   - dueDate: Due date string (Y-m-d or similar)
  *   - invoiceUrl: Full URL to view/pay the invoice
  *   - portalUrl: Full URL to the customer's portal (optional)
+ *   - canPay: bool, whether a provider is connected, which decides the button's wording
  * @return array Result with 'success' and 'message'
  */
 function send_invoice_notification(array $params): array
@@ -590,6 +591,8 @@ function send_invoice_notification(array $params): array
     $currency = $params['currency'] ?? 'USD';
     $dueDate = $params['dueDate'] ?? '';
     $invoiceUrl = $params['invoiceUrl'] ?? '';
+    // A company with no provider connected shows the invoice without any way to pay it, so the button must not promise one.
+    $canPay = !empty($params['canPay']);
     // Default to true to match the schema's column default (pass_processing_fee DEFAULT 1).
     $passProcessingFee = !array_key_exists('passProcessingFee', $params)
         ? true
@@ -632,7 +635,7 @@ function send_invoice_notification(array $params): array
         'greetingName' => $customerName,       // escaped by helper
         'introHtml' => 'You have a new invoice from <strong>' . $safeCompany . '</strong>.',
         'detailRows' => $detailRows,
-        'ctaButton' => ['url' => $invoiceUrl, 'text' => 'View & Pay Invoice', 'color' => '#2563eb'],
+        'ctaButton' => ['url' => $invoiceUrl, 'text' => $canPay ? 'View & Pay Invoice' : 'View Invoice', 'color' => '#2563eb'],
         'closingHtml' => 'If you have any questions about this invoice, please contact ' . $safeCompany . ' directly.',
     ]);
 
@@ -669,6 +672,7 @@ function send_invoice_notification(array $params): array
  *   - customerEmail, customerName, companyName, invoiceId
  *   - balanceDue, currency, dueDate, invoiceUrl
  *   - passProcessingFee: bool, whether the fee is added at checkout
+ *   - canPay: bool, whether a provider is connected, which decides the button's wording
  *   - stage: 1|2|3, controls the subject line and closing urgency
  *   - daysOverdue: int, shown as a detail row
  *   - replyToEmail: optional verified owner address, so "I already paid"
@@ -688,6 +692,8 @@ function send_invoice_reminder(array $params): array
     $stage = (int)($params['stage'] ?? 1);
     $daysOverdue = (int)($params['daysOverdue'] ?? 0);
     $replyToEmail = trim((string)($params['replyToEmail'] ?? ''));
+    // As in send_invoice_notification: no provider connected means no way to pay, so the button says so.
+    $canPay = !empty($params['canPay']);
     $passProcessingFee = !array_key_exists('passProcessingFee', $params)
         ? true
         : !empty($params['passProcessingFee']);
@@ -747,7 +753,7 @@ function send_invoice_reminder(array $params): array
         'greetingName' => $customerName,       // escaped by helper
         'introHtml' => $intro,
         'detailRows' => $detailRows,
-        'ctaButton' => ['url' => $invoiceUrl, 'text' => 'View & Pay Invoice', 'color' => '#d97706'],
+        'ctaButton' => ['url' => $invoiceUrl, 'text' => $canPay ? 'View & Pay Invoice' : 'View Invoice', 'color' => '#d97706'],
         'closingHtml' => $closing,
     ]);
 

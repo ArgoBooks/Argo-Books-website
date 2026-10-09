@@ -45,6 +45,7 @@ function portal_reminder_candidates(PDO $pdo, string $environment): array
                 pi.total_amount, pi.balance_due, pi.currency, pi.due_date,
                 pi.pass_processing_fee,
                 pc.company_name, pc.owner_email, pc.email_verified_at,
+                pc.stripe_account_id, pc.square_merchant_id,
                 DATEDIFF(CURDATE(), pi.due_date) AS days_overdue
          FROM portal_invoices pi
          INNER JOIN portal_companies pc ON pc.id = pi.company_id

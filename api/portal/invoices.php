@@ -151,6 +151,7 @@ function handle_publish_invoice(): void
                 'invoiceUrl' => $invoiceUrl,
                 'portalUrl' => $portalUrl,
                 'passProcessingFee' => (bool)$passProcessingFee,
+                'canPay' => count(get_available_payment_methods($company)) > 0,
             ]);
             $emailSent = $emailResult['success'];
         } catch (\Throwable $e) {
