@@ -321,7 +321,14 @@ $isPaid = $status === 'paid' || $balanceDue <= 0;
                                             <?php echo htmlspecialchars($item['description'] ?? $item['Description'] ?? ''); ?>
                                         </td>
                                         <td class="col-qty" data-label="Qty">
-                                            <?php echo htmlspecialchars($item['quantity'] ?? $item['Quantity'] ?? 1); ?>
+                                            <?php
+                                            echo htmlspecialchars($item['quantity'] ?? $item['Quantity'] ?? 1);
+                                            // The app sends the unit only when the product states one, and never for a plain count.
+                                            $itemUnit = trim((string)($item['unit'] ?? $item['Unit'] ?? ''));
+                                            if ($itemUnit !== '') {
+                                                echo ' ' . htmlspecialchars($itemUnit);
+                                            }
+                                            ?>
                                         </td>
                                         <td class="col-price" data-label="Price">
                                             <?php echo $currencySymbol . number_format(floatval($item['unitPrice'] ?? $item['UnitPrice'] ?? $item['price'] ?? $item['Price'] ?? 0), 2); ?>
