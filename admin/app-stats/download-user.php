@@ -4,6 +4,7 @@
  *
  * ?authId=...  one user, reached from the "Download CSV" button on their card.
  * ?all=1       every user in one file, reached from the button above the list.
+ * ?all=1&today=1  the same file, limited to the users who sent an event today.
  *
  * Both deliberately ignore the page's date range and tier filter: the buttons mean
  * "everything ever sent", the same scope the Delete button operates on, so the file
@@ -41,6 +42,9 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
 $_SESSION['admin_return_to'] = '/admin/app-stats/?tab=user-activity';
 
 $allMode = (string)($_GET['all'] ?? '') === '1';
+$todayOnly = $allMode && (string)($_GET['today'] ?? '') === '1';
+// Today starts where the Active Users cards on the page start it, so the file and the card count the same people.
+$todayStart = strtotime('today');
 $authId  = (string)($_GET['authId'] ?? '');
 if (!$allMode && $authId === '') {
     http_response_code(400);
@@ -231,6 +235,7 @@ $matchedFile = false;
 if ($allMode) {
     $filesByAuth = [];   // authId => [basename => path]
     $newestByAuth = [];  // authId => newest mtime, used only for ordering
+    $activeToday = [];   // authId => true, for anyone with an event since midnight
 
     foreach ($files as $name => $path) {
         $raw = @file_get_contents($path);
@@ -246,6 +251,19 @@ if ($allMode) {
         if (!isset($newestByAuth[$owner]) || $mtime > $newestByAuth[$owner]) {
             $newestByAuth[$owner] = $mtime;
         }
+
+        if ($todayOnly && !isset($activeToday[$owner]) && is_array($d['events'] ?? null)) {
+            foreach ($d['events'] as $ev) {
+                $ts = is_array($ev) ? telemetry_ts_seconds(ua_unwrap_event($ev)['timestamp'] ?? null) : false;
+                if ($ts !== false && $ts >= $todayStart) {
+                    $activeToday[$owner] = true;
+                    break;
+                }
+            }
+        }
+    }
+    if ($todayOnly) {
+        $newestByAuth = array_intersect_key($newestByAuth, $activeToday);
     }
 
     // Most recently active first, which is the order the tab presents people in.
@@ -266,12 +284,12 @@ if (!$allMode) {
 }
 if (!$matchedFile) {
     http_response_code(404);
-    exit($allMode ? 'No telemetry found' : 'No telemetry found for that user');
+    exit($todayOnly ? 'No user has sent anything today' : ($allMode ? 'No telemetry found' : 'No telemetry found for that user'));
 }
 
 // ---- Emit ---------------------------------------------------------------------
 if ($allMode) {
-    $filename = 'argo-activity-all-users-' . gmdate('Y-m-d') . '.csv';
+    $filename = 'argo-activity-' . ($todayOnly ? 'todays-users-' : 'all-users-') . gmdate('Y-m-d') . '.csv';
 } else {
     // authId contains a colon ('device:...' / 'subscription:...'), which is illegal in a
     // Windows filename, and is long enough to be unwieldy. Keep it recognisable instead.

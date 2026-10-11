@@ -507,6 +507,8 @@ if (!function_exists('ua_fmt')) {
              auth_id column, which the single-user file does not carry. -->
         <a class="ua-dl" href="download-user.php?all=1"
            title="Every event from every user, in one file. Ignores the filters above.">Download all users (CSV)</a>
+        <a class="ua-dl" href="download-user.php?all=1&amp;today=1"
+           title="Everyone who has used the app today, with every event each of them has ever sent. Ignores the filters above.">Download today's users (CSV)</a>
         <?php if ($ua_otherEnvUsers): ?>
             <span class="ua-dupes" title="Premium installs whose subscription is not in this environment: a sandbox test redemption, or a subscription since deleted. Hidden here and everywhere else on this page.">
                 <?= count($ua_otherEnvUsers) ?> <?= htmlspecialchars($ua_otherEnvLabel) ?> install<?= count($ua_otherEnvUsers) === 1 ? '' : 's' ?> hidden
