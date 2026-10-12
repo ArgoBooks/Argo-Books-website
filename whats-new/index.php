@@ -124,14 +124,12 @@ $pricing = get_pricing_config();
                                 <li><strong>A duplicate tells you what it came from:</strong> Duplicating an expense, a revenue record or an invoice opens with a title naming the record it was copied from.</li>
                                 <li><strong>A quicker save:</strong> Saving an expense or revenue record no longer briefly shows a waiting screen in most cases.</li>
                                 <li><strong>Write invoices without setting up card payments:</strong> Taking payment online is optional, so Create Invoice is ready straight away. Write one, save it as a draft and download it, and connect Stripe or Square later if you ever want customers to pay by card.</li>
-                                <li><strong>Delete an invoice from the list:</strong> The Actions column has a delete button, which asks before it goes ahead.</li>
                                 <li><strong>Search finds what is in your notes:</strong> A reference or tracking number written in the notes on an expense or revenue record now comes up in the search.</li>
                                 <li><strong>Invoices are easier to read:</strong> The text on every invoice template is darker, which shows on a dim screen and on paper.</li>
                                 <li><strong>A clearer invoice form:</strong> Saving a draft says when a customer or product name is not one of yours, rather than leaving the box empty. When an invoice would go out with no address, phone or email on it, Argo Books points that out with a link to fill them in.</li>
                                 <li><strong>Undo a draft invoice:</strong> Creating a draft invoice and deleting an invoice can both be undone. Undoing a delete brings the invoice back along with the income entry it made and any rentals booked against it.</li>
                                 <li><strong>Hide the company details reminder:</strong> If you would rather leave your address, phone or email off your invoices, the reminder can be dismissed and stays dismissed for that company.</li>
                                 <li><strong>Discounts are checked as you type:</strong> If a discount comes to more than the items on an expense or revenue record, Argo Books tells you while you are entering it, and a total below zero shows in red.</li>
-                                <li><strong>Steadier number boxes:</strong> The quantity, price and amount boxes match every other box on the form. The outline holds still as the mouse passes over, clicking in gives the same highlight in your accent colour, and each box takes exactly the number it will keep.</li>
                                 <li><strong>A smaller download:</strong> Argo Books is about 10 MB smaller, so it downloads and updates a little faster.</li>
                             </ul>
                         </div>
