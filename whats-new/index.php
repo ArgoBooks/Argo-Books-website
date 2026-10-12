@@ -89,6 +89,70 @@ $pricing = get_pricing_config();
     <div class="container">
         <div class="version-grid">
 
+            <!-- Version 2.0.20 -->
+            <div class="version-card">
+                <div class="version-header">
+                    <div class="version-info">
+                        <span class="version-tag">Version 2.0.20</span>
+                        <span class="date-tag">October 10 2026</span>
+                    </div>
+                    <?= svg_icon('chevron-down', 24, 'dropdown-arrow', null, 'stroke-linecap="round" stroke-linejoin="round"') ?>
+                </div>
+
+                <div class="version-content">
+                    <div class="changelog">
+                        <div class="changelog-section">
+                            <h4 class="section-label feature">New Features</h4>
+                            <ul class="changelog-list">
+                                <li><strong>See where your customers are, down to the city:</strong> The charts that group customers and suppliers by place can now group by state or province and by city, not just by country. The choice is on the Analytics page, in a dashboard chart's settings and beside a chart in the report builder, and each one remembers what you picked.</li>
+                                <li><strong>Search the charts you can add:</strong> The Charts tab of the 'Add widget' window has a search box.</li>
+                                <li><strong>Save any invoice as a PDF:</strong> There is a Download PDF button while you are writing an invoice and on every invoice you have already sent, so you can keep a copy or send it yourself.</li>
+                                <li><strong>Say what you sell it by:</strong> An invoice prints the product's unit beside the quantity, so a line reads 2.5 kg rather than a bare number. Any product can state a unit now, not only the ones you count stock for, and hours and days have been added to the list.</li>
+                                <li><strong>Attach several documents at once:</strong> An expense or revenue record can hold more than one receipt or document.</li>
+                                <li><strong>Use your own reference numbers:</strong> An expense or revenue record can carry the number your business already uses for it. Change it on the record and everything linked to it comes along, including its payments, receipt, returns and any matched bank line.</li>
+                            </ul>
+                        </div>
+                        <div class="changelog-section">
+                            <h4 class="section-label enhancement">Enhancements</h4>
+                            <ul class="changelog-list">
+                                <li><strong>Your dashboard arrangement stays during theme changes:</strong> Changes you are making to the layout are kept when the computers theme switches, and Argo Books asks whether to save them before anything else opens over the page.</li>
+                                <li><strong>Tidier dashboard editing:</strong> A widget you are arranging shows one clear outline, every entry in the Add widget window has an icon, and pie chart legends have more room for longer names.</li>
+                                <li><strong>Everything you enter counts as a change:</strong> Attaching a receipt, typing a new supplier or customer, changing an invoice's template, and more, all mean the form asks if you want to save before it closes.</li>
+                                <li><strong>Bank statements import more smoothly:</strong> Exchange rates are collected up front, behind the same progress bar the spreadsheet import shows, so every row comes in right away. A supplier or customer typed on one line is then offered on all the others.</li>
+                                <li><strong>Easier on the eye:</strong> The smallest text in Argo Books is larger. Hints and notes are a more comfortable size.</li>
+                                <li><strong>More of Argo Books in your language:</strong> more text now translates, in all 54 languages.</li>
+                                <li><strong>A duplicate tells you what it came from:</strong> Duplicating an expense, a revenue record or an invoice opens with a title naming the record it was copied from.</li>
+                                <li><strong>A quicker save:</strong> Saving an expense or revenue record no longer briefly shows a waiting screen in most cases.</li>
+                                <li><strong>Write invoices without setting up card payments:</strong> Taking payment online is optional, so Create Invoice is ready straight away. Write one, save it as a draft and download it, and connect Stripe or Square later if you ever want customers to pay by card.</li>
+                                <li><strong>Delete an invoice from the list:</strong> The Actions column has a delete button, which asks before it goes ahead.</li>
+                                <li><strong>Search finds what is in your notes:</strong> A reference or tracking number written in the notes on an expense or revenue record now comes up in the search.</li>
+                                <li><strong>Invoices are easier to read:</strong> The text on every invoice template is darker, which shows on a dim screen and on paper.</li>
+                                <li><strong>A clearer invoice form:</strong> Saving a draft says when a customer or product name is not one of yours, rather than leaving the box empty. When an invoice would go out with no address, phone or email on it, Argo Books points that out with a link to fill them in.</li>
+                                <li><strong>Undo a draft invoice:</strong> Creating a draft invoice and deleting an invoice can both be undone. Undoing a delete brings the invoice back along with the income entry it made and any rentals booked against it.</li>
+                                <li><strong>Hide the company details reminder:</strong> If you would rather leave your address, phone or email off your invoices, the reminder can be dismissed and stays dismissed for that company.</li>
+                                <li><strong>Discounts are checked as you type:</strong> If a discount comes to more than the items on an expense or revenue record, Argo Books tells you while you are entering it, and a total below zero shows in red.</li>
+                                <li><strong>Steadier number boxes:</strong> The quantity, price and amount boxes match every other box on the form. The outline holds still as the mouse passes over, clicking in gives the same highlight in your accent colour, and each box takes exactly the number it will keep.</li>
+                                <li><strong>A smaller download:</strong> Argo Books is about 10 MB smaller, so it downloads and updates a little faster.</li>
+                            </ul>
+                        </div>
+                        <div class="changelog-section">
+                            <h4 class="section-label fix">Fixes</h4>
+                            <ul class="changelog-list">
+                                <li><strong>Better rounding:</strong> An amount sitting exactly halfway between two cents always rounds up now. For example, 13% tax on $48.50 comes to $6.305, which reads as $6.31 instead of $6.30.</li>
+                                <li>A quantity ending in a zero on the invoice keeps it, so one entered as 2.50 prints as 2.50 rather than 2.5.</li>
+                                <li>The title of a widget's settings panel renders in the light theme.</li>
+                                <li>Switching a bank statement row between expense and revenue keeps the right supplier or customer with it.</li>
+                                <li>The window opens at a size your screen can give it, whatever screen you last used.</li>
+                                <li>Taking back a return or a write-off keeps the reason and note you gave in the version history.</li>
+                                <li>The "Back Online" notice appears only when the connection actually dropped.</li>
+                                <li>A stock transfer is recorded as completed, since the stock has already moved by the time you enter it.</li>
+                                <li>A line item's amount and its remove button stay lined up with the boxes beside them when a message appears on that line.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Version 2.0.19 -->
             <div class="version-card">
                 <div class="version-header">
@@ -120,9 +184,9 @@ $pricing = get_pricing_config();
                         <div class="changelog-section">
                             <h4 class="section-label fix">Fixes</h4>
                             <ul class="changelog-list">
-                                <li>Refunds cover more cases: a full refund goes through, tax can be refunded on its own, and refunding part of a sale returns the tax on just those items.</li>
-                                <li>Stock stays right when you edit a sale made through an invoice.</li>
-                                <li>Invoices brought in unpaid record their sale, and each repeat of a recurring invoice records its own.</li>
+                                <li>Refunds cover more cases: a full refund goes through, tax can be refunded on its own, and a part refund on a revenue record returns the tax on just those items.</li>
+                                <li>Stock stays right when you edit a revenue record made through an invoice.</li>
+                                <li>Invoices brought in unpaid record their revenue, and each repeat of a recurring invoice records its own.</li>
                                 <li>Undoing a quote conversion keeps an invoice you've already sent.</li>
                                 <li>Undoing a bank match gives the other lines their suggestions back, and Stripe payouts are left out of matching.</li>
                                 <li>Exporting a PDF receipt saves the file you attached, rather than a picture of its first page.</li>
@@ -150,7 +214,7 @@ $pricing = get_pricing_config();
                             <ul class="changelog-list">
                                 <li><strong>See when a list is filtered:</strong> While a filter is on, the Filter button shows how many are applied, with a button to clear them. If the filters hide every row, the list tells you.</li>
                                 <li><strong>Bank statements in any layout:</strong> Bank statements saved as a CSV or Excel file now import even when the column headings aren't in English.</li>
-                                <li><strong>Duplicate in one click:</strong> Copy an expense, sale or invoice. A new one opens already filled in and dated today, so you only change what's different.</li>
+                                <li><strong>Duplicate in one click:</strong> Copy an expense, a revenue record or an invoice. A new one opens already filled in and dated today, so you only change what's different.</li>
                             </ul>
                         </div>
                         <div class="changelog-section">
@@ -162,7 +226,7 @@ $pricing = get_pricing_config();
                                 <li><strong>Your language from the first screen:</strong> If you use Argo Books in another language, it shows in that language immediately.</li>
                                 <li><strong>Remembers your window:</strong> Argo Books reopens at the size and position you left it.</li>
                                 <li><strong>Your stock valued the same everywhere:</strong> Inventory value and cost of goods now agree on the dashboard, the Locations page and your reports.</li>
-                                <li><strong>Clearer tax figures:</strong> Tax counts only sales you've been paid for and takes refunded tax off, so it matches your Tax Summary and Balance Sheet. Tax by category and by product is shared across every line of a sale.</li>
+                                <li><strong>Clearer tax figures:</strong> Tax counts only the revenue you've been paid for and takes refunded tax off, so it matches your Tax Summary and Balance Sheet. Tax by category and by product is shared across every line of a revenue record.</li>
                                 <li><strong>Top Customers follows your date range:</strong> The dashboard widget shows the period you've picked, like every other widget.</li>
                                 <li><strong>Import previews in your currency:</strong> Before bringing in payments from Stripe or the Argo Books API, the total is shown in your company's currency.</li>
                                 <li><strong>Security deposits:</strong> A deposit reads "Refund pending" until the card refund clears. When there's no online payment to refund, Argo Books tells you to return the deposit by hand.</li>
@@ -172,12 +236,12 @@ $pricing = get_pricing_config();
                         <div class="changelog-section">
                             <h4 class="section-label fix">Fixes</h4>
                             <ul class="changelog-list">
-                                <li>Importing a spreadsheet keeps unpaid sales unpaid.</li>
+                                <li>Importing a spreadsheet keeps unpaid revenue records unpaid.</li>
                                 <li>Only invoices that are past due with money still owed count as overdue. Drafts and cancelled invoices never do.</li>
                                 <li>A rental billed through an invoice shows as paid once that invoice is paid, and returning a rental that was already paid keeps it paid.</li>
                                 <li>Returning a rental can't be undone, because a deposit sent back through Stripe or Square can't be taken back.</li>
                                 <li>Online refunds can include the invoice's shipping.</li>
-                                <li>Marking a sale or purchase as returned records what was actually paid for the items.</li>
+                                <li>Marking an expense or revenue record as returned stores what was actually paid for the items.</li>
                             </ul>
                         </div>
                     </div>
@@ -247,7 +311,7 @@ $pricing = get_pricing_config();
                                 <li><strong>Book rentals ahead:</strong> A rental that starts later is saved as a reservation and leaves the units on your shelf until you check it out. The same units can't be promised twice for dates that overlap, and you can cancel a reservation in one click.</li>
                                 <li><strong>Give back as much of a deposit as you choose:</strong> When a rental comes back, enter how much of the security deposit to return. Whatever you keep is recorded as revenue. If the customer paid the rental invoice online, the refund opens with that amount already filled in, ready to send back through Stripe or Square.</li>
                                 <li><strong>Charge for late returns and damage:</strong> Add an extra charge on the return, with a note saying what it is for, and it is added to what the rental comes to.</li>
-                                <li><strong>Stock in more than one place:</strong> Move stock between a shop and a storage unit right from Stock Levels page, and choose the location on a sale or purchase when a product is stocked in more than one.</li>
+                                <li><strong>Stock in more than one place:</strong> Move stock between a shop and a storage unit right from Stock Levels page, and choose the location on an expense or revenue record when a product is stocked in more than one.</li>
                                 <li><strong>Stock by weight and volume:</strong> Choose the unit a product is stocked in, such as kilograms, litres or boxes, and keep part units like 2.5 kg.</li>
                                 <li><strong>Add a category, customer or supplier as you type:</strong> Type a name that isn't on the list yet and Argo Books creates it when you save, so you don't have to stop and set it up first.</li>
                                 <li><strong>Provinces, states and counties from a list:</strong> Thirteen countries now pick their region from a list, each with its flag, and the label matches the country.</li>
@@ -263,7 +327,7 @@ $pricing = get_pricing_config();
                         <div class="changelog-section">
                             <h4 class="section-label fix">Fixes</h4>
                             <ul class="changelog-list">
-                                <li>Editing or deleting a sale or purchase returns exactly the stock it moved.</li>
+                                <li>Editing or deleting an expense or revenue record returns exactly the stock it moved.</li>
                                 <li>Revenue and expenses brought in from Stripe or the Argo Books API now move stock too.</li>
                             </ul>
                         </div>
@@ -907,7 +971,7 @@ $pricing = get_pricing_config();
 
                         <h3>Predictive Analytics</h3>
                         <p>
-                            Argo Books now examines your historical business data to forecast future sales patterns and identify seasonal trends. See where your business is heading, not just where it's been. This helps you make smarter decisions about inventory, staffing, and cash flow planning.
+                            Argo Books now examines your historical business data to forecast future revenue patterns and identify seasonal trends. See where your business is heading, not just where it's been. This helps you make smarter decisions about inventory, staffing, and cash flow planning.
                         </p>
 
                         <h3>Inventory Management</h3>
@@ -1172,7 +1236,7 @@ $pricing = get_pricing_config();
                             <h4 class="section-label enhancement">Enhancements</h4>
                             <ul class="changelog-list">
                                 <li><strong>.NET 9 upgrade:</strong> Migrated to .NET 9, which brings roughly 15&ndash;25% faster performance and 20&ndash;30% lower memory usage across the board.</li>
-                                <li><strong>Chart performance:</strong> Separated chart instances for purchases and sales so they don't refresh unnecessarily when switching screens.</li>
+                                <li><strong>Chart performance:</strong> Separated chart instances for expenses and revenue so they don't refresh unnecessarily when switching screens.</li>
                                 <li><strong>Faster language switching:</strong> Translations are now downloaded in a single batch instead of multiple API calls.</li>
                             </ul>
                         </div>
@@ -1194,7 +1258,7 @@ $pricing = get_pricing_config();
                     <div class="changelog">
                         <p class="changelog-intro">First stable release of Argo Books.</p>
                         <ul class="changelog-list">
-                            <li>Core sales tracking and product management</li>
+                            <li>Core revenue tracking and product management</li>
                             <li>Analytics dashboard with interactive charts for revenue, expenses, and transaction data</li>
                             <li>Receipt manager with date range filtering and bulk selection</li>
                             <li>Spreadsheet import and export (.xlsx), compatible with Excel, Google Sheets, and LibreOffice</li>
