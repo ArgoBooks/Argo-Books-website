@@ -12,6 +12,16 @@
  *
  * Bluesky is not connected here. It uses an app password in .env.
  */
+
+// The admin cookie is SameSite=Strict, so the browser leaves it off the request a platform sends here, and starting a session without it would replace the admin's login with an empty one. Reloading from this page makes the request same-site, and the cookie comes with it.
+if ((isset($_GET['code']) || isset($_GET['error'])) && !isset($_GET['returned'])) {
+    $again = htmlspecialchars('connect.php?' . http_build_query($_GET + ['returned' => '1']), ENT_QUOTES, 'UTF-8');
+    header('Cache-Control: no-store');
+    echo '<!doctype html><meta charset="utf-8"><meta http-equiv="refresh" content="0;url=' . $again . '">'
+       . '<title>Finishing the sign-in</title><p>Finishing the sign-in. <a href="' . $again . '">Continue</a> if this page stays.</p>';
+    exit;
+}
+
 require_once __DIR__ . '/../admin_session.php';
 require_once __DIR__ . '/../../db_connect.php';
 require_once __DIR__ . '/../../env_helper.php';
