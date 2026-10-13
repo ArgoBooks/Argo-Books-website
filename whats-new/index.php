@@ -136,7 +136,7 @@ $pricing = get_pricing_config();
                         <div class="changelog-section">
                             <h4 class="section-label fix">Fixes</h4>
                             <ul class="changelog-list">
-                                <li><strong>Better rounding:</strong> An amount sitting exactly halfway between two cents always rounds up now. For example, 13% tax on $48.50 comes to $6.305, which reads as $6.31 instead of $6.30.</li>
+                                <li>An amount sitting exactly halfway between two cents always rounds up now. For example, 13% tax on $48.50 comes to $6.305, which reads as $6.31 instead of $6.30.</li>
                                 <li>A quantity ending in a zero on the invoice keeps it, so one entered as 2.50 prints as 2.50 rather than 2.5.</li>
                                 <li>The title of a widget's settings panel renders in the light theme.</li>
                                 <li>Switching a bank statement row between expense and revenue keeps the right supplier or customer with it.</li>
