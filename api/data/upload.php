@@ -151,9 +151,13 @@ function authenticate_telemetry_request(): ?array
 {
     $license = authenticate_license_request();
     if ($license !== null) {
+        $deviceHash = authenticate_device_request();
         return [
             'tier' => 'premium',
             'authId' => 'subscription:' . ($license['subscription_id'] ?? 'unknown'),
+            // The app sends both headers once it holds a licence, and this upload is the only place
+            // the two identities are known together, so it records which install the licence is on.
+            'deviceAuthId' => $deviceHash !== null ? 'device:' . $deviceHash : null,
         ];
     }
 
@@ -327,8 +331,12 @@ try {
     $payload = backfill_geolocation_from_request($payload);
 
     // Server-injected tier + authId always override anything in the uploaded payload
-    unset($payload['tier'], $payload['authId']);
-    $tagged = ['tier' => $tier, 'authId' => $authId] + $payload;
+    unset($payload['tier'], $payload['authId'], $payload['deviceAuthId']);
+    $tagged = ['tier' => $tier, 'authId' => $authId];
+    if (!empty($auth['deviceAuthId'])) {
+        $tagged['deviceAuthId'] = $auth['deviceAuthId'];
+    }
+    $tagged += $payload;
     $content = json_encode($tagged);
     if ($content === false) {
         http_response_code(500);

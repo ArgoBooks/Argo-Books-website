@@ -58,6 +58,8 @@ $ua_duplicatesCollapsed = 0;
 // Installs whose premium came from another environment's subscription, counted so
 // the page can say they were left out rather than silently dropping them.
 $ua_otherEnvUsers = [];
+// device authId => subscription authId, for installs seen on both sides of an upgrade.
+$ua_identityLinks = [];
 // Name the environment rather than saying "another" one: on the live site what gets
 // hidden is sandbox, and on dev it is production.
 $ua_otherEnvLabel = current_environment() === 'production' ? 'sandbox' : 'production';
@@ -110,6 +112,12 @@ foreach ($ua_files as $name => $path) {
             'files'     => [],
         ];
     }
+    // Upgrading swaps the identity an upload authenticates with, so one person arrives as a device
+    // and later as a subscription. The upload that carried both says which install it was.
+    if (!empty($d['deviceAuthId']) && $d['deviceAuthId'] !== $authId) {
+        $ua_identityLinks[$d['deviceAuthId']] = $authId;
+    }
+
     $u =& $ua_users[$authId];
     $u['files'][] = $name;
     if (!empty($d['platform']))   $u['platforms'][$d['platform']] = true;
@@ -176,6 +184,46 @@ foreach ($ua_files as $name => $path) {
         $u['timeline'][] = ['ts' => ($ts !== false ? $ts : 0), 'type' => $evType, 'text' => $evText];
     }
     unset($u);
+}
+
+// Fold each install's pre-upgrade card into the subscription it became, so one person is one card.
+foreach ($ua_identityLinks as $ua_deviceId => $ua_subId) {
+    if (!isset($ua_users[$ua_deviceId], $ua_users[$ua_subId])) {
+        continue;
+    }
+
+    $ua_from = $ua_users[$ua_deviceId];
+    $ua_into =& $ua_users[$ua_subId];
+
+    $ua_into['isFounder'] = $ua_into['isFounder'] || $ua_from['isFounder'];
+    $ua_into['platforms'] += $ua_from['platforms'];
+    $ua_into['versions']  += $ua_from['versions'];
+    foreach (['country', 'region', 'timezone'] as $ua_field) {
+        if (empty($ua_into[$ua_field]) && !empty($ua_from[$ua_field])) {
+            $ua_into[$ua_field] = $ua_from[$ua_field];
+        }
+    }
+    if ($ua_from['languageTs'] !== null && ($ua_into['languageTs'] === null || $ua_from['languageTs'] > $ua_into['languageTs'])) {
+        $ua_into['language']   = $ua_from['language'];
+        $ua_into['languageTs'] = $ua_from['languageTs'];
+    }
+    if ($ua_into['company'] === null) {
+        $ua_into['company'] = $ua_from['company'];
+    }
+    if ($ua_from['first'] !== null && ($ua_into['first'] === null || $ua_from['first'] < $ua_into['first'])) {
+        $ua_into['first'] = $ua_from['first'];
+    }
+    if ($ua_from['last'] !== null && ($ua_into['last'] === null || $ua_from['last'] > $ua_into['last'])) {
+        $ua_into['last'] = $ua_from['last'];
+    }
+    foreach (['sessions', 'unclean', 'events', 'errors', 'warnings'] as $ua_counter) {
+        $ua_into[$ua_counter] += $ua_from[$ua_counter];
+    }
+    $ua_into['timeline'] = array_merge($ua_into['timeline'], $ua_from['timeline']);
+    $ua_into['files']    = array_merge($ua_into['files'], $ua_from['files']);
+    unset($ua_into);
+
+    unset($ua_users[$ua_deviceId]);
 }
 
 // A user whose files hold no events in the range is not part of this view, but the card still lists every file, because deleting a user removes all of them.
