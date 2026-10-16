@@ -181,7 +181,14 @@ foreach ($ua_files as $name => $path) {
         }
 
         [$evType, $evText] = ua_describe_event($ev);
-        $u['timeline'][] = ['ts' => ($ts !== false ? $ts : 0), 'type' => $evType, 'text' => $evText];
+        $ua_row = ['ts' => ($ts !== false ? $ts : 0), 'type' => $evType, 'text' => $evText];
+        // ua_fold_bursts() counts and times a run of calls from these rather than from the wording.
+        if ($evType === 'api') {
+            $ua_row['api'] = (string)($ev['apiName'] ?? 'Unknown');
+            $ua_row['ok']  = array_key_exists('success', $ev) ? (bool)$ev['success'] : null;
+            $ua_row['ms']  = (int)($ev['durationMs'] ?? 0);
+        }
+        $u['timeline'][] = $ua_row;
     }
     unset($u);
 }
@@ -575,7 +582,7 @@ if (!function_exists('ua_fmt')) {
     <?php foreach ($ua_users as $u):
         // Newest-first timeline for display.
         $timeline = $u['timeline'];
-        $timeline = ua_merge_timeline($timeline);
+        $timeline = ua_fold_bursts(ua_merge_timeline($timeline));
         usort($timeline, fn($a, $b) => $b['ts'] <=> $a['ts']);
         $ua_ref = strncmp($u['authId'], 'device:', 7) === 0
             ? ($ua_referrals[substr($u['authId'], 7)] ?? null)
@@ -697,7 +704,7 @@ if (!function_exists('ua_fmt')) {
 
         <?php if ($timeline): ?>
         <details class="ua-events">
-            <summary>Show all <?= count($timeline) ?> events</summary>
+            <summary>Show timeline (<?= count($timeline) ?> row<?= count($timeline) === 1 ? '' : 's' ?>)</summary>
             <div class="ua-timeline">
                 <?php foreach ($timeline as $t): ?>
                     <div class="ua-evt <?= $t['type'] ?>">

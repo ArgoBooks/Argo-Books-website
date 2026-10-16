@@ -322,3 +322,90 @@ if (!function_exists('ua_merge_timeline')) {
         return array_values(array_diff_key($timeline, $drop));
     }
 }
+
+if (!function_exists('ua_format_span')) {
+    /** A length of time in seconds, worded for the timeline. */
+    function ua_format_span(float $seconds): string
+    {
+        if ($seconds < 1) return (int)round($seconds * 1000) . ' ms';
+        if ($seconds < 60) return number_format($seconds, 1) . ' s';
+        $whole = (int)round($seconds);
+        if ($whole < 3600) return intdiv($whole, 60) . ' min ' . ($whole % 60) . ' s';
+        return intdiv($whole, 3600) . ' h ' . intdiv($whole % 3600, 60) . ' min';
+    }
+}
+
+if (!function_exists('ua_fold_bursts')) {
+    /** Folds a burst of calls to one API, or of one repeated error or warning, into a single row giving the count and how long it lasted. */
+    function ua_fold_bursts(array $timeline, int $gap = 120): array
+    {
+        usort($timeline, fn($a, $b) => ($a['ts'] ?? 0) <=> ($b['ts'] ?? 0));
+
+        $out   = [];
+        $open  = [];   // burst key => index in $out of the row still taking repeats
+        $stats = [];   // index in $out => what the burst has gathered so far
+        foreach ($timeline as $row) {
+            $type = $row['type'] ?? '';
+            if ($type === 'api') {
+                $key = 'api|' . ($row['api'] ?? $row['text']);
+            } elseif ($type === 'error' || $type === 'warning') {
+                $key = $type . '|' . $row['text'];
+            } else {
+                $out[] = $row;
+                continue;
+            }
+
+            $ts = (float)($row['ts'] ?? 0);
+            $i  = $open[$key] ?? null;
+            // Other events in between do not end a burst, because a page visit during an import is not a reason to show its requests twice.
+            if ($i !== null && $ts - $stats[$i]['last'] <= $gap) {
+                $s =& $stats[$i];
+                $s['count']++;
+                $s['last'] = $ts;
+                $s['ms']  += (int)($row['ms'] ?? 0);
+                if (($row['ok'] ?? null) === true)  $s['ok']++;
+                if (($row['ok'] ?? null) === false) $s['failed']++;
+                unset($s);
+                continue;
+            }
+
+            $out[] = $row;
+            $i = array_key_last($out);
+            $open[$key] = $i;
+            $stats[$i] = [
+                'count'  => 1,
+                'first'  => $ts,
+                'last'   => $ts,
+                'ms'     => (int)($row['ms'] ?? 0),
+                'firstMs'=> (int)($row['ms'] ?? 0),
+                'ok'     => ($row['ok'] ?? null) === true ? 1 : 0,
+                'failed' => ($row['ok'] ?? null) === false ? 1 : 0,
+            ];
+        }
+
+        foreach ($stats as $i => $s) {
+            if ($s['count'] < 2) continue;
+            // An API event is stamped when its call returns, so the burst began one call's length before the first stamp.
+            $span = $s['last'] - $s['first'] + $s['firstMs'] / 1000;
+            $over = $span < 0.001 ? 'at once' : 'over ' . ua_format_span($span);
+
+            if ($out[$i]['type'] !== 'api') {
+                $out[$i]['text'] .= " ({$s['count']} times {$over})";
+                continue;
+            }
+
+            if ($s['failed'] === 0 && $s['ok'] === $s['count']) {
+                $result = 'all ok';
+            } elseif ($s['ok'] === 0 && $s['failed'] === $s['count']) {
+                $result = 'all FAILED';
+            } else {
+                $result = number_format($s['ok']) . ' ok, ' . number_format($s['failed']) . ' FAILED';
+            }
+            $avg = ua_format_span($s['ms'] / $s['count'] / 1000);
+            $out[$i]['text'] = 'API: ' . ($out[$i]['api'] ?? 'Unknown') . ', '
+                . number_format($s['count']) . " requests {$over} ({$result}, avg {$avg} each)";
+        }
+
+        return $out;
+    }
+}
