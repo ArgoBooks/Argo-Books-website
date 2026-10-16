@@ -124,7 +124,7 @@
    following its own badge overrides (alpha fill, light text). */
 [data-theme="dark"] .if-notice {
   background: var(--amber-alpha-15);
-  border-color: var(--gray-200);
+  border-color: var(--gray-600);
   border-left-color: var(--amber-500);
 }
 
@@ -141,19 +141,33 @@
 [data-theme="dark"] .if-device,
 [data-theme="dark"] .if-reason,
 [data-theme="dark"] .if-expiry-ok {
-  background: var(--gray-200);
+  background: var(--gray-700);
 }
+
+[data-theme="dark"] .if-sub { color: var(--gray-400); }
 
 [data-theme="dark"] .if-btn {
-  background: var(--gray-100);
-  border-color: var(--gray-200);
+  background: var(--gray-700);
+  border-color: var(--gray-600);
+  color: var(--white);
 }
 
-[data-theme="dark"] .if-btn:hover:not(:disabled) { background: var(--gray-200); }
+[data-theme="dark"] .if-btn:hover:not(:disabled) { background: var(--gray-600); }
+
+/* Restated here because the dark .if-btn rule above outranks the plain .if-btn-primary one. */
+[data-theme="dark"] .if-btn-primary {
+  background: var(--emerald-500);
+  border-color: var(--emerald-500);
+}
+
+[data-theme="dark"] .if-btn-primary:hover:not(:disabled) {
+  background: var(--emerald-600);
+  border-color: var(--emerald-600);
+}
 
 [data-theme="dark"] .if-btn-danger {
-  background: var(--gray-100);
-  border-color: var(--red-alpha-20);
+  background: var(--gray-700);
+  border-color: var(--red-alpha-30);
   color: var(--red-400);
 }
 
