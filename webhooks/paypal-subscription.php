@@ -200,6 +200,12 @@ function handleSubscriptionCancelled($resource) {
     $stmt->execute([$paypalSubscriptionId]);
     $subscription = $stmt->fetch(PDO::FETCH_ASSOC);
 
+    // Cancelling from account settings cancels on PayPal too, and PayPal then reports that same cancellation back here.
+    if ($subscription && $subscription['status'] === 'cancelled') {
+        logPayPalWebhookEvent('BILLING.SUBSCRIPTION.CANCELLED', $resource, 'already_cancelled');
+        return;
+    }
+
     if ($subscription) {
         // Update subscription status to cancelled
         $stmt = $pdo->prepare("
@@ -209,9 +215,14 @@ function handleSubscriptionCancelled($resource) {
                 credit_balance = 0,
                 cancelled_at = NOW(),
                 updated_at = NOW()
-            WHERE paypal_subscription_id = ?
+            WHERE paypal_subscription_id = ? AND status <> 'cancelled'
         ");
         $stmt->execute([$paypalSubscriptionId]);
+        // The check above and this update are separate steps, so a request that cancelled the row in between has already sent everything.
+        if ($stmt->rowCount() === 0) {
+            logPayPalWebhookEvent('BILLING.SUBSCRIPTION.CANCELLED', $resource, 'already_cancelled');
+            return;
+        }
 
         // Send cancellation email
         try {
@@ -258,9 +269,15 @@ function handleSubscriptionExpired($resource) {
     }
 
     // Look up subscription before status update so we can attribute the churn
-    $lookup = $pdo->prepare('SELECT subscription_id FROM premium_subscriptions WHERE paypal_subscription_id = ?');
+    $lookup = $pdo->prepare('SELECT subscription_id, status FROM premium_subscriptions WHERE paypal_subscription_id = ?');
     $lookup->execute([$paypalSubscriptionId]);
     $subRow = $lookup->fetch();
+
+    // A cancellation or an earlier expiry has already recorded this churn.
+    if ($subRow !== false && in_array($subRow['status'], ['cancelled', 'expired'], true)) {
+        logPayPalWebhookEvent('BILLING.SUBSCRIPTION.EXPIRED', $resource, 'already_' . $subRow['status']);
+        return;
+    }
 
     // Update subscription status
     $stmt = $pdo->prepare("
@@ -294,6 +311,12 @@ function handleSubscriptionSuspended($resource) {
     $stmt = $pdo->prepare("SELECT * FROM premium_subscriptions WHERE paypal_subscription_id = ?");
     $stmt->execute([$paypalSubscriptionId]);
     $subscription = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    // The customer was already told when the subscription was first suspended.
+    if ($subscription && $subscription['status'] === 'payment_failed') {
+        logPayPalWebhookEvent('BILLING.SUBSCRIPTION.SUSPENDED', $resource, 'already_suspended');
+        return;
+    }
 
     if ($subscription) {
         // Update subscription status to payment_failed

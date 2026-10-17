@@ -176,6 +176,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 } elseif ($subject === '' || $body === '') {
                     $flash = 'Subject and body are both required.';
                     $flash_type = 'error';
+                } elseif (broadcast_recently_queued($pdo, $subject, $body, $audience)) {
+                    // Refreshing the page after queueing resubmits the form, which would email the whole audience a second time.
+                    $flash = 'This exact broadcast was already queued for that audience in the last 24 hours, so it was not queued again. To send it again on purpose, cancel the earlier one if it is still sending, or change the subject.';
+                    $flash_type = 'error';
                 } else {
                     $emails = broadcast_audience_emails($pdo, $audience);
                     if (!$emails) {

@@ -129,6 +129,23 @@ try {
     // Continue with new subscription if check fails
 }
 
+// A checkout left open in a second tab would otherwise charge an active subscriber again and create a second subscription.
+if ($existingSubscription && $existingSubscription['status'] === 'active' && !$isUpdatingPaymentMethod) {
+    $duplicatePayPalId = $input['paypal_subscription_id'] ?? $input['subscriptionID'] ?? '';
+    if ($paymentMethod === 'paypal' && $duplicatePayPalId !== '') {
+        require_once __DIR__ . '/../../../paypal-helper.php';
+        // PayPal approved this subscription before the request reached us, so it bills until cancelled there.
+        if (!cancelPayPalSubscription($duplicatePayPalId, 'Duplicate checkout: customer already has an active subscription')) {
+            error_log("CRITICAL: duplicate checkout for user $userId left PayPal subscription $duplicatePayPalId active; cancel it and refund any charge manually");
+        } else {
+            error_log("Duplicate checkout for user $userId: cancelled PayPal subscription $duplicatePayPalId; check PayPal for a first-cycle charge to refund");
+        }
+    }
+    http_response_code(409);
+    echo json_encode(['success' => false, 'error' => 'You already have an active Premium subscription. Manage it from your account settings.']);
+    exit();
+}
+
 // Generate subscription ID using the shared license key generator
 function generateSubscriptionId() {
     return generate_license_key('premium');

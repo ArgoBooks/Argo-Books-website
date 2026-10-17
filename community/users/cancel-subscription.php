@@ -48,9 +48,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm_cancel'])) {
         $stmt->execute([$user_id]);
         $subscription = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        // If this is a PayPal subscription, cancel it on PayPal's side first
+        // This runs before PayPal is told, because PayPal's cancellation webhook can arrive before this request finishes and must find the row already cancelled.
+        $stmt = $pdo->prepare("
+            UPDATE premium_subscriptions
+            SET status = 'cancelled', auto_renew = 0, credit_balance = 0, cancelled_at = NOW(), updated_at = NOW()
+            WHERE user_id = ? AND status = 'active'
+        ");
+        $stmt->execute([$user_id]);
+        // A second submit of this form finds nothing left to cancel, so it must not send the emails again.
+        $cancelledHere = $stmt->rowCount() > 0;
+
         $paypalCancelFailed = false;
-        if ($subscription && $subscription['payment_method'] === 'paypal' && !empty($subscription['paypal_subscription_id'])) {
+        if ($cancelledHere && $subscription && $subscription['payment_method'] === 'paypal' && !empty($subscription['paypal_subscription_id'])) {
             try {
                 $cancelled = cancelPayPalSubscription($subscription['paypal_subscription_id'], 'Cancelled by user from account settings');
                 if (!$cancelled) {
@@ -63,17 +72,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm_cancel'])) {
             }
         }
 
-        // Cancel the subscription and invalidate any remaining credit
-        // Credit is forfeited upon cancellation
-        $stmt = $pdo->prepare("
-            UPDATE premium_subscriptions
-            SET status = 'cancelled', auto_renew = 0, credit_balance = 0, cancelled_at = NOW(), updated_at = NOW()
-            WHERE user_id = ? AND status = 'active'
-        ");
-        $stmt->execute([$user_id]);
-
         // Send cancellation email
-        if ($subscription) {
+        if ($subscription && $cancelledHere) {
             try {
                 send_premium_subscription_cancelled_email(
                     $subscription['email'],

@@ -330,16 +330,18 @@ try {
                 }
             }
 
-            // Fire premium_paid event for the retry payment.
-            track_subscription_event('premium_paid', $subscription_id, [
-                'amount'         => $amount,
-                'currency'       => 'CAD',
-                'payment_type'   => 'retry',
-                'payment_method' => $payment_method,
-            ], [
-                'visitor_id' => $_COOKIE[ARGO_VISITOR_COOKIE] ?? null,
-                'user_id'    => $_SESSION['user_id'] ?? null,
-            ], ['allow_bot' => false]);
+            // A PayPal retry only un-suspends the subscription, and the payment webhook records the payment once PayPal collects it.
+            if ($transaction_id) {
+                track_subscription_event('premium_paid', $subscription_id, [
+                    'amount'         => $amount,
+                    'currency'       => 'CAD',
+                    'payment_type'   => 'retry',
+                    'payment_method' => $payment_method,
+                ], [
+                    'visitor_id' => $_COOKIE[ARGO_VISITOR_COOKIE] ?? null,
+                    'user_id'    => $_SESSION['user_id'] ?? null,
+                ], ['allow_bot' => false]);
+            }
 
             // Send reactivation email with end date (current end date for
             // PayPal; newly-extended date for Stripe/Square).

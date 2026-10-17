@@ -25,6 +25,19 @@ function broadcast_audiences(): array
     ];
 }
 
+/** True when the same subject and body went to this audience in the last 24 hours and was not canceled. */
+function broadcast_recently_queued(PDO $pdo, string $subject, string $body, string $audience): bool
+{
+    $stmt = $pdo->prepare(
+        "SELECT 1 FROM marketing_broadcasts
+         WHERE subject = ? AND html_body = ? AND audience = ?
+           AND status <> 'canceled' AND created_at > NOW() - INTERVAL 1 DAY
+         LIMIT 1"
+    );
+    $stmt->execute([$subject, $body, $audience]);
+    return $stmt->fetchColumn() !== false;
+}
+
 /**
  * Resolve the current set of deliverable emails for an audience: the opted-in
  * population minus anyone suppressed for that context or all_marketing. This is
