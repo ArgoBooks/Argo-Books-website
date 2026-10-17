@@ -274,26 +274,22 @@ function generate_reseller_batch($label, $count, $duration_months)
 function get_subscription_chart_data()
 {
     global $pdo;
-    $data = [];
+    require_once __DIR__ . '/subscription_chart.php';
 
     try {
         $stmt = $pdo->prepare("
-            SELECT DATE(created_at) as date,
-                   COUNT(*) as total,
-                   SUM(CASE WHEN status = 'active' THEN 1 ELSE 0 END) as active
+            SELECT created_at, status, cancelled_at, end_date
             FROM premium_subscriptions
             WHERE payment_method != 'free_key'
               AND environment = ?
-            GROUP BY DATE(created_at)
-            ORDER BY date
         ");
         $stmt->execute([current_environment()]);
-        $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $today = (string) $pdo->query("SELECT CURDATE()")->fetchColumn();
+        return subscription_chart_series($stmt->fetchAll(PDO::FETCH_ASSOC), $today);
     } catch (PDOException $e) {
         error_log("Error fetching subscription chart data: " . $e->getMessage());
+        return [];
     }
-
-    return $data;
 }
 
 // Get usage data for a list of license keys

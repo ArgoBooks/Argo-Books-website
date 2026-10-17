@@ -1,14 +1,11 @@
 document.addEventListener('DOMContentLoaded', function () {
     // Premium Subscriptions Chart initialization
+    // One point per day from the first subscription to today, with both counts already worked out for that day.
     const subLabels = subscriptionChartData.map(item => item.date);
-    // The query returns per-day counts (how many were created that day). Plot a
-    // running total instead, so the line shows how many subscriptions exist as
-    // of each date and reaches the real total (matching the stat card) rather
-    // than sitting at 1 when each day only adds one.
-    let runningTotal = 0;
-    let runningActive = 0;
-    const subTotals = subscriptionChartData.map(item => (runningTotal += parseInt(item.total)));
-    const subActive = subscriptionChartData.map(item => (runningActive += parseInt(item.active)));
+    const subTotals = subscriptionChartData.map(item => item.total);
+    const subActive = subscriptionChartData.map(item => item.active);
+    // Dots on every day of a long range bury the line, so they only show while there are few enough to read.
+    const subPointRadius = subscriptionChartData.length > 60 ? 0 : 4;
 
     const subCtx = document.getElementById('subscriptionsChart').getContext('2d');
     new Chart(subCtx, {
@@ -23,7 +20,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     borderColor: 'rgba(59, 130, 246, 1)',
                     borderWidth: 2,
                     tension: 0.3,
-                    pointRadius: 4,
+                    pointRadius: subPointRadius,
                     pointBackgroundColor: 'rgba(59, 130, 246, 1)'
                 },
                 {
@@ -33,7 +30,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     borderColor: 'rgba(16, 185, 129, 1)',
                     borderWidth: 2,
                     tension: 0.3,
-                    pointRadius: 4,
+                    pointRadius: subPointRadius,
                     pointBackgroundColor: 'rgba(16, 185, 129, 1)'
                 }
             ]
