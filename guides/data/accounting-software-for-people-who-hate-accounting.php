@@ -40,7 +40,7 @@ HTML,
 <p>It helps to name the thing, because once you see why bookkeeping feels awful, the fix gets obvious. The dread almost always comes from one of these, and none of them are a personal failing:</p>
 <ul>
 <li><strong>It's dull and it never ends.</strong> Data entry is the most boring kind of work there is, and the pile refills the moment you clear it. Anyone would put that off.</li>
-<li><strong>The words are gatekeeping.</strong> Accruals, ledgers, double-entry, chart of accounts. The jargon makes it sound like a profession you have not trained for, so you assume you will get it wrong, so you avoid it. Most of those words are things software handles silently in the background. You never have to meet them.</li>
+<li><strong>The words are gatekeeping.</strong> Accruals, ledgers, double-entry, chart of accounts. The jargon makes it sound like a profession you have not trained for, so you assume you will get it wrong, so you avoid it. Software built for business owners rather than accountants keeps most of them out of your way, so you never have to meet them.</li>
 <li><strong>It piles up.</strong> A receipt captured the day you got it takes two seconds. The same receipt a year later, faded and out of context, takes ten minutes and a guess. Leaving it for "later" is what turns a small chore into a dreaded one.</li>
 <li><strong>The stakes feel high.</strong> It's your money and the tax office is involved, so a mistake feels scary, which makes you avoid the whole thing, which makes mistakes more likely. A nasty loop.</li>
 </ul>
@@ -58,7 +58,7 @@ HTML,
 <li><strong>Automatic categorizing.</strong> Good software guesses which bucket each expense belongs in (fuel, supplies, software, meals) so all you do is glance and confirm. You are not spending time categorizing; you are nodding at a suggestion.</li>
 <li><strong>Bank import.</strong> Either a live connection to your bank or the ability to drop in a statement file, so your transactions arrive on their own instead of being typed in one by one. The list builds itself; you just tidy it.</li>
 <li><strong>Plain-English reports.</strong> A button that tells you what you earned, what you spent, and what is left, in normal words. You should never have to read a balance sheet to find out if you made money this month.</li>
-<li><strong>It does not make you learn the jargon.</strong> The best tools for the bookkeeping-averse keep the accounting machinery out of sight. You enter what happened in plain terms and the software does the double-entry behind the curtain.</li>
+<li><strong>It does not make you learn the jargon.</strong> The best tools for the bookkeeping-averse keep the accounting machinery out of sight. You enter what happened in plain terms and the software turns it into your reports.</li>
 </ul>
 <p>If a tool has these five, the parts of bookkeeping you hate are mostly automated away. Everything else is a bonus you may never need.</p>
 HTML,
@@ -133,7 +133,7 @@ HTML,
   'faqs' => [
     [
       'q' => 'Do I really need to understand accounting to use this software?',
-      'a' => 'No. The whole point of the tools in this guide is that they do the accounting machinery for you while you work in plain terms. You enter what happened, you photograph receipts, you glance at suggested categories and confirm them, and the software handles the double-entry, the ledgers, and the rest behind the scenes. You never have to learn what those words mean to keep clean books. If a tool forces accounting jargon on you for everyday tasks, it\'s the wrong tool for someone who hates accounting. Pick one that hides the machinery and you can stay happily ignorant of it forever.',
+      'a' => 'No. The whole point of the tools in this guide is that they do the accounting machinery for you while you work in plain terms. You enter what happened, you photograph receipts, you glance at suggested categories and confirm them, and the software turns that into your profit and loss, tax summary and other reports. You never have to learn debits, credits or ledgers to keep clean books. If a tool forces accounting jargon on you for everyday tasks, it\'s the wrong tool for someone who hates accounting. Pick one that hides the machinery and you can stay happily ignorant of it forever.',
     ],
     [
       'q' => 'I have a shoebox of receipts going back months. Where do I even start?',

@@ -92,7 +92,7 @@ return [
     'related' => [
         ['href' => '../expense-revenue-tracking/', 'icon' => 'dollar', 'h3' => 'Expense & revenue tracking', 'p' => 'The transaction records every report is generated from.'],
         ['href' => '../invoicing/', 'icon' => 'document', 'h3' => 'Invoicing', 'p' => 'Billed and paid figures flow straight into your statements.'],
-        ['href' => '../inventory-management/', 'icon' => 'package', 'h3' => 'Inventory management', 'p' => 'Stock value and cost of goods feed the balance sheet.'],
+        ['href' => '../inventory-management/', 'icon' => 'package', 'h3' => 'Inventory management', 'p' => 'Stock value feeds the balance sheet, and cost of goods the income statement.'],
         ['href' => '../predictive-analytics/', 'icon' => 'analytics', 'h3' => 'Predictive analytics', 'p' => 'Look forward as well as back, from the same records.'],
     ],
 

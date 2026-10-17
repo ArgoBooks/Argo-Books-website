@@ -49,6 +49,10 @@ include __DIR__ . '/../../docs-header.php';
                             <td>Why does a transaction show "Pending" instead of an amount?</td>
                             <td>Its exchange rate isn't available yet, so it counts as zero until it is. See <a href="#pending-conversion" class="link">Currency display</a> below.</td>
                         </tr>
+                        <tr>
+                            <td>Why isn't my loan or equipment on the Balance Sheet?</td>
+                            <td>Argo Books doesn't record loans, long-term assets or money you put in or take out yourself. See <a href="#balance-sheet" class="link">Balance Sheet</a> below.</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -155,6 +159,19 @@ include __DIR__ . '/../../docs-header.php';
                 <strong>Why the difference?</strong> Cash basis answers "did money actually arrive?" Accrual basis answers "did I do the work that earned the money?" Both are valid views; small businesses usually want the cash-basis dashboard for day-to-day decisions and the accrual report for taxes and accountants.
             </div>
 
+            <h2 id="balance-sheet">Balance Sheet</h2>
+            <p>Argo Books doesn't use a chart of accounts. The Balance Sheet is worked out from your records as of the report date:</p>
+            <ul>
+                <li><strong>Cash:</strong> estimated from the sales, invoice payments and expenses you've recorded. It starts from zero, because there's no way yet to enter a bank balance from before you began recording.</li>
+                <li><strong>Accounts receivable:</strong> what customers still owed on their invoices on that date.</li>
+                <li><strong>Inventory:</strong> the stock you had on hand, explained <a href="#inventory-balance-sheet" class="link">below</a>.</li>
+                <li><strong>Accounts payable:</strong> purchase orders sent to a supplier but not yet received. Drafts and cancelled orders are left out.</li>
+                <li><strong>Sales tax payable:</strong> tax you collected, less tax refunded to customers and tax you paid on expenses.</li>
+                <li><strong>Security deposits:</strong> deposits on invoices that you're still holding.</li>
+                <li><strong>Retained earnings:</strong> the difference between your assets and your liabilities, which is what makes the two sides balance.</li>
+            </ul>
+            <p>Loans, equipment and other long-term assets, and money you put into or take out of the business yourself, aren't recorded in Argo Books, so they don't appear on it.</p>
+
             <h2 id="inventory-balance-sheet">Inventory on the Balance Sheet</h2>
             <p>The Balance Sheet lists your stock on hand as a current asset. It values each item at its current unit cost (Argo Books doesn't keep a history of past costs) and works out how much stock you held as of the report date from your recorded stock movements.</p>
             <p>For a product with Track Inventory on, buying stock adds it to your stock instead of counting as an expense. When it sells, what that stock cost comes off your profit, and the Income Statement shows it as Cost of Goods Sold with Gross Profit underneath. The cost is saved on the sale, so changing a cost price later doesn't rewrite past profit.</p>
@@ -163,7 +180,7 @@ include __DIR__ . '/../../docs-header.php';
             <h2 id="sales-by-product">Sales by product</h2>
             <p>The Products tab in Analytics and the "Sales by Product" report both break your sales down per product. Two things about these figures surprise people, so they're worth knowing up front.</p>
 
-            <p><strong>They show revenue, not profit.</strong> Argo Books deliberately doesn't calculate profit per product, because it can't do it honestly. Working out profit on a product needs a reliable cost for that exact product, and there often isn't one: the cost you enter is an optional default, stock is treated as an expense when you buy it rather than matched to the sale, and anything you assemble yourself (a pizza made from flour and cheese) has no purchase cost of its own. Rather than show you a margin that might be wrong, these screens show what's always true: what each product sold for, and how many units moved.</p>
+            <p><strong>They show revenue, not profit.</strong> Argo Books deliberately doesn't calculate profit per product, because it can't do it honestly. Working out profit on a product needs a reliable cost for that exact product, and there often isn't one: the cost you enter is an optional default, stock you don't track is treated as an expense when you buy it rather than matched to the sale, and anything you assemble yourself (a pizza made from flour and cheese) has no purchase cost of its own. Rather than show you a margin that might be wrong, these screens show what's always true: what each product sold for, and how many units moved.</p>
 
             <p><strong>They won't exactly match your Total Revenue.</strong> Two differences pull in opposite directions:</p>
             <ul>

@@ -30,8 +30,8 @@ include __DIR__ . '/../../docs-header.php';
             <ul>
                 <li><strong>Income Statement:</strong> Revenue, expenses, and net income over the selected period</li>
                 <li><strong>Balance Sheet:</strong> Assets, liabilities, and equity at a point in time</li>
-                <li><strong>Cash Flow Statement:</strong> Cash inflows and outflows across operating, investing, and financing activities</li>
-                <li><strong>General Ledger:</strong> Detailed transaction records for all accounts</li>
+                <li><strong>Cash Flow Statement:</strong> Cash coming in from sales and invoice payments, and going out on expenses, over the selected period</li>
+                <li><strong>General Ledger:</strong> Every transaction, listed by category with its debit or credit and a running balance</li>
                 <li><strong>Accounts Receivable Aging:</strong> Outstanding customer payments grouped by age</li>
                 <li><strong>Tax Summary:</strong> Tax-related totals for the selected period</li>
                 <li><strong>Sales by Product:</strong> Revenue and units sold, broken down per product</li>
