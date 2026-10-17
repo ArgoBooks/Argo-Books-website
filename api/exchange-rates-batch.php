@@ -7,9 +7,9 @@
  * Request body (JSON):
  *   { "dates": ["2025-01-15", "2025-03-20", ...] }
  *
- * Returns all rates from MySQL cache, fetching from OpenExchangeRates only for
- * dates not yet cached. Historical rates are stored permanently (they never change).
- * Today's rate is refreshed if older than 1 hour.
+ * Returns stored rates, and fetches and stores the dates not stored yet. Every date, today
+ * included, is fetched once and kept for good. Sources and limits are in
+ * api/_exchange_rate_sources.php.
  */
 
 require_once __DIR__ . '/portal/portal-helper.php';
@@ -36,12 +36,6 @@ if ($deviceId) {
 // any legitimate use while still guarding the OpenExchangeRates quota against a runaway client.
 if (rate_limit_hit('exchange_rates', $rateLimitId, 'rates')) {
     send_rate_limited_response('exchange_rates');
-}
-
-// Validate server configuration
-$apiKey = $_ENV['OPENEXCHANGERATES_API_KEY'] ?? '';
-if (empty($apiKey)) {
-    send_error_response(500, 'Exchange rate service not configured on server.', 'CONFIG_ERROR');
 }
 
 // Parse request body
@@ -83,122 +77,32 @@ if (!$pdo) {
     send_error_response(500, 'Database connection failed.', 'DB_ERROR');
 }
 
-// Fetch all cached rates from MySQL in one query
+require_once __DIR__ . '/_exchange_rate_sources.php';
+
+// Fetch all stored rates from MySQL in one query
 $placeholders = implode(',', array_fill(0, count($validDates), '?'));
-$stmt = $pdo->prepare("SELECT rate_date, rates, fetched_at FROM exchange_rates WHERE rate_date IN ($placeholders)");
+$stmt = $pdo->prepare("SELECT rate_date, rates FROM exchange_rates WHERE rate_date IN ($placeholders)");
 $stmt->execute($validDates);
-$cachedRows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 $results = [];
-$datesToFetch = [];
-$oneHourAgo = date('Y-m-d H:i:s', time() - 3600);
-
-foreach ($cachedRows as $row) {
-    $dateStr = $row['rate_date'];
+foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
     $rates = json_decode($row['rates'], true);
-    if ($rates === null) {
-        $datesToFetch[] = $dateStr;
-        continue;
-    }
-    // Today's rate: check freshness (1hr TTL)
-    if ($dateStr === $today && $row['fetched_at'] < $oneHourAgo) {
-        $datesToFetch[] = $dateStr;
-        continue;
-    }
-    $results[$dateStr] = $rates;
-}
-
-// Find dates not in DB at all
-$cachedDateSet = array_column($cachedRows, 'rate_date');
-foreach ($validDates as $date) {
-    if (!in_array($date, $cachedDateSet) && !isset($results[$date])) {
-        $datesToFetch[] = $date;
+    if (is_array($rates) && $rates) {
+        $results[$row['rate_date']] = $rates;
     }
 }
-$datesToFetch = array_unique($datesToFetch);
+$datesToFetch = array_values(array_filter($validDates, fn($d) => !isset($results[$d])));
 
-// Cap OER calls per batch to protect API quota
-$maxOerCalls = 30;
-$failed = [];
-if (count($datesToFetch) > $maxOerCalls) {
-    // Fetch the first $maxOerCalls, mark the rest as failed
-    $overflow = array_slice($datesToFetch, $maxOerCalls);
-    $datesToFetch = array_slice($datesToFetch, 0, $maxOerCalls);
-    $failed = $overflow;
-}
-
-// Fetch missing dates from OpenExchangeRates and store in MySQL
-$insertStmt = $pdo->prepare(
-    "INSERT INTO exchange_rates (rate_date, rates, fetched_at) VALUES (?, ?, NOW())
-     ON DUPLICATE KEY UPDATE rates = VALUES(rates), fetched_at = NOW()"
-);
-
-// Fetched together rather than one after another, because upstream still needs a call per date and in series an import waited the sum of every round trip.
-$concurrency = 8;
-
-foreach (array_chunk(array_values($datesToFetch), $concurrency) as $chunk) {
-    $multi = curl_multi_init();
-    $handles = [];
-
-    foreach ($chunk as $date) {
-        $url = $date === $today
-            ? "https://openexchangerates.org/api/latest.json?app_id={$apiKey}&base=USD"
-            : "https://openexchangerates.org/api/historical/{$date}.json?app_id={$apiKey}&base=USD";
-
-        $ch = curl_init($url);
-        curl_setopt_array($ch, [
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_TIMEOUT        => 15,
-            CURLOPT_CONNECTTIMEOUT => 5,
-        ]);
-
-        curl_multi_add_handle($multi, $ch);
-        $handles[$date] = $ch;
-    }
-
-    do {
-        $status = curl_multi_exec($multi, $running);
-        if ($running) {
-            // Blocks until something moves, rather than spinning on the CPU. select() returns -1 when there is no descriptor to wait on, which libcurl can do while resolving a name.
-            if (curl_multi_select($multi, 1.0) === -1) {
-                usleep(1000);
-            }
-        }
-    } while ($running && $status === CURLM_OK);
-
-    foreach ($handles as $date => $ch) {
-        $response = curl_multi_getcontent($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
-        curl_multi_remove_handle($multi, $ch);
-        // The old serial loop never closed its handle. Harmless when the script was
-        // about to end anyway, not harmless once there are several per request.
-        curl_close($ch);
-
-        if ($response === false || $response === null || $httpCode !== 200) {
-            $failed[] = $date;
-            continue;
-        }
-
-        $data = json_decode($response, true);
-        if ($data === null || !isset($data['rates'])) {
-            $failed[] = $date;
-            continue;
-        }
-
-        // Store in MySQL
-        $insertStmt->execute([$date, json_encode($data['rates'])]);
-
-        $results[$date] = $data['rates'];
-    }
-
-    curl_multi_close($multi);
-}
+// Dates are fetched eight at a time, so 150 keeps one request well inside the time limit, and the app fetches any left over one date at a time.
+$maxFetches = 150;
+$fetched = exchange_rates_fetch_and_store($pdo, array_slice($datesToFetch, 0, $maxFetches), $today);
+$results += $fetched;
+$failed = array_values(array_filter($datesToFetch, fn($d) => !isset($results[$d])));
 
 send_json_response(200, [
     'success' => true,
     'base' => 'USD',
     'results' => empty($results) ? new stdClass() : $results,
-    'failed' => array_values(array_unique($failed)),
+    'failed' => $failed,
     'timestamp' => date('c'),
 ]);

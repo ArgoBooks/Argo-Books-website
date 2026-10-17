@@ -901,8 +901,10 @@ CREATE TABLE IF NOT EXISTS invoice_send_usage (
 CREATE TABLE IF NOT EXISTS exchange_rates (
     rate_date DATE NOT NULL,
     rates JSON NOT NULL COMMENT 'All currency rates relative to USD for this date',
+    source VARCHAR(20) NOT NULL DEFAULT 'openexchangerates' COMMENT 'frankfurter, openexchangerates or fawazahmed0; the Open Exchange Rates allowance counts openexchangerates rows',
     fetched_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (rate_date)
+    PRIMARY KEY (rate_date),
+    INDEX idx_source_fetched (source, fetched_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================

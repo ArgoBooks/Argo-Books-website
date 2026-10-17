@@ -10,9 +10,9 @@
 //   3. reports the dominant ISO code so meta/formatting can label it correctly.
 //
 // Rates come from the same `exchange_rates` table the desktop app's rate proxy
-// (api/exchange-rates.php) fills, fetched on demand from OpenExchangeRates and
-// cached permanently per date. Conversion is best-effort: if rates can't be
-// obtained (no API key, network failure), it degrades to no conversion, so a
+// (api/exchange-rates.php) fills, fetched on demand through api/_exchange_rate_sources.php
+// and stored permanently per date. Conversion is best-effort: if rates can't be
+// obtained (allowance used up, network failure), it degrades to no conversion, so a
 // single-currency sheet is still labeled right and a mixed sheet is no worse
 // than before this feature existed.
 
@@ -261,8 +261,8 @@ function pa_currency_find_alpha_symbol(string $raw): ?string
 
 /**
  * USD-based rate table (code => units per 1 USD, with 'USD' => 1.0) for a date.
- * Reads the exchange_rates cache first, then fetches+caches from
- * OpenExchangeRates. Returns null only when nothing usable can be obtained.
+ * Reads the exchange_rates table first, then fetches and stores through
+ * api/_exchange_rate_sources.php. Returns null only when nothing usable can be obtained.
  * Memoized per date; live fetches are capped per request.
  */
 function pa_currency_rates(string $date): ?array
@@ -282,7 +282,7 @@ function pa_currency_rates(string $date): ?array
         return $memo[$date];
     }
 
-    // 1. Cache table (historical rates are permanent; today's may be refreshed).
+    // 1. Stored rates, which never change once a date is stored.
     if (isset($pdo)) {
         try {
             $stmt = $pdo->prepare('SELECT rates FROM exchange_rates WHERE rate_date = ?');
@@ -302,47 +302,21 @@ function pa_currency_rates(string $date): ?array
         }
     }
 
-    // 2. Bounded live fetch from OpenExchangeRates.
-    if ($liveFetches >= PA_FX_MAX_LIVE_FETCHES) {
+    // 2. Bounded live fetch, through the same sources and allowance as the app's rate endpoints.
+    if ($liveFetches >= PA_FX_MAX_LIVE_FETCHES || !isset($pdo)) {
         return $memo[$date] = $lastGood;
     }
-    $apiKey = $_ENV['OPENEXCHANGERATES_API_KEY'] ?? getenv('OPENEXCHANGERATES_API_KEY') ?: '';
-    if (!$apiKey) {
-        return $memo[$date] = $lastGood;
-    }
-
-    $isLatest = ($date === $today);
-    $url = $isLatest
-        ? "https://openexchangerates.org/api/latest.json?app_id={$apiKey}&base=USD"
-        : "https://openexchangerates.org/api/historical/{$date}.json?app_id={$apiKey}&base=USD";
-
     $liveFetches++;
-    $ch = curl_init($url);
-    curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 12, CURLOPT_CONNECTTIMEOUT => 5]);
-    $resp = curl_exec($ch);
-    $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
-
-    if ($resp === false || $code !== 200) {
-        return $memo[$date] = $lastGood;
+    require_once __DIR__ . '/../../../api/_exchange_rate_sources.php';
+    try {
+        $rates = exchange_rates_fetch_and_store($pdo, [$date], $today)[$date] ?? null;
+    } catch (Throwable $e) {
+        $rates = null;
     }
-    $data = json_decode($resp, true);
-    if (!isset($data['rates']) || !is_array($data['rates'])) {
+    if (!is_array($rates)) {
         return $memo[$date] = $lastGood;
     }
 
-    if (isset($pdo)) {
-        try {
-            $pdo->prepare(
-                'INSERT INTO exchange_rates (rate_date, rates, fetched_at) VALUES (?, ?, NOW())
-                 ON DUPLICATE KEY UPDATE rates = VALUES(rates), fetched_at = NOW()'
-            )->execute([$date, json_encode($data['rates'])]);
-        } catch (Throwable $e) {
-            // caching is best-effort
-        }
-    }
-
-    $rates = $data['rates'];
     $rates['USD'] = 1.0;
     $memo[$date] = $rates;
     $lastGood = $rates;

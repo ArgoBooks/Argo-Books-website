@@ -149,6 +149,7 @@ The `read-me/` directory has authoritative reference docs:
 
 - `read-me/Tool-page-standards.md`: conventions for the free tools under `/tools/`, including which currencies each tool offers and why
 - `read-me/Cron-jobs.md`: every scheduled cron and its frequency
+- `read-me/Exchange-rates.md`: where the app's exchange rates come from, how they are stored, and the Open Exchange Rates allowance
 - `read-me/Deployment.md`: how `.github/workflows/deploy.yml` ships code to the server
 - `read-me/Email-outreach.md`: outreach pipeline behavior
 - `read-me/Marketing-agent.md`: the scheduled marketing agent, what `/api/agent/` lets it do, the approval queue, and how to set it up
