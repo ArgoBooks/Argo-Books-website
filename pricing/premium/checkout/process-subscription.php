@@ -15,6 +15,7 @@ require_once __DIR__ . '/../../../license_functions.php';
 require_once __DIR__ . '/../../../vendor/autoload.php';
 require_once __DIR__ . '/../../../config/pricing.php';
 require_once __DIR__ . '/../../../track_referral_event.php';
+require_once __DIR__ . '/checkout_helpers.php';
 
 // Only accept POST requests
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -130,12 +131,14 @@ try {
 }
 
 // A checkout left open in a second tab would otherwise charge an active subscriber again and create a second subscription.
-if ($existingSubscription && $existingSubscription['status'] === 'active' && !$isUpdatingPaymentMethod) {
+if (!$isUpdatingPaymentMethod && premium_active_subscription($pdo, $userId) !== null) {
     $duplicatePayPalId = $input['paypal_subscription_id'] ?? $input['subscriptionID'] ?? '';
-    if ($paymentMethod === 'paypal' && $duplicatePayPalId !== '') {
+    if ($paymentMethod === 'paypal' && is_string($duplicatePayPalId) && $duplicatePayPalId !== '') {
         require_once __DIR__ . '/../../../paypal-helper.php';
         // PayPal approved this subscription before the request reached us, so it bills until cancelled there.
-        if (!cancelPayPalSubscription($duplicatePayPalId, 'Duplicate checkout: customer already has an active subscription')) {
+        if (!premium_should_cancel_refused_paypal($pdo, $userId, $duplicatePayPalId, 'getPayPalSubscriptionCustomId')) {
+            error_log("Duplicate checkout for user $userId: left PayPal subscription $duplicatePayPalId alone, as it is already on file or not confirmed as theirs");
+        } elseif (!cancelPayPalSubscription($duplicatePayPalId, 'Duplicate checkout: customer already has an active subscription')) {
             error_log("CRITICAL: duplicate checkout for user $userId left PayPal subscription $duplicatePayPalId active; cancel it and refund any charge manually");
         } else {
             error_log("Duplicate checkout for user $userId: cancelled PayPal subscription $duplicatePayPalId; check PayPal for a first-cycle charge to refund");

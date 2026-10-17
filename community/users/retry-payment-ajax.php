@@ -14,6 +14,7 @@ require_once __DIR__ . '/user_functions.php';
 require_once __DIR__ . '/../../paypal-helper.php';
 require_once __DIR__ . '/../../config/pricing.php';
 require_once __DIR__ . '/../../track_referral_event.php';
+require_once __DIR__ . '/../../cron/lib/renewal_helpers.php';
 
 // Ensure user is logged in
 if (!isset($_SESSION['user_id'])) {
@@ -143,7 +144,7 @@ try {
         try {
             // Build payment intent params
             $params = [
-                'amount' => intval($amount * 100), // Stripe uses cents
+                'amount' => (int) round($amount * 100), // Stripe uses cents
                 'currency' => 'cad',
                 'payment_method' => $paymentToken,
                 'confirm' => true,
@@ -161,8 +162,10 @@ try {
                 $params['customer'] = $stripeCustomerId;
             }
 
-            // Create and confirm payment intent
-            $paymentIntent = \Stripe\PaymentIntent::create($params);
+            // A double click sends the same card and amount on the same day and gets the first payment back, while a newly saved card gets a key of its own, since Stripe refuses a reused key whose request has changed.
+            $paymentIntent = \Stripe\PaymentIntent::create($params, [
+                'idempotency_key' => 'retry_' . $subscription_id . '_' . date('Y-m-d') . '_' . $paymentToken . '_' . $params['amount'],
+            ]);
 
             if ($paymentIntent->status === 'succeeded') {
                 $reactivated = true;
@@ -211,64 +214,30 @@ try {
             exit;
         }
 
-        // Initialize Square
         $squareAccessToken = $isProduction
             ? $_ENV['SQUARE_LIVE_ACCESS_TOKEN']
             : $_ENV['SQUARE_SANDBOX_ACCESS_TOKEN'];
         $squareEnvironment = $isProduction ? 'production' : 'sandbox';
-        $squareLocationId = $isProduction
-            ? $_ENV['SQUARE_LIVE_LOCATION_ID']
-            : $_ENV['SQUARE_SANDBOX_LOCATION_ID'];
 
-        try {
-            $client = new \Square\SquareClient([
-                'accessToken' => $squareAccessToken,
-                'environment' => $squareEnvironment
-            ]);
+        // A double click sends the same card and amount on the same day and gets the first payment back, while a newly saved card gets a key of its own, since Square refuses a reused key whose request has changed.
+        $result = square_charge_saved_card(
+            $paymentToken,
+            (float) $amount,
+            square_idempotency_key('retry_' . $subscription_id . '_' . date('Y-m-d') . '_' . $squareAccessToken . '_' . $paymentToken . '_' . (int) round($amount * 100)),
+            "Premium Subscription Retry Payment - $subscription_id",
+            $squareAccessToken,
+            $squareEnvironment
+        );
 
-            $paymentsApi = $client->getPaymentsApi();
-            // One key per subscription and calendar day, so a retry or a double click reuses it and Square declines to charge twice.
-            $idempotencyKey = substr(
-                hash('sha256', 'retry_' . $subscription_id . '_' . date('Y-m-d') . '_' . $squareAccessToken),
-                0,
-                45
-            );
-
-            $amountMoney = new \Square\Models\Money();
-            $amountMoney->setAmount(intval($amount * 100)); // Square uses cents
-            $amountMoney->setCurrency('CAD');
-
-            $createPaymentRequest = new \Square\Models\CreatePaymentRequest(
-                $paymentToken,
-                $idempotencyKey
-            );
-            $createPaymentRequest->setAmountMoney($amountMoney);
-            $createPaymentRequest->setLocationId($squareLocationId);
-            $createPaymentRequest->setNote("Premium Subscription Retry Payment - $subscription_id");
-
-            $response = $paymentsApi->createPayment($createPaymentRequest);
-
-            if ($response->isSuccess()) {
-                $payment = $response->getResult()->getPayment();
-                $reactivated = true;
-                $transaction_id = $payment->getId();
-                $message = 'Payment successful! Your subscription has been reactivated.';
-            } else {
-                $errors = $response->getErrors();
-                $errorMessage = $errors[0]->getDetail() ?? 'Payment failed';
-                echo json_encode([
-                    'success' => false,
-                    'error' => 'Payment failed: ' . $errorMessage,
-                    'action' => 'update_payment',
-                    'redirect' => 'reactivate-subscription.php'
-                ]);
-                exit;
-            }
-        } catch (Exception $e) {
-            error_log("Square payment error: " . $e->getMessage());
+        if ($result['success']) {
+            $reactivated = true;
+            $transaction_id = $result['transaction_id'];
+            $message = 'Payment successful! Your subscription has been reactivated.';
+        } else {
+            error_log("Square retry payment failed for $subscription_id: " . $result['error']);
             echo json_encode([
                 'success' => false,
-                'error' => 'Payment processing error. Please try again or update your payment method.',
+                'error' => 'Payment failed: ' . $result['error'],
                 'action' => 'update_payment',
                 'redirect' => 'reactivate-subscription.php'
             ]);

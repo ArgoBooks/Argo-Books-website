@@ -437,6 +437,36 @@ function getPayPalSubscriptionBilledAmount($subscriptionId) {
     return null;
 }
 
+/** The custom_id the checkout gave a PayPal subscription ("user_<id>"), or null when PayPal cannot be asked. */
+function getPayPalSubscriptionCustomId(string $subscriptionId): ?string
+{
+    if (!isValidPayPalResourceId($subscriptionId)) {
+        return null;
+    }
+    $accessToken = getPayPalAccessToken();
+    if (!$accessToken) {
+        return null;
+    }
+
+    $ch = curl_init(getPayPalApiBaseUrl() . "/v1/billing/subscriptions/$subscriptionId");
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_HTTPHEADER => ['Content-Type: application/json', "Authorization: Bearer $accessToken"],
+        CURLOPT_SSL_VERIFYPEER => true,
+        CURLOPT_SSL_VERIFYHOST => 2,
+        CURLOPT_CONNECTTIMEOUT => 10,
+        CURLOPT_TIMEOUT        => 15,
+    ]);
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    if ($httpCode !== 200) {
+        error_log("getPayPalSubscriptionCustomId: subscription GET failed. HTTP $httpCode");
+        return null;
+    }
+    $customId = json_decode((string) $response, true)['custom_id'] ?? null;
+    return is_string($customId) ? $customId : null;
+}
+
 /**
  * Log webhook event for debugging
  *

@@ -39,6 +39,16 @@ The table had no cleanup at all before this. A cron on a one minute schedule add
 
 Takes an exclusive lock on `cron/logs/subscription_renewal.lock` and exits immediately if a previous run still holds it, recording the skip in `cron_runs`. Both the charged path and the fully-credit-covered path also check for a completed renewal payment in the last 23 hours before doing anything, so a manual re-run cannot charge a card or spend credit twice.
 
+### Charged But Not Saved
+
+A renewal names its billing period by the subscription's current `end_date`, which only moves once the renewal is saved. Every charge carries that period: Stripe charges in their `renewal_period` metadata, Square charges in their `reference_id` (a hash of the subscription and period, from `square_renewal_reference()`).
+
+Before charging, the cron asks the provider whether a charge for this subscription and period already went through. If one did, it records that charge, at the amount the provider took, instead of charging again, and counts it under **Earlier charges recorded**. A charge refunded in full does not count. If the provider cannot be asked, the cron charges anyway and counts it under **Earlier-charge check failed**, since a missed renewal is worse than the rare double charge this check exists for.
+
+If a charge succeeds but saving it fails, the run counts it under **Charged but not saved**, writes no failed payment row, sends no failure email and takes no step towards suspension. The next run finds the charge and records it. Stripe's search takes up to about a minute to see a new charge, and a same-day re-run is covered by the idempotency key instead, which includes the date.
+
+Square refuses an idempotency key longer than 45 characters, so every Square key goes through `square_idempotency_key()`.
+
 ### Manual Execution
 
 ```bash

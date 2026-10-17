@@ -18,6 +18,7 @@ require_once __DIR__ . '/../../vendor/autoload.php';
 require_once __DIR__ . '/../community_functions.php';
 require_once __DIR__ . '/user_functions.php';
 require_once __DIR__ . '/../../config/pricing.php';
+require_once __DIR__ . '/../../cron/lib/renewal_helpers.php';
 
 // 1. Auth
 if (!isset($_SESSION['user_id'])) {
@@ -201,11 +202,12 @@ try {
                         $params['customer'] = $stripeCustomerId;
                     }
 
-                    // One key per subscription, cycle and day, so a double click or an abandoned SCA retry within 24 hours returns the original payment.
+                    // A double click or an abandoned SCA retry the same day sends the same card and amount and gets the original payment back, while a newly saved card gets a key of its own, since Stripe refuses a reused key whose request has changed.
                     $stripeIdempotencyKey = hash(
                         'sha256',
                         'cycleswitch_' . $subscription_id . '_' . $newCycle . '_'
                             . date('Y-m-d') . '_' . $stripeSecretKey
+                            . '_' . $paymentToken . '_' . $params['amount']
                     );
 
                     $paymentIntent = \Stripe\PaymentIntent::create(
@@ -262,61 +264,29 @@ try {
                 ? $_ENV['SQUARE_LIVE_ACCESS_TOKEN']
                 : $_ENV['SQUARE_SANDBOX_ACCESS_TOKEN'];
             $squareEnvironment = $is_production ? 'production' : 'sandbox';
-            $squareLocationId = $is_production
-                ? $_ENV['SQUARE_LIVE_LOCATION_ID']
-                : $_ENV['SQUARE_SANDBOX_LOCATION_ID'];
 
-            try {
-                $client = new \Square\SquareClient([
-                    'accessToken' => $squareAccessToken,
-                    'environment' => $squareEnvironment
-                ]);
-                $paymentsApi = $client->getPaymentsApi();
+            // A double click sends the same card and amount on the same day and gets the first payment back, while a newly saved card gets a key of its own, since Square refuses a reused key whose request has changed.
+            $result = square_charge_saved_card(
+                $paymentToken,
+                $immediateChargeTotal,
+                square_idempotency_key(
+                    'cycleswitch_' . $subscription_id . '_' . $newCycle . '_' . date('Y-m-d') . '_' . $squareAccessToken
+                        . '_' . $paymentToken . '_' . (int) round($immediateChargeTotal * 100)
+                ),
+                "Premium Subscription Cycle Switch ({$proration['old_cycle']}->{$proration['new_cycle']}) - $subscription_id",
+                $squareAccessToken,
+                $squareEnvironment
+            );
 
-                // Deterministic idempotency key per (subscription, calendar day, cycle).
-                // Salted with access token so dev/prod keys never collide.
-                $idempotencyKey = substr(
-                    hash(
-                        'sha256',
-                        'cycleswitch_' . $subscription_id . '_' . $newCycle . '_'
-                            . date('Y-m-d') . '_' . $squareAccessToken
-                    ),
-                    0,
-                    45
-                );
-
-                $amountMoney = new \Square\Models\Money();
-                $amountMoney->setAmount(intval(round($immediateChargeTotal * 100)));
-                $amountMoney->setCurrency('CAD');
-
-                $createPaymentRequest = new \Square\Models\CreatePaymentRequest($paymentToken, $idempotencyKey);
-                $createPaymentRequest->setAmountMoney($amountMoney);
-                $createPaymentRequest->setLocationId($squareLocationId);
-                $createPaymentRequest->setNote("Premium Subscription Cycle Switch ({$proration['old_cycle']}->{$proration['new_cycle']}) - $subscription_id");
-
-                $response = $paymentsApi->createPayment($createPaymentRequest);
-
-                if ($response->isSuccess()) {
-                    $transaction_id = $response->getResult()->getPayment()->getId();
-                } else {
-                    $errors = $response->getErrors();
-                    $errorMessage = (count($errors) > 0 && $errors[0]->getDetail())
-                        ? $errors[0]->getDetail()
-                        : 'Payment failed';
-                    echo json_encode([
-                        'success' => false,
-                        'error'   => 'Payment failed: ' . $errorMessage
-                    ]);
-                    exit;
-                }
-            } catch (Exception $e) {
-                error_log('Square error in switch-billing-cycle-ajax: ' . $e->getMessage());
+            if (!$result['success']) {
+                error_log("Square cycle switch payment failed for $subscription_id: " . $result['error']);
                 echo json_encode([
                     'success' => false,
-                    'error'   => 'Payment processing error. Please try again.'
+                    'error'   => 'Payment failed: ' . $result['error']
                 ]);
                 exit;
             }
+            $transaction_id = $result['transaction_id'];
         }
     } else {
         // No charge needed (credit fully covered). Synthetic transaction id for the audit row.

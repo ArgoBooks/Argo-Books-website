@@ -234,6 +234,24 @@ document.addEventListener("DOMContentLoaded", function () {
           layout: "vertical",
           label: useSubscriptionMode ? "subscribe" : "pay",
         },
+        // PayPal takes the first payment as soon as the customer approves, before our server is asked, so a second subscription has to be stopped here.
+        onClick: function (data, actions) {
+          if (subscription.isUpdatingPaymentMethod) {
+            return actions.resolve();
+          }
+          return fetch("check-active.php", { credentials: "same-origin" })
+            .then((response) => response.json())
+            .then((result) => {
+              if (result.active) {
+                alert("You already have an active Premium subscription. You can manage it from your account settings.");
+                window.location.href = "../../../community/users/subscription.php";
+                return actions.reject();
+              }
+              return actions.resolve();
+            })
+            // A failed check lets the customer through, since process-subscription.php still refuses a second subscription and cancels it at PayPal.
+            .catch(() => actions.resolve());
+        },
         onError: function (err) {
           console.error("PayPal error:", err);
           paypalContainer.innerHTML = `

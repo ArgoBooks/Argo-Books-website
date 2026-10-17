@@ -221,6 +221,10 @@ foreach ($subscriptions as $subscription) {
     // Process payment based on method
     $paymentResult = null;
     $transactionId = null;
+    $charged = false;
+    $recorded = false;
+    // The end date being renewed names the billing period, and it stays the same until a renewal is recorded.
+    $periodEnd = (string) $subscription['end_date'];
 
     try {
         // Idempotency guard against double-charges (overlapping cron runs,
@@ -234,10 +238,10 @@ foreach ($subscriptions as $subscription) {
         switch ($paymentMethod) {
             case 'stripe':
                 $stripeCustomerId = $subscription['stripe_customer_id'] ?? null;
-                $paymentResult = processStripeRenewal($paymentToken, $amountToCharge, $subscriptionId, $email, $stripeCustomerId);
+                $paymentResult = processStripeRenewal($paymentToken, $amountToCharge, $subscriptionId, $email, $stripeCustomerId, $periodEnd);
                 break;
             case 'square':
-                $paymentResult = processSquareRenewal($paymentToken, $amountToCharge, $subscriptionId, $email, $squareAccessToken, $squareEnvironment);
+                $paymentResult = processSquareRenewal($paymentToken, $amountToCharge, $subscriptionId, $squareAccessToken, $squareEnvironment, $periodEnd);
                 break;
             case 'paypal':
                 // Check if this is a PayPal Subscription (managed by PayPal)
@@ -259,7 +263,14 @@ foreach ($subscriptions as $subscription) {
         }
 
         if ($paymentResult['success']) {
+            $charged = true;
             $transactionId = $paymentResult['transaction_id'];
+            if (!empty($paymentResult['recovered'])) {
+                logMessage("Found earlier charge $transactionId for $subscriptionId that was never recorded; recording it instead of charging again", 'WARNING');
+                cron_metric_incr('renewals_recovered');
+                // The provider took what was due on the day it charged, which today's credit or price may no longer match.
+                $amountToCharge = (float) $paymentResult['amount'];
+            }
 
             // Update subscription dates and credit balance
             $newEndDate = calculateNewEndDate($subscription['end_date'], $billing);
@@ -287,15 +298,11 @@ foreach ($subscriptions as $subscription) {
                 $stmt->execute([$subscriptionId, $amountToCharge, $paymentMethod, $transactionId, current_environment()]);
 
                 $pdo->commit();
+                $recorded = true;
             } catch (Exception $dbEx) {
                 if ($pdo->inTransaction()) {
                     $pdo->rollBack();
                 }
-                logMessage(
-                    "CRITICAL: charged $subscriptionId (txn $transactionId, $$amountToCharge) but DB write failed: "
-                    . $dbEx->getMessage() . ". Manual fix required",
-                    'ERROR'
-                );
                 throw $dbEx;
             }
 
@@ -328,7 +335,31 @@ foreach ($subscriptions as $subscription) {
             throw new Exception($paymentResult['error'] ?? 'Payment failed');
         }
 
-    } catch (Exception $e) {
+    } catch (Throwable $e) {
+        // The renewal is paid and saved, so whatever failed afterwards is not a reason to tell the customer their payment failed.
+        if ($recorded) {
+            logMessage("Renewed $subscriptionId (txn $transactionId) but a step after saving it failed: " . $e->getMessage(), 'ERROR');
+            $successCount++;
+            continue;
+        }
+
+        // The card was charged, so this is not a decline: no failure email and no step towards suspension, and the next run finds the charge and records it.
+        if ($charged) {
+            logMessage("Charged $subscriptionId (txn $transactionId) but could not record it: " . $e->getMessage() . '. The next run records this charge instead of charging again.', 'ERROR');
+            error_log("CRITICAL: renewal charge $transactionId for $subscriptionId succeeded but was not recorded: " . $e->getMessage());
+            cron_metric_incr('renewals_charged_not_recorded');
+            $failedCount++;
+            continue;
+        }
+
+        // A fault in this code is not a decline, so the customer is not emailed one, and the other renewals still run.
+        if (!$e instanceof Exception) {
+            logMessage("Renewal of $subscriptionId stopped by an internal error before any charge: " . $e->getMessage(), 'ERROR');
+            error_log("Renewal of $subscriptionId stopped by an internal error: " . $e);
+            $failedCount++;
+            continue;
+        }
+
         logMessage("Failed to renew $subscriptionId: " . $e->getMessage(), 'ERROR');
 
         // Log failed attempt
@@ -354,6 +385,7 @@ foreach ($subscriptions as $subscription) {
             ");
             $stmt->execute([$subscriptionId]);
             logMessage("Subscription $subscriptionId suspended after $failureCount failures", 'WARNING');
+            cron_metric_incr('subscriptions_suspended');
 
             track_subscription_event('premium_churned', $subscriptionId, [
                 'reason'         => 'payment_failed',
@@ -441,11 +473,22 @@ try {
 /**
  * Process Stripe renewal payment
  */
-function processStripeRenewal($paymentMethodId, $amount, $subscriptionId, $email, $customerId = null) {
+function processStripeRenewal($paymentMethodId, $amount, $subscriptionId, $email, $customerId, string $periodEnd) {
+    // A charge whose record never reached the database is still on Stripe, and charging again would bill the customer twice for one period.
+    try {
+        $earlier = stripe_find_paid_renewal($subscriptionId, $periodEnd);
+        if ($earlier !== null) {
+            return ['success' => true, 'transaction_id' => $earlier['id'], 'amount' => $earlier['amount'], 'recovered' => true];
+        }
+    } catch (Exception $e) {
+        logMessage("Could not check Stripe for an earlier charge for $subscriptionId, charging anyway: " . $e->getMessage(), 'WARNING');
+        cron_metric_incr('renewal_lookup_failed');
+    }
+
     try {
         // Build payment intent params
         $params = [
-            'amount' => intval($amount * 100), // Stripe uses cents
+            'amount' => (int) round($amount * 100), // Stripe uses cents
             'currency' => 'cad',
             'payment_method' => $paymentMethodId,
             'confirm' => true,
@@ -454,7 +497,8 @@ function processStripeRenewal($paymentMethodId, $amount, $subscriptionId, $email
             'receipt_email' => $email,
             'metadata' => [
                 'subscription_id' => $subscriptionId,
-                'type' => 'renewal'
+                'type' => 'renewal',
+                'renewal_period' => $periodEnd,
             ]
         ];
 
@@ -463,7 +507,10 @@ function processStripeRenewal($paymentMethodId, $amount, $subscriptionId, $email
             $params['customer'] = $customerId;
         }
 
-        $paymentIntent = \Stripe\PaymentIntent::create($params);
+        // Stripe's search can take a minute to see a new charge, so a same-day re-run relies on this key to get the original charge back. The card and amount are in it because Stripe refuses a reused key whose request has changed.
+        $paymentIntent = \Stripe\PaymentIntent::create($params, [
+            'idempotency_key' => 'renew_' . $subscriptionId . '_' . $periodEnd . '_' . date('Y-m-d') . '_' . $paymentMethodId . '_' . $params['amount'],
+        ]);
 
         if ($paymentIntent->status === 'succeeded') {
             return [
@@ -492,97 +539,31 @@ function processStripeRenewal($paymentMethodId, $amount, $subscriptionId, $email
 /**
  * Process Square renewal payment
  */
-function processSquareRenewal($cardId, $amount, $subscriptionId, $email, $accessToken, $environment) {
+function processSquareRenewal($cardId, $amount, $subscriptionId, $accessToken, $environment, string $periodEnd) {
+    $reference = square_renewal_reference($subscriptionId, $periodEnd);
+
+    // A charge whose record never reached the database is still on Square, and charging again would bill the customer twice for one period.
     try {
-        $locationId = ($environment === 'production')
-            ? $_ENV['SQUARE_LIVE_LOCATION_ID']
-            : $_ENV['SQUARE_SANDBOX_LOCATION_ID'];
-
-        $apiBaseUrl = ($environment === 'production')
-            ? 'https://connect.squareup.com/v2'
-            : 'https://connect.squareupsandbox.com/v2';
-
-        // Validate card ID format to prevent SSRF via URL path injection
-        if (!preg_match('/^[A-Za-z0-9\-_:]+$/', $cardId)) {
-            return ['success' => false, 'error' => 'Invalid card ID format'];
-        }
-
-        // First, retrieve the card to get the customer_id (required for card-on-file payments)
-        $ch = curl_init("$apiBaseUrl/cards/$cardId");
-        curl_setopt_array($ch, [
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_HTTPHEADER => [
-                "Square-Version: 2026-01-22",
-                "Authorization: Bearer $accessToken",
-                "Content-Type: application/json"
-            ],
-            CURLOPT_SSL_VERIFYPEER => true,
-            CURLOPT_SSL_VERIFYHOST => 2,
-        ]);
-        $cardResponse = curl_exec($ch);
-        $cardHttpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
-        $cardResult = json_decode($cardResponse, true);
-        if ($cardHttpCode < 200 || $cardHttpCode >= 300 || !isset($cardResult['card'])) {
-            $errorMessage = $cardResult['errors'][0]['detail'] ?? 'Failed to retrieve card details';
-            return ['success' => false, 'error' => $errorMessage];
-        }
-
-        $customerId = $cardResult['card']['customer_id'];
-
-        // Create payment request with customer_id
-        $paymentData = [
-            // Deterministic per (subscription, month) so a retry after a lost response reuses the key and Square dedups the charge instead of billing the card twice.
-            'idempotency_key' => hash('sha256', 'sqrenew_' . $subscriptionId . '_' . date('Y-m')),
-            'source_id' => $cardId,
-            'customer_id' => $customerId,
-            'amount_money' => [
-                'amount' => intval($amount * 100), // Square uses cents
-                'currency' => 'CAD'
-            ],
-            'location_id' => $locationId,
-            'note' => "Premium Subscription Renewal - $subscriptionId",
-            'autocomplete' => true
-        ];
-
-        // Make API call
-        $ch = curl_init("$apiBaseUrl/payments");
-        curl_setopt_array($ch, [
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_CUSTOMREQUEST => 'POST',
-            CURLOPT_POSTFIELDS => json_encode($paymentData),
-            CURLOPT_HTTPHEADER => [
-                "Square-Version: 2026-01-22",
-                "Authorization: Bearer $accessToken",
-                "Content-Type: application/json"
-            ],
-            CURLOPT_SSL_VERIFYPEER => true,
-            CURLOPT_SSL_VERIFYHOST => 2,
-        ]);
-
-        $response = curl_exec($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
-        $result = json_decode($response, true);
-
-        if ($httpCode >= 200 && $httpCode < 300 && isset($result['payment'])) {
-            return [
-                'success' => true,
-                'transaction_id' => $result['payment']['id']
-            ];
-        } else {
-            $errorMessage = $result['errors'][0]['detail'] ?? 'Unknown error';
-            return [
-                'success' => false,
-                'error' => $errorMessage
-            ];
+        $since = (new DateTimeImmutable($periodEnd))->modify('-3 days');
+        $earlier = square_find_payment_by_reference($reference, $since, $accessToken, $environment);
+        if ($earlier !== null) {
+            return ['success' => true, 'transaction_id' => $earlier['id'], 'amount' => $earlier['amount'], 'recovered' => true];
         }
     } catch (Exception $e) {
-        return [
-            'success' => false,
-            'error' => $e->getMessage()
-        ];
+        logMessage("Could not check Square for an earlier charge for $subscriptionId, charging anyway: " . $e->getMessage(), 'WARNING');
+        cron_metric_incr('renewal_lookup_failed');
     }
+
+    // The date is in the key so a card declined today is tried again tomorrow, and the card and amount because Square refuses a reused key whose request has changed.
+    return square_charge_saved_card(
+        (string) $cardId,
+        (float) $amount,
+        square_idempotency_key('sqrenew_' . $subscriptionId . '_' . $periodEnd . '_' . date('Y-m-d') . '_' . $cardId . '_' . (int) round($amount * 100)),
+        "Premium Subscription Renewal - $subscriptionId",
+        (string) $accessToken,
+        (string) $environment,
+        $reference
+    );
 }
 
 /**
