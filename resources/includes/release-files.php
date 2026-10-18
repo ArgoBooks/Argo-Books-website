@@ -1,17 +1,8 @@
 <?php
-// Decides whether an installer in resources/downloads/ is safe to offer.
-//
-// Release files go up over FileZilla, and a file that is still uploading already exists
-// under its final name, so a plain file_exists() offered half-written installers. The
-// release feed (avalonia-update.xml) holds each current file's exact size, written by
-// sign-release.ps1, so a file counts as ready once it has reached that size. This works
-// whether the release commit is pushed before or after the upload.
+// A file uploading over FileZilla already has its final name, so a download is offered only once it reaches the size its release recorded.
 
 if (!function_exists('release_feed')) {
-    /**
-     * The newest version in the feed and the expected size of each file, keyed by filename.
-     * Null when the feed is missing or unreadable, in which case every file is offered.
-     */
+    /** The newest version and each file's size from avalonia-update.xml and release.json, or null when neither can be read, which offers every file. */
     function release_feed(): ?array
     {
         static $feed = false;
@@ -19,21 +10,31 @@ if (!function_exists('release_feed')) {
             return $feed;
         }
 
-        $xml = @simplexml_load_file(__DIR__ . '/../../avalonia-update.xml');
-        if ($xml === false) {
-            return $feed = null;
-        }
-
         $version = null;
         $sizes = [];
-        foreach ($xml->channel->item as $item) {
-            $itemVersion = (string) $item->children('sparkle', true)->version;
-            if ($itemVersion !== '' && ($version === null || version_compare($itemVersion, $version) > 0)) {
-                $version = $itemVersion;
+
+        $xml = @simplexml_load_file(__DIR__ . '/../../avalonia-update.xml');
+        if ($xml !== false) {
+            foreach ($xml->channel->item as $item) {
+                $itemVersion = (string) $item->children('sparkle', true)->version;
+                if ($itemVersion !== '' && ($version === null || version_compare($itemVersion, $version) > 0)) {
+                    $version = $itemVersion;
+                }
+                $path = parse_url((string) $item->enclosure['url'], PHP_URL_PATH);
+                if (is_string($path) && $path !== '') {
+                    $sizes[rawurldecode(basename($path))] = (int) $item->enclosure['length'];
+                }
             }
-            $path = parse_url((string) $item->enclosure['url'], PHP_URL_PATH);
-            if (is_string($path) && $path !== '') {
-                $sizes[rawurldecode(basename($path))] = (int) $item->enclosure['length'];
+        }
+
+        $raw = @file_get_contents(__DIR__ . '/../updates/release.json');
+        $release = is_string($raw) ? json_decode($raw, true) : null;
+        if (is_array($release) && is_string($release['version'] ?? null)) {
+            if ($version === null || version_compare($release['version'], $version) > 0) {
+                $version = $release['version'];
+            }
+            foreach ($release['downloads'] ?? [] as $name => $size) {
+                $sizes[(string) $name] = (int) $size;
             }
         }
 
@@ -58,5 +59,18 @@ if (!function_exists('release_feed')) {
 
         $expected = $feed['sizes'][$filename] ?? 0;
         return $expected <= 0 || filesize($filepath) === $expected;
+    }
+
+    /** The first of a platform's file name patterns that is ready to download, since Windows has both a Setup.exe and the older installer. */
+    function release_find_file(string $version, string|array $patterns, string $downloadsDir): ?array
+    {
+        foreach ((array) $patterns as $pattern) {
+            $filename = str_replace('{version}', $version, $pattern);
+            $filepath = rtrim($downloadsDir, '/') . '/' . $version . '/' . $filename;
+            if (release_file_ready($version, $filename, $filepath)) {
+                return ['filename' => $filename, 'filepath' => $filepath];
+            }
+        }
+        return null;
     }
 }

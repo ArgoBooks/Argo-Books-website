@@ -27,6 +27,11 @@ Everything in `.gitignore` is automatically skipped (it's not in the runner's ch
 - `phpunit.xml`, `tests/` (PHPUnit suite, local-only)
 - `.ftp-deploy-sync-state.json`
 
+A full mirror deletes anything on the server that is not in the repo, except what it excludes. So it also leaves alone the release files uploaded by hand with FileZilla, which are not in git:
+
+- `resources/downloads/<version>/`, the downloads and translations for each app release
+- the `.nupkg` and `.exe` files in `resources/updates/` and `resources/updates-sandbox/`, the app's update packages. The update lists and signatures beside them are in the repo and deploy as usual.
+
 ## Forcing a full re-upload
 
 Go to **Actions -> Deploy to server -> Run workflow** in GitHub, set `full_deploy` to `true`, and click Run. This mirrors every tracked file to both servers (still respecting the exclude list above).

@@ -4,7 +4,8 @@
  *
  * Filesystem layout:
  *   resources/downloads/{version}/
- *     Argo Books Installer V.{version}.exe        (Windows)
+ *     ArgoBooks-{version}-win-Setup.exe           (Windows, since the move to Velopack)
+ *     Argo Books Installer V.{version}.exe        (Windows, up to the bridge release)
  *     ArgoBooks-{version}-osx-arm64.zip           (macOS, Apple Silicon)
  *     ArgoBooks-{version}-osx-x64.zip             (macOS, Intel)
  *     ArgoBooks-{version}-linux-x64.AppImage      (Linux)
@@ -25,7 +26,7 @@ require_once __DIR__ . '/resources/includes/release-files.php';
 // Platform file patterns: platform key => filename pattern
 // {version} is replaced at runtime
 $platformPatterns = [
-    'win'       => 'Argo Books Installer V.{version}.exe',
+    'win'       => ['ArgoBooks-{version}-win-Setup.exe', 'Argo Books Installer V.{version}.exe'],
     'mac-arm64' => 'ArgoBooks-{version}-osx-arm64.zip',
     'mac-intel' => 'ArgoBooks-{version}-osx-x64.zip',
     // Kept because it is the slug that has been public since before there were two macOS builds.
@@ -82,12 +83,12 @@ function findInstaller(string $version, string $platform): ?array
         return null;
     }
 
-    $filename = str_replace('{version}', $version, $platformPatterns[$platform]);
-    $filepath = __DIR__ . "/resources/downloads/$version/$filename";
-
-    if (!release_file_ready($version, $filename, $filepath)) {
+    $file = release_find_file($version, $platformPatterns[$platform], __DIR__ . '/resources/downloads');
+    if ($file === null) {
         return null;
     }
+    $filename = $file['filename'];
+    $filepath = $file['filepath'];
 
     return [
         'version'  => $version,

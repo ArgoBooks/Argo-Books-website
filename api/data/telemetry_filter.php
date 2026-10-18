@@ -61,8 +61,8 @@ const TELEMETRY_FEATURE_NAMES = [
     'AccountantPackSent',
     // Quotes
     'QuoteCreated', 'QuoteSent', 'QuoteConverted',
-    // Updates, with the version in the context
-    'UpdateOffered', 'UpdateApplied',
+    // Updates, with the versions in the context
+    'UpdateOffered', 'UpdateApplied', 'UpdateInstalled', 'UpdateFailed', 'OldInstallRemoved',
     'RecurringScheduleCreated', 'RecurringTransactionsGenerated',
     'PaymentProviderConnected', 'PhonePaired', 'CompanyPasswordSet',
     // The record type (expense, revenue, invoice) is in the context.

@@ -152,6 +152,9 @@ jobs:
                     --exclude ^phpunit\.xml$ \
                     --exclude ^tests/$ \
                     --exclude ^\.ftp-deploy-sync-state\.json$ \
+                    --exclude ^resources/updates[^/]*/.*\.nupkg$ \
+                    --exclude ^resources/updates[^/]*/.*\.exe$ \
+                    --exclude ^resources/downloads/[0-9]+\.[0-9]+\.[0-9]+/$ \
                     ./ ${REMOTE_DIR}; \
                   bye" \
               sftp://${{ secrets.FTP_SERVER }}

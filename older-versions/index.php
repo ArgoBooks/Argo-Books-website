@@ -7,7 +7,8 @@ require_once __DIR__ . '/../resources/includes/release-files.php';
 $platforms = [
     'windows' => [
         'name' => 'Windows',
-        'filePattern' => 'Argo Books Installer V.{version}.exe',
+        // Setup.exe since the move to Velopack, and the Advanced Installer installer up to the bridge release.
+        'filePattern' => ['ArgoBooks-{version}-win-Setup.exe', 'Argo Books Installer V.{version}.exe'],
         'downloadPlatform' => 'win',
         'available' => true,
         'icon' => 'M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.9-1.801'
@@ -52,16 +53,14 @@ function getOlderVersions($filePattern)
         if (!is_dir($basePath . $folder)) continue;
         if (!preg_match('/^\d+\.\d+\.\d+/', $folder)) continue;
 
-        $filename = str_replace('{version}', $folder, $filePattern);
-        $filepath = $basePath . $folder . '/' . $filename;
-
-        if (release_file_ready($folder, $filename, $filepath)) {
+        $file = release_find_file($folder, $filePattern, $basePath);
+        if ($file !== null) {
             $versions[] = [
                 'version' => $folder,
-                'filename' => $filename,
-                'filepath' => $filepath,
-                'filesize' => filesize($filepath),
-                'modified' => filemtime($filepath)
+                'filename' => $file['filename'],
+                'filepath' => $file['filepath'],
+                'filesize' => filesize($file['filepath']),
+                'modified' => filemtime($file['filepath'])
             ];
         }
     }

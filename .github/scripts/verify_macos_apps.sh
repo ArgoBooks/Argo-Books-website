@@ -1,9 +1,8 @@
 #!/bin/bash
-# Downloads both macOS zips listed in avalonia-update.xml and checks each app bundle the way
-# Gatekeeper will: Developer ID signature, hardened runtime, notarization ticket stapled.
-# Also checks the processor architecture and bundle version, so a swapped or stale zip fails.
+# Checks each macOS zip's app is signed, notarized, and the right architecture and version, as Gatekeeper will.
 #
-# Usage: verify_macos_apps.sh avalonia-update.xml
+# Usage: verify_macos_apps.sh avalonia-update.xml                  (the bridge release)
+#        verify_macos_apps.sh resources/updates/release.json       (releases since Velopack)
 
 set -uo pipefail
 
@@ -17,12 +16,18 @@ fail() {
 }
 
 ENTRIES=$(python3 - "$APPCAST" <<'PY'
-import sys, xml.etree.ElementTree as ET
-ns = "{http://www.andymatuschak.org/xml-namespaces/sparkle}"
-for enc in ET.parse(sys.argv[1]).getroot().iter("enclosure"):
-    os_name = enc.get(ns + "os", "")
-    if os_name.startswith("macos"):
-        print(os_name, enc.get(ns + "version"), enc.get("url"))
+import json, sys, xml.etree.ElementTree as ET
+path = sys.argv[1]
+if path.endswith(".json"):
+    version = json.load(open(path))["version"]
+    for os_name, rid in (("macos-arm64", "osx-arm64"), ("macos-x64", "osx-x64")):
+        print(os_name, version, f"https://argorobots.com/resources/downloads/{version}/ArgoBooks-{version}-{rid}.zip")
+else:
+    ns = "{http://www.andymatuschak.org/xml-namespaces/sparkle}"
+    for enc in ET.parse(path).getroot().iter("enclosure"):
+        os_name = enc.get(ns + "os", "")
+        if os_name.startswith("macos"):
+            print(os_name, enc.get(ns + "version"), enc.get("url"))
 PY
 )
 

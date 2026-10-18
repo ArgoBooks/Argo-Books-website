@@ -1,0 +1,60 @@
+name: Verify Velopack release
+
+# Checks the release in resources/updates is on argorobots.com, signed for the updater, and code-signed for Windows and macOS.
+# The push can land before the FileZilla upload finishes, so a push run keeps rechecking for up to 45 minutes.
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - resources/updates/**
+      - .github/scripts/verify_velopack_release.py
+      - .github/scripts/verify_windows_release.ps1
+      - .github/scripts/verify_macos_apps.sh
+      - .github/workflows/verify-velopack-release.yml
+  workflow_dispatch:
+
+concurrency:
+  group: verify-velopack-release
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - run: pip install cryptography
+
+      - name: Verify update packages, signatures and downloads
+        run: |
+          WAIT=0
+          if [ "${{ github.event_name }}" = "push" ]; then WAIT=45; fi
+          python .github/scripts/verify_velopack_release.py resources/updates --wait-minutes "$WAIT"
+
+  windows:
+    needs: verify
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check Authenticode signatures and app file versions
+        shell: pwsh
+        run: ./.github/scripts/verify_windows_release.ps1 -UpdatesFolder resources/updates
+
+  macos-apps:
+    needs: verify
+    runs-on: macos-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check Developer ID signature, notarization, architecture and version
+        run: bash .github/scripts/verify_macos_apps.sh resources/updates/release.json

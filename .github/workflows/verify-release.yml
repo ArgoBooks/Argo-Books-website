@@ -8,6 +8,8 @@ name: Verify release signatures
 #
 # On push the XML usually lands before the FileZilla upload finishes, so the run keeps
 # rechecking for up to 45 minutes. Run it manually after the upload for an immediate answer.
+#
+# avalonia-update.xml stays at the bridge release, so later releases are checked by verify-velopack-release.yml.
 
 on:
   push:

@@ -29,6 +29,15 @@ if ($update_xml !== false && isset($update_xml->channel->item[0])) {
         $current_release_date = date('Y-m-d', $parsed_pub_date);
     }
 }
+// Releases since the move to Velopack are recorded here, and the appcast above stays at the bridge release.
+$velopack_release = json_decode((string) @file_get_contents(__DIR__ . '/resources/updates/release.json'), true);
+if (is_array($velopack_release) && is_string($velopack_release['version'] ?? null)
+    && version_compare($velopack_release['version'], $current_version) > 0) {
+    $current_version = $velopack_release['version'];
+    if (is_string($velopack_release['date'] ?? null)) {
+        $current_release_date = $velopack_release['date'];
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">

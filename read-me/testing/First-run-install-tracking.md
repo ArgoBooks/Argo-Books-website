@@ -6,7 +6,7 @@ The flow has three moving parts:
 
 1. **Website**: Receives the `app_first_run` POST at `/api/track-app-event.php`, resolves the install token back to a `visitor_id`, and writes a row to `referral_events`.
 2. **Desktop app**: `ArgoBooks.Core.Services.FirstRunReporter` fires the POST once per machine on the first successful launch.
-3. **Installer**: On Windows, the Advanced Installer custom action writes an 8-character HMAC token to `%LOCALAPPDATA%\ArgoBooks\install_token.txt` during install. On Mac and Linux the token is embedded in the installer filename.
+3. **Installer**: Every download carries an 8-character HMAC token in its filename. On Windows, the app's Velopack install hook (`WindowsInstallHooks.AfterInstall()`) reads it from the filename of the Setup.exe that is installing it and writes it to `%LOCALAPPDATA%\ArgoBooks\install_token.txt`. On Mac and Linux the app reads it from the filename directly.
 
 The admin funnel at `/admin/marketing-funnel/` reads the resulting rows from `referral_events` to populate the "App first run" stage.
 
@@ -36,7 +36,7 @@ reason=<token | no_token | gave_up_after_retries>
 ```
 
 - `reason=token` means the reporter found `install_token.txt`, sent the token, and got a 2xx response. This is the healthy case.
-- `reason=no_token` means the reporter ran successfully and posted to the server, but did not find `install_token.txt` on disk, so it sent an empty token. The server still wrote a row, just with `visitor_id = NULL` and `token_match = false`. **This is what you see when the installer's `WriteInstallToken` custom action did not run.**
+- `reason=no_token` means the reporter ran successfully and posted to the server, but did not find `install_token.txt` on disk, so it sent an empty token. The server still wrote a row, just with `visitor_id = NULL` and `token_match = false`. **This is what you see when the Windows install hook did not write the token.**
 - `reason=gave_up_after_retries` means the reporter tried the POST three times, hit network failures on every attempt, and stopped retrying. No row was written server-side.
 
 So if the funnel shows a missing or unattributed install, reading this marker on the affected machine tells you which side of the chain to look at without opening the database.
@@ -199,7 +199,7 @@ If this is greater than zero, attribution is missing the window but the install 
 
 ### The token file is not being written by the installer
 
-On Windows, the Advanced Installer `WriteInstallToken` custom action writes `install_token.txt` to `%LOCALAPPDATA%\ArgoBooks\` during install. If a packaging change stopped that action from running, every install posts with an empty token and lands as `visitor_id = null`. See `Argo-Books-Avalonia/docs/setup/AdvancedInstallerProjectSetup.md` for the custom action setup.
+On Windows, the app's install hook writes `install_token.txt` to `%LOCALAPPDATA%\ArgoBooks\` while Setup.exe is installing it, taking the token from Setup.exe's filename. If the hook stopped running, or the download stopped carrying the token in its filename, every install posts with an empty token and lands as `visitor_id = null`. The hook is in `ArgoBooks.Desktop/Services/WindowsInstallHooks.cs`.
 
 **Fastest check** (works any time after first launch): read the marker file.
 
@@ -207,15 +207,15 @@ On Windows, the Advanced Installer `WriteInstallToken` custom action writes `ins
 type "%LOCALAPPDATA%\ArgoBooks\first_run_reported.marker"
 ```
 
-If you see `reason=no_token`, the installer is not writing `install_token.txt`. The custom action either did not run or could not extract the token from the installer's filename. This is your confirmation; no further diagnosis on the desktop side is needed.
+If you see `reason=no_token`, the install did not write `install_token.txt`. The hook either did not run or could not find the token in the Setup.exe filename. This is your confirmation; no further diagnosis on the desktop side is needed.
 
-**Live-installer check** (works only between install and first launch): run the installer but **do not open the app yet**. Then look for the file:
+**Token file check**: Setup.exe opens the app as soon as it finishes installing, and the app deletes `install_token.txt` after a successful first-run POST, so the file is normally gone by the time you look. If the first-run POST could not reach the server, it is still there:
 
 ```
 type "%LOCALAPPDATA%\ArgoBooks\install_token.txt"
 ```
 
-If the file exists and has an 8-character hex string, the installer is doing its job. If the file is missing, the custom action did not fire. Note that `FirstRunReporter` deletes `install_token.txt` after a successful first-run POST, so once the app has launched once this file is gone whether or not the install was attributed.
+An 8-character hex string means the install hook did its job and only the POST is outstanding.
 
 ### Outbound POST blocked by Windows Defender / firewall on first launch
 
@@ -235,4 +235,4 @@ Argo Books is marketed as offline-capable, and a user who installs on a machine 
 - `admin/marketing-funnel/index.php` - funnel display
 - `ArgoBooks.Core/Services/FirstRunReporter.cs` - desktop reporter, marker file logic, token resolution
 - `ArgoBooks/App.axaml.cs` - kicks off the reporter on app startup
-- `Argo-Books-Avalonia/docs/setup/AdvancedInstallerProjectSetup.md` - Windows installer custom action that writes the token file
+- `ArgoBooks.Desktop/Services/WindowsInstallHooks.cs` - Windows install hook that writes the token file

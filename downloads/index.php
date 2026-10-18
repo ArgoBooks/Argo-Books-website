@@ -77,7 +77,8 @@ function getSystemRequirements()
 
 // Platform file patterns for Avalonia builds
 $avaloniaPatterns = [
-    'windows'     => 'Argo Books Installer V.{version}.exe',
+    // Setup.exe since the move to Velopack, and the Advanced Installer installer up to the bridge release.
+    'windows'     => ['ArgoBooks-{version}-win-Setup.exe', 'Argo Books Installer V.{version}.exe'],
     'macos-arm64' => 'ArgoBooks-{version}-osx-arm64.zip',
     'macos-x64'   => 'ArgoBooks-{version}-osx-x64.zip',
     'linux'       => 'ArgoBooks-{version}-linux-x64.AppImage',
@@ -114,13 +115,12 @@ function getLatestVersion()
     $platforms = [];
     foreach ($avaloniaPatterns as $platform => $pattern) {
         foreach ($versions as $version) {
-            $filename = str_replace('{version}', $version, $pattern);
-            $filepath = $basePath . $version . '/' . $filename;
-            if (release_file_ready($version, $filename, $filepath)) {
+            $file = release_find_file($version, $pattern, $basePath);
+            if ($file !== null) {
                 $platforms[$platform] = [
                     'version'  => $version,
-                    'filename' => $filename,
-                    'filesize' => filesize($filepath),
+                    'filename' => $file['filename'],
+                    'filesize' => filesize($file['filepath']),
                 ];
                 break;
             }
