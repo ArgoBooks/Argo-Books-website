@@ -89,6 +89,54 @@ $pricing = get_pricing_config();
     <div class="container">
         <div class="version-grid">
 
+            <!-- Version 2.0.21 -->
+            <div class="version-card">
+                <div class="version-header">
+                    <div class="version-info">
+                        <span class="version-tag">Version 2.0.21</span>
+                        <span class="date-tag">October 18 2026</span>
+                    </div>
+                    <?= svg_icon('chevron-down', 24, 'dropdown-arrow', null, 'stroke-linecap="round" stroke-linejoin="round"') ?>
+                </div>
+
+                <div class="version-content">
+                    <div class="changelog">
+                        <div class="changelog-section">
+                            <h4 class="section-label feature">New Features</h4>
+                            <ul class="changelog-list">
+                                <li><strong>Work without reaching for the mouse:</strong> Tab and Shift+Tab take you through everything on a page, the arrow keys move through menus and lists, Enter chooses, and Escape closes.</li>
+                                <li><strong>Import your bank's download file:</strong> The OFX, QFX and QBO files most banks offer for Quicken and QuickBooks now import as bank statements.</li>
+                                <li><strong>Photograph a paper bank statement:</strong> Import a photo or scan of a paper bank statement, in JPG, PNG, WebP, HEIC or TIFF, and Argo Books reads its transactions just as it does a PDF statement.</li>
+                                <li><strong>Scan receipts straight from your office scanner:</strong> Receipts saved as TIFF files are accepted, and a scan of several pages stays together as one receipt.</li>
+                                <li><strong>More spreadsheets welcome:</strong> Import LibreOffice and Google Sheets files (.ods), Excel files with macros (.xlsm), tab-separated text files, and the .xls files many banks make with "Export to Excel".</li>
+                                <li><strong>Start your Balance Sheet from your real bank balance:</strong> Enter what's in your business bank account when you create a company, or any time in Edit Company, and the Balance Sheet's cash starts from it instead of from zero.</li>
+                                <li><strong>Skip the import tips you already know:</strong> The tips shown before an import's file picker have a "Don't show again" box, remembered for every company.</li>
+                            </ul>
+                        </div>
+                        <div class="changelog-section">
+                            <h4 class="section-label enhancement">Enhancements</h4>
+                            <ul class="changelog-list">
+                                <li><strong>Updates in one click:</strong> From the next update after this one, click Update and Argo Books downloads the new version, restarts and reopens right where you were. On Windows, those updates no longer ask for administrator permission.</li>
+                                <li><strong>A simpler bank statement import:</strong> Each line is sorted into an expense or revenue from the sign of its amount, money out shows in red and money in shows in green, and a Category column sits beside Product.</li>
+                                <li><strong>Accents come through:</strong> CSV files saved in an older Windows format keep their accented letters, curly quotes and euro signs.</li>
+                                <li><strong>Statements with a header block:</strong> A CSV statement with your account details above the column names is read correctly, whatever separator it uses.</li>
+                                <li><strong>WebP images in reports:</strong> The report designer accepts WebP pictures.</li>
+                            </ul>
+                        </div>
+                        <div class="changelog-section">
+                            <h4 class="section-label fix">Fixes</h4>
+                            <ul class="changelog-list">
+                                <li>Charts on the Dashboard and Analytics pages draw every time on slower computers.</li>
+                                <li>Saving a company file kept on your desktop leaves its icon where you put it.</li>
+                                <li>The dismiss and mark-as-read buttons on a notification are always visible in the dark theme.</li>
+                                <li>Messages on the dashboard have space between them.</li>
+                                <li>The history window's filters start on "All Actions" and "All Types".</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Version 2.0.20 -->
             <div class="version-card">
                 <div class="version-header">
