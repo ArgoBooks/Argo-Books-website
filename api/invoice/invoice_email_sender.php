@@ -156,7 +156,7 @@ class InvoiceEmailSender
 
         // Handle PDF attachment
         if (!empty($data['pdfAttachment'])) {
-            $pdfContent = base64_decode($data['pdfAttachment']);
+            $pdfContent = base64_decode($data['pdfAttachment'], true);
             if ($pdfContent === false) {
                 throw new \Exception('Invalid base64 PDF content');
             }
@@ -219,7 +219,7 @@ class InvoiceEmailSender
         $headers[] = 'Content-Type: multipart/mixed; boundary="' . $boundary . '"';
 
         // Decode PDF
-        $pdfContent = base64_decode($pdfBase64);
+        $pdfContent = base64_decode($pdfBase64, true);
         if ($pdfContent === false) {
             throw new \Exception('Invalid base64 PDF content');
         }

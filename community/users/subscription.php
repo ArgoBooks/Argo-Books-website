@@ -158,7 +158,7 @@ if ($premium_subscription) {
                             </div>
                             <?php endif; ?>
                             <?php if ($creditBalance > 0):
-                                $monthsRemaining = floor($creditBalance / $monthlyPrice);
+                                $monthsRemaining = (int) floor($creditBalance / $monthlyPrice);
                             ?>
                             <div class="detail-item">
                                 <span class="detail-label">Credit Balance</span>

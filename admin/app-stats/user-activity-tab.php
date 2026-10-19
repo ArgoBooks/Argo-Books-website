@@ -377,6 +377,7 @@ if ($ua_deviceHashes && isset($pdo)) {
     // its own so that a problem here cannot take the referral lookup above with it.
     try {
         $ua_goalLabels = survey_choice_labels('goals');
+        $ua_ph = implode(',', array_fill(0, count($ua_deviceHashes), '?'));
         $ua_gstmt = $pdo->prepare("
             SELECT JSON_UNQUOTE(JSON_EXTRACT(event_data, '$.device_hash')) AS device_hash,
                    survey_goal, survey_goal_other_text, exit_survey_answer, exit_survey_text

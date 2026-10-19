@@ -158,7 +158,7 @@ try {
     send_error_response(500, 'Storage is unavailable.', 'STORAGE_UNAVAILABLE');
 }
 
-send_json_response([
+send_json_response(200, [
     'success'      => true,
     'retentionDays' => IMPORT_DIAGNOSTIC_RETENTION_DAYS,
 ]);

@@ -145,7 +145,7 @@ class PurchaseOrderEmailSender
         }
 
         if (!empty($data['pdfAttachment'])) {
-            $pdfContent = base64_decode($data['pdfAttachment']);
+            $pdfContent = base64_decode($data['pdfAttachment'], true);
             if ($pdfContent === false) {
                 throw new \Exception('Invalid base64 PDF content');
             }
@@ -201,7 +201,7 @@ class PurchaseOrderEmailSender
         $headers = array_filter($baseHeaders, fn($h) => !str_starts_with($h, 'Content-Type:'));
         $headers[] = 'Content-Type: multipart/mixed; boundary="' . $boundary . '"';
 
-        $pdfContent = base64_decode($pdfBase64);
+        $pdfContent = base64_decode($pdfBase64, true);
         if ($pdfContent === false) {
             throw new \Exception('Invalid base64 PDF content');
         }

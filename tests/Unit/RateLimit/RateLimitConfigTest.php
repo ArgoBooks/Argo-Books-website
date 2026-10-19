@@ -13,7 +13,7 @@ use PHPUnit\Framework\TestCase;
 final class RateLimitConfigTest extends TestCase
 {
     private const ENTRY_PATTERN =
-        "/^\s*'([a-z0-9_]+)' => \[_rl_env\('RL_([A-Z0-9_]+)_MAX', (\d+)\), _rl_env\('RL_([A-Z0-9_]+)_WINDOW', (\d+)\)\],$/m";
+        "/^\s*'([a-z0-9_]+)' => \[_rl_env\('RL_([A-Z0-9_]+)_MAX', (\d+)\), _rl_env\('RL_([A-Z0-9_]+)_WINDOW', (\d+)\)\],\r?$/m";
 
     /**
      * @return list<array{name: string, maxKey: string, windowKey: string, max: int, window: int}>
