@@ -10,20 +10,20 @@
             <title>Version 2.0.21</title>
             <sparkle:version>2.0.21</sparkle:version>
             <sparkle:releaseNotesLink>https://argorobots.com/whats-new/</sparkle:releaseNotesLink>
-            <pubDate>Mon, 19 Oct 2026 01:52:28 +0000</pubDate>
+            <pubDate>Mon, 19 Oct 2026 02:57:32 +0000</pubDate>
             <enclosure url="https://argorobots.com/resources/downloads/2.0.21/Argo%20Books%20Installer%20V.2.0.21.exe"
                        sparkle:version="2.0.21"
                        sparkle:os="windows"
                        type="application/octet-stream"
-                       length="170296928"
-                       sparkle:edSignature="1sr5Tas+ht5Vrs2tueWobBQRfPIXmeae7Wmkpofnm25818+UQ7pcnHXMjsRQzTEYBtIbT5vUJtKr7b9hEwycCw==" />
+                       length="170309272"
+                       sparkle:edSignature="nn/X2qHGzpsbrEP1lvDuJAcQigiWRuFkzROK/R9In8DKWH5KuKFN8Tdt7jEogMw6Grr1b/mfIc2uqOujfJgqDQ==" />
         </item>
 
         <item>
             <title>Version 2.0.21</title>
             <sparkle:version>2.0.21</sparkle:version>
             <sparkle:releaseNotesLink>https://argorobots.com/whats-new/</sparkle:releaseNotesLink>
-            <pubDate>Mon, 19 Oct 2026 01:52:28 +0000</pubDate>
+            <pubDate>Mon, 19 Oct 2026 02:57:32 +0000</pubDate>
             <enclosure url="https://argorobots.com/resources/downloads/2.0.21/ArgoBooks-2.0.21-linux-x64.AppImage"
                        sparkle:version="2.0.21"
                        sparkle:os="linux"
@@ -36,7 +36,7 @@
             <title>Version 2.0.21</title>
             <sparkle:version>2.0.21</sparkle:version>
             <sparkle:releaseNotesLink>https://argorobots.com/whats-new/</sparkle:releaseNotesLink>
-            <pubDate>Mon, 19 Oct 2026 01:52:28 +0000</pubDate>
+            <pubDate>Mon, 19 Oct 2026 02:57:32 +0000</pubDate>
             <enclosure url="https://argorobots.com/resources/downloads/2.0.21/ArgoBooks-2.0.21-osx-arm64.zip"
                        sparkle:version="2.0.21"
                        sparkle:os="macos-arm64"
@@ -49,7 +49,7 @@
             <title>Version 2.0.21</title>
             <sparkle:version>2.0.21</sparkle:version>
             <sparkle:releaseNotesLink>https://argorobots.com/whats-new/</sparkle:releaseNotesLink>
-            <pubDate>Mon, 19 Oct 2026 01:52:28 +0000</pubDate>
+            <pubDate>Mon, 19 Oct 2026 02:57:32 +0000</pubDate>
             <enclosure url="https://argorobots.com/resources/downloads/2.0.21/ArgoBooks-2.0.21-osx-x64.zip"
                        sparkle:version="2.0.21"
                        sparkle:os="macos-x64"
