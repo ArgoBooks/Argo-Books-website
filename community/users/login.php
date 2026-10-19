@@ -33,7 +33,6 @@ if (!isset($_SESSION['user_id']) && isset($_COOKIE['remember_me'])) {
 }
 
 $error = '';
-$verification_notice = '';
 $clientIp = get_client_ip();
 
 // Process form submission
@@ -173,12 +172,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <?php if ($error): ?>
                 <div class="error-message">
                     <?php echo htmlspecialchars($error); ?>
-                </div>
-            <?php endif; ?>
-
-            <?php if ($verification_notice): ?>
-                <div class="verification-notice">
-                    <?php echo $verification_notice; ?>
                 </div>
             <?php endif; ?>
 

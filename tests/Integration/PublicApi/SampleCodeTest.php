@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace Tests\Integration\PublicApi;
 
-use PDO;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
@@ -161,33 +160,6 @@ final class SampleCodeTest extends TestCase
         // Every language variant of an example uses the same documented Idempotency-Key, which is right for a reader running one of them and wrong for a harness running all five.
         $GLOBALS['pdo']->prepare('DELETE FROM api_idempotency_cache WHERE account_id = ?')
             ->execute([self::$accountId]);
-    }
-
-    /**
-     * What a sample must print to have actually worked.
-     *
-     * Without this the test only proved the process exited zero, which several
-     * samples did while printing "undefined" or a PHP warning. An expected
-     * shape is the difference between a green test and a meaningful one.
-     */
-    private function expectedOutput(array $sample): string
-    {
-        $code = $sample['code'];
-
-        if (str_contains($code, 'signing_secret')) {
-            return '/^whsec_[0-9a-f]{48}$/';
-        }
-        if (str_contains($code, 'still waiting')) {
-            return '/^\d+ still waiting$/';
-        }
-        if (str_contains($code, 'events')) {
-            return '/^\d+ events$/';
-        }
-        if (str_contains($code, '/v1/revenue') && !str_contains($code, 'import_status')) {
-            return '/^rev_[0-9a-f]{24}$/';
-        }
-
-        return '/^acct_[0-9a-f]{24}$/';
     }
 
     // -- the samples ---------------------------------------------------------

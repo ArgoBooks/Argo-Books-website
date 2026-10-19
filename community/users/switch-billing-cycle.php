@@ -204,7 +204,6 @@ $is_upgrade = ($new_cycle === 'yearly');
             <?php if ($is_paypal):
                 // PayPal flow: show the breakdown with refund-style copy, then send the user to checkout where they'll approve a new PayPal subscription with the new plan_id.
                 $new_billed_base = ($new_cycle === 'yearly') ? $yearly_base : $monthly_base;
-                $new_billed_fee = 0.0;
                 $new_billed_total = round($new_billed_base, 2);
                 $existing_credit_used = (float) ($premium_subscription['credit_balance'] ?? 0);
                 $next_billing_date = date('F j, Y', strtotime(($new_cycle === 'yearly') ? '+1 year' : '+1 month'));
@@ -227,13 +226,6 @@ $is_upgrade = ($new_cycle === 'yearly');
                         <span class="label">New <?= htmlspecialchars($new_cycle) ?> subscription</span>
                         <span class="value">$<?= number_format($new_billed_base, 2) ?> CAD</span>
                     </div>
-
-                    <?php if ($new_billed_fee > 0): ?>
-                    <div class="proration-line">
-                        <span class="label">Processing fee</span>
-                        <span class="value">$<?= number_format($new_billed_fee, 2) ?> CAD</span>
-                    </div>
-                    <?php endif; ?>
 
                     <div class="proration-divider"></div>
 

@@ -283,10 +283,10 @@ function api_handle_reject(array $spec, array $auth, string $publicId): void
 {
     global $pdo;
 
-    [$input, $raw] = api_request_body();
+    [, $raw] = api_request_body();
     $accountId = $auth['account_id'];
 
-    api_with_idempotency($accountId, $raw, static function () use ($spec, $input, $accountId, $publicId, $pdo) {
+    api_with_idempotency($accountId, $raw, static function () use ($spec, $accountId, $publicId, $pdo) {
         $row = api_fetch_object($spec, $publicId, $accountId);
         api_require_pending($spec, $row, 'rejected');
 

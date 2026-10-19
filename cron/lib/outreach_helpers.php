@@ -143,55 +143,35 @@ function send_outreach_lead($pdo, $lead, &$reason = null)
     // A personal name, because this is one to one outreach and the body opens with "I'm Evan". It has to match send_followup_row(), since follow-ups thread into the same conversation.
     $fromName = 'Evan';
     $preheader = null;
-    $format = 'html';
 
     // Creator and affiliate outreach ships without an unsubscribe line by request, so the defensive re-injection below is skipped for those leads and applies to every other kind.
     $isCreatorLead = strtolower((string) ($lead['source'] ?? '')) === 'creator_auto';
 
-    if ($format === 'plain') {
-        // URLs stay bare so they are clickable in a plain-text client while still carrying the tracking parameter, which means no HTML escaping and no anchor tags.
-        $body = (string) $lead['draft_body'];
-        $body = preg_replace('#https?://argorobots\.com/?(?![\w?/])#', $trackedUrl, $body);
-        $body = str_replace('{UNSUBSCRIBE_URL}', $unsubUrl, $body);
-        if (!$isCreatorLead && strpos($body, 'unsubscribe?t=') === false) {
-            $unsubLine = "\n\nNot interested? " . $unsubUrl . " and I'll stop emailing you.";
-            $replaced = preg_replace('#(\nAll the best)#i', $unsubLine . "\n$1", $body, 1);
-            if ($replaced !== null && strpos($replaced, 'unsubscribe?t=') !== false) {
-                $body = $replaced;
-            } else {
-                $body .= $unsubLine;
-            }
+    $anchorHtml = '<a href="' . htmlspecialchars($trackedUrl) . '" style="color:#3b82f6;text-decoration:underline">argorobots.com</a>';
+    $escapedBody = htmlspecialchars($lead['draft_body']);
+    $escapedBody = preg_replace('#https?://argorobots\.com/?(?![\w?/])#', $anchorHtml, $escapedBody);
+
+    $unsubAnchor = '<a href="' . htmlspecialchars($unsubUrl) . '" style="color:#6b7280;text-decoration:underline">unsubscribe</a>';
+    // Drafts carry the bare unsubscribe URL in their body, and each one becomes the styled "unsubscribe" link.
+    $escapedBody = preg_replace(
+        '#https?://argorobots\.com/unsubscribe\?t=[a-f0-9]+#i',
+        $unsubAnchor,
+        $escapedBody
+    );
+    // Some drafts still hold the {UNSUBSCRIBE_URL} placeholder instead of the URL.
+    $escapedBody = str_replace('{UNSUBSCRIBE_URL}', $unsubAnchor, $escapedBody);
+
+    if (!$isCreatorLead && strpos($escapedBody, 'unsubscribe?t=') === false) {
+        $unsubLine = "\n\n<span style=\"color:#9ca3af;font-size:13px\">Not interested? " . $unsubAnchor . " and I'll stop emailing you.</span>";
+        $replaced = preg_replace('#(\nAll the best)#i', $unsubLine . "\n$1", $escapedBody, 1);
+        if ($replaced !== null && strpos($replaced, 'unsubscribe?t=') !== false) {
+            $escapedBody = $replaced;
+        } else {
+            $escapedBody .= $unsubLine;
         }
-        $finalBody = $body;
-    } else {
-        $anchorHtml = '<a href="' . htmlspecialchars($trackedUrl) . '" style="color:#3b82f6;text-decoration:underline">argorobots.com</a>';
-        $escapedBody = htmlspecialchars($lead['draft_body']);
-        $escapedBody = preg_replace('#https?://argorobots\.com/?(?![\w?/])#', $anchorHtml, $escapedBody);
-
-        $unsubAnchor = '<a href="' . htmlspecialchars($unsubUrl) . '" style="color:#6b7280;text-decoration:underline">unsubscribe</a>';
-        // Drafts since the unsubscribe-URL fix carry the real bare URL in
-        // their body. Wrap any occurrences in the styled "unsubscribe" anchor.
-        $escapedBody = preg_replace(
-            '#https?://argorobots\.com/unsubscribe\?t=[a-f0-9]+#i',
-            $unsubAnchor,
-            $escapedBody
-        );
-        // Defensive: also handle the legacy {UNSUBSCRIBE_URL} placeholder for
-        // any drafts created before the substitution moved to draft time.
-        $escapedBody = str_replace('{UNSUBSCRIBE_URL}', $unsubAnchor, $escapedBody);
-
-        if (!$isCreatorLead && strpos($escapedBody, 'unsubscribe?t=') === false) {
-            $unsubLine = "\n\n<span style=\"color:#9ca3af;font-size:13px\">Not interested? " . $unsubAnchor . " and I'll stop emailing you.</span>";
-            $replaced = preg_replace('#(\nAll the best)#i', $unsubLine . "\n$1", $escapedBody, 1);
-            if ($replaced !== null && strpos($replaced, 'unsubscribe?t=') !== false) {
-                $escapedBody = $replaced;
-            } else {
-                $escapedBody .= $unsubLine;
-            }
-        }
-
-        $finalBody = '<p>' . nl2br($escapedBody) . '</p>';
     }
+
+    $finalBody = '<p>' . nl2br($escapedBody) . '</p>';
 
     $messageId = null;
     $result = send_styled_email(
@@ -204,7 +184,6 @@ function send_outreach_lead($pdo, $lead, &$reason = null)
         'contact@argorobots.com',
         [],
         $preheader,
-        $format,
         $messageId
     );
 
@@ -607,7 +586,6 @@ function send_followup_row($pdo, array $followupRow, ?string &$reason = null): b
         'contact@argorobots.com',
         $threadingHeaders,
         'Quick bump on my last note',
-        'html',
         $messageId
     );
 

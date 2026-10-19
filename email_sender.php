@@ -107,18 +107,17 @@ function _premium_feature_list_items($prefix = '')
  *
  * @param string      $to_email      Recipient email address
  * @param string      $subject       Email subject
- * @param string      $body_content  HTML content for the email body (will be wrapped in template). When $format === 'plain', this is used as-is as plain text and no template is applied.
+ * @param string      $body_content  HTML content for the email body (will be wrapped in template)
  * @param string      $header_style  Optional header style ('blue', 'premium', 'purple', '' for default, or a raw inline style string for backwards compatibility)
  * @param string|null $from_email    Sender email address; falls back to noreply@argorobots.com when null
  * @param string|null $from_name     Sender display name; defaults to 'Argo Books' when null
  * @param string|null $reply_to      Reply-To address; defaults to support@argorobots.com when null
  * @param array       $extra_headers Optional associative array of additional headers (added to the SMTP message via addCustomHeader, and to the mail() fallback's header block)
- * @param string|null $preheader     Optional inbox-preview snippet; rendered as a hidden element so it appears next to the subject in most mail clients without being visible in the body. Ignored when $format === 'plain'.
- * @param string      $format        'html' (default, full styled template) or 'plain' (no wrapper, sent as text/plain)
+ * @param string|null $preheader     Optional inbox-preview snippet; rendered as a hidden element so it appears next to the subject in most mail clients without being visible in the body.
  * @param string|null &$message_id   Out-parameter: receives the RFC 822 Message-ID of the sent email (with angle brackets), or null if the send failed. Pass an existing variable to capture; ignore otherwise. Used by the outreach follow-up sender so a follow-up can thread to the original via In-Reply-To / References.
  * @return bool                      True if successful, false otherwise
  */
-function send_styled_email($to_email, $subject, $body_content, $header_style = '', $from_email = null, $from_name = null, $reply_to = null, $extra_headers = [], $preheader = null, $format = 'html', &$message_id = null)
+function send_styled_email($to_email, $subject, $body_content, $header_style = '', $from_email = null, $from_name = null, $reply_to = null, $extra_headers = [], $preheader = null, &$message_id = null)
 {
     // sanitize_header_value() strips CR/LF and ASCII control chars so user-controlled fields can't inject Bcc/Cc/etc into the mail() fallback's concatenated header string.
     $to_email = sanitize_header_value($to_email);
@@ -127,55 +126,49 @@ function send_styled_email($to_email, $subject, $body_content, $header_style = '
     $from_name = sanitize_header_value($from_name);
     $reply_to = sanitize_header_value($reply_to);
 
-    $isPlain = ($format === 'plain');
+    $css = file_get_contents(__DIR__ . '/email.css');
+    $site_url = site_url();
 
-    if ($isPlain) {
-        $email_body = (string) $body_content;
-    } else {
-        $css = file_get_contents(__DIR__ . '/email.css');
-        $site_url = site_url();
-
-        $preheaderHtml = '';
-        if ($preheader !== null && trim((string) $preheader) !== '') {
-            $safePreheader = htmlspecialchars((string) $preheader, ENT_QUOTES, 'UTF-8');
-            $preheaderHtml = '<div style="display:none;max-height:0;overflow:hidden;font-size:1px;line-height:1px;color:transparent;mso-hide:all;">' . $safePreheader . '</div>';
-        }
-
-        // 'premium' is the blue subscription header, 'purple' the accent for affiliate, portal and refund mail, 'blue' the default.
-        $header_class_map = [
-            'premium' => 'header-premium',
-            'purple'  => 'header-purple',
-        ];
-        $header_class = $header_class_map[$header_style] ?? 'header-blue';
-
-        // Subjects can be admin-authored or AI-generated; escape for the HTML <title> context. The raw subject still goes to SMTP/mail() as the email Subject header below.
-        $titleEscaped = htmlspecialchars((string) $subject, ENT_QUOTES, 'UTF-8');
-
-        $email_body = <<<HTML
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-                <title>{$titleEscaped}</title>
-                <style>
-                    {$css}
-                </style>
-            </head>
-            <body>
-                {$preheaderHtml}
-                <div class="container">
-                    <div class="header {$header_class}">
-                        <img src="{$site_url}/resources/images/argo-logo/argo-logo-white.png" alt="Argo Logo" width="140">
-                    </div>
-                    <div class="content">
-                        {$body_content}
-                    </div>
-                </div>
-            </body>
-            </html>
-            HTML;
+    $preheaderHtml = '';
+    if ($preheader !== null && trim((string) $preheader) !== '') {
+        $safePreheader = htmlspecialchars((string) $preheader, ENT_QUOTES, 'UTF-8');
+        $preheaderHtml = '<div style="display:none;max-height:0;overflow:hidden;font-size:1px;line-height:1px;color:transparent;mso-hide:all;">' . $safePreheader . '</div>';
     }
+
+    // 'premium' is the blue subscription header, 'purple' the accent for affiliate, portal and refund mail, 'blue' the default.
+    $header_class_map = [
+        'premium' => 'header-premium',
+        'purple'  => 'header-purple',
+    ];
+    $header_class = $header_class_map[$header_style] ?? 'header-blue';
+
+    // Subjects can be admin-authored or AI-generated; escape for the HTML <title> context. The raw subject still goes to SMTP/mail() as the email Subject header below.
+    $titleEscaped = htmlspecialchars((string) $subject, ENT_QUOTES, 'UTF-8');
+
+    $email_body = <<<HTML
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+            <title>{$titleEscaped}</title>
+            <style>
+                {$css}
+            </style>
+        </head>
+        <body>
+            {$preheaderHtml}
+            <div class="container">
+                <div class="header {$header_class}">
+                    <img src="{$site_url}/resources/images/argo-logo/argo-logo-white.png" alt="Argo Logo" width="140">
+                </div>
+                <div class="content">
+                    {$body_content}
+                </div>
+            </div>
+        </body>
+        </html>
+        HTML;
 
     // Synthesize the Message-ID up-front so both transport paths use the same value.
     $generated_message_id = '<' . bin2hex(random_bytes(16)) . '@argorobots.com>';
@@ -190,9 +183,6 @@ function send_styled_email($to_email, $subject, $body_content, $header_style = '
             $mailer->addAddress($to_email);
             $mailer->addReplyTo($reply_to ?? 'support@argorobots.com');
             $mailer->Subject = $subject;
-            if ($isPlain) {
-                $mailer->isHTML(false);
-            }
             $mailer->Body = $email_body;
             $mailer->MessageID = $generated_message_id;
             if (!empty($extra_headers) && is_array($extra_headers)) {
@@ -211,10 +201,9 @@ function send_styled_email($to_email, $subject, $body_content, $header_style = '
     }
 
     $actualFrom = $from_email ? ($from_name ?? 'Argo Books') . " <{$from_email}>" : 'Argo Books <noreply@argorobots.com>';
-    $contentType = $isPlain ? 'text/plain; charset=UTF-8' : 'text/html; charset=UTF-8';
     $headers = [
         'MIME-Version: 1.0',
-        'Content-Type: ' . $contentType,
+        'Content-Type: text/html; charset=UTF-8',
         'From: ' . $actualFrom,
         'Reply-To: ' . ($reply_to ?? 'support@argorobots.com'),
         'Message-ID: ' . $generated_message_id,
