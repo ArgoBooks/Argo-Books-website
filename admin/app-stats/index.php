@@ -1019,7 +1019,9 @@ include __DIR__ . '/../admin_header.php';
 
             <!-- API Usage Tab -->
             <div id="api" class="tab-content">
-                <h2 class="section-title">API Usage</h2>
+                <?php include __DIR__ . '/ai-cost-section.php'; ?>
+
+                <h2 class="section-title" style="margin-top: 2rem;">API Usage</h2>
 
                 <div class="chart-row">
                     <div class="chart-container">

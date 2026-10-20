@@ -35,9 +35,9 @@ function ai_timing_record(array $row): void
         $stmt = $pdo->prepare(
             "INSERT INTO ai_call_timings
                 (operation, model, size_feature, page_count, input_bytes, mime,
-                 prompt_tokens, output_tokens, max_output_tokens, finish_reason,
-                 elapsed_ms, poll_count, success, app_platform, environment)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+                 prompt_tokens, output_tokens, thought_tokens, max_output_tokens, finish_reason,
+                 elapsed_ms, poll_count, success, app_platform, caller, tier, environment)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
         );
         $stmt->execute([
             substr((string) $row['operation'], 0, 40),
@@ -48,12 +48,15 @@ function ai_timing_record(array $row): void
             isset($row['mime']) ? substr((string) $row['mime'], 0, 30) : null,
             ai_timing_int($row['prompt_tokens'] ?? null),
             ai_timing_int($row['output_tokens'] ?? null),
+            ai_timing_int($row['thought_tokens'] ?? null),
             ai_timing_int($row['max_output_tokens'] ?? null),
             isset($row['finish_reason']) ? substr((string) $row['finish_reason'], 0, 20) : null,
             (int) $row['elapsed_ms'],
             ai_timing_int($row['poll_count'] ?? null),
             !empty($row['success']) ? 1 : 0,
             isset($row['app_platform']) ? substr((string) $row['app_platform'], 0, 20) : null,
+            isset($row['caller']) ? substr((string) $row['caller'], 0, 16) : null,
+            in_array($row['tier'] ?? null, ['free', 'premium'], true) ? $row['tier'] : null,
             current_environment(),
         ]);
     } catch (Throwable $e) {

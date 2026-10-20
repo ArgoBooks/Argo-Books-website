@@ -132,11 +132,14 @@ ai_timing_record([
     'mime' => 'application/pdf',
     'prompt_tokens' => $extractUsage['promptTokenCount'] ?? null,
     'output_tokens' => $extractUsage['candidatesTokenCount'] ?? null,
+    'thought_tokens' => $extractUsage['thoughtsTokenCount'] ?? null,
     'max_output_tokens' => 16000,
     'finish_reason' => 'STOP',
     'elapsed_ms' => $extractElapsedMs ?? 0,
     'poll_count' => $pollCount,
     'success' => true,
+    'caller' => $rateLimitId,
+    'tier' => $license ? 'premium' : 'free',
 ]);
 
 // A valid-but-empty result (no transactions found) is still success: the client

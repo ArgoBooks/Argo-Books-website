@@ -5,6 +5,13 @@
 
 const AI_SUPPORTED_MODELS = ['gemini-3.5-flash', 'gemini-3.1-flash-lite', 'gemini-2.5-pro'];
 
+// USD per million tokens, input then output, for the cost estimate on the admin stats page; thinking tokens bill as output.
+const AI_MODEL_PRICES = [
+    'gemini-3.1-flash-lite' => [0.25, 1.50],
+    'gemini-3.5-flash' => [1.50, 9.00],
+    'gemini-2.5-pro' => [1.25, 10.00],
+];
+
 // Installed desktop builds pin a model id that Google has since retired (e.g.
 // gemini-2.5-flash); empty requests also need a default. Both are remapped to a
 // current model so existing installs keep working without a forced app update.

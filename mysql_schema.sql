@@ -1421,16 +1421,20 @@ CREATE TABLE IF NOT EXISTS ai_call_timings (
     mime VARCHAR(30) DEFAULT NULL,
     prompt_tokens INT DEFAULT NULL,
     output_tokens INT DEFAULT NULL,
+    thought_tokens INT DEFAULT NULL COMMENT 'Hidden reasoning tokens, billed as output',
     max_output_tokens INT DEFAULT NULL,
     finish_reason VARCHAR(20) DEFAULT NULL COMMENT 'Non-STOP rows are excluded from priors',
     elapsed_ms INT NOT NULL COMMENT 'Server-measured Gemini generate wall time',
     poll_count INT DEFAULT NULL COMMENT 'PDF Files-API polls until ACTIVE',
     success TINYINT(1) NOT NULL DEFAULT 1,
     app_platform VARCHAR(20) DEFAULT NULL,
+    caller VARCHAR(16) DEFAULT NULL COMMENT 'Start of the license key hash or device id hash, as the AI rate limit uses',
+    tier ENUM('free','premium') DEFAULT NULL,
     environment ENUM('production','sandbox') NOT NULL DEFAULT 'production',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     INDEX idx_op_model_created (operation, model, created_at),
-    INDEX idx_created (created_at)
+    INDEX idx_created (created_at),
+    INDEX idx_env_caller_created (environment, caller, created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ===== Mobile sync (phone pairing + E2E-encrypted snapshot/queue) =====

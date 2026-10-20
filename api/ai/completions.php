@@ -405,6 +405,7 @@ if (isset($responseData['usageMetadata'])) {
         'prompt_tokens' => $responseData['usageMetadata']['promptTokenCount'] ?? 0,
         'completion_tokens' => $responseData['usageMetadata']['candidatesTokenCount'] ?? 0,
         'total_tokens' => $responseData['usageMetadata']['totalTokenCount'] ?? 0,
+        'thought_tokens' => $responseData['usageMetadata']['thoughtsTokenCount'] ?? 0,
     ];
 }
 
@@ -461,11 +462,14 @@ ai_timing_record([
     'mime' => !empty($base64Image) ? $mimeType : null,
     'prompt_tokens' => $usage['prompt_tokens'] ?? null,
     'output_tokens' => $usage['completion_tokens'] ?? null,
+    'thought_tokens' => $usage['thought_tokens'] ?? null,
     'max_output_tokens' => $maxTokens,
     'finish_reason' => $finishReason,
     'elapsed_ms' => $aiElapsedMs,
     'success' => true,
     'app_platform' => $appPlatform,
+    'caller' => $rateLimitId,
+    'tier' => $license ? 'premium' : 'free',
 ]);
 
 // A consumed scan is only kept once a usable result is genuinely on its way back.
