@@ -46,7 +46,7 @@ include __DIR__ . '/../../docs-header.php';
                 <li>Enter your current password, then set a new one</li>
             </ol>
 
-            <h2>Biometric Login (Premium)</h2>
+            <h2 id="biometric-login">Biometric Login (Premium)</h2>
             <div class="info-box">
                 <p><strong>Premium Feature:</strong> Biometric login is available with the Premium plan.
                 <a href="../getting-started/version-comparison.php" class="link">Compare versions</a></p>

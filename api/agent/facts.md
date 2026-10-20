@@ -38,11 +38,11 @@ When a line here and the live site disagree, do not use either. Say so in your s
 19. Inventory, including multiple locations, low-stock alerts and purchase orders, is on the free plan. (Inventory page.)
 20. Rental management is on the free plan. (Rental page.)
 21. The whole report builder, with every accounting statement, is on the free plan with no usage limit. (Report builder page.)
+22. Online payment links, so a customer can pay an invoice by card through the business's own Stripe or Square account, are on every plan. (Pricing page, `config/plans.json`.)
 
 ## Premium
 
-22. Unlimited invoices. (`config/plans.json`.)
-23. Online payment links, so a customer can pay an invoice by card. (Pricing page.)
+23. Unlimited invoices. (`config/plans.json`.)
 24. Higher monthly limits for receipt scans, spreadsheet imports and bank statement imports. The limits are in `plans_and_prices`. (`config/plans.json`.)
 25. Canadian payroll. (`config/plans.json`.)
 26. Revenue forecasting. (`config/plans.json`.)

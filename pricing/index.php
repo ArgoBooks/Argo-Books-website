@@ -164,6 +164,76 @@ $yearlySavings = ($monthlyPrice * 12) - $yearlyPrice;
             ];
             include __DIR__ . '/../partials/pricing-cards.php';
             ?>
+
+            <?php
+            // true is a tick, false a dash, and a string is shown as written, for the monthly limits.
+            $perMonth = fn(string $key) => number_format((int) $pricing[$key]) . ' a month';
+            $planComparison = [
+                'Everyday bookkeeping' => [
+                    ['Products, customers and sales', 'Unlimited', 'Unlimited'],
+                    ['Expenses and revenue, with full history and undo', true, true],
+                    ['Quotes', 'Unlimited', 'Unlimited'],
+                    ['Inventory across locations, with purchase orders', true, true],
+                    ['Rentals and security deposits', true, true],
+                    ['Companies', 'Unlimited', 'Unlimited'],
+                    ['Automatic backups', true, true],
+                    ['54 languages and 55 currencies', true, true],
+                ],
+                'Invoicing' => [
+                    ['Invoices sent', $perMonth('free_invoice_monthly_limit'), 'Unlimited'],
+                    ['Recurring invoices', true, true],
+                    ['Card payments through Stripe or Square', true, true],
+                ],
+                'AI that does the typing' => [
+                    ['Receipt scans', $perMonth('free_receipt_scan_monthly_limit'), $perMonth('receipt_scan_monthly_limit')],
+                    ['Spreadsheet imports', $perMonth('ai_import_monthly_limit'), $perMonth('premium_ai_import_monthly_limit')],
+                    ['Bank statement imports', $perMonth('bank_import_monthly_limit'), $perMonth('premium_bank_import_monthly_limit')],
+                ],
+                'Reports' => [
+                    ['Every accounting statement and the report designer', true, true],
+                    ['Revenue forecasting', false, true],
+                ],
+                'Premium' => [
+                    ['Canadian payroll with T4 slips', false, true],
+                    ['API for your store and apps', false, true],
+                    ['Sign in with your fingerprint or face', false, true],
+                    ['Priority support', false, true],
+                ],
+            ];
+            $planCell = fn($value) => match (true) {
+                $value === true => '<span class="plan-compare-yes" aria-label="Included">' . svg_icon('check', 18) . '</span>',
+                $value === false => '<span class="plan-compare-no" aria-label="Not included">&ndash;</span>',
+                default => htmlspecialchars($value),
+            };
+            ?>
+            <details class="plan-compare">
+                <summary>Compare plans in full</summary>
+                <div class="plan-compare-wrap">
+                    <table class="plan-compare-table">
+                        <thead>
+                            <tr>
+                                <th scope="col"><span class="visually-hidden">Feature</span></th>
+                                <th scope="col">Free</th>
+                                <th scope="col">Premium</th>
+                            </tr>
+                        </thead>
+                        <?php foreach ($planComparison as $group => $rows): ?>
+                            <tbody>
+                                <tr class="plan-compare-group">
+                                    <th scope="colgroup" colspan="3"><?= htmlspecialchars($group) ?></th>
+                                </tr>
+                                <?php foreach ($rows as [$feature, $free, $premium]): ?>
+                                    <tr>
+                                        <th scope="row"><?= htmlspecialchars($feature) ?></th>
+                                        <td><?= $planCell($free) ?></td>
+                                        <td><?= $planCell($premium) ?></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        <?php endforeach; ?>
+                    </table>
+                </div>
+            </details>
         </div>
     </section>
 
@@ -250,7 +320,7 @@ $yearlySavings = ($monthlyPrice * 12) - $yearlyPrice;
 
     <!-- =============================================
          ALSO IN PREMIUM
-         The two Premium features the blocks above don't cover.
+         The Premium features the blocks above don't cover.
          ============================================= -->
     <section class="benefits-section" style="background: var(--gray-50);">
         <div class="container">
@@ -258,20 +328,34 @@ $yearlySavings = ($monthlyPrice * 12) - $yearlyPrice;
                 <h2 class="section-title">Also in Premium</h2>
             </div>
             <div class="benefits-grid">
-                <div class="benefit-card animate-on-scroll">
+                <a class="benefit-card animate-on-scroll" href="../features/predictive-analytics/">
+                    <div class="benefit-card-icon">
+                        <?= svg_icon('trending-up', 22) ?>
+                    </div>
+                    <h3>Revenue Forecasting</h3>
+                    <p>See where your revenue, expenses and cash flow are heading, projected from the history already in your books. Each forecast shows a range for how sure it is, and allows for your busy and quiet seasons.</p>
+                </a>
+                <a class="benefit-card animate-on-scroll" href="../integrations/argo-books-api/">
+                    <div class="benefit-card-icon">
+                        <?= svg_icon('code-window', 22) ?>
+                    </div>
+                    <h3>Connect Your Store and Apps</h3>
+                    <p>Send sales, expenses, customers and suppliers in from your online store, booking system or your own tools through the API. Everything waits for you to review it before it is imported.</p>
+                </a>
+                <a class="benefit-card animate-on-scroll" href="../documentation/pages/security/password.php#biometric-login">
                     <div class="benefit-card-icon">
                         <?= svg_icon('shield', 22) ?>
                     </div>
                     <h3>Biometric Login</h3>
                     <p>Open your books with your fingerprint or face instead of typing your password each time. Works with Windows Hello, Touch ID on a Mac, and your Linux login.</p>
-                </div>
-                <div class="benefit-card animate-on-scroll">
+                </a>
+                <a class="benefit-card animate-on-scroll" href="../contact-us/">
                     <div class="benefit-card-icon">
                         <?= svg_icon('message-circle', 22) ?>
                     </div>
                     <h3>Priority Support</h3>
                     <p>Support messages from Premium subscribers are answered first.</p>
-                </div>
+                </a>
             </div>
         </div>
     </section>
