@@ -22,7 +22,7 @@ include __DIR__ . '/../../docs-header.php';
             <ul>
                 <li><strong>Select a Template:</strong> Choose from pre-built templates including chart-based reports and accounting report templates, or create your own</li>
                 <li><strong>Name Your Report:</strong> Enter a name for your report</li>
-                <li><strong>Set Date Range:</strong> Use quick presets (Last Month, Last 3 Months, etc.) or choose start and end dates</li>
+                <li><strong>Set Date Range:</strong> Use quick presets (This Month, Last Quarter, This Year, etc.) or choose start and end dates</li>
             </ul>
 
             <h3>Accounting Report Templates</h3>
@@ -33,9 +33,20 @@ include __DIR__ . '/../../docs-header.php';
                 <li><strong>Cash Flow Statement:</strong> Cash coming in from sales and invoice payments, and going out on expenses, over the selected period</li>
                 <li><strong>General Ledger:</strong> Every transaction, listed by category with its debit or credit and a running balance</li>
                 <li><strong>Accounts Receivable Aging:</strong> Outstanding customer payments grouped by age</li>
+                <li><strong>Customer Statement:</strong> What one customer owes you, ready to send to them (see below)</li>
                 <li><strong>Tax Summary:</strong> Tax-related totals for the selected period</li>
                 <li><strong>Sales by Product:</strong> Revenue and units sold, broken down per product</li>
+                <li><strong>Payroll Remittance:</strong> What you owe the CRA for your payroll over the selected period (Premium, Canadian payroll)</li>
             </ul>
+
+            <h3>Customer Statements</h3>
+            <p>A Customer Statement shows one customer what they owe you. After choosing the template, pick the customer under Report Settings, then export the statement as a PDF in step 3 and send it to them.</p>
+            <ul>
+                <li><strong>What they owe today:</strong> By default, the statement lists every unpaid invoice with its issue date, due date, amount, anything already paid on it, and the balance due. Overdue invoices are marked, and the amount due is totalled at the bottom</li>
+                <li><strong>Activity between two dates:</strong> Tick "Show activity between two dates instead" to list what was invoiced and paid in a period. The statement starts from the balance before the period, keeps a running balance, and says on the page which dates it covers</li>
+                <li><strong>Payments made since:</strong> If the customer has paid since the period ended, the statement shows that payment and what is still owed today, and marks invoices that are now paid, so an older statement does not look like money is still owed</li>
+            </ul>
+            <p>Draft and cancelled invoices are left out. Quotes do not appear until they become invoices.</p>
 
             <div class="info-box">
                 <strong>Tip:</strong> Accounting reports are generated directly from your transaction records, with no Chart of Accounts setup required.
