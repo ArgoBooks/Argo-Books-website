@@ -2170,14 +2170,14 @@ function renderAppStats() {
       });
     });
 
-    // Only the All tier mixes free and premium users. Green is new and blue returning, with the darker shade for premium.
+    // Only the All tier mixes free and premium users. Free keeps the chart's green and blue, and premium gets its own colour for each.
     const dauShowsTiers = rawData.tierFilter === "all";
     const dauSegments = dauShowsTiers
       ? [
-          { label: "New, free", keys: ["newFree"], color: "#6ee7b7" },
-          { label: "New, premium", keys: ["newPremium"], color: "#059669" },
-          { label: "Returning, free", keys: ["returningFree"], color: "#93c5fd" },
-          { label: "Returning, premium", keys: ["returningPremium"], color: "#1d4ed8" },
+          { label: "New, free", keys: ["newFree"], color: "#10b981" },
+          { label: "New, premium", keys: ["newPremium"], color: "#f59e0b" },
+          { label: "Returning, free", keys: ["returningFree"], color: "#3b82f6" },
+          { label: "Returning, premium", keys: ["returningPremium"], color: "#8b5cf6" },
         ]
       : [
           { label: "New", keys: ["newFree", "newPremium"], color: "#10b981" },
