@@ -122,7 +122,8 @@ $uninstallWithComment = count(array_filter($uninstallRows, static fn($r) => !emp
             <canvas id="uninstallReasonsChart"></canvas>
         </div>
         <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        // Draws straight away, because a filter swaps this script in after the page has loaded.
+        (function () {
             var rows = <?= json_encode($uninstallChart, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
             var canvas = document.getElementById('uninstallReasonsChart');
             var dark = document.documentElement.getAttribute('data-theme') === 'dark';
@@ -147,7 +148,7 @@ $uninstallWithComment = count(array_filter($uninstallRows, static fn($r) => !emp
                     }
                 }
             });
-        });
+        })();
         </script>
 
         <div class="table-container">

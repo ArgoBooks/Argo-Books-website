@@ -96,6 +96,7 @@ include __DIR__ . '/../admin_header.php';
 
 <link rel="stylesheet" href="style.css">
 
+<div data-live-region>
 <?php if ($message): ?>
     <div class="alert alert-success"><?= htmlspecialchars($message) ?></div>
 <?php endif; ?>
@@ -145,7 +146,7 @@ include __DIR__ . '/../admin_header.php';
 <div class="control-bar">
     <div class="control-group">
         <span class="control-label">Show:</span>
-        <div class="control-pills">
+        <div class="control-pills" data-live-filter>
             <?php foreach (['held' => 'Held', 'downloaded' => 'Taken', 'all' => 'All'] as $key => $label): ?>
                 <a href="?state=<?= $key ?>" class="control-pill <?= $state === $key ? 'active' : '' ?>">
                     <?= htmlspecialchars($label) ?>
@@ -259,6 +260,7 @@ include __DIR__ . '/../admin_header.php';
 </p>
 
 <?php endif; ?>
+</div>
 
 </div>
 </body>

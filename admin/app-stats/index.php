@@ -374,6 +374,8 @@ if (empty($dataDirs)) {
                     if (!isset($aggregatedData['dataPoints'][$category])) {
                         $aggregatedData['dataPoints'][$category] = [];
                     }
+                    // The tier comes from the file, and the daily users chart splits free from premium with it.
+                    $data['tier'] = $fileTier;
                     $aggregatedData['dataPoints'][$category][] = $data;
 
                     if (!empty($data['country']) && $data['country'] !== 'Unknown') {
@@ -454,6 +456,13 @@ include __DIR__ . '/../admin_header.php';
 <style>
 .tabs-container {
     margin-bottom: 2rem;
+}
+
+/* The New vs Returning / Free vs Premium switch sits centred under the daily users title. */
+.dau-split {
+    justify-content: center;
+    flex-shrink: 0;
+    margin: -0.5rem auto 0.75rem;
 }
 
 /* Tab styles are shared across admin pages: see admin/common-style.css */
@@ -592,6 +601,7 @@ include __DIR__ . '/../admin_header.php';
    (admin/common-style.css). No page-specific styles needed. */
 </style>
 
+<div data-live-region>
 <div class="container">
     <?php
     $hasAnyData = !$errorMessage && ($fileInfo['total_files'] ?? 0) > 0;
@@ -612,7 +622,7 @@ include __DIR__ . '/../admin_header.php';
         <div class="control-bar">
             <div class="control-group">
                 <span class="control-label">Tier:</span>
-                <div class="control-pills">
+                <div class="control-pills" data-live-filter>
                     <?php
                         $tierLabels = [
                             'all' => 'All',
@@ -643,7 +653,7 @@ include __DIR__ . '/../admin_header.php';
 
             <!-- Date range: scopes the charts and detail tables. The Active Users KPI
                  cards are fixed-window metrics and deliberately ignore it. -->
-            <form method="get" id="rangeForm" class="range-controls">
+            <form method="get" id="rangeForm" class="range-controls" data-live-filter>
                 <input type="hidden" name="tier" value="<?= htmlspecialchars($tierFilter) ?>">
                 <input type="hidden" name="tab" id="rangeTabInput" value="<?= htmlspecialchars($currentTab) ?>">
                 <div class="control-group">
@@ -744,7 +754,15 @@ include __DIR__ . '/../admin_header.php';
 
                 <div class="chart-row">
                     <div class="chart-container" style="flex: 1;">
-                        <h2>Daily Active Users (New vs Returning)</h2>
+                        <?php if ($tierFilter === 'all'): ?>
+                            <h2>Daily Active Users</h2>
+                            <div class="control-pills dau-split" role="group" aria-label="Split daily active users by">
+                                <button type="button" class="control-pill active" data-dau-split="age" aria-pressed="true">New vs Returning</button>
+                                <button type="button" class="control-pill" data-dau-split="tier" aria-pressed="false">Free vs Premium</button>
+                            </div>
+                        <?php else: ?>
+                            <h2>Daily Active Users (New vs Returning)</h2>
+                        <?php endif; ?>
                         <canvas id="dauChart"></canvas>
                     </div>
                 </div>
@@ -1139,43 +1157,14 @@ include __DIR__ . '/../admin_header.php';
     <?php endif; ?>
 </div>
 
-<?php if (!$errorMessage && $currentViewHasData): ?>
 <script>
-// Tab switching is handled centrally by admin/section-tabs.js
-// Pass PHP data to JavaScript
-window.dashboardData = <?= $jsonData ?>;
+// Null on the empty-state page, which has none of the canvases main.js draws into.
+window.dashboardData = <?= (!$errorMessage && $currentViewHasData) ? $jsonData : 'null' ?>;
 </script>
-<!-- Only loaded when the tabs above were rendered: every chart generator in
-     main.js assumes its canvas exists, so running it against the empty-state
-     page (no data for the selected range or tier) would throw. -->
+</div>
 <script src="main.js?v=<?= filemtime(__DIR__ . '/main.js') ?>"></script>
-<?php endif; ?>
 
 <script>
-// Preserve scroll position when switching tier filter (shared admin pattern; see CLAUDE.md)
-document.addEventListener('DOMContentLoaded', function () {
-
-    document.querySelectorAll('.control-bar a.control-pill').forEach(function (link) {
-        link.addEventListener('click', function () {
-            sessionStorage.setItem('scrollPosition', window.scrollY);
-            // The href is rendered server-side at load, before the user clicks a
-            // tab (section-tabs.js only updates the URL, not these hrefs). Rewrite
-            // it here so the tier switch keeps the currently-active tab.
-            try {
-                var dest = new URL(link.href, window.location.origin);
-                var activeBtn = document.querySelector('.section-tab.active[data-tab]');
-                var currentTab = activeBtn
-                    ? activeBtn.dataset.tab
-                    : new URLSearchParams(window.location.search).get('tab');
-                if (currentTab) {
-                    dest.searchParams.set('tab', currentTab);
-                    link.href = dest.toString();
-                }
-            } catch (err) { /* URL API missing; fall back to server-rendered href */ }
-        });
-    });
-});
-
 // Date range control. Mirrors admin/website-stats: presets submit immediately,
 // "Custom Range" reveals the date inputs and waits for Apply.
 function onRangeChange() {
@@ -1194,32 +1183,9 @@ function onRangeChange() {
         // Disable so stale custom dates aren't appended to the URL.
         start.disabled = true;
         end.disabled = true;
-        submitRangeForm();
+        document.getElementById('rangeForm').requestSubmit();
     }
 }
-
-// The hidden tab field is rendered server-side at load; section-tabs.js only
-// updates the URL, so refresh it here to keep the active tab across a reload.
-function submitRangeForm() {
-    var activeBtn = document.querySelector('.section-tab.active[data-tab]');
-    var currentTab = activeBtn
-        ? activeBtn.dataset.tab
-        : new URLSearchParams(window.location.search).get('tab');
-    document.getElementById('rangeTabInput').value = currentTab || '';
-    sessionStorage.setItem('scrollPosition', window.scrollY);
-    document.getElementById('rangeForm').submit();
-}
-
-document.addEventListener('DOMContentLoaded', function () {
-    var rangeForm = document.getElementById('rangeForm');
-    if (rangeForm) {
-        // Apply button (custom range) goes through the same tab-preserving path.
-        rangeForm.addEventListener('submit', function (e) {
-            e.preventDefault();
-            submitRangeForm();
-        });
-    }
-});
 </script>
 <div id="countryDetailsModal" class="modal bd-details-modal" style="display:none;">
     <div class="modal-content">
@@ -1231,4 +1197,4 @@ document.addEventListener('DOMContentLoaded', function () {
 </div>
 
 <script src="../details-modal.js?v=<?= filemtime(__DIR__ . '/../details-modal.js') ?>" defer></script>
-<script src="../preserve-scroll.js" defer></script>
+

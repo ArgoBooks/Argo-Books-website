@@ -160,9 +160,13 @@ class TablePaginator {
 }
 
 // Auto-init tables with data-paginate attribute
-document.addEventListener('DOMContentLoaded', () => {
+function initPaginatedTables() {
     document.querySelectorAll('table[data-paginate]').forEach(table => {
+        if (table._paginator) return;
         const perPage = parseInt(table.dataset.paginate, 10) || 25;
         table._paginator = new TablePaginator(table, { perPage });
     });
-});
+}
+document.addEventListener('DOMContentLoaded', initPaginatedTables);
+// A filter swaps in fresh tables, which need their pagination too.
+document.addEventListener('admin:live-update', initPaginatedTables);

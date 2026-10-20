@@ -88,4 +88,6 @@
     } else {
         bootstrap();
     }
+    // A filter swaps in fresh tab buttons, which need wiring and the tab from the address.
+    document.addEventListener('admin:live-update', bootstrap);
 })();

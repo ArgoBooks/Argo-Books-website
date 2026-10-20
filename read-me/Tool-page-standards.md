@@ -182,7 +182,7 @@ Reach for these rather than writing the pattern again. Each replaced a block tha
 | `shared/scripts/business-calcs.js` | Mileage, hourly rate, late fee, markup, break-even, and stall math | 6 calculators |
 | `shared/data/mileage-rates.php` | Statutory mileage rates, with sources and a verified date | the mileage calculator |
 | `shared/styles/calculator.css` | Per-tool copies of the form, results, and article styles | 2 tools |
-| `admin/preserve-scroll.js` | The sessionStorage scroll save/restore dance | 6 admin pages |
+| `admin/live-filters.js` | A full page reload on every admin filter, with a sessionStorage scroll save/restore around it | 9 admin pages |
 | `argo_send_html_email()` in `smtp_mailer.php` | `create_smtp_mailer()` plus a hand-built `mail()` fallback | 4 senders |
 
 A note on `partials/faq.php`: it renders the question as a `<button>`, not a `<div>`, so the accordion is reachable by keyboard. `resources/styles/faq.css` carries the reset that makes the button look like the div it replaced.

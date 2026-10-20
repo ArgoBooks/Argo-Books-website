@@ -127,6 +127,7 @@ include __DIR__ . '/../admin_header.php';
 
 <link rel="stylesheet" href="style.css">
 
+<div data-live-region>
 <!-- Summary Statistics Cards -->
 <div class="stats-grid">
     <div class="stat-card pending">
@@ -144,10 +145,10 @@ include __DIR__ . '/../admin_header.php';
 </div>
 
 <!-- Filters -->
-<form method="GET" action="" class="control-bar">
+<form method="GET" action="" class="control-bar" data-live-filter>
     <div class="control-group">
         <span class="control-label">Status</span>
-        <select name="status" id="status" class="control-select" onchange="this.form.submit()">
+        <select name="status" id="status" class="control-select" onchange="this.form.requestSubmit()">
             <option value="pending" <?php echo $status_filter === 'pending' ? 'selected' : ''; ?>>Pending</option>
             <option value="resolved" <?php echo $status_filter === 'resolved' ? 'selected' : ''; ?>>Resolved</option>
             <option value="dismissed" <?php echo $status_filter === 'dismissed' ? 'selected' : ''; ?>>Dismissed</option>
@@ -157,7 +158,7 @@ include __DIR__ . '/../admin_header.php';
 
     <div class="control-group">
         <span class="control-label">Content Type</span>
-        <select name="content_type" id="content_type" class="control-select" onchange="this.form.submit()">
+        <select name="content_type" id="content_type" class="control-select" onchange="this.form.requestSubmit()">
             <option value="all" <?php echo $content_type_filter === 'all' ? 'selected' : ''; ?>>All</option>
             <option value="post" <?php echo $content_type_filter === 'post' ? 'selected' : ''; ?>>Posts</option>
             <option value="comment" <?php echo $content_type_filter === 'comment' ? 'selected' : ''; ?>>Comments</option>
@@ -259,6 +260,7 @@ include __DIR__ . '/../admin_header.php';
             </div>
         <?php endforeach; ?>
     <?php endif; ?>
+</div>
 </div>
 
 <!-- Ban Modal -->

@@ -76,9 +76,18 @@ Consequences:
 
 All colors come from CSS variables in `resources/styles/custom-colors.css`. Don't hardcode hex values. Dark mode uses `[data-theme="dark"]` selectors. Shared admin styles in `admin/common-style.css` already cover `.stat-card`, `.table-container`, `.chart-container`, `.section-tabs`, `.modal`, etc. for both themes; only add `[data-theme="dark"]` overrides for custom components those defaults don't reach.
 
-## Preserving scroll on filter reload
+## Admin filters update in place
 
-Admin pages with filter pills that reload the page (period selectors, source pills, range buttons) use a shared `sessionStorage.scrollPosition` pattern so the reload doesn't jump back to the top. When adding a new filter, extend the existing handler's selector on that page rather than writing a parallel script. URL anchors (`#section-id`) do NOT solve this; they only change where the jump lands. Reference implementations: `admin/referral-links/index.php`, `admin/website-stats/index.php`, `admin/users/index.php`, `admin/crons/index.php`.
+Admin filters (period pills, tier pills, date ranges, status dropdowns) never reload the page. `admin/live-filters.js`, loaded by `admin_header.php` on every admin page, fetches the filtered page in the background and swaps in only the elements marked `data-live-region`, so the scroll position and the open tab stay put. The page's own PHP renders the result, so there is no separate data endpoint.
+
+To make a filter live:
+
+- Mark the area the filter changes with `data-live-region`, including any `<script>` that draws from its data. Every marked element is swapped, in order.
+- Mark the filter's container, link or GET form with `data-live-filter`. A select that submits on change must call `form.requestSubmit()`, since `form.submit()` skips the submit event the script listens for. Code that builds an address itself calls `window.adminLiveFilters.go(url)`.
+- A script inside a region runs again after every swap, so it must be safe to run twice: wrap it in `(function () { ... })();` so `const` names are not declared twice, run immediately rather than waiting for `DOMContentLoaded`, and give page-wide listeners an `AbortController` signal so each run removes the last one's. A script outside the region that needs to redo its setup listens for the `admin:live-update` event, which fires after every swap.
+- The filter keeps the open section tab automatically. Old charts are destroyed before the swap.
+
+POST forms (bulk actions, saves) still reload as normal. If the background fetch fails, for example because the session expired, the script falls back to a full page load that keeps the scroll position. Reference implementations: `admin/crons/index.php` (pills only), `admin/payments/index.php` (charts inside the region), `admin/app-stats/index.php` with `main.js` (a large external script re-run on `admin:live-update`).
 
 ## Server access
 

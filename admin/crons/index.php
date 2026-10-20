@@ -311,10 +311,11 @@ include __DIR__ . '/../admin_header.php';
 
 <link rel="stylesheet" href="style.css">
 
+<div data-live-region>
 <div class="control-bar">
     <div class="control-group">
         <span class="control-label">Period:</span>
-        <div class="control-pills">
+        <div class="control-pills" data-live-filter>
             <?php foreach ($rangeMap as $key => $r): ?>
                 <a href="?range=<?= $key ?>" class="control-pill <?= $range === $key ? 'active' : '' ?>">
                     <?= htmlspecialchars($r['label']) ?>
@@ -401,16 +402,6 @@ include __DIR__ . '/../admin_header.php';
     <?php endforeach; ?>
     </div>
 <?php endif; ?>
-
-<script>
-
-    document.querySelectorAll('a[href^="?range="]').forEach(link => {
-        link.addEventListener('click', function () {
-            sessionStorage.setItem('scrollPosition', window.scrollY);
-        });
-    });
-</script>
-<script>window.ADMIN_PRESERVE_SCROLL = ['a[href^="?range="]'];</script>
-<script src="../preserve-scroll.js" defer></script>
+</div>
 </body>
 </html>

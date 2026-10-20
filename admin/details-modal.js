@@ -1,35 +1,39 @@
-/**
- * "See all details" modals: a searchable full list behind a button, used by the
- * marketing funnel's breakdown cards and the app-stats country chart.
- *
- * A trigger is any .bd-details-btn carrying data-details-target with the id of a
- * .bd-details-modal. Rows are read at filter time, so a page that builds its list
- * after load works the same as one that renders it server-side.
- */
+// "See all details" modals: a .bd-details-btn with data-details-target opens the .bd-details-modal of that id, a searchable full list.
 (function () {
     const close = modal => { modal.style.display = 'none'; };
 
-    document.querySelectorAll('.bd-details-modal').forEach(modal => {
-        const search = modal.querySelector('.bd-details-search');
-        const filter = () => {
-            const q = (search.value || '').trim().toLowerCase();
-            modal.querySelectorAll('.bd-details-row[data-name]').forEach(r => {
-                r.style.display = (!q || r.getAttribute('data-name').includes(q)) ? '' : 'none';
-            });
-        };
-        if (search) search.addEventListener('input', filter);
-        modal.querySelectorAll('.bd-details-close').forEach(x => x.addEventListener('click', () => close(modal)));
-        modal.addEventListener('mousedown', e => { if (e.target === modal) close(modal); });
-    });
-
-    document.querySelectorAll('.bd-details-btn[data-details-target]').forEach(btn => {
-        btn.addEventListener('click', () => {
+    // Listening on the document covers buttons and modals that a filter swaps in after load.
+    document.addEventListener('click', e => {
+        const btn = e.target.closest('.bd-details-btn[data-details-target]');
+        if (btn) {
             const modal = document.getElementById(btn.getAttribute('data-details-target'));
             if (!modal) return;
             modal.style.display = 'block';
             const search = modal.querySelector('.bd-details-search');
-            if (search) { search.value = ''; search.dispatchEvent(new Event('input')); search.focus(); }
+            if (search) { search.value = ''; search.dispatchEvent(new Event('input', { bubbles: true })); search.focus(); }
+            return;
+        }
+        const closeBtn = e.target.closest('.bd-details-close');
+        if (closeBtn) {
+            const modal = closeBtn.closest('.bd-details-modal');
+            if (modal) close(modal);
+        }
+    });
+
+    // Rows are read at filter time, so a list built after load filters the same as one rendered by the server.
+    document.addEventListener('input', e => {
+        const search = e.target.closest ? e.target.closest('.bd-details-search') : null;
+        if (!search) return;
+        const modal = search.closest('.bd-details-modal');
+        if (!modal) return;
+        const q = (search.value || '').trim().toLowerCase();
+        modal.querySelectorAll('.bd-details-row[data-name]').forEach(r => {
+            r.style.display = (!q || r.getAttribute('data-name').includes(q)) ? '' : 'none';
         });
+    });
+
+    document.addEventListener('mousedown', e => {
+        if (e.target.classList && e.target.classList.contains('bd-details-modal')) close(e.target);
     });
 
     document.addEventListener('keydown', e => {

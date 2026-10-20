@@ -358,11 +358,11 @@ include __DIR__ . '/../admin_header.php';
         </div>
     <?php endif; ?>
 
-    <div class="card">
+    <div class="card" data-live-region>
         <div class="card-header">
             <h2>Users</h2>
             <div class="search-container">
-                <form method="GET" action="" class="control-bar search-form">
+                <form method="GET" action="" class="control-bar search-form" data-live-filter>
                     <input type="text"
                            id="search"
                            name="search"
@@ -371,7 +371,7 @@ include __DIR__ . '/../admin_header.php';
                            class="control-input search-input">
 
                     <div class="control-group">
-                        <select name="date_preset" id="date_preset" class="control-select" onchange="this.form.submit()">
+                        <select name="date_preset" id="date_preset" class="control-select" onchange="this.form.requestSubmit()">
                             <option value="">All Time</option>
                             <option value="today" <?php echo $date_preset === 'today' ? 'selected' : ''; ?>>Today</option>
                             <option value="last_week" <?php echo $date_preset === 'last_week' ? 'selected' : ''; ?>>Last 7 Days</option>
@@ -384,7 +384,7 @@ include __DIR__ . '/../admin_header.php';
                     </div>
 
                     <div class="control-group">
-                        <select name="ban_status" id="ban_status" class="control-select" onchange="this.form.submit()">
+                        <select name="ban_status" id="ban_status" class="control-select" onchange="this.form.requestSubmit()">
                             <option value="all" <?php echo $ban_status === 'all' ? 'selected' : ''; ?>>All Users</option>
                             <option value="banned" <?php echo $ban_status === 'banned' ? 'selected' : ''; ?>>Banned</option>
                             <option value="unbanned" <?php echo $ban_status === 'unbanned' ? 'selected' : ''; ?>>Not Banned</option>
@@ -577,8 +577,8 @@ include __DIR__ . '/../admin_header.php';
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Bulk selection functionality
+    // Runs on load and again after a filter swaps in a fresh users card, whose elements need their handlers.
+    function initUsersPage() {
         const selectAllCheckbox = document.getElementById('select-all');
         const rowCheckboxes = document.querySelectorAll('.row-checkbox');
         const bulkButtons = document.querySelectorAll('.btn-bulk');
@@ -600,194 +600,179 @@ include __DIR__ . '/../admin_header.php';
         const banModalCancel = document.getElementById('ban-modal-cancel');
         const banModalClose = document.getElementById('ban-modal-close');
 
-        function updateSelectedCount() {
-            const checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
-            const count = checkedBoxes.length;
-            selectedCountSpan.textContent = count;
-
-            // Check if any banned users are selected
-            let bannedUsersSelected = 0;
-            checkedBoxes.forEach(checkbox => {
-                if (checkbox.dataset.banned === '1') {
-                    bannedUsersSelected++;
-                }
-            });
-
-            // Enable/disable buttons based on selection
-            if (count === 0) {
-                unbanButton.disabled = true;
-                if (banButton) banButton.disabled = true;
-                deleteButton.disabled = true;
-            } else {
-                // Only enable unban if at least one banned user is selected,
-                // and ban if at least one NOT-banned user is selected.
-                unbanButton.disabled = bannedUsersSelected === 0;
-                if (banButton) banButton.disabled = (count - bannedUsersSelected) === 0;
-                deleteButton.disabled = false;
-            }
-
-            // Update select-all checkbox state
-            if (count === 0) {
-                selectAllCheckbox.checked = false;
-                selectAllCheckbox.indeterminate = false;
-            } else if (count === rowCheckboxes.length) {
-                selectAllCheckbox.checked = true;
-                selectAllCheckbox.indeterminate = false;
-            } else {
-                selectAllCheckbox.checked = false;
-                selectAllCheckbox.indeterminate = true;
-            }
-        }
-
-        // Select all functionality
-        selectAllCheckbox.addEventListener('change', function() {
-            rowCheckboxes.forEach(checkbox => {
-                checkbox.checked = this.checked;
-            });
-            updateSelectedCount();
-        });
-
-        // Individual checkbox changes
-        rowCheckboxes.forEach(checkbox => {
-            checkbox.addEventListener('change', updateSelectedCount);
-        });
-
-        // Bulk action buttons
-        bulkButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                const action = this.dataset.action;
-                // The modal's confirm button shares .btn-bulk styling but has no
-                // data-action; it has its own handler, so ignore it here.
-                if (!action) return;
+        // A search with no results shows no table, so there is nothing to select.
+        if (selectAllCheckbox && bulkForm) {
+            const updateSelectedCount = function () {
                 const checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
                 const count = checkedBoxes.length;
+                selectedCountSpan.textContent = count;
 
-                if (count === 0) return;
+                // Check if any banned users are selected
+                let bannedUsersSelected = 0;
+                checkedBoxes.forEach(checkbox => {
+                    if (checkbox.dataset.banned === '1') {
+                        bannedUsersSelected++;
+                    }
+                });
 
-                // Ban needs a reason + duration, so it opens a modal instead of a confirm.
-                if (action === 'ban') {
-                    banModalCount.textContent = count;
-                    banModalReason.value = '';
-                    banModalDuration.value = 'permanent';
-                    banModal.style.display = 'flex';
-                    banModalReason.focus();
-                    return;
+                // Enable/disable buttons based on selection
+                if (count === 0) {
+                    unbanButton.disabled = true;
+                    if (banButton) banButton.disabled = true;
+                    deleteButton.disabled = true;
+                } else {
+                    // Only enable unban if at least one banned user is selected,
+                    // and ban if at least one NOT-banned user is selected.
+                    unbanButton.disabled = bannedUsersSelected === 0;
+                    if (banButton) banButton.disabled = (count - bannedUsersSelected) === 0;
+                    deleteButton.disabled = false;
                 }
 
-                let confirmMessage = '';
-
-                if (action === 'delete') {
-                    confirmMessage = `Are you sure you want to delete ${count} user${count > 1 ? 's' : ''}? This action cannot be undone.`;
-                } else if (action === 'unban') {
-                    confirmMessage = `Are you sure you want to unban ${count} user${count > 1 ? 's' : ''}? They will be able to post again.`;
+                // Update select-all checkbox state
+                if (count === 0) {
+                    selectAllCheckbox.checked = false;
+                    selectAllCheckbox.indeterminate = false;
+                } else if (count === rowCheckboxes.length) {
+                    selectAllCheckbox.checked = true;
+                    selectAllCheckbox.indeterminate = false;
+                } else {
+                    selectAllCheckbox.checked = false;
+                    selectAllCheckbox.indeterminate = true;
                 }
+            };
 
-                if (confirm(confirmMessage)) {
-                    bulkActionInput.value = action;
+            // Select all functionality
+            selectAllCheckbox.addEventListener('change', function() {
+                rowCheckboxes.forEach(checkbox => {
+                    checkbox.checked = this.checked;
+                });
+                updateSelectedCount();
+            });
+
+            // Individual checkbox changes
+            rowCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', updateSelectedCount);
+            });
+
+            // Bulk action buttons
+            bulkButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const action = this.dataset.action;
+                    // The modal's confirm button shares .btn-bulk styling but has no
+                    // data-action; it has its own handler, so ignore it here.
+                    if (!action) return;
+                    const checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
+                    const count = checkedBoxes.length;
+
+                    if (count === 0) return;
+
+                    // Ban needs a reason + duration, so it opens a modal instead of a confirm.
+                    if (action === 'ban') {
+                        banModalCount.textContent = count;
+                        banModalReason.value = '';
+                        banModalDuration.value = 'permanent';
+                        banModal.style.display = 'flex';
+                        banModalReason.focus();
+                        return;
+                    }
+
+                    let confirmMessage = '';
+
+                    if (action === 'delete') {
+                        confirmMessage = `Are you sure you want to delete ${count} user${count > 1 ? 's' : ''}? This action cannot be undone.`;
+                    } else if (action === 'unban') {
+                        confirmMessage = `Are you sure you want to unban ${count} user${count > 1 ? 's' : ''}? They will be able to post again.`;
+                    }
+
+                    if (confirm(confirmMessage)) {
+                        bulkActionInput.value = action;
+                        sessionStorage.setItem('scrollPosition', window.scrollY);
+                        bulkForm.submit();
+                    }
+                });
+            });
+
+            // Ban modal wiring
+            const closeBanModal = function () {
+                if (banModal) banModal.style.display = 'none';
+            };
+            if (banModalConfirm) {
+                banModalConfirm.addEventListener('click', function() {
+                    const reason = banModalReason.value.trim();
+                    if (!reason) {
+                        banModalReason.focus();
+                        return;
+                    }
+                    banReasonInput.value = reason;
+                    banDurationInput.value = banModalDuration.value;
+                    bulkActionInput.value = 'ban';
                     sessionStorage.setItem('scrollPosition', window.scrollY);
                     bulkForm.submit();
-                }
-            });
-        });
+                });
+            }
+            if (banModalCancel) banModalCancel.addEventListener('click', closeBanModal);
+            if (banModalClose) banModalClose.addEventListener('click', closeBanModal);
+            if (banModal) {
+                banModal.addEventListener('click', function(e) {
+                    if (e.target === banModal) closeBanModal();
+                });
+            }
 
-        // Ban modal wiring
-        function closeBanModal() {
-            if (banModal) banModal.style.display = 'none';
+            // Initial count
+            updateSelectedCount();
         }
-        if (banModalConfirm) {
-            banModalConfirm.addEventListener('click', function() {
-                const reason = banModalReason.value.trim();
-                if (!reason) {
-                    banModalReason.focus();
-                    return;
-                }
-                banReasonInput.value = reason;
-                banDurationInput.value = banModalDuration.value;
-                bulkActionInput.value = 'ban';
-                sessionStorage.setItem('scrollPosition', window.scrollY);
-                bulkForm.submit();
-            });
-        }
-        if (banModalCancel) banModalCancel.addEventListener('click', closeBanModal);
-        if (banModalClose) banModalClose.addEventListener('click', closeBanModal);
-        if (banModal) {
-            banModal.addEventListener('click', function(e) {
-                if (e.target === banModal) closeBanModal();
-            });
-        }
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape' && banModal && banModal.style.display === 'flex') closeBanModal();
-        });
-
-        // Initial count
-        updateSelectedCount();
 
         // Date preset select handling
         const datePresetSelect = document.getElementById('date_preset');
         const customDateRange = document.getElementById('custom_date_range');
 
-        datePresetSelect.addEventListener('change', function() {
-            if (this.value === 'custom') {
-                customDateRange.style.display = 'flex';
-            } else {
-                customDateRange.style.display = 'none';
-            }
-        });
-
-        // If user clicks on date inputs, select custom option
-        const dateInputs = customDateRange.querySelectorAll('input[type="date"]');
-        dateInputs.forEach(input => {
-            input.addEventListener('focus', function() {
-                datePresetSelect.value = 'custom';
-                customDateRange.style.display = 'flex';
+        if (datePresetSelect && customDateRange) {
+            datePresetSelect.addEventListener('change', function() {
+                if (this.value === 'custom') {
+                    customDateRange.style.display = 'flex';
+                } else {
+                    customDateRange.style.display = 'none';
+                }
             });
-        });
 
-
-
-        // Save scroll position when submitting forms
-        const forms = document.querySelectorAll('form');
-        forms.forEach(form => {
-            form.addEventListener('submit', function() {
-                sessionStorage.setItem('scrollPosition', window.scrollY);
+            // If user clicks on date inputs, select custom option
+            customDateRange.querySelectorAll('input[type="date"]').forEach(input => {
+                input.addEventListener('focus', function() {
+                    datePresetSelect.value = 'custom';
+                    customDateRange.style.display = 'flex';
+                });
             });
-        });
-
-        // Also save position when clicking links
-        const links = document.querySelectorAll('a[href^="index.php"]');
-        links.forEach(link => {
-            link.addEventListener('click', function() {
-                sessionStorage.setItem('scrollPosition', window.scrollY);
-            });
-        });
+        }
 
         // Auto-clear search when textbox is emptied
         const searchInput = document.querySelector('#search');
         if (searchInput) {
             searchInput.addEventListener('input', function() {
                 if (this.value.trim() === '') {
-                    sessionStorage.setItem('scrollPosition', window.scrollY);
-                    this.form.submit();
+                    this.form.requestSubmit();
                 }
             });
 
             searchInput.addEventListener('keydown', function(e) {
                 if (e.key === 'Escape') {
-                    sessionStorage.setItem('scrollPosition', window.scrollY);
                     this.value = '';
-                    this.form.submit();
+                    this.form.requestSubmit();
                 }
             });
         }
+    }
+
+    // Registered once, because the ban window it closes is looked up afresh each time.
+    document.addEventListener('keydown', function(e) {
+        const banModal = document.getElementById('ban-modal');
+        if (e.key === 'Escape' && banModal && banModal.style.display === 'flex') banModal.style.display = 'none';
     });
-
-
+    document.addEventListener('DOMContentLoaded', initUsersPage);
+    document.addEventListener('admin:live-update', initUsersPage);
 </script>
 
         </main>
     </div>
-<script>window.ADMIN_PRESERVE_SCROLL = ['a[href^="index.php"]'];</script>
-<script src="../preserve-scroll.js" defer></script>
 </body>
 
 </html>

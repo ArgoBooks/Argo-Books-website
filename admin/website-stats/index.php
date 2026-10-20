@@ -541,10 +541,11 @@ foreach ($downloads_by_country as $country) {
 include __DIR__ . '/../admin_header.php';
 ?>
 
+<div data-live-region>
 <div class="container">
     <!-- Date range controls (the chart bucket is derived automatically from the range) -->
     <div class="control-bar">
-        <form method="get" id="rangeForm" class="range-controls">
+        <form method="get" id="rangeForm" class="range-controls" data-live-filter>
             <div class="control-group">
                 <span class="control-label">Date Range:</span>
                 <select name="range" id="rangePreset" class="control-select" onchange="onRangeChange()">
@@ -625,7 +626,8 @@ include __DIR__ . '/../admin_header.php';
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    // Runs straight away, because a filter swaps this script in after the page has loaded.
+    (function () {
         // Chart data
         const chartLabels = <?php echo json_encode($chart_labels); ?>;
         const downloadsData = <?php echo json_encode($downloads_data); ?>;
@@ -1098,15 +1100,11 @@ include __DIR__ . '/../admin_header.php';
 
 
 
-        // Preserve scroll position across the date-range reload.
-        const rangeForm = document.getElementById('rangeForm');
-        if (rangeForm) {
-            rangeForm.addEventListener('submit', function() {
-                sessionStorage.setItem('scrollPosition', window.scrollY);
-            });
-        }
-    });
+    })();
+</script>
+</div>
 
+<script>
     // Show custom date inputs for "Custom Range"; for any preset, reload immediately.
     function onRangeChange() {
         const preset = document.getElementById('rangePreset').value;
@@ -1124,9 +1122,7 @@ include __DIR__ . '/../admin_header.php';
             // Disable so stale custom dates aren't appended to the URL.
             start.disabled = true;
             end.disabled = true;
-            sessionStorage.setItem('scrollPosition', window.scrollY);
-            document.getElementById('rangeForm').submit();
+            document.getElementById('rangeForm').requestSubmit();
         }
     }
 </script>
-<script src="../preserve-scroll.js" defer></script>

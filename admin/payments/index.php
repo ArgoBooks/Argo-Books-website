@@ -424,6 +424,7 @@ include __DIR__ . '/../admin_header.php';
 
 <link rel="stylesheet" href="style.css">
 
+<div data-live-region>
 <div class="container payments-page">
 
     <!-- Environment Toggle -->
@@ -431,7 +432,7 @@ include __DIR__ . '/../admin_header.php';
     <div class="control-bar">
         <div class="control-group">
             <span class="control-label">Environment:</span>
-            <div class="control-pills">
+            <div class="control-pills" data-live-filter>
                 <a href="?view_env=production<?php echo $tab_param; ?>" class="control-pill env-toggle-production <?php echo $view_env === 'production' ? 'active' : ''; ?>">Production</a>
                 <a href="?view_env=sandbox<?php echo $tab_param; ?>" class="control-pill env-toggle-sandbox <?php echo $view_env === 'sandbox' ? 'active' : ''; ?>">Sandbox</a>
             </div>
@@ -561,13 +562,13 @@ include __DIR__ . '/../admin_header.php';
     <div id="transactions" class="tab-content">
         <!-- Filters -->
         <div class="control-bar">
-            <form method="GET" class="filters-form" id="tx-filters-form">
+            <form method="GET" class="filters-form" id="tx-filters-form" data-live-filter>
                 <input type="hidden" name="tab" value="transactions">
                 <div class="control-group">
                     <input type="text" class="control-input" name="tx_search" placeholder="Search customer, reference, company..." value="<?php echo htmlspecialchars($tx_search); ?>">
                 </div>
                 <div class="control-group">
-                    <select class="control-select" name="tx_method" onchange="document.getElementById('tx-filters-form').submit()">
+                    <select class="control-select" name="tx_method" onchange="document.getElementById('tx-filters-form').requestSubmit()">
                         <option value="">All Methods</option>
                         <option value="stripe" <?php echo $tx_method === 'stripe' ? 'selected' : ''; ?>>Stripe</option>
                         <option value="paypal" <?php echo $tx_method === 'paypal' ? 'selected' : ''; ?>>PayPal</option>
@@ -575,7 +576,7 @@ include __DIR__ . '/../admin_header.php';
                     </select>
                 </div>
                 <div class="control-group">
-                    <select class="control-select" name="tx_status" onchange="document.getElementById('tx-filters-form').submit()">
+                    <select class="control-select" name="tx_status" onchange="document.getElementById('tx-filters-form').requestSubmit()">
                         <option value="">All Statuses</option>
                         <option value="completed" <?php echo $tx_status === 'completed' ? 'selected' : ''; ?>>Completed</option>
                         <option value="pending" <?php echo $tx_status === 'pending' ? 'selected' : ''; ?>>Pending</option>
@@ -585,7 +586,7 @@ include __DIR__ . '/../admin_header.php';
                 </div>
                 <input type="hidden" name="view_env" value="<?php echo htmlspecialchars($view_env); ?>">
                 <div class="control-group">
-                    <select class="control-select" name="tx_company" onchange="document.getElementById('tx-filters-form').submit()">
+                    <select class="control-select" name="tx_company" onchange="document.getElementById('tx-filters-form').requestSubmit()">
                         <option value="">All Companies</option>
                         <?php foreach ($company_options as $co): ?>
                             <option value="<?php echo $co['id']; ?>" <?php echo $tx_company == $co['id'] ? 'selected' : ''; ?>><?php echo htmlspecialchars($co['company_name']); ?></option>
@@ -890,14 +891,14 @@ include __DIR__ . '/../admin_header.php';
     <div id="invoices" class="tab-content">
         <!-- Filters -->
         <div class="control-bar">
-            <form method="GET" class="filters-form" id="inv-filters-form">
+            <form method="GET" class="filters-form" id="inv-filters-form" data-live-filter>
                 <input type="hidden" name="tab" value="invoices">
                 <input type="hidden" name="view_env" value="<?php echo htmlspecialchars($view_env); ?>">
                 <div class="control-group">
                     <input type="text" class="control-input" name="inv_search" placeholder="Search customer, invoice ID, company..." value="<?php echo htmlspecialchars($inv_search); ?>">
                 </div>
                 <div class="control-group">
-                    <select class="control-select" name="inv_status" onchange="document.getElementById('inv-filters-form').submit()">
+                    <select class="control-select" name="inv_status" onchange="document.getElementById('inv-filters-form').requestSubmit()">
                         <option value="">All Statuses</option>
                         <option value="draft" <?php echo $inv_status === 'draft' ? 'selected' : ''; ?>>Draft</option>
                         <option value="sent" <?php echo $inv_status === 'sent' ? 'selected' : ''; ?>>Sent</option>
@@ -910,7 +911,7 @@ include __DIR__ . '/../admin_header.php';
                     </select>
                 </div>
                 <div class="control-group">
-                    <select class="control-select" name="inv_company" onchange="document.getElementById('inv-filters-form').submit()">
+                    <select class="control-select" name="inv_company" onchange="document.getElementById('inv-filters-form').requestSubmit()">
                         <option value="">All Companies</option>
                         <?php foreach ($company_options as $co): ?>
                             <option value="<?php echo $co['id']; ?>" <?php echo $inv_company == $co['id'] ? 'selected' : ''; ?>><?php echo htmlspecialchars($co['company_name']); ?></option>
@@ -1228,6 +1229,8 @@ function toggleCompanyDetail(companyId) {
 // ============================================================
 // Charts
 // ============================================================
+// Private to this script, because a filter runs it again and top-level constants cannot be declared twice.
+(function () {
 const chartColors = {
     blue: 'rgba(59, 130, 246, 0.8)',
     navy: 'rgba(30, 64, 175, 0.8)',
@@ -1450,4 +1453,6 @@ new Chart(document.getElementById('feesTrendChart'), {
     }
 });
 <?php endif; ?>
+})();
 </script>
+</div>

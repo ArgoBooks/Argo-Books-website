@@ -1,4 +1,5 @@
-document.addEventListener("DOMContentLoaded", function () {
+// Draws the dashboard from window.dashboardData, on load and again after a filter swaps in new data.
+function renderAppStats() {
   const rawData = window.dashboardData;
   // The page omits the payload (and normally this script) when it renders its
   // empty state: no data for the selected range or tier. Nothing to draw.
@@ -2098,10 +2099,16 @@ document.addEventListener("DOMContentLoaded", function () {
     // Users active per day, drawn below as new and returning stacked, so each bar's
     // height is that day's active users.
     const dailyUsers = {};
+    // Anyone with a premium event on a day counts as premium that day.
+    const dailyPremium = {};
     eventsWithUser.forEach((e) => {
       const dateStr = toDateStr(e.timestamp);
       if (!dailyUsers[dateStr]) dailyUsers[dateStr] = new Set();
       dailyUsers[dateStr].add(e.hashedIP);
+      if (e.tier === "premium") {
+        if (!dailyPremium[dateStr]) dailyPremium[dateStr] = new Set();
+        dailyPremium[dateStr].add(e.hashedIP);
+      }
     });
 
     // The server already drops events outside the selected range, so these charts
@@ -2148,40 +2155,57 @@ document.addEventListener("DOMContentLoaded", function () {
       globalFirstSeen[ip] = toDateStr(new Date(first));
     });
 
-    const newPerDay = {};
-    const returningPerDay = {};
+    // Each day's users counted four ways, so the chart can split either way and its tooltip can give the other split.
+    const dauCounts = {};
     rangeDates.forEach((d) => {
-      newPerDay[d] = 0;
-      returningPerDay[d] = 0;
+      dauCounts[d] = { newFree: 0, newPremium: 0, returningFree: 0, returningPremium: 0 };
     });
 
     rangeDates.forEach((d) => {
       if (!dailyUsers[d]) return;
+      const premium = dailyPremium[d] || new Set();
       dailyUsers[d].forEach((ip) => {
-        if (globalFirstSeen[ip] === d) {
-          newPerDay[d]++;
-        } else {
-          returningPerDay[d]++;
-        }
+        const age = globalFirstSeen[ip] === d ? "new" : "returning";
+        dauCounts[d][age + (premium.has(ip) ? "Premium" : "Free")]++;
       });
     });
 
-    new Chart(document.getElementById("dauChart"), {
+    const DAU_SPLITS = {
+      age: [
+        { label: "New", free: "newFree", premium: "newPremium", color: "#10b981",
+          detail: (c) => `${c.newFree} free, ${c.newPremium} premium` },
+        { label: "Returning", free: "returningFree", premium: "returningPremium", color: "#3b82f6",
+          detail: (c) => `${c.returningFree} free, ${c.returningPremium} premium` },
+      ],
+      tier: [
+        { label: "Free", free: "newFree", premium: "returningFree", color: "#94a3b8",
+          detail: (c) => `${c.newFree} new, ${c.returningFree} returning` },
+        { label: "Premium", free: "newPremium", premium: "returningPremium", color: "#f59e0b",
+          detail: (c) => `${c.newPremium} new, ${c.returningPremium} returning` },
+      ],
+    };
+    // Only the All tier mixes free and premium users, so only it offers the switch and the breakdown.
+    const dauShowsTiers = rawData.tierFilter === "all";
+    let dauSplit = "age";
+    if (dauShowsTiers) {
+      try {
+        if (localStorage.getItem("appStatsDauSplit") === "tier") dauSplit = "tier";
+      } catch (e) { /* storage unavailable: start on New vs Returning */ }
+    }
+
+    const dauDatasets = (split) =>
+      DAU_SPLITS[split].map((s) => ({
+        label: s.label,
+        data: rangeDates.map((d) => dauCounts[d][s.free] + dauCounts[d][s.premium]),
+        backgroundColor: s.color,
+        dauDetail: s.detail,
+      }));
+
+    const dauChart = new Chart(document.getElementById("dauChart"), {
       type: "bar",
       data: {
         labels: rangeDates.map((d) => fmtDayLabel(d)),
-        datasets: [
-          {
-            label: "New",
-            data: rangeDates.map((d) => newPerDay[d]),
-            backgroundColor: "#10b981",
-          },
-          {
-            label: "Returning",
-            data: rangeDates.map((d) => returningPerDay[d]),
-            backgroundColor: "#3b82f6",
-          },
-        ],
+        datasets: dauDatasets(dauSplit),
       },
       options: {
         responsive: true,
@@ -2200,12 +2224,36 @@ document.addEventListener("DOMContentLoaded", function () {
           tooltip: {
             mode: "index",
             callbacks: {
+              label: (item) => {
+                const line = `${item.dataset.label}: ${item.raw}`;
+                if (!dauShowsTiers) return line;
+                return `${line} (${item.dataset.dauDetail(dauCounts[rangeDates[item.dataIndex]])})`;
+              },
               footer: (items) => "Total: " + items.reduce((sum, i) => sum + i.raw, 0),
             },
           },
         },
       },
     });
+
+    const dauButtons = document.querySelectorAll("[data-dau-split]");
+    const showDauSplit = (split) => {
+      dauSplit = split;
+      dauButtons.forEach((b) => {
+        const on = b.dataset.dauSplit === split;
+        b.classList.toggle("active", on);
+        b.setAttribute("aria-pressed", on ? "true" : "false");
+      });
+      dauChart.data.datasets = dauDatasets(split);
+      dauChart.update();
+    };
+    dauButtons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        try { localStorage.setItem("appStatsDauSplit", btn.dataset.dauSplit); } catch (e) { /* not remembered */ }
+        showDauSplit(btn.dataset.dauSplit);
+      });
+    });
+    if (dauButtons.length) showDauSplit(dauSplit);
 
     // --- Peak Usage Hours bar chart (selected range) ---
     const hourlyUsers = {};
@@ -3260,4 +3308,7 @@ document.addEventListener("DOMContentLoaded", function () {
       },
     });
   }
-});
+}
+
+document.addEventListener("DOMContentLoaded", renderAppStats);
+document.addEventListener("admin:live-update", renderAppStats);

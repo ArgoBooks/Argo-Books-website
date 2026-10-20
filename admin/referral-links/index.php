@@ -429,11 +429,12 @@ include __DIR__ . '/../admin_header.php';
     ?>
     <div id="pageMessage" class="success-message"<?php echo $flash_message === '' ? ' style="display: none;"' : ''; ?>><?php echo htmlspecialchars($flash_message); ?></div>
 
+    <div data-live-region>
     <!-- Controls: group-by toggle + time period selector, combined into one bar -->
     <div class="control-bar">
         <div class="control-group">
             <span class="control-label">Group by:</span>
-            <div class="control-pills">
+            <div class="control-pills" data-live-filter>
                 <a href="?group=source&amp;period=<?php echo htmlspecialchars($period); ?>"
                    class="control-pill <?php echo $group_mode === 'source' ? 'active' : ''; ?>">By source</a>
                 <a href="?group=category&amp;period=<?php echo htmlspecialchars($period); ?>"
@@ -442,7 +443,7 @@ include __DIR__ . '/../admin_header.php';
         </div>
         <div class="control-group">
             <span class="control-label">Time period:</span>
-            <div class="control-pills">
+            <div class="control-pills" data-live-filter>
                 <?php
                 $periods = [
                     'day' => 'Daily',
@@ -506,93 +507,15 @@ include __DIR__ . '/../admin_header.php';
         </div>
     </div>
 
-    <!-- Referral Links Management -->
-    <div class="table-container">
-        <div class="table-header-actions">
-            <h2>Manage Referral Links</h2>
-            <button type="button" id="referralDownloadBtn" class="bd-download-btn" title="Download this table as CSV"
-                    data-download="<?php echo htmlspecialchars(referral_download_payload(), ENT_QUOTES); ?>">Download</button>
-            <button id="createLinkBtn" class="btn btn-blue">Create New Link</button>
-        </div>
-
-        <div class="table-responsive">
-            <table class="referral-table">
-                <thead>
-                    <tr>
-                        <th>Source Code</th>
-                        <th>Name</th>
-                        <th>Target URL</th>
-                        <th>Visits</th>
-                        <th>Installs</th>
-                        <th>Conversions</th>
-                        <th>Rate</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <?php echo render_referral_table_bodies(); ?>
-            </table>
-        </div>
-    </div>
-</div>
-
-<!-- Create/Edit Modal -->
-<div id="linkModal" class="modal" style="display: none;">
-    <div class="modal-content">
-        <span class="modal-close" onclick="closeModal()">&times;</span>
-        <h2 id="modalTitle">Create Referral Link</h2>
-        <div id="modalError" class="error-message" style="display: none;"></div>
-
-        <form id="linkForm" method="POST">
-            <input type="hidden" name="action" id="formAction" value="create">
-            <input type="hidden" name="id" id="linkId">
-            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
-
-            <div class="form-group">
-                <label for="source_code">Source Code *</label>
-                <input type="text" name="source_code" id="source_code" required pattern="[a-zA-Z0-9_\-]+" title="Only letters, numbers, hyphens, and underscores allowed">
-                <small>Used in URL: ?source=CODE (alphanumeric, hyphens, underscores only)</small>
-            </div>
-
-            <div class="form-group">
-                <label for="category">Category *</label>
-                <select name="category" id="category" required>
-                    <option value="">Choose a category</option>
-                    <?php foreach (referral_categories() as $ckey => $clabel): ?>
-                        <option value="<?php echo htmlspecialchars($ckey); ?>"><?php echo htmlspecialchars($clabel); ?></option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="name">Display Name *</label>
-                <input type="text" name="name" id="name" required>
-                <small>Shown as "Category - Display Name", e.g. "YouTube - Desktop accounting"</small>
-            </div>
-
-            <div class="form-group">
-                <label for="target_url">Target URL *</label>
-                <input type="url" name="target_url" id="target_url" required>
-                <small>The page users will land on (usually your homepage)</small>
-            </div>
-
-            <div class="form-actions">
-                <button type="submit" class="btn btn-blue">Save</button>
-                <button type="button" class="btn btn-gray" onclick="closeModal()">Cancel</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<script>
+    <script>
+    // Private to this script, because a filter runs it again and top-level constants cannot be declared twice.
+    (function () {
     const sourceLabels = <?php echo json_encode($source_labels); ?>;
     const sourceVisitCounts = <?php echo json_encode($source_visit_counts); ?>;
     const sourceConversionCounts = <?php echo json_encode($source_conversion_counts); ?>;
     const timeLabels = <?php echo json_encode($time_labels); ?>;
     const timeVisitCounts = <?php echo json_encode($time_visit_counts); ?>;
     const timeConversionCounts = <?php echo json_encode($time_conversion_counts); ?>;
-    const csrfToken = <?php echo json_encode($_SESSION['csrf_token']); ?>;
-
-    document.addEventListener('DOMContentLoaded', function() {
         // Visits by Source Chart
         const ctxSourceVisits = document.getElementById('sourceVisitsChart').getContext('2d');
         new Chart(ctxSourceVisits, {
@@ -748,7 +671,89 @@ include __DIR__ . '/../admin_header.php';
                 }
             }
         });
-    });
+    })();
+    </script>
+    </div>
+
+    <!-- Referral Links Management -->
+    <div class="table-container">
+        <div class="table-header-actions">
+            <h2>Manage Referral Links</h2>
+            <button type="button" id="referralDownloadBtn" class="bd-download-btn" title="Download this table as CSV"
+                    data-download="<?php echo htmlspecialchars(referral_download_payload(), ENT_QUOTES); ?>">Download</button>
+            <button id="createLinkBtn" class="btn btn-blue">Create New Link</button>
+        </div>
+
+        <div class="table-responsive">
+            <table class="referral-table">
+                <thead>
+                    <tr>
+                        <th>Source Code</th>
+                        <th>Name</th>
+                        <th>Target URL</th>
+                        <th>Visits</th>
+                        <th>Installs</th>
+                        <th>Conversions</th>
+                        <th>Rate</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <?php echo render_referral_table_bodies(); ?>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Create/Edit Modal -->
+<div id="linkModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <span class="modal-close" onclick="closeModal()">&times;</span>
+        <h2 id="modalTitle">Create Referral Link</h2>
+        <div id="modalError" class="error-message" style="display: none;"></div>
+
+        <form id="linkForm" method="POST">
+            <input type="hidden" name="action" id="formAction" value="create">
+            <input type="hidden" name="id" id="linkId">
+            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
+
+            <div class="form-group">
+                <label for="source_code">Source Code *</label>
+                <input type="text" name="source_code" id="source_code" required pattern="[a-zA-Z0-9_\-]+" title="Only letters, numbers, hyphens, and underscores allowed">
+                <small>Used in URL: ?source=CODE (alphanumeric, hyphens, underscores only)</small>
+            </div>
+
+            <div class="form-group">
+                <label for="category">Category *</label>
+                <select name="category" id="category" required>
+                    <option value="">Choose a category</option>
+                    <?php foreach (referral_categories() as $ckey => $clabel): ?>
+                        <option value="<?php echo htmlspecialchars($ckey); ?>"><?php echo htmlspecialchars($clabel); ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="name">Display Name *</label>
+                <input type="text" name="name" id="name" required>
+                <small>Shown as "Category - Display Name", e.g. "YouTube - Desktop accounting"</small>
+            </div>
+
+            <div class="form-group">
+                <label for="target_url">Target URL *</label>
+                <input type="url" name="target_url" id="target_url" required>
+                <small>The page users will land on (usually your homepage)</small>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-blue">Save</button>
+                <button type="button" class="btn btn-gray" onclick="closeModal()">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    const csrfToken = <?php echo json_encode($_SESSION['csrf_token']); ?>;
 
     // Modal Functions
     function openModal() {
@@ -910,14 +915,6 @@ include __DIR__ . '/../admin_header.php';
 
 
 
-    // Save scroll position when clicking period or group-by links so the page
-    // reload doesn't jump back to the top.
-    document.querySelectorAll('a[href^="?period="], a[href^="?group="]').forEach(link => {
-        link.addEventListener('click', function() {
-            sessionStorage.setItem('scrollPosition', window.scrollY);
-        });
-    });
-
     // Collapse / expand referral category sections in the management table.
     // Re-run after an AJAX save replaces the rows.
     function bindCategoryHeaders() {
@@ -936,8 +933,6 @@ include __DIR__ . '/../admin_header.php';
 
     bindCategoryHeaders();
 </script>
-<script>window.ADMIN_PRESERVE_SCROLL = ['a[href^="?period="]', 'a[href^="?group="]'];</script>
-<script src="../preserve-scroll.js" defer></script>
 <script>
     // Download button: the same client-side CSV as the marketing funnel's cards, built from
     // the payload already in the page, so there is no extra admin endpoint to secure.

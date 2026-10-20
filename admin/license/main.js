@@ -66,17 +66,3 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
-// Restore scroll position after page fully loads
-window.addEventListener('load', function () {
-    if (sessionStorage.getItem('scrollPosition')) {
-        const scrollPos = sessionStorage.getItem('scrollPosition');
-        sessionStorage.removeItem('scrollPosition');
-
-        // Use requestAnimationFrame to ensure page is fully rendered
-        requestAnimationFrame(function () {
-            requestAnimationFrame(function () {
-                window.scrollTo(0, parseInt(scrollPos));
-            });
-        });
-    }
-});

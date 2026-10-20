@@ -2553,3 +2553,13 @@ th.col-nowrap {
 .bd-details-head span { font-weight: 600; }
 [data-theme="dark"] .bd-details-head { color: var(--white); }
 
+
+/* A filter is fetching new data: the area dims and ignores clicks until the swap. */
+[data-live-region] {
+    transition: opacity 0.15s ease;
+}
+
+[data-live-region][aria-busy="true"] {
+    opacity: 0.55;
+    pointer-events: none;
+}

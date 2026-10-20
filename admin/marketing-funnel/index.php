@@ -720,7 +720,9 @@ include __DIR__ . '/../admin_header.php';
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="vendor/jsvectormap.min.css">
 
-<div class="container">
+<script src="vendor/jsvectormap.min.js"></script>
+<script src="vendor/world.min.js"></script>
+<div class="container" data-live-region>
     <?php if (isset($_SESSION['success_message'])): ?>
         <div class="success-message">
             <?php
@@ -849,7 +851,7 @@ include __DIR__ . '/../admin_header.php';
     <div class="control-bar">
         <div class="control-group">
             <span class="control-label">Period:</span>
-            <div class="control-pills">
+            <div class="control-pills" data-live-filter>
                 <?php foreach (['30d' => 'Last 30 days', '90d' => 'Last 90 days', 'all' => 'All time'] as $pkey => $plabel):
                     $href_params = ['tab' => 'funnel', 'funnel_period' => $pkey];
                     if ($funnel_source_filter !== '') $href_params['source'] = $funnel_source_filter;
@@ -1389,7 +1391,7 @@ include __DIR__ . '/../admin_header.php';
     <div class="control-bar">
         <div class="control-group">
             <span class="control-label">Period:</span>
-            <div class="control-pills">
+            <div class="control-pills" data-live-filter>
                 <?php foreach (['30d' => 'Last 30 days', '90d' => 'Last 90 days', 'all' => 'All time'] as $pkey => $plabel):
                     $href = 'index.php?' . http_build_query(['tab' => 'tools', 'funnel_period' => $pkey]);
                 ?>
@@ -1662,147 +1664,16 @@ include __DIR__ . '/../admin_header.php';
         <?php endif; ?>
     </div>
     </div><!-- /#tools -->
-</div>
-
-<!-- Ad spend modal -->
-<div id="spendModal" class="modal" style="display:none;">
-    <div class="modal-content">
-        <span class="modal-close" onclick="closeSpendModal()">&times;</span>
-        <h2 id="spendModalTitle">Add ad spend</h2>
-        <form id="spendForm" method="POST" action="index.php">
-            <input type="hidden" name="action" value="spend_save">
-            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
-            <div class="form-group">
-                <label for="spend_source_code">Source *</label>
-                <select name="spend_source_code" id="spend_source_code" required
-                        style="width:100%; padding:10px 12px; border:1px solid var(--gray-input-border); border-radius:6px; font-size:14px;">
-                    <option value="">-- choose a source --</option>
-                    <?php foreach ($referral_links as $rl): ?>
-                        <option value="<?php echo htmlspecialchars($rl['source_code']); ?>">
-                            <?php echo htmlspecialchars(referral_display_name($rl['category'], $rl['name'], $rl['source_code']) . ' (' . $rl['source_code'] . ')'); ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-                <small>Pick a referral link the spend should be attributed to.</small>
-            </div>
-            <div class="form-group">
-                <label for="spend_period">Month *</label>
-                <input type="month" name="spend_period" id="spend_period" required>
-                <small>Spend is tracked one calendar month at a time.</small>
-            </div>
-            <div class="spend-form-row">
-                <div class="form-group spend-amount-group">
-                    <label for="spend_amount">Amount *</label>
-                    <input type="number" name="spend_amount" id="spend_amount" step="0.01" min="0" required>
-                    <small>Total ad-platform spend for the chosen source + month.</small>
-                </div>
-                <div class="form-group spend-currency-group">
-                    <label for="spend_currency">Currency</label>
-                    <select name="spend_currency" id="spend_currency">
-                        <option value="CAD" selected>CAD - Canadian Dollar</option>
-                        <option value="USD">USD - US Dollar</option>
-                        <option value="EUR">EUR - Euro</option>
-                        <option value="GBP">GBP - British Pound</option>
-                        <option value="AUD">AUD - Australian Dollar</option>
-                    </select>
-                </div>
-            </div>
-            <div class="form-group">
-                <label for="spend_notes">Notes</label>
-                <textarea name="spend_notes" id="spend_notes" rows="4"></textarea>
-            </div>
-            <div class="form-actions">
-                <button type="submit" class="btn btn-blue">Save</button>
-                <button type="button" class="btn btn-gray" onclick="closeSpendModal()">Cancel</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- World map for the geography card (choropleth by visits). Self-hosted so it
-     loads under the admin CSP, which only allows scripts from 'self' + cdnjs. -->
-<script src="vendor/jsvectormap.min.js"></script>
-<script src="vendor/world.min.js"></script>
 
 <script>
-    const csrfToken = <?php echo json_encode($_SESSION['csrf_token']); ?>;
+// Private to this script, because a filter runs it again and top-level constants cannot be declared twice.
+(function () {
+    // Each run removes the page-wide listeners the previous run added.
+    if (window.__funnelListeners) window.__funnelListeners.abort();
+    window.__funnelListeners = new AbortController();
+    const funnelSignal = window.__funnelListeners.signal;
 
-    // Spend modal open/close + edit + delete
-    function openSpendModal() {
-        const m = document.getElementById('spendModal');
-        if (m) m.style.display = 'block';
-    }
-    window.closeSpendModal = function() {
-        const m = document.getElementById('spendModal');
-        if (!m) return;
-        m.style.display = 'none';
-        document.getElementById('spendForm').reset();
-        document.getElementById('spend_source_code').removeAttribute('disabled');
-        document.getElementById('spendModalTitle').textContent = 'Add ad spend';
-    };
-    window.editSpend = function(row) {
-        document.getElementById('spend_source_code').value = row.source_code;
-        // Disabled so the user can't repoint an existing row to a different source
-        // (the UNIQUE key on source_code+period_start would then collide).
-        document.getElementById('spend_source_code').setAttribute('disabled', 'disabled');
-        const periodStr = (row.period_start || '').slice(0, 7); // YYYY-MM
-        document.getElementById('spend_period').value = periodStr;
-        document.getElementById('spend_amount').value = row.amount;
-        document.getElementById('spend_currency').value = row.currency;
-        document.getElementById('spend_notes').value = row.notes || '';
-        document.getElementById('spendModalTitle').textContent = 'Edit ad spend';
-        openSpendModal();
-    };
-    window.deleteSpend = function(id) {
-        if (!confirm('Delete this ad-spend entry?')) return;
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = 'index.php?tab=spend';
-        const tokenInput = document.createElement('input');
-        tokenInput.type = 'hidden';
-        tokenInput.name = 'csrf_token';
-        tokenInput.value = csrfToken;
-        const actionInput = document.createElement('input');
-        actionInput.type = 'hidden';
-        actionInput.name = 'action';
-        actionInput.value = 'spend_delete';
-        const idInput = document.createElement('input');
-        idInput.type = 'hidden';
-        idInput.name = 'id';
-        idInput.value = id;
-        form.appendChild(tokenInput);
-        form.appendChild(actionInput);
-        form.appendChild(idInput);
-        document.body.appendChild(form);
-        form.submit();
-    };
-    // Re-enable the source dropdown on submit so its value is included in POST
-    const spendFormEl = document.getElementById('spendForm');
-    if (spendFormEl) {
-        spendFormEl.addEventListener('submit', function() {
-            document.getElementById('spend_source_code').removeAttribute('disabled');
-        });
-    }
-    const addSpendBtnEl = document.getElementById('addSpendBtn');
-    if (addSpendBtnEl) {
-        addSpendBtnEl.addEventListener('click', openSpendModal);
-    }
-
-    // Close modal when clicking outside (only if mousedown also started on backdrop)
-    let modalMouseDownTarget = null;
-    window.addEventListener('mousedown', function(event) {
-        modalMouseDownTarget = event.target;
-    });
-    window.addEventListener('click', function(event) {
-        const sModal = document.getElementById('spendModal');
-        if (sModal && event.target === sModal && modalMouseDownTarget === sModal) {
-            closeSpendModal();
-        }
-    });
-
-    // Searchable source filter (combobox). Type to filter the source list,
-    // click or Enter to apply; applying reloads the funnel for that source and
-    // preserves scroll the same way the pills do.
+    // Searchable source filter: choosing a source swaps in that source's funnel in place, the same way the pills do.
     (function () {
         const box = document.getElementById('sourceCombobox');
         if (!box) return;
@@ -1814,12 +1685,11 @@ include __DIR__ . '/../admin_header.php';
         let highlighted = -1;
 
         function go(source) {
-            sessionStorage.setItem('scrollPosition', window.scrollY);
             const params = new URLSearchParams();
             params.set('tab', 'funnel');
             params.set('funnel_period', period);
             if (source) params.set('source', source);
-            window.location = 'index.php?' + params.toString();
+            window.adminLiveFilters.go('index.php?' + params.toString());
         }
 
         function open()  { box.classList.add('open');  input.setAttribute('aria-expanded', 'true'); }
@@ -1872,7 +1742,7 @@ include __DIR__ . '/../admin_header.php';
             e.preventDefault();
             if (box.classList.contains('open')) { close(); } else { input.focus(); }
         });
-        document.addEventListener('click', (e) => { if (!box.contains(e.target)) close(); });
+        document.addEventListener('click', (e) => { if (!box.contains(e.target)) close(); }, { signal: funnelSignal });
     })();
 
     // Source-survey breakdown doughnut (unattributed installs only).
@@ -2119,8 +1989,8 @@ include __DIR__ . '/../admin_header.php';
                 });
                 document.addEventListener('click', (e) => {
                     if (e.target !== actBtn && !pop.contains(e.target)) closePop();
-                });
-                document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closePop(); });
+                }, { signal: funnelSignal });
+                document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closePop(); }, { signal: funnelSignal });
             }
 
             const tip = document.getElementById('funnelTip');
@@ -2220,6 +2090,9 @@ include __DIR__ . '/../admin_header.php';
             const vals = {};
             codes.forEach(k => { vals[k] = Math.round(Math.sqrt(MAP_VALUES[k].visits / maxV) * 1000); });
             const scale = dark ? ['#4d7ac9', '#a9d3f7'] : ['#9db4f5', '#2740b5'];
+            if (window.__argoMap && typeof window.__argoMap.destroy === 'function') {
+                try { window.__argoMap.destroy(); } catch (e) { /* its element is already gone */ }
+            }
             try {
                 window.__argoMap = new jsVectorMap({
                     selector: '#worldMap',
@@ -2291,8 +2164,7 @@ include __DIR__ . '/../admin_header.php';
             });
         })();
     })();
-</script>
-<script>
+
     // Hide sources that produced no installs. On by default: the point of the table is
     // which sources produced users, and a wall of zeroes buries the two or three that did.
     (function () {
@@ -2309,7 +2181,143 @@ include __DIR__ . '/../admin_header.php';
         toggle.addEventListener('change', apply);
         apply();
     })();
+})();
 </script>
-<script>window.ADMIN_PRESERVE_SCROLL = ['.control-pill'];</script>
+</div>
+
+<!-- Ad spend modal -->
+<div id="spendModal" class="modal" style="display:none;">
+    <div class="modal-content">
+        <span class="modal-close" onclick="closeSpendModal()">&times;</span>
+        <h2 id="spendModalTitle">Add ad spend</h2>
+        <form id="spendForm" method="POST" action="index.php">
+            <input type="hidden" name="action" value="spend_save">
+            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
+            <div class="form-group">
+                <label for="spend_source_code">Source *</label>
+                <select name="spend_source_code" id="spend_source_code" required
+                        style="width:100%; padding:10px 12px; border:1px solid var(--gray-input-border); border-radius:6px; font-size:14px;">
+                    <option value="">-- choose a source --</option>
+                    <?php foreach ($referral_links as $rl): ?>
+                        <option value="<?php echo htmlspecialchars($rl['source_code']); ?>">
+                            <?php echo htmlspecialchars(referral_display_name($rl['category'], $rl['name'], $rl['source_code']) . ' (' . $rl['source_code'] . ')'); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+                <small>Pick a referral link the spend should be attributed to.</small>
+            </div>
+            <div class="form-group">
+                <label for="spend_period">Month *</label>
+                <input type="month" name="spend_period" id="spend_period" required>
+                <small>Spend is tracked one calendar month at a time.</small>
+            </div>
+            <div class="spend-form-row">
+                <div class="form-group spend-amount-group">
+                    <label for="spend_amount">Amount *</label>
+                    <input type="number" name="spend_amount" id="spend_amount" step="0.01" min="0" required>
+                    <small>Total ad-platform spend for the chosen source + month.</small>
+                </div>
+                <div class="form-group spend-currency-group">
+                    <label for="spend_currency">Currency</label>
+                    <select name="spend_currency" id="spend_currency">
+                        <option value="CAD" selected>CAD - Canadian Dollar</option>
+                        <option value="USD">USD - US Dollar</option>
+                        <option value="EUR">EUR - Euro</option>
+                        <option value="GBP">GBP - British Pound</option>
+                        <option value="AUD">AUD - Australian Dollar</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="spend_notes">Notes</label>
+                <textarea name="spend_notes" id="spend_notes" rows="4"></textarea>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-blue">Save</button>
+                <button type="button" class="btn btn-gray" onclick="closeSpendModal()">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- World map for the geography card (choropleth by visits). Self-hosted so it
+     loads under the admin CSP, which only allows scripts from 'self' + cdnjs. -->
+
+<script>
+    const csrfToken = <?php echo json_encode($_SESSION['csrf_token']); ?>;
+
+    // Spend modal open/close + edit + delete
+    function openSpendModal() {
+        const m = document.getElementById('spendModal');
+        if (m) m.style.display = 'block';
+    }
+    window.closeSpendModal = function() {
+        const m = document.getElementById('spendModal');
+        if (!m) return;
+        m.style.display = 'none';
+        document.getElementById('spendForm').reset();
+        document.getElementById('spend_source_code').removeAttribute('disabled');
+        document.getElementById('spendModalTitle').textContent = 'Add ad spend';
+    };
+    window.editSpend = function(row) {
+        document.getElementById('spend_source_code').value = row.source_code;
+        // Disabled so the user can't repoint an existing row to a different source
+        // (the UNIQUE key on source_code+period_start would then collide).
+        document.getElementById('spend_source_code').setAttribute('disabled', 'disabled');
+        const periodStr = (row.period_start || '').slice(0, 7); // YYYY-MM
+        document.getElementById('spend_period').value = periodStr;
+        document.getElementById('spend_amount').value = row.amount;
+        document.getElementById('spend_currency').value = row.currency;
+        document.getElementById('spend_notes').value = row.notes || '';
+        document.getElementById('spendModalTitle').textContent = 'Edit ad spend';
+        openSpendModal();
+    };
+    window.deleteSpend = function(id) {
+        if (!confirm('Delete this ad-spend entry?')) return;
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = 'index.php?tab=spend';
+        const tokenInput = document.createElement('input');
+        tokenInput.type = 'hidden';
+        tokenInput.name = 'csrf_token';
+        tokenInput.value = csrfToken;
+        const actionInput = document.createElement('input');
+        actionInput.type = 'hidden';
+        actionInput.name = 'action';
+        actionInput.value = 'spend_delete';
+        const idInput = document.createElement('input');
+        idInput.type = 'hidden';
+        idInput.name = 'id';
+        idInput.value = id;
+        form.appendChild(tokenInput);
+        form.appendChild(actionInput);
+        form.appendChild(idInput);
+        document.body.appendChild(form);
+        form.submit();
+    };
+    // Re-enable the source dropdown on submit so its value is included in POST
+    const spendFormEl = document.getElementById('spendForm');
+    if (spendFormEl) {
+        spendFormEl.addEventListener('submit', function() {
+            document.getElementById('spend_source_code').removeAttribute('disabled');
+        });
+    }
+    // The Add button is swapped in again by every filter, so its click is caught on the document.
+    document.addEventListener('click', function(event) {
+        if (event.target.closest('#addSpendBtn')) openSpendModal();
+    });
+
+    // Close modal when clicking outside (only if mousedown also started on backdrop)
+    let modalMouseDownTarget = null;
+    window.addEventListener('mousedown', function(event) {
+        modalMouseDownTarget = event.target;
+    });
+    window.addEventListener('click', function(event) {
+        const sModal = document.getElementById('spendModal');
+        if (sModal && event.target === sModal && modalMouseDownTarget === sModal) {
+            closeSpendModal();
+        }
+    });
+
+</script>
 <script src="../details-modal.js?v=<?= filemtime(__DIR__ . '/../details-modal.js') ?>" defer></script>
-<script src="../preserve-scroll.js" defer></script>
