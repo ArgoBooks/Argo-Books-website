@@ -36,7 +36,11 @@ include __DIR__ . '/../../docs-header.php';
                 <li><strong>Customer Statement:</strong> What one customer owes you, ready to send to them (see below)</li>
                 <li><strong>Tax Summary:</strong> Tax-related totals for the selected period</li>
                 <li><strong>Sales by Product:</strong> Revenue and units sold, broken down per product</li>
+                <li><strong>Sales by Customer:</strong> Each customer's sales before tax, less refunds, and their share of the total. It adds up to the Income Statement's revenue</li>
+                <li><strong>Expenses by Supplier:</strong> How many expenses each supplier had and what you spent with them, before and after tax</li>
                 <li><strong>Payroll Remittance:</strong> What you owe the CRA for your payroll over the selected period (Premium, Canadian payroll)</li>
+                <li><strong>Payroll Summary:</strong> Each employee's gross pay, CPP or QPP, EI or QPIP, income tax and net pay, with the employer's contributions and the total payroll cost (Premium, Canadian payroll)</li>
+                <li><strong>Rentals:</strong> What is rented out today with the deposit held on each, what came back in the selected period and what it earned, and the deposits held in total</li>
             </ul>
 
             <h3>Customer Statements</h3>

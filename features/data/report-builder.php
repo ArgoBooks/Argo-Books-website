@@ -100,7 +100,7 @@ return [
     'faqs' => [
     [
         'q' => 'What reports can I create in Argo Books?',
-        'a' => 'Argo Books includes the core financial statements: Income Statement, Balance Sheet, Cash Flow Statement, General Ledger, AR Aging, Tax Summary, and Sales by Product, plus a Customer Statement to send each customer what they owe, and analytics-style overview templates. You can also start from a blank report and build your own.',
+        'a' => 'Argo Books includes the core financial statements: Income Statement, Balance Sheet, Cash Flow Statement, General Ledger, AR Aging, Tax Summary, Sales by Product, Sales by Customer, Expenses by Supplier and Rentals, plus Payroll Remittance and Payroll Summary for Canadian payroll, a Customer Statement to send each customer what they owe, and analytics-style overview templates. You can also start from a blank report and build your own.',
     ],
     [
         'q' => 'Can I customize how a report looks?',
