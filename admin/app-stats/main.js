@@ -2155,7 +2155,7 @@ function renderAppStats() {
       globalFirstSeen[ip] = toDateStr(new Date(first));
     });
 
-    // Each day's users counted four ways, so the chart can split either way and its tooltip can give the other split.
+    // Each day's users counted four ways: new or returning, and free or premium.
     const dauCounts = {};
     rangeDates.forEach((d) => {
       dauCounts[d] = { newFree: 0, newPremium: 0, returningFree: 0, returningPremium: 0 };
@@ -2170,42 +2170,29 @@ function renderAppStats() {
       });
     });
 
-    const DAU_SPLITS = {
-      age: [
-        { label: "New", free: "newFree", premium: "newPremium", color: "#10b981",
-          detail: (c) => `${c.newFree} free, ${c.newPremium} premium` },
-        { label: "Returning", free: "returningFree", premium: "returningPremium", color: "#3b82f6",
-          detail: (c) => `${c.returningFree} free, ${c.returningPremium} premium` },
-      ],
-      tier: [
-        { label: "Free", free: "newFree", premium: "returningFree", color: "#94a3b8",
-          detail: (c) => `${c.newFree} new, ${c.returningFree} returning` },
-        { label: "Premium", free: "newPremium", premium: "returningPremium", color: "#f59e0b",
-          detail: (c) => `${c.newPremium} new, ${c.returningPremium} returning` },
-      ],
-    };
-    // Only the All tier mixes free and premium users, so only it offers the switch and the breakdown.
+    // Only the All tier mixes free and premium users. Green is new and blue returning, with the darker shade for premium.
     const dauShowsTiers = rawData.tierFilter === "all";
-    let dauSplit = "age";
-    if (dauShowsTiers) {
-      try {
-        if (localStorage.getItem("appStatsDauSplit") === "tier") dauSplit = "tier";
-      } catch (e) { /* storage unavailable: start on New vs Returning */ }
-    }
+    const dauSegments = dauShowsTiers
+      ? [
+          { label: "New, free", keys: ["newFree"], color: "#6ee7b7" },
+          { label: "New, premium", keys: ["newPremium"], color: "#059669" },
+          { label: "Returning, free", keys: ["returningFree"], color: "#93c5fd" },
+          { label: "Returning, premium", keys: ["returningPremium"], color: "#1d4ed8" },
+        ]
+      : [
+          { label: "New", keys: ["newFree", "newPremium"], color: "#10b981" },
+          { label: "Returning", keys: ["returningFree", "returningPremium"], color: "#3b82f6" },
+        ];
 
-    const dauDatasets = (split) =>
-      DAU_SPLITS[split].map((s) => ({
-        label: s.label,
-        data: rangeDates.map((d) => dauCounts[d][s.free] + dauCounts[d][s.premium]),
-        backgroundColor: s.color,
-        dauDetail: s.detail,
-      }));
-
-    const dauChart = new Chart(document.getElementById("dauChart"), {
+    new Chart(document.getElementById("dauChart"), {
       type: "bar",
       data: {
         labels: rangeDates.map((d) => fmtDayLabel(d)),
-        datasets: dauDatasets(dauSplit),
+        datasets: dauSegments.map((s) => ({
+          label: s.label,
+          data: rangeDates.map((d) => s.keys.reduce((sum, k) => sum + dauCounts[d][k], 0)),
+          backgroundColor: s.color,
+        })),
       },
       options: {
         responsive: true,
@@ -2224,36 +2211,23 @@ function renderAppStats() {
           tooltip: {
             mode: "index",
             callbacks: {
-              label: (item) => {
-                const line = `${item.dataset.label}: ${item.raw}`;
-                if (!dauShowsTiers) return line;
-                return `${line} (${item.dataset.dauDetail(dauCounts[rangeDates[item.dataIndex]])})`;
+              footer: (items) => {
+                if (!items.length) return "";
+                const c = dauCounts[rangeDates[items[0].dataIndex]];
+                const isNew = c.newFree + c.newPremium;
+                const returning = c.returningFree + c.returningPremium;
+                const lines = ["Total: " + (isNew + returning)];
+                if (dauShowsTiers) {
+                  lines.push(`${isNew} new, ${returning} returning`);
+                  lines.push(`${c.newFree + c.returningFree} free, ${c.newPremium + c.returningPremium} premium`);
+                }
+                return lines;
               },
-              footer: (items) => "Total: " + items.reduce((sum, i) => sum + i.raw, 0),
             },
           },
         },
       },
     });
-
-    const dauButtons = document.querySelectorAll("[data-dau-split]");
-    const showDauSplit = (split) => {
-      dauSplit = split;
-      dauButtons.forEach((b) => {
-        const on = b.dataset.dauSplit === split;
-        b.classList.toggle("active", on);
-        b.setAttribute("aria-pressed", on ? "true" : "false");
-      });
-      dauChart.data.datasets = dauDatasets(split);
-      dauChart.update();
-    };
-    dauButtons.forEach((btn) => {
-      btn.addEventListener("click", () => {
-        try { localStorage.setItem("appStatsDauSplit", btn.dataset.dauSplit); } catch (e) { /* not remembered */ }
-        showDauSplit(btn.dataset.dauSplit);
-      });
-    });
-    if (dauButtons.length) showDauSplit(dauSplit);
 
     // --- Peak Usage Hours bar chart (selected range) ---
     const hourlyUsers = {};

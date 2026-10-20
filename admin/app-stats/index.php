@@ -457,14 +457,6 @@ include __DIR__ . '/../admin_header.php';
 .tabs-container {
     margin-bottom: 2rem;
 }
-
-/* The New vs Returning / Free vs Premium switch sits centred under the daily users title. */
-.dau-split {
-    justify-content: center;
-    flex-shrink: 0;
-    margin: -0.5rem auto 0.75rem;
-}
-
 /* Tab styles are shared across admin pages: see admin/common-style.css */
 
 .stats-grid {
@@ -754,15 +746,7 @@ include __DIR__ . '/../admin_header.php';
 
                 <div class="chart-row">
                     <div class="chart-container" style="flex: 1;">
-                        <?php if ($tierFilter === 'all'): ?>
-                            <h2>Daily Active Users</h2>
-                            <div class="control-pills dau-split" role="group" aria-label="Split daily active users by">
-                                <button type="button" class="control-pill active" data-dau-split="age" aria-pressed="true">New vs Returning</button>
-                                <button type="button" class="control-pill" data-dau-split="tier" aria-pressed="false">Free vs Premium</button>
-                            </div>
-                        <?php else: ?>
-                            <h2>Daily Active Users (New vs Returning)</h2>
-                        <?php endif; ?>
+                        <h2>Daily Active Users (<?= $tierFilter === 'all' ? 'New vs Returning, Free vs Premium' : 'New vs Returning' ?>)</h2>
                         <canvas id="dauChart"></canvas>
                     </div>
                 </div>
