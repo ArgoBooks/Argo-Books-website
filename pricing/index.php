@@ -68,7 +68,7 @@ $yearlySavings = ($monthlyPrice * 12) - $yearlyPrice;
                     "name": "What does Premium include?",
                     "acceptedAnswer": {
                         "@type": "Answer",
-                        "text": "Premium includes unlimited invoicing, <?= (int) $pricing['receipt_scan_monthly_limit'] ?> AI receipt scans per month, predictive analytics that forecast trends in your data, biometric login (Windows Hello, Touch ID or your Linux login), and priority customer support. Premium is available at $<?php echo number_format($monthlyPrice, 0); ?> CAD/month or $<?php echo number_format($yearlyPrice, 0); ?> CAD/year. The annual plan saves you $<?php echo number_format($yearlySavings, 0); ?> per year."
+                        "text": "Premium includes Canadian payroll with T4 slips, unlimited invoicing, <?= (int) $pricing['receipt_scan_monthly_limit'] ?> AI receipt scans per month, predictive analytics that forecast trends in your data, biometric login (Windows Hello, Touch ID or your Linux login), and priority customer support. Premium is available at $<?php echo number_format($monthlyPrice, 0); ?> CAD/month or $<?php echo number_format($yearlyPrice, 0); ?> CAD/year. The annual plan saves you $<?php echo number_format($yearlySavings, 0); ?> per year."
                     }
                 },
                 {
@@ -174,52 +174,52 @@ $yearlySavings = ($monthlyPrice * 12) - $yearlyPrice;
         <div class="container">
             <div class="premium-intro-inner animate-on-scroll">
                 <h2>What Premium adds</h2>
-                <p>Receipt scanning, revenue forecasts and unlimited invoicing with online payments, each explained below.</p>
+                <p>Canadian payroll, receipt scanning and unlimited invoicing with online payments, each explained below.</p>
             </div>
         </div>
     </section>
 
     <!-- =============================================
-         DETAIL: AI Receipt Scanning
+         DETAIL: Canadian Payroll
          Text left, image right
          ============================================= -->
     <section class="feature-detail-section">
         <div class="container">
             <div class="feature-detail animate-on-scroll">
                 <div class="feature-detail-text">
-                    <h2>Scan receipts in seconds, not minutes</h2>
-                    <p>Point your camera at any receipt and Argo Books extracts the supplier, date, and total automatically, with no typing required. Receipts are categorized and attached to your expense records instantly.</p>
+                    <h2>Run Canadian payroll in the same app as your books</h2>
+                    <p>Argo Books works out CPP, EI and income tax for every province and territory, with Quebec handled through QPP, QPIP and Quebec income tax. Pay salaried and hourly staff on any schedule, then print pay stubs and get your year-end slips ready to file.</p>
                     <ul class="feature-checklist">
-                        <li><?= svg_icon('check', 20) ?><span><?= (int) $pricing['receipt_scan_monthly_limit'] ?> receipt scans per month</span></li>
-                        <li><?= svg_icon('check', 20) ?><span>Auto-categorized by expense type</span></li>
-                        <li><?= svg_icon('check', 20) ?><span>Attached directly to your transaction records</span></li>
+                        <li><?= svg_icon('check', 20) ?><span>Rates from the CRA's published payroll formulas</span></li>
+                        <li><?= svg_icon('check', 20) ?><span>Pay stubs, T4 slips and the T4 summary file</span></li>
+                        <li><?= svg_icon('check', 20) ?><span>No charge per employee or per pay run</span></li>
                     </ul>
                 </div>
                 <div class="feature-detail-visual">
-                    <img src="../resources/images/features/receipt-archive.svg" alt="AI receipt scanning archive showing scanned receipts organized by category" loading="lazy">
+                    <img src="../resources/images/features/payroll-deductions.svg" alt="Pay stub showing gross pay with CPP, EI, federal and Ontario income tax deducted" loading="lazy">
                 </div>
             </div>
         </div>
     </section>
 
     <!-- =============================================
-         DETAIL: Predictive Analytics
+         DETAIL: AI Receipt Scanning
          Image left, text right (reversed)
          ============================================= -->
     <section class="feature-detail-section" style="background: var(--gray-50);">
         <div class="container">
             <div class="feature-detail reversed animate-on-scroll">
                 <div class="feature-detail-text">
-                    <h2>See where your revenue is heading</h2>
-                    <p>Argo Books analyzes your historical data to surface trends and forecast revenue. Built-in charts show where your business is headed, with no spreadsheets or external tools needed.</p>
+                    <h2>Scan up to <?= (int) $pricing['receipt_scan_monthly_limit'] ?> receipts a month</h2>
+                    <p>Point your camera at any receipt and Argo Books reads the supplier, date, and total for you, with no typing required. The free plan includes <?= (int) $pricing['free_receipt_scan_monthly_limit'] ?> scans per month, and Premium raises that to <?= (int) $pricing['receipt_scan_monthly_limit'] ?>.</p>
                     <ul class="feature-checklist">
-                        <li><?= svg_icon('check', 20) ?><span>Revenue and expense forecasting</span></li>
-                        <li><?= svg_icon('check', 20) ?><span>Seasonal trend detection</span></li>
-                        <li><?= svg_icon('check', 20) ?><span>Profit margin and anomaly alerts</span></li>
+                        <li><?= svg_icon('check', 20) ?><span>Photos, scans or PDFs, printed or handwritten</span></li>
+                        <li><?= svg_icon('check', 20) ?><span>Auto-categorized by expense type</span></li>
+                        <li><?= svg_icon('check', 20) ?><span>Attached directly to your transaction records</span></li>
                     </ul>
                 </div>
                 <div class="feature-detail-visual">
-                    <img src="../resources/images/features/analytics-dashboard.svg" alt="Predictive analytics dashboard showing revenue forecasts and trend charts" loading="lazy">
+                    <img src="../resources/images/features/receipt-archive.svg" alt="AI receipt scanning archive showing scanned receipts organized by category" loading="lazy">
                 </div>
             </div>
         </div>
@@ -290,7 +290,7 @@ $yearlySavings = ($monthlyPrice * 12) - $yearlyPrice;
             ob_start(); ?>What does Premium include?<?php $q = ob_get_clean();
             ob_start(); ?>
 
-                            <p>Premium includes unlimited invoicing, <?= (int) $pricing['receipt_scan_monthly_limit'] ?> AI receipt scans per month, predictive analytics that forecast trends in your data, biometric login (Windows Hello, Touch ID or your Linux login), and priority customer support.</p>
+                            <p>Premium includes Canadian payroll with T4 slips, unlimited invoicing, <?= (int) $pricing['receipt_scan_monthly_limit'] ?> AI receipt scans per month, predictive analytics that forecast trends in your data, biometric login (Windows Hello, Touch ID or your Linux login), and priority customer support.</p>
                             <p>Premium is available at <strong>$<?php echo number_format($monthlyPrice, 0); ?> CAD/month</strong> or <strong>$<?php echo number_format($yearlyPrice, 0); ?> CAD/year</strong>. The annual plan saves you $<?php echo number_format($yearlySavings, 0); ?> per year.</p>
                         
             <?php $faqs[] = ['q_html' => $q, 'a_html' => ob_get_clean()];
