@@ -84,6 +84,18 @@ $cronConfig = [
             'already_sent' => 'Skipped, already sent this window',
         ],
     ],
+    'cca_rate_reminder' => [
+        'label'     => 'CCA Rate Reminder',
+        'frequency' => 'daily',
+        'description' => 'Asks for the twice yearly check of the CRA Capital Cost Allowance rates the desktop app fills in for Canadian assets. Emails once between the 10th and 20th of December and June, the same windows as the payroll reminder, and goes quiet once resources/downloads/assets/cca.json has a reviewedOn date that month. CCA has no fixed changeover, so the check is mostly confirming nothing moved, then raising the revision and reviewedOn.',
+        'metrics'   => [
+            'in_window'    => 'Ran inside a reminder window',
+            'file_present' => 'Rate file on the server',
+            'reviewed'     => 'Reviewed this month, nothing to ask',
+            'email_sent'   => 'Reminder emails sent',
+            'already_sent' => 'Skipped, already sent this window',
+        ],
+    ],
     'outreach_pipeline' => [
         'label'     => 'Outreach Pipeline',
         'frequency' => 'daily',

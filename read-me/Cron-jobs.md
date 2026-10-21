@@ -593,3 +593,32 @@ The marketing agent runs outside the site, on a schedule in Anthropic's cloud, a
 4. Warns once per stoppage. The next warning needs a finished run in between.
 
 It records how long since the last run and how many posts and emails are waiting for approval, so both can be read on the admin Crons page. See `read-me/Marketing-agent.md` for the agent itself.
+
+---
+
+## 18. CCA Rate Reminder
+
+**Script:** `cron/cca_rate_reminder.php`
+**Frequency:** daily
+
+```
+5 8 * * * /usr/bin/php /home/argorobots/public_html/cron/cca_rate_reminder.php
+```
+
+### What It Does
+
+Emails a reminder to check CRA's Capital Cost Allowance rates, which the desktop app uses to fill in the class and rate of a Canadian company's assets. The app reads them from `resources/downloads/assets/cca.json`, and only replaces its own copy with a file whose `revision` is higher.
+
+Runs daily but does nothing outside the 10th to the 20th of December and June, the same windows as the Payroll Rate Reminder, so both are done in one sitting. CCA has no fixed changeover dates, since budgets change it when they choose, so this asks for a regular check rather than chasing a deadline.
+
+### Behaviour Worth Knowing
+
+Goes quiet as soon as the server's `cca.json` has a `reviewedOn` date in the current month. When nothing changed, raising `revision` and setting `reviewedOn` is the whole job.
+
+Sends **once per window**: it checks `cron_runs` for a successful send naming the same month in the last 30 days.
+
+### Logs
+
+No daily log file. Activity is visible on `/admin/crons/`, and failures go to `error_log`.
+
+Full instructions are in `docs/AssetRateUpdates.md` in the desktop repository.
