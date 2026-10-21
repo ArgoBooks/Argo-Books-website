@@ -93,6 +93,7 @@ try {
         'followup_write' => ['status' => agent_write_followup($pdo, $runId, $in)],
         'finish_run'     => (function () use ($pdo, $runId, $in) {
             agent_finish_run($pdo, $runId, (string) ($in['summary'] ?? ''));
+            agent_mark_decisions_told($pdo, $runId);
             return ['finished' => true, 'update_emailed' => agent_send_update($pdo, $runId)];
         })(),
         default => throw new AgentRefused('UNKNOWN_ACTION', "There is no action called \"$action\".", 404),

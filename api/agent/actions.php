@@ -181,7 +181,9 @@ function agent_email_on_page(string $html, string $email): bool
 {
     $email = strtolower(trim($email));
     $text = strtolower(html_entity_decode($html, ENT_QUOTES | ENT_HTML5, 'UTF-8'));
-    if (str_contains($text, $email) || str_contains(rawurldecode($text), $email)) {
+    // The whole address has to match, so a guess does not pass on a page showing a longer address that contains it.
+    $whole = '/(?<![a-z0-9._%+-])' . preg_quote($email, '/') . '(?![a-z0-9_-]|\.[a-z0-9])/';
+    if (preg_match($whole, $text) || preg_match($whole, rawurldecode($text))) {
         return true;
     }
 
@@ -524,6 +526,9 @@ function agent_carry_out(PDO $pdo, int $id, ?callable $http = null): string
  */
 function agent_add_lead(PDO $pdo, array $payload): int
 {
+    if (!agent_may_touch_outreach()) {
+        throw new AgentRefused('LIVE_SITE_ONLY', 'Not added: only the live site adds to the outreach list, because dev shares it and the live cron would send the email.', 409);
+    }
     $refusal = agent_email_blocked($pdo, $payload['email'], (string) ($payload['website'] ?? ''));
     if ($refusal !== null) {
         throw new AgentRefused($refusal[1], 'Not added: ' . $refusal[0] . '.', 409);
@@ -556,6 +561,9 @@ function agent_add_lead(PDO $pdo, array $payload): int
 /** The follow-ups coming due for leads the agent added, with what was sent before. */
 function agent_followups_due(PDO $pdo): array
 {
+    if (!agent_may_touch_outreach()) {
+        return [];
+    }
     return $pdo->query(
         "SELECT f.id AS followup_id, f.touch_number, f.scheduled_for, l.business_name, l.category, l.city,
                 l.draft_subject AS first_subject, l.draft_body AS first_body, l.sent_at AS first_sent_at
@@ -571,6 +579,9 @@ function agent_followups_due(PDO $pdo): array
  */
 function agent_write_followup(PDO $pdo, ?int $runId, array $in): string
 {
+    if (!agent_may_touch_outreach()) {
+        throw new AgentRefused('LIVE_SITE_ONLY', 'Follow-ups are written only on the live site, because dev shares the outreach list with it.', 409);
+    }
     $id = (int) ($in['followup_id'] ?? 0);
     $body = trim((string) ($in['body'] ?? ''));
     if (mb_strlen($body) < 80 || mb_strlen($body) > 1500) {
@@ -598,21 +609,29 @@ function agent_write_followup(PDO $pdo, ?int $runId, array $in): string
 
 // ─── What a run starts with ───
 
+/** The decisions the agent has not been shown yet, oldest first, optionally only those made before a time. */
+function agent_untold_decisions(PDO $pdo, ?string $decidedBefore = null): array
+{
+    $sql = "SELECT id, kind, platform, status, edited, owner_note, payload, result, decided_at FROM agent_proposals
+             WHERE environment = ? AND status != 'pending' AND told_agent_at IS NULL";
+    $params = [current_environment()];
+    if ($decidedBefore !== null) {
+        $sql .= ' AND decided_at < ?';
+        $params[] = $decidedBefore;
+    }
+    $stmt = $pdo->prepare($sql . ' ORDER BY id LIMIT 40');
+    $stmt->execute($params);
+    return $stmt->fetchAll();
+}
+
 /**
- * What the owner decided about earlier proposals, shown to the agent once. An edit or a
- * rejection is the clearest teaching it gets.
+ * What the owner decided about earlier proposals. An edit or a rejection is the clearest
+ * teaching the agent gets, so each one is shown again until a run that saw it finishes.
  */
 function agent_decisions_to_report(PDO $pdo): array
 {
-    $stmt = $pdo->prepare(
-        "SELECT id, kind, platform, status, edited, owner_note, payload, result, decided_at FROM agent_proposals
-          WHERE environment = ? AND status != 'pending' AND told_agent_at IS NULL ORDER BY id LIMIT 40"
-    );
-    $stmt->execute([current_environment()]);
-    $rows = $stmt->fetchAll();
-
     $out = [];
-    foreach ($rows as $row) {
+    foreach (agent_untold_decisions($pdo) as $row) {
         $payload = json_decode((string) $row['payload'], true) ?: [];
         $out[] = [
             'proposal_id' => (int) $row['id'],
@@ -626,11 +645,22 @@ function agent_decisions_to_report(PDO $pdo): array
             'result' => json_decode((string) $row['result'], true),
         ];
     }
-    if ($rows) {
-        $ids = implode(',', array_map(fn ($r) => (int) $r['id'], $rows));
-        $pdo->exec("UPDATE agent_proposals SET told_agent_at = NOW() WHERE id IN ($ids)");
-    }
     return $out;
+}
+
+/** Marks the decisions a finished run was shown at its start, which are the ones made before it began. */
+function agent_mark_decisions_told(PDO $pdo, int $runId): void
+{
+    $stmt = $pdo->prepare('SELECT started_at FROM agent_runs WHERE id = ? AND environment = ?');
+    $stmt->execute([$runId, current_environment()]);
+    $startedAt = $stmt->fetchColumn();
+    if ($startedAt === false) {
+        return;
+    }
+    $ids = array_map(fn ($r) => (int) $r['id'], agent_untold_decisions($pdo, (string) $startedAt));
+    if ($ids) {
+        $pdo->exec('UPDATE agent_proposals SET told_agent_at = NOW() WHERE id IN (' . implode(',', $ids) . ')');
+    }
 }
 
 /** How recent posts have done, fetched fresh and kept with the proposal. */

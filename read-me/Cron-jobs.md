@@ -588,7 +588,7 @@ No daily log file. Metrics are on `/admin/crons/`, and failures go to `error_log
 The marketing agent runs outside the site, on a schedule in Anthropic's cloud, and emails its own update when a run finishes. A run that never starts sends nothing, so a stopped agent would look the same as a quiet one. This cron is the check from the site's side.
 
 1. Does nothing while the agent is switched off on the admin Agent page.
-2. Looks up when the agent last finished a run.
+2. Looks up when the agent last finished a run. If runs have started but none has ever finished, it uses the first start instead.
 3. Emails the admin if that was more than 36 hours ago.
 4. Warns once per stoppage. The next warning needs a finished run in between.
 

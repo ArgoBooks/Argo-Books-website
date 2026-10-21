@@ -109,7 +109,7 @@ Say plainly when nothing worked. He would rather hear that than a cheerful repor
 
 ## The requests
 
-Every request is a `POST` to `https://argorobots.com/api/agent/?action=NAME` with the header `Authorization: Bearer $AGENT_API_TOKEN` and a JSON body. Every request except `start_run` includes `"run_id"`.
+Every request is a `POST` to `https://argorobots.com/api/agent/?action=NAME` with a JSON body. The environment you run in signs each request for you, so add no Authorization header and do not look for a token. Every request except `start_run` includes `"run_id"`.
 
 - `start_run` with `{}`. Returns everything described above.
 - `sql` with `{"run_id": 1, "query": "SELECT ..."}`. One `SELECT`, up to 300 rows.

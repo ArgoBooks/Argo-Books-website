@@ -9,7 +9,7 @@ The agent holds one secret token and nothing else. Every credential and every li
 ## What it can do
 
 - **Read the numbers.** Visits, the install funnel by referral link, survey answers, uninstall reasons, outreach results, and a count of paying subscribers.
-- **Run SQL**, one `SELECT` at a time, over a fixed list of tables. Customer accounts, payments, licence keys, portal data and synced books are not on the list, and visitor IP addresses are removed from every answer.
+- **Run SQL**, one `SELECT` at a time, over a fixed list of tables. Customer accounts, payments, licence keys, portal data and synced books are not on the list. Visitor IP addresses, and the text people typed into the surveys or the uninstall form, are removed from every answer: that text is theirs, and anyone can write it to try to instruct the agent. It sees the answers they picked.
 - **Make tracked referral links**, with codes starting `ag-`, pointing only at argorobots.com. They are listed under their own category, Marketing agent, on the admin Referral Links page.
 - **Research** through Gemini with Google Search, or with its own web search.
 - **Propose posts** for Bluesky, LinkedIn and Threads.
@@ -23,6 +23,7 @@ The agent holds one secret token and nothing else. Every credential and every li
 - Email anyone the site already knows: a paying subscriber, a licence holder, an account holder, a newsletter subscriber, or anyone who unsubscribed from anything.
 - Email an address it did not read from a page. The site loads the page the agent names and refuses the email if the address is not there.
 - Read customer data.
+- Add to the outreach list anywhere but the live site. Dev shares that list with production, and production's cron sends whatever is approved on it, so on dev an approved email ends as failed and no follow-ups are offered.
 - Read or answer replies. A reply to an outreach email arrives in the contact@argorobots.com inbox, and the `reply_checker` cron marks that business as replied. The agent sees that a business replied and the subject line, not what the reply said. Answering is yours to do.
 
 ## Approval
@@ -33,7 +34,7 @@ The agent starts in approval mode. It writes the post or the email and the site 
 - **Edit and approve** does the same with your wording.
 - **Reject** drops it. Add a line saying why.
 
-Your edits and rejections are shown to the agent at the start of its next run. This is the best teaching it gets, so the one-line reason is worth writing.
+Your edits and rejections are shown to the agent at the start of its next run, and again at the start of each run after it until one of them finishes. This is the best teaching it gets, so the one-line reason is worth writing.
 
 There are two switches, one for posts and one for emails. Turning one off makes that kind go out as soon as the agent writes it. Follow-up emails are the exception to the admin page: while email approval is on they wait in **Outreach, Follow-ups**, which is where follow-ups have always been approved.
 
@@ -141,7 +142,7 @@ At claude.ai/code/routines, create a routine that runs once a day, with the webs
 In the routine's cloud environment:
 
 - Set network access to **Full**. The narrower setting lets it reach argorobots.com but blocks the small business sites it has to read before writing to them.
-- Add an **API credential** of the Bearer kind, holding the token from step 2, for the website `argorobots.com` and the path `/api/agent/`. The environment then adds the token to every request to that address. The agent never sees the token, so nothing it reads on the web can get it to reveal it. Do not put the token in an environment variable: those are not kept secret.
+- Add an **API credential** of the Bearer kind, holding the token from step 1, for the website `argorobots.com` and the path `/api/agent/`. The environment then adds the token to every request to that address. The agent never sees the token, so nothing it reads on the web can get it to reveal it. Do not put the token in an environment variable: those are not kept secret.
 
 The routine also carries two short notes for Claude's own safety check, which otherwise stops the agent from sending SQL to a live site. One says that argorobots.com is the owner's own site and that its `/api/agent/` endpoint was built for this routine. The other allows read-only `SELECT` queries to the `sql` action. They cannot be entered on the routine's page. Claude Code sets them, so ask it to if the routine is ever made again.
 

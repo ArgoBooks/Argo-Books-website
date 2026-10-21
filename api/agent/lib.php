@@ -129,6 +129,12 @@ function agent_finish_run(PDO $pdo, int $runId, string $summary): void
         ->execute([$summary, $runId, current_environment()]);
 }
 
+/** The outreach list has no environment column and only the live site runs the cron that sends from it, so a lead added on dev is really emailed. */
+function agent_may_touch_outreach(): bool
+{
+    return current_environment() === 'production';
+}
+
 /** True when the Outreach page's own switch lets the cron send. An approved email waits while it is off. */
 function agent_outreach_sending(PDO $pdo): bool
 {
@@ -286,8 +292,11 @@ const AGENT_READABLE_TABLES = [
     'agent_runs', 'agent_actions', 'agent_journal', 'agent_notes', 'agent_proposals',
 ];
 
-/** Columns never sent back, whichever table they sit in. Visitors' addresses are not the agent's business. */
-const AGENT_HIDDEN_COLUMNS = ['ip_address', 'ip', 'license_key', 'unsubscribe_token', 'subscription_id', 'user_id'];
+/** Columns never sent back, whichever table they sit in. Text visitors typed is theirs, and anyone can write it to instruct the agent. */
+const AGENT_HIDDEN_COLUMNS = [
+    'ip_address', 'ip', 'license_key', 'unsubscribe_token', 'subscription_id', 'user_id',
+    'source_survey_other_text', 'survey_goal_other_text', 'exit_survey_text', 'comment',
+];
 
 const AGENT_SQL_MAX_ROWS = 300;
 

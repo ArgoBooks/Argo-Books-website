@@ -4,7 +4,8 @@ declare(strict_types=1);
 /**
  * agent_watch.php
  *
- * Emails the admin when the marketing agent has not finished a run for a day and a half.
+ * Emails the admin when the marketing agent has not finished a run for a day and a half,
+ * including when runs have started but none has ever finished.
  *
  * The agent runs outside the site, on a schedule in Anthropic's cloud, and sends its own
  * update when a run finishes. A run that never starts sends nothing, so on its own a stopped
@@ -40,9 +41,11 @@ try {
     }
     cron_metric_set('agent_on', 1);
 
-    $stmt = $pdo->prepare('SELECT MAX(finished_at) FROM agent_runs WHERE environment = ?');
+    $stmt = $pdo->prepare('SELECT MAX(finished_at), MIN(started_at) FROM agent_runs WHERE environment = ?');
     $stmt->execute([current_environment()]);
-    $last = $stmt->fetchColumn();
+    [$lastFinished, $firstStarted] = $stmt->fetch(PDO::FETCH_NUM);
+    // Runs that start and never finish are a stoppage too, so with none finished the clock runs from the first start.
+    $last = $lastFinished ?: $firstStarted;
     $hours = $last ? (int) floor((time() - strtotime((string) $last)) / 3600) : null;
     cron_metric_set('hours_since_last_run', $hours ?? -1);
 
@@ -50,7 +53,7 @@ try {
     $waiting->execute([current_environment()]);
     cron_metric_set('waiting_for_approval', (int) $waiting->fetchColumn());
 
-    // No run at all yet is setup still in progress, not a stoppage.
+    // No run started yet is setup still in progress, not a stoppage.
     if ($hours === null || $hours < 36) {
         cron_run_finish($pdo, $runId, 'ok');
         exit(0);
@@ -64,7 +67,9 @@ try {
     }
 
     $body = '<h2>The marketing agent has stopped running</h2>'
-          . '<p>Its last finished run was ' . htmlspecialchars((string) $last) . ', ' . $hours . ' hours ago. It is meant to run once a day.</p>'
+          . ($lastFinished
+              ? '<p>Its last finished run was ' . htmlspecialchars((string) $lastFinished) . ', ' . $hours . ' hours ago. It is meant to run once a day.</p>'
+              : '<p>It has started runs since ' . htmlspecialchars((string) $firstStarted) . ', ' . $hours . ' hours ago, but none has finished. A run that never calls finish_run sends no update.</p>')
           . '<p>Things to check: the schedule at claude.ai/code/routines, whether the Claude plan has run out of usage, '
           . 'and whether the last run there shows an error.</p>'
           . '<p><a href="https://argorobots.com/admin/agent/">Open the agent page</a></p>';
