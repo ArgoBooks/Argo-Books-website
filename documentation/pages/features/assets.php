@@ -69,7 +69,7 @@ include __DIR__ . '/../../docs-header.php';
                 <li><strong>Cash Flow Statement:</strong> buying and selling assets appears under Investing Activities rather than with your everyday expenses.</li>
                 <li><strong>Asset Register:</strong> a report listing every asset with its cost, depreciation in the period and so far, and what it's worth now, plus any sold or disposed of in the period. See <a class="link" href="report-generator.php">Report Generator</a>.</li>
             </ul>
-            <p>The Dashboard and Analytics count money as it comes and goes, so they still show an asset purchase as an expense on the day you paid for it. See <a class="link" href="../reference/how-numbers-are-calculated.php#fixed-assets">How Numbers Are Calculated</a>.</p>
+            <p>The Dashboard and Analytics count money as it comes and goes, so they still show an asset purchase as an expense on the day you paid for it, and add what you sold it for to your profit on the day you sold it. See <a class="link" href="../reference/how-numbers-are-calculated.php#fixed-assets">How Numbers Are Calculated</a>.</p>
 
             <h2>Managing Existing Assets</h2>
             <p>From the Assets page, you can edit or delete any asset using the action buttons in each row. Deleting an asset that came from an expense means that expense counts as an ordinary expense again. Every change can be undone.</p>

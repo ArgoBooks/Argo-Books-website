@@ -188,7 +188,7 @@ include __DIR__ . '/../../docs-header.php';
                 <li><strong>Depreciation</strong> is counted at the end of each month, from the month you bought the asset until it reaches its value at end or leaves the business.</li>
                 <li><strong>Selling an asset</strong> shows a gain or loss on the Income Statement: what you got for it, less what it was worth on your books. The money from the sale counts as cash, so don't also record it as revenue.</li>
                 <li><strong>On the Balance Sheet,</strong> assets you still hold show at what they cost, less the depreciation so far.</li>
-                <li><strong>The Dashboard and Analytics</strong> count money as it comes and goes, so they show the purchase as an expense on the day you paid for it, like any other expense.</li>
+                <li><strong>The Dashboard and Analytics</strong> count money as it comes and goes, so they show the purchase as an expense on the day you paid for it, like any other expense. What you sell it for is added to your profit on the day you sell it, but not to your revenue, since it isn't a sale to a customer.</li>
             </ul>
             <p>An asset bought in a currency other than your company's is converted at the rate on its purchase date, and a sale at the rate on the sale date. See <a href="../features/assets.php" class="link">Fixed Assets</a> for how to set assets up.</p>
 
