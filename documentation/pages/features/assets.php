@@ -46,6 +46,17 @@ include __DIR__ . '/../../docs-header.php';
                 <strong>Use the lifetime or rate your accountant gives you.</strong> Tax rules set their own rates for each kind of asset (Capital Cost Allowance in Canada, MACRS in the US), and they can differ from what you'd pick yourself. Argo Books shows depreciation in your reports but doesn't file taxes, so check the figures with your accountant.
             </div>
 
+            <h2>Canadian Companies: CRA Rates Filled In</h2>
+            <p>If your company is in Canada, the asset form fills in CRA's Capital Cost Allowance class and rate for you. Pick the asset's type and Argo Books picks its class, for example Class 10 at 30% a year for a vehicle or Class 50 at 55% for a computer, and sets the depreciation to match. You can choose a different class from the "CRA class" list, or change the rate, if your accountant tells you to.</p>
+            <p>An asset with a CRA class is depreciated the way CRA works it out:</p>
+            <ul>
+                <li><strong>By calendar year:</strong> each year takes the class's rate of what's left.</li>
+                <li><strong>A different first year:</strong> CRA only allows part of the rate, or sometimes more, in the year you buy an asset. The half-year rule allows half; recent budgets have allowed one and a half times the rate for a few years to encourage investment. Argo Books uses the rule for the date you bought it, and the form says which.</li>
+                <li><strong>Nothing in the year it's sold:</strong> the year an asset leaves the business has no depreciation.</li>
+            </ul>
+            <p>Argo Books keeps the rates up to date, so a budget's change reaches you without installing an update. On the expense form, ticking "This is an asset" asks a Canadian company for the CRA class instead of a number of years.</p>
+            <p>A few things CRA handles that Argo Books doesn't: the cost limit on class 10.1 passenger vehicles, tax years that don't end on December 31, and depreciating a whole class as one pool. Your accountant takes care of these when filing.</p>
+
             <h2>Selling or Disposing of an Asset</h2>
             <p>When an asset leaves the business, click the "Sell or dispose" button on its row on the Assets page. Choose whether it was sold or scrapped or given away, the date, and the sale price if it was sold.</p>
             <p>The window shows what the asset was worth on your books on that date, and whether the sale is a gain or a loss: the difference between what you got for it and that book value. Depreciation stops from the month it left.</p>
