@@ -73,7 +73,7 @@ include __DIR__ . '/../../docs-header.php';
             <div class="page-navigation">
                 <a href="spreadsheet-import.php" class="nav-button prev">
                     <span class="nav-label">Previous</span>
-                    <span class="nav-title">&larr; AI Spreadsheet Import</span>
+                    <span class="nav-title">&larr; Spreadsheet Import</span>
                 </a>
                 <a href="spreadsheet-export.php" class="nav-button next">
                     <span class="nav-label">Next</span>

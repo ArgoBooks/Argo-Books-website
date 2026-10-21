@@ -2,7 +2,7 @@
 require_once __DIR__ . '/../../../config/pricing.php';
 require_once __DIR__ . '/../../../resources/icons.php';
 $pricing = get_pricing_config();
-$pageTitle = 'AI Spreadsheet Import';
+$pageTitle = 'Spreadsheet Import';
 $pageDescription = 'Import data from any Excel or CSV spreadsheet into Argo Books. AI automatically detects your data types and maps columns, with no reformatting needed.';
 $currentPage = 'spreadsheet-import';
 $pageCategory = 'features';
@@ -56,10 +56,10 @@ include __DIR__ . '/../../docs-header.php';
             </div>
 
             <h2>Column Mapping</h2>
-            <p>The AI uses two approaches depending on your data:</p>
+            <p>AI reads each sheet's column names and a sample of its rows, and works out which Argo Books field each column holds. How your rows are then brought in depends on what it finds:</p>
             <ul>
-                <li><strong>Direct Mapping</strong>: When your column names are close enough to what Argo Books expects (e.g., "Customer Name" → "Name"), the columns are mapped directly with no AI processing of the data itself. This is fast and deterministic.</li>
-                <li><strong>AI Processing</strong>: When your data needs transformation (e.g., dates in a different format, combined fields that need splitting), the AI processes your rows to normalize them. You'll see this indicated in the review dialog.</li>
+                <li><strong>Direct Mapping</strong>: When the values already fit, such as a "Customer Name" column holding names, Argo Books copies each row into the matched fields itself. The rows aren't sent to the AI, so this is fast and gives the same result every time.</li>
+                <li><strong>AI Processing</strong>: When the values need reworking, such as dates in an unusual format or a whole address in one cell, the AI rewrites the rows into the right fields. The review dialog shows when this will happen.</li>
             </ul>
 
             <h2>Reviewing the Mapping</h2>

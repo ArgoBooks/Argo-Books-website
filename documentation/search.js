@@ -35,7 +35,7 @@
             { id: 'lost-damaged', title: 'Lost & Damaged Inventory', category: 'Core Features', folder: 'features', keywords: 'lost damaged stolen expired shrinkage write off loss value inventory tracking' },
             { id: 'receipts', title: 'Receipt Management', category: 'Core Features', folder: 'features', keywords: 'receipt digital attach microsoft lens export archive' },
             { id: 'receipt-scanning', title: 'AI Receipt Scanning', category: 'Core Features', folder: 'features', keywords: 'ai receipt scanning ocr photo image pdf extract vendor date line items totals tax premium' },
-            { id: 'spreadsheet-import', title: 'AI Spreadsheet Import', category: 'Core Features', folder: 'features', keywords: 'import excel spreadsheet xlsx csv column mapping confidence validation customers suppliers products expenses revenue' },
+            { id: 'spreadsheet-import', title: 'Spreadsheet Import', category: 'Core Features', folder: 'features', keywords: 'import excel spreadsheet xlsx csv column mapping confidence validation customers suppliers products expenses revenue' },
             { id: 'spreadsheet-export', title: 'Spreadsheet Export', category: 'Core Features', folder: 'features', keywords: 'export excel spreadsheet xlsx backup data currency conversion chart google sheets' },
             { id: 'history-modal', title: 'Version History', category: 'Core Features', folder: 'features', keywords: 'version history audit log timeline changes added modified deleted undone redone search filter' },
 

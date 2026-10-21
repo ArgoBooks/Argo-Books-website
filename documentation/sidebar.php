@@ -52,7 +52,7 @@ $sidebarSections = [
             'lost-damaged' => ['title' => 'Lost & Damaged Inventory'],
             'receipts' => ['title' => 'Receipt Management'],
             'receipt-scanning' => ['title' => 'AI Receipt Scanning'],
-            'spreadsheet-import' => ['title' => 'AI Spreadsheet Import'],
+            'spreadsheet-import' => ['title' => 'Spreadsheet Import'],
             'quickbooks-import' => ['title' => 'Import from QuickBooks'],
             'spreadsheet-export' => ['title' => 'Spreadsheet Export'],
             'send-to-accountant' => ['title' => 'Send to Accountant'],
