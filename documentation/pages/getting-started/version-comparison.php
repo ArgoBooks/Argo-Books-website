@@ -120,6 +120,11 @@ include __DIR__ . '/../../docs-header.php';
                             <td>✓</td>
                         </tr>
                         <tr>
+                            <td>Fixed Assets &amp; Depreciation</td>
+                            <td>✓</td>
+                            <td>✓</td>
+                        </tr>
+                        <tr>
                             <td>Receipt Management</td>
                             <td>✓</td>
                             <td>✓</td>

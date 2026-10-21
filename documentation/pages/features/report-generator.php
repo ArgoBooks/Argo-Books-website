@@ -30,7 +30,7 @@ include __DIR__ . '/../../docs-header.php';
             <ul>
                 <li><strong>Income Statement:</strong> Revenue, expenses, and net income over the selected period</li>
                 <li><strong>Balance Sheet:</strong> Assets, liabilities, and equity at a point in time</li>
-                <li><strong>Cash Flow Statement:</strong> Cash coming in from sales and invoice payments, and going out on expenses, over the selected period</li>
+                <li><strong>Cash Flow Statement:</strong> Cash coming in from sales and invoice payments, and going out on expenses, over the selected period, with buying and selling fixed assets shown separately as investing activities</li>
                 <li><strong>General Ledger:</strong> Every transaction, listed by category with its debit or credit and a running balance</li>
                 <li><strong>Accounts Receivable Aging:</strong> Outstanding customer payments grouped by age</li>
                 <li><strong>Customer Statement:</strong> What one customer owes you, ready to send to them (see below)</li>
@@ -41,6 +41,7 @@ include __DIR__ . '/../../docs-header.php';
                 <li><strong>Payroll Remittance:</strong> What you owe the CRA for your payroll over the selected period (Premium, Canadian payroll)</li>
                 <li><strong>Payroll Summary:</strong> Each employee's gross pay, CPP or QPP, EI or QPIP, income tax and net pay, with the employer's contributions and the total payroll cost (Premium, Canadian payroll)</li>
                 <li><strong>Rentals:</strong> What is rented out today with the deposit held on each, what came back in the selected period and what it earned, and the deposits held in total</li>
+                <li><strong>Asset Register:</strong> Every fixed asset you hold with what it cost, its depreciation in the selected period and so far, and what it's worth now, plus any sold or disposed of in the period. See <a class="link" href="assets.php">Fixed Assets</a></li>
             </ul>
 
             <h3>Customer Statements</h3>

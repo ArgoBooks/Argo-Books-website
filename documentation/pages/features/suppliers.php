@@ -47,9 +47,9 @@ include __DIR__ . '/../../docs-header.php';
                     <span class="nav-label">Previous</span>
                     <span class="nav-title">&larr; Product Management</span>
                 </a>
-                <a href="inventory.php" class="nav-button next">
+                <a href="assets.php" class="nav-button next">
                     <span class="nav-label">Next</span>
-                    <span class="nav-title">Inventory Management &rarr;</span>
+                    <span class="nav-title">Fixed Assets &rarr;</span>
                 </a>
             </div>
         </div>

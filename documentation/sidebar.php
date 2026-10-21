@@ -44,6 +44,7 @@ $sidebarSections = [
             'customers' => ['title' => 'Customer Management'],
             'product-management' => ['title' => 'Product Management'],
             'suppliers' => ['title' => 'Supplier Management'],
+            'assets' => ['title' => 'Fixed Assets'],
             'inventory' => ['title' => 'Inventory Management'],
             'locations' => ['title' => 'Locations'],
             'purchase-orders' => ['title' => 'Purchase Orders'],

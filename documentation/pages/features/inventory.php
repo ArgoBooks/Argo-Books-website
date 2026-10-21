@@ -79,9 +79,9 @@ include __DIR__ . '/../../docs-header.php';
             </ul>
 
             <div class="page-navigation">
-                <a href="suppliers.php" class="nav-button prev">
+                <a href="assets.php" class="nav-button prev">
                     <span class="nav-label">Previous</span>
-                    <span class="nav-title">&larr; Supplier Management</span>
+                    <span class="nav-title">&larr; Fixed Assets</span>
                 </a>
                 <a href="locations.php" class="nav-button next">
                     <span class="nav-label">Next</span>
