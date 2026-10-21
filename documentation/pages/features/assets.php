@@ -47,14 +47,14 @@ include __DIR__ . '/../../docs-header.php';
             </div>
 
             <h2>Canadian Companies: CRA Rates Filled In</h2>
-            <p>If your company is in Canada, the asset form fills in CRA's Capital Cost Allowance class and rate for you. Pick the asset's type and Argo Books picks its class, for example Class 10 at 30% a year for a vehicle or Class 50 at 55% for a computer, and sets the depreciation to match. You can choose a different class from the "CRA class" list, or change the rate, if your accountant tells you to.</p>
+            <p>If your company is in Canada, the asset form fills in CRA's Capital Cost Allowance class and rate for you. Each choice in the Type list shows its class and rate, such as "Vehicle (Class 10, 30%)" or "Computer equipment (Class 50, 55%)", and picking one sets the depreciation to match. Where a type can be in more than one class, the list has both, such as "Passenger vehicle over CRA's limit (Class 10.1, 30%)". You can still change the rate if your accountant tells you to.</p>
             <p>An asset with a CRA class is depreciated the way CRA works it out:</p>
             <ul>
                 <li><strong>By calendar year:</strong> each year takes the class's rate of what's left.</li>
                 <li><strong>A different first year:</strong> CRA only allows part of the rate, or sometimes more, in the year you buy an asset. The half-year rule allows half; recent budgets have allowed one and a half times the rate for a few years to encourage investment. Argo Books uses the rule for the date you bought it, and the form says which.</li>
                 <li><strong>Nothing in the year it's sold:</strong> the year an asset leaves the business has no depreciation.</li>
             </ul>
-            <p>Argo Books keeps the rates up to date, so a budget's change reaches you without installing an update. On the expense form, ticking "This is an asset" asks a Canadian company for the CRA class instead of a number of years.</p>
+            <p>Argo Books keeps the rates up to date, so a budget's change reaches you without installing an update. On the expense form, the type you pick under "This is an asset" carries its CRA class the same way, so a Canadian company isn't asked for a number of years.</p>
             <p>A few things CRA handles that Argo Books doesn't: the cost limit on class 10.1 passenger vehicles, tax years that don't end on December 31, and depreciating a whole class as one pool. Your accountant takes care of these when filing.</p>
 
             <h2>Selling or Disposing of an Asset</h2>
@@ -73,6 +73,9 @@ include __DIR__ . '/../../docs-header.php';
 
             <h2>Managing Existing Assets</h2>
             <p>From the Assets page, you can edit or delete any asset using the action buttons in each row. Deleting an asset that came from an expense means that expense counts as an ordinary expense again. Every change can be undone.</p>
+
+            <h2>Assets in Spreadsheets</h2>
+            <p>File &gt; Export As includes an Assets sheet with each asset's cost, depreciation settings, depreciation so far and value today, which is the list an accountant usually asks for at year end. An Assets sheet can also be brought in with <a class="link" href="spreadsheet-import.php">Spreadsheet Import</a>, for example to add assets you owned before using Argo Books all at once. For a Canadian company the sheet only needs each asset's CRA class: the rate and first-year rule are filled in from it.</p>
 
             <div class="page-navigation">
                 <a href="suppliers.php" class="nav-button prev">
