@@ -147,6 +147,7 @@ jobs:
         run: |
           DEPLOY_TARGETS="${{ secrets.FTP_SERVER_DIR }} ${{ secrets.FTP_DEV_SERVER_DIR }}"
 
+          # Markdown files are notes and stay off the server, except the agent's playbook and facts, which api/agent/lib.php reads.
           for REMOTE_DIR in $DEPLOY_TARGETS; do
             echo "=== Full mirror deploy to ${REMOTE_DIR} ==="
             lftp -u "${{ secrets.FTP_USERNAME }}," \
@@ -167,6 +168,8 @@ jobs:
                     --exclude ^resources/updates[^/]*/.*\.nupkg$ \
                     --exclude ^resources/updates[^/]*/.*\.exe$ \
                     --exclude ^resources/downloads/[0-9]+\.[0-9]+\.[0-9]+/$ \
+                    --exclude \.md$ \
+                    --include ^api/agent/[^/]*\.md$ \
                     ./ ${REMOTE_DIR}; \
                   bye" \
               sftp://${{ secrets.FTP_SERVER }}
@@ -181,6 +184,8 @@ jobs:
           is_excluded() {
             case "$1" in
               .git/*|.github/*|.gitignore|README.md|CLAUDE.md|read-me/*|composer.json|composer.lock|mysql_schema.sql|phpunit.xml|tests/*|.ftp-deploy-sync-state.json) return 0 ;;
+              api/agent/*.md) return 1 ;;
+              *.md) return 0 ;;
               *) return 1 ;;
             esac
           }

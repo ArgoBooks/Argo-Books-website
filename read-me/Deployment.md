@@ -22,6 +22,7 @@ Everything in `.gitignore` is automatically skipped (it's not in the runner's ch
 
 - `.git/`, `.github/`, `.gitignore`
 - `README.md`, `CLAUDE.md`, `read-me/`
+- every other `.md` file, except `api/agent/playbook.md` and `api/agent/facts.md`, which the agent endpoint reads from the server
 - `composer.json`, `composer.lock` (the runner uses them, but they don't go to the server)
 - `mysql_schema.sql`
 - `phpunit.xml`, `tests/` (PHPUnit suite, local-only)
