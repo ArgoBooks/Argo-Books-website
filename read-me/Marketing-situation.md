@@ -1,6 +1,8 @@
 # Marketing situation
 
-Context snapshot for anyone (including Claude) picking up marketing work. Numbers are as of **2026-09-03** unless a line says otherwise. Update this file when the picture changes.
+Context snapshot for anyone (including Claude) picking up marketing work. Update this file when the picture changes.
+
+Last updated: 2026-10-21.
 
 Related: [Google-Ads-economics.md](Google-Ads-economics.md), [Email-outreach.md](Email-outreach.md).
 
@@ -8,18 +10,19 @@ Related: [Google-Ads-economics.md](Google-Ads-economics.md), [Email-outreach.md]
 
 - Solo founder, bootstrapping. Argo Books has been in development for about 2 years.
 - Windows, macOS, and Linux. The macOS build shipped 2026-09-09, signed and notarized, for Apple Silicon and Intel; see [macOS](#macos).
-- **8 paying customers: 2 subscriptions and 6 one-time.** The two subscribers signed up around May, both auto-renewed and are still active, although they don't use the app.
+- **8 paying customers: 2 subscriptions and 6 one-time.** The two subscribers signed up around May and both auto-renewed for months, although neither used the app. One has now stopped (see MRR below), leaving 1 active subscription.
   - Customer 1 came from a YouTube video (the receipt scanning one).
   - Customer 2 came from Google search.
   - Customers 3 to 8 bought the lifetime deal through Stack Social, one each on 2026-08-27, 2026-09-27, 2026-09-28, 2026-09-29, 2026-10-01 and 2026-10-03. None of them produce recurring revenue.
 - Pricing: \$15/month or \$150/year. Customer 1 is paying \$10/month with no payment processing fee added, because I increased the price after he signed up.
-- Revenue: **\$102.96 CAD from subscriptions** all time (2026-09-29), all of it inside the last year, plus **\$139.11 USD from Stack Social** across six lifetime sales (2026-10-03). Kept in their own currencies because that is how each is paid. Stack Social keys are reseller keys and never touch the site's billing, so they are absent from the admin revenue figures entirely.
-- **MRR has been flat at \$25.74 since June 2026.** Four months, no growth: all-time subscription revenue is exactly four months of it. 2 active licenses, 0% churn so far.
-- Running costs: **~\$170 CAD/month.** Claude Code \$140, Azure code signing \$10, Apple Developer Program \$10, website hosting and domain \$10. Against \$25.74 of revenue that is about \$145/month out of pocket, so a \$1,000 spend is roughly seven months of runway.
+- Revenue: **\$112.96 CAD from subscriptions** all time, all of it inside the last year, plus **\$139.11 USD from Stack Social** across six lifetime sales (2026-10-03). Kept in their own currencies because that is how each is paid. Stack Social keys are reseller keys and never touch the site's billing, so they are absent from the admin revenue figures entirely.
+- **MRR fell to \$15.74 in October**, after sitting flat at \$25.74 from June to September. Active licenses went from 2 to 1: the first subscriber churn. The \$10 drop matches Customer 1's price, so it is most likely them; confirm on `/admin/license/`.
+- Running costs: **~\$170 CAD/month.** Claude Code \$140, Azure code signing \$10, Apple Developer Program \$10, website hosting and domain \$10. Against \$15.74 of recurring revenue that is about \$154/month out of pocket, so a \$1,000 spend is roughly six and a half months of runway.
 - **The "LTV" tile on `/admin/marketing-funnel/` is not lifetime value.** It computes `total_revenue / total_paying` (see `admin/marketing-funnel/index.php`), which is revenue booked to date per customer. It reads low early and drifts up as customers renew. Do not quote it as LTV.
-- **LTV is not known.** Both customers are only a few months in and neither has churned, so there is no retention data to calculate it from.
-- App telemetry, excluding my own device: **40 people have installed and run the app** (2026-09-15). Most open it, spend a few minutes without really doing anything, and leave. From the 28 Aug snapshot, when the count was 35: 21 active in the last 30 days, 8 on a Premium identity, and only 9 ever came back on a second day.
-- **Both paying customers have not opened the app in over a month**, despite still being billed. A feedback email went to both and neither replied. 0% churn is not a retention signal yet, because the numbers are too small and not enough time has passed.
+- **LTV is not known.** One subscriber has churned after about five months and the other is still paying, which is far too little data to calculate it from.
+- App telemetry, excluding my own device: **133 devices have installed and run the app**, up from 40 on 2026-09-15. 81 of them first ran in October, 48 of those on a Mac (see [the October jump](#the-october-jump)). By platform: 77 Windows, 53 macOS, 3 Linux. Most are in the United States, then Canada.
+- **Use is thin.** Across the 133, the median total time active in the app is 1.5 minutes. 65 created a company of their own, 48 came back on a second day, 6 on five or more days, and only **10 have ever recorded an expense, a sale or an invoice**. 98 opened it in the last 30 days and 38 in the last 7.
+- **Neither subscriber has opened the app in over a month.** A feedback email went to both and neither replied. One has since stopped paying, which is what paying for an unused app eventually leads to; the other is likely to follow unless they start using it.
 
 ## Traffic numbers are not trustworthy yet
 
@@ -32,24 +35,56 @@ Those two pictures do not reconcile, and the internal one is the suspect one:
 - 4,206 direct visitors means "no referrer sent". This is a suspicion, not a measurement. Nobody has verified how much of it is bots, so do not state it as settled. For a site with essentially no brand awareness, almost nobody is typing the URL in. Bots, scrapers, uptime checks, and referrer-stripped traffic all land in this bucket. The site's bot filter (`is_likely_bot()` in `statistics.php`) is basic and probably not catching everything.
 - Average position in Search Console is very low. Organic search is indexed but barely being served to anyone.
 
-What **is** trustworthy is app telemetry, because it requires someone to actually install and run a desktop app: 40 unique users as of 2026-09-15. Work backwards from that number, not from 5.1k.
+What **is** trustworthy is app telemetry, because it requires someone to actually install and run a desktop app: 133 devices. Work backwards from that number, not from the landing count.
 
 ## Funnel (all traffic, all time)
 
-From `/admin/marketing-funnel/`, 2026-09-15.
+From `/admin/marketing-funnel/`.
 
-| Step | Count | From previous step |
-|---|---|---|
-| Landing | 5,100 | |
-| Downloads page | 434 | 8.6% |
-| Download click | 72 | 16.6% |
-| App first run | 40 | 55.6% |
-| Premium signup | 2 | 5.0% |
-| Premium paid | 2 | 100% |
+| Step | All time | From previous step | Last 30 days | From previous step |
+|---|---|---|---|---|
+| Landing | 6,000 | | 862 | |
+| Downloads page | 599 | 10.0% | 154 | 17.9% |
+| Download click | 172 | 28.7% | 93 | 60.4% |
+| App first run | 145 | 84.3% | 102 | 110% |
+| Premium signup | 2 | 1.4% | 0 | 0% |
+| Premium paid | 2 | 100% | 0 | |
 
-The landing figure may be inflated by bots, so the 91% drop from landing to downloads page is not useful. Treat it as unresolved rather than explained. The steps that are real: 72 download clicks produced 40 first runs, and 2 of those 40 became paying customers. Conversion after install is fine. The problem is that only 40 humans have ever installed it.
+The landing figure may be inflated by bots, so the drop from landing to downloads page is not useful. Treat it as unresolved rather than explained.
 
-Top entry pages: `/` (2.34), `/downloads/` (325), `/pricing/` (259), `/features/invoicing/` (224), `/compare/argo-books-vs-quickbooks/` (145).
+- **First runs now outnumber download clicks** in the last 30 days, because Microsoft Store and Homebrew installs never pass through the website. From here on, download clicks undercount installs.
+- **Nobody who installed in the last 30 days has paid**, apart from the Stack Social buyers, who never touch the site's billing. Both Premium signups date from around May.
+- The funnel's 145 first runs and the 133 devices above probably differ because the 133 leave out my own devices.
+
+Top entry pages (2026-09-15): `/` (2.34), `/downloads/` (325), `/pricing/` (259), `/features/invoicing/` (224), `/compare/argo-books-vs-quickbooks/` (145).
+
+### Installs by tagged source
+
+From the users-by-source export. Only visits that arrive on a tagged link are counted here, so these 44 installs are a third of the 133. The rest came with no tag: search, the Microsoft Store, Homebrew, or someone typing the address.
+
+| Source | Landings | Download clicks | Installs | Paying |
+|---|---|---|---|---|
+| YouTube (video links and channel) | 125 | 48 | 23 | 1 |
+| AI assistants | 108 | 15 | 15 | 0 |
+| Paid ads (Google) | 80 | 5 | 2 | 0 |
+| Social media | 147 | 2 | 2 | 0 |
+| Website guides | 417 | 2 | 1 | 0 |
+| Affiliates | 1 | 1 | 1 | 0 |
+| Invoice generator | 449 | 0 | 0 | 0 |
+| Directories | 36 | 0 | 0 | 0 |
+
+- **AI assistants are now the second biggest tagged source**: DuckDuckGo's assistant sent 11 installs and ChatGPT 4, with no work put in. Being described accurately on the site is what feeds this.
+- **YouTube is still the best**, and still the only tagged source with a paying customer. The Desktop accounting video produced 8 installs, the most of any single link.
+- **The invoice generator and the guides bring traffic that does not install.** 449 and 417 landings for 0 and 1 installs. They are good for search, not for downloads.
+
+### The October jump
+
+New devices by month: 10 in June, 6 in July, 15 in August, 21 in September, **81 in October** (to the 21st). Two listings went live just before it:
+
+- **Homebrew**, added on 2026-10-02. New Macs went from about one a week to 10, 7 and 4 on 3, 4 and 5 October, and have stayed at a few a week since. 48 of October's 81 are Macs.
+- **The Microsoft Store**, live around 2026-10-01. New Windows devices rose from about one every two days to a few a day over the same week.
+
+Neither listing tells us its installs, so this is timing, not proof. But nothing else changed that week, and the Mac jump is too sharp to be chance. It suggests store listings reach people that the website does not, which raises the priority of Flathub, Snapcraft and the Mac App Store.
 
 ### Per-source funnel, and why YouTube traffic is different
 
@@ -90,23 +125,29 @@ The app already offers an optional email sign-up for update news, on the dashboa
 ## What has been tried
 
 ### YouTube channel
-9 videos, **496 total views** (channel checked 3 Sept 2026). Best performer is "Best Free AI Receipt Scanner" (223 views, 3 months old), which produced one of the two paying customers. Also posting comments on other accounting software videos mentioning Argo Books.
+13 videos, **2,150 total views**, 34.1 hours watched and 13 subscribers (YouTube Analytics, lifetime). 10,410 thumbnail impressions at a 7.4% click-through rate. That is four times the views of 3 Sept, and the daily views have climbed steadily since mid-September, led by one video. Also posting comments on other accounting software videos mentioning Argo Books.
 
-Current view counts, newest first:
+- **"Top 5 Free Desktop Accounting Software (2026)" is now the best performer**: 646 views in under six weeks, 9.1% click-through, 4 subscribers and 8 installs through its link, the most of any single link. Its daily views are still rising.
+- **"Best Free AI Receipt Scanner"** is second with 543 views. It produced one of the two paying subscribers.
+- **Titles taken from real search queries work.** The "Best Free ..." videos for desktop accounting and inventory have the most views of the September batch. Payroll for Canada and rental management are newer and still small, and payroll serves a smaller, Canada-only audience.
 
-| Video | Views | Age |
+View counts from YouTube Studio, newest first:
+
+| Video | Published | Views |
 |---|---|---|
-| Best Free Invoicing Software for Small Business (2026) | 5 | 15 hours |
-| QuickBooks Receipt Scanner vs a Free Alternative (2026) | 8 | 2 days |
-| How To Redeem Your Argo Books License Key | 7 | 12 days |
-| Scan Receipts Into Excel Automatically (Free) | 40 | 3 weeks |
-| QuickBooks Desktop Is Discontinued: What To Do Now | 51 | 1 month |
-| Best Free QuickBooks Alternative in 2026 | 63 | 1 month |
-| Free invoicing with online payments | 28 | 2 months |
-| Best Free AI Receipt Scanner | 223 | 3 months |
-| Argo Books Demo | 73 | 4 months |
-
-Subscriber count: 3.
+| Payroll Software for Small Business in Canada (2026) | 2026-09-27 | 24 |
+| Best Free Rental Management Software for Small Business (2026) | 2026-09-25 | 49 |
+| Best Free Inventory Management Software for Small Business (2026) | 2026-09-15 | 172 |
+| Top 5 Free Desktop Accounting Software (2026) | 2026-09-12 | 646 |
+| Best Free Invoicing Software for Small Business (2026) | 2026-09-03 | 62 |
+| QuickBooks Receipt Scanner vs a Free Alternative (2026) | 2026-08-31 | 29 |
+| How To Redeem Your Argo Books License Key | 2026-08-22 | 23 |
+| Scan Receipts Into Excel Automatically (Free) | 2026-08-06 | 117 |
+| QuickBooks Desktop Is Discontinued: What To Do Now | 2026-07-30 | 65 |
+| Best Free QuickBooks Alternative in 2026 | 2026-07-17 | 123 |
+| Free invoicing with online payments | 2026-06-03 | 33 |
+| Best Free AI Receipt Scanner | 2026-06-02 | 543 |
+| Argo Books Demo | 2026-04-08 | 130 |
 
 ### Stack Social
 A Stack Social deal went live late August. **Six sales so far, one each on 2026-08-27, 2026-09-27, 2026-09-28, 2026-09-29, 2026-10-01 and 2026-10-03.** Argo Books Premium is being sold as a lifetime deal of $83.99 CAD. My share of the revenue is 45-50%, depending on how they acquired each customer. Stack Social is generally either a hit or a miss, with most companies making almost no sales, while some do very well, with hundreds, or thousands of sales. While ~$40 revenue on each sale is very little considering I also have business expenses, based on my research:
@@ -144,7 +185,7 @@ About CA\$300 spent, 0 attributable customers. Details in [Google-Ads-economics.
 ~1,100 emails sent starting around January 2026. A couple of replies, zero customers. Stopped.
 
 ### Editorial outreach
-22 emails to blog and article writers who cover accounting/bookkeeping software, started July 20226. Zero responses. Main friction is finding unique targets. The auto-discovery feature in the admin outreach page did not work well and was removed on 2026-10-05, so targets are now added by hand.
+22 emails to blog and article writers who cover accounting/bookkeeping software, started July 2026. Zero responses. Main friction is finding unique targets. The auto-discovery feature in the admin outreach page did not work well and was removed on 2026-10-05, so targets are now added by hand.
 
 ### YouTuber outreach
 82 emails sent starting about a month ago. 2 responses, both rejections (one "schedule is full", one asked which regions Argo Books supports then went quiet). A third response showed interest then said that the email had been forwarded to someone else for consideration. A fourth response gave a quote of $1000 USD as a flat-fee instead of an affiliate (see below).
@@ -161,17 +202,17 @@ About CA\$300 spent, 0 attributable customers. Details in [Google-Ads-economics.
 - **Break-even.** \$1000 USD is about \$1,370 CAD, roughly 9 subscriptions at \$150 CAD/year, which needs 7 to 11% of those installs to pay. The only two figures available, 6% of all installs and 11% of YouTube installs, sit either side of that. Year-one payback is a coin flip, and the real outcome turns on renewal, which is unknown.
 - **Decision: consider funding it from Avalonia Port Challenge prize money (winners announced 2026-11-06).**
 
-### 2. Microsoft Store listing
+### Microsoft Store listing
 
-Submitted on 2026-09-30 against version 2.0.18, with a stated review time of three business days. Available in all 240 markets and discoverable, with an English-only listing.
+Submitted on 2026-09-30 against version 2.0.18 and [live](https://apps.microsoft.com/detail/xpdmdvrxj0xs0m), in all 240 markets with an English-only listing. Review has taken under a day in practice, against a stated three business days. The listing points at one specific installer, so each release has to repoint it (`docs/Publishing.md` in the desktop repository); it was moved to 2.0.21 on 2026-10-18.
 
 Expect very little traffic. Competitor listings pulled on 2026-09-30 carry 7, 14 and 6 reviews, and two of the five have none at all, which is the clearest available measure of how little volume this category sees on the Store. The reasons to do it are: it's permanent, and a Store listing is a trust signal for a small-business owner deciding whether to run an unknown `.exe` on the machine holding their financial records.
 
 ### Reddit
-0-5 comments a day, roughly 100 total. Posts get auto removed immediately even when they follow the rules and do not mention Argo Books, with no explanation given. Account is 2 months old with 21 karma, which is the likely cause. About 90% of comments get 1 view, and some get 10-100.
+As of September 2026: 0-5 comments a day, roughly 100 total. Posts get auto removed immediately even when they follow the rules and do not mention Argo Books, with no explanation given. Account is 2 months old with 21 karma, which is the likely cause. About 90% of comments get 1 view, and some get 10-100.
 
 ### LinkedIn
-16 connections, 53 profile views, 943 post impressions (879 of those from the latest post), 4 posts. Messaged startup/business/accounting influencers about the affiliate program. Nothing has come of it, at least that we can measure.
+As of September 2026: 16 connections, 53 profile views, 943 post impressions (879 of those from the latest post), 4 posts. Messaged startup/business/accounting influencers about the affiliate program. Nothing has come of it, at least that we can measure.
 
 The WinForms to Avalonia article post (published 2026-09-15, Avalonia UI tagged in the first sentence) reached 1901 impressions, 34 reactions, 1 comment and 4 reposts in three days, twice the amount as the other 2 posts. One repost was from Jumar Macato, a software engineer at Avalonia UI.
 
@@ -189,6 +230,15 @@ A neighbour, James, works at a credit union, knows Chris, the CEO of Mainstreet 
 **Follow-up.** One email, written so the middle paragraph can be forwarded to a member untouched, with a single ask for an introduction to someone on their business banking side. Link tagged `?source=mainstreet`, which is the only real measure of whether it went anywhere: he is not going to reply to say he forwarded it.
 
 **Honest read.** A meeting the other side closes twice in six minutes is usually a polite no, although he may have just been busy. The named commitment to look at his members is worth the email, but expect nothing. The value in this one is the lesson about the ask, and the fact that a warm introduction reached a CEO at all, which no amount of cold email has done.
+
+### Homebrew
+The macOS build has been in [Homebrew's own cask repository](https://github.com/Homebrew/homebrew-cask/blob/main/Casks/a/argo-books.rb) since 2026-10-02, so `brew install --cask argo-books` works. Each release needs a pull request from a Mac (`docs/Publishing.md`). It is the likeliest cause of the jump in Mac installs that followed (see [the October jump](#the-october-jump)).
+
+### Inbound offers: all declined
+Unsolicited offers have started arriving. None has been worth taking, and later ones of the same kind can be ignored.
+
+- **Paid "Top 5" rankings.** Tech Times offered to rank Argo Books No. 1 in a "Top 5 Best Payroll Software in 2026" article (October 2026). It is a paid placement written to look like a review, and the readers are mostly American, while Argo Books' payroll is Canada only.
+- **Link-building requests.** An agency for Relay, a small-business banking app, asked for a link to Relay in the cash-flow forecasting guide. It offers nothing back and sends readers to a product that overlaps with Argo Books.
 
 ### Directory listings: done, no measurable traffic
 Already listed on G2, Capterra, Product Hunt, and roughly 30 cheap Product Hunt copycats. None of it brought traffic. G2 and the other main listings were updated in September 2026 to include macOS.
@@ -210,13 +260,40 @@ Documents users send to other businesses carry a tracked link to Argo Books. The
 
 Sources are `loop-*`, grouped as "Growth loops (documents users send)" on `/admin/referral-links/`. Check installs per source after 30 days before investing more, or deciding whether Premium removes the branding.
 
+## People in touch
+
+The free users and prospects who write in, worth knowing by name because the product is answering what they ask.
+
+### Kevin Kling (free user)
+Runs a short-term rental in Maine, US, managed by a rental company, and uses the macOS build. He upgraded macOS just to run it. He first wrote in September with four problems, three of which were fixed in 2.0.19 and the fourth found later, and has written several times since, asking about rentals, reports and depreciation. Friendly, technical (he writes software himself) and the most engaged user so far.
+
+- His questions shaped 2.0.22: fixed assets and depreciation, alongside the Sales by Customer and Expenses by Supplier reports that were built the day before he asked.
+- **The best candidate for a first review.** The in-app review prompt only records locally whether it was shown, so there is no way to know if he has seen it. Ask him personally once 2.0.22 is out and he has tried what he asked for, and point him at `/review/`.
+
+### Joe Violanti (prospect)
+Wrote through the contact form on 2026-10-16 while weighing a purchase: how to create asset, liability and equity accounts without a chart of accounts, and whether Argo Books is bookkeeping or only income and expense tracking. That is the objection an accountant-minded buyer will raise. What answers it now:
+
+- An opening bank balance in Edit Company, which the Balance Sheet's cash starts from (shipped in 2.0.21).
+- Fixed assets with depreciation, shown on the Balance Sheet at cost less depreciation (2.0.22).
+- Not yet: loans and other liabilities, or owner money put in and taken out.
+
+## What 2.0.22 adds that matters for marketing
+
+Not released yet. Worth a video and a What's New entry each once it ships.
+
+- **Fixed assets and depreciation**, with an Asset Register report. For a Canadian company, each asset type comes with its CRA Capital Cost Allowance class and rate filled in, kept current from the website like the payroll tables. Canadian payroll and CCA together are something few small tools offer.
+- **New report templates:** Sales by Customer, Expenses by Supplier, Payroll Summary, Rentals and Customer Statement.
+- **Assets in spreadsheet export and import**, the list an accountant asks for at year end.
+
 ## Honest read
 
 The two things that produced customers are YouTube and organic search. Both are slow, compounding, and free. Everything push-based (cold email, editorial outreach, YouTuber outreach, paid ads) has produced zero customers.
 
-The real constraint is not conversion, it's reach. 40 people have installed and run the app, and 2 of them have paid for a subscription.
+Reach was the constraint, and October loosened it: 133 devices have now run the app, against 40 in mid-September, mostly thanks to the store listings rather than anything on the website.
 
-The second problem is retention. Both paying customers have gone a month without opening the app. Most of the free users use the app for a few minutes, do almost nothing, sometimes come back a few days later, do nothing, then leave. Not sure why. This could be a problem with the telemetry (unlikely, but possible), normal user behavior, or a real problem.
+That moves the problem to activation. Only 10 of the 133 have ever recorded an expense, a sale or an invoice, and the median person spends a minute and a half in the app in total. More installs will not turn into customers until more people get as far as recording something.
+
+The other problem is retention. Neither subscriber used the app, and in October one of them stopped paying, the first churn. Most of the free users use the app for a few minutes, do almost nothing, sometimes come back a few days later, do nothing, then leave. Not sure why. This could be a problem with the telemetry (unlikely, but possible), normal user behavior, or a real problem.
 
 ## Next steps
 
@@ -244,9 +321,8 @@ A few hours each, and free. Linux users go to these stores to find apps, and the
 
 Expect small numbers: Linux is 3 of the 46 devices in the 2026-09-16 activity export. The reasons to do it anyway are the same as the Microsoft Store: permanent for little work, and a store listing reads as more trustworthy than a download from a site nobody has heard of.
 
-### 3. Mac: Homebrew cask and the Mac App Store
+### 3. Mac App Store
 
-- **Homebrew cask** is the cheap one: a pull request to the `homebrew-cask` repository pointing at the signed, notarized download. Free, and Mac users who install from the terminal look there first. Homebrew reviews new casks for notability, so a young app with few users may be turned down until it has more of a following.
-- **The Mac App Store** is a real project, not a listing. The developer account is already paid for. The work is App Sandbox, which limits where the app can read and write files and would need testing against how company files are opened and saved, plus Apple's review. Apple also generally requires Premium to be sold through in-app purchase in a store app, which takes a 15 to 30% cut and needs its own implementation. Check Apple's current rules before committing, since they have been changing.
+The Homebrew cask is done (see What has been tried). The Mac App Store is a real project, not a listing. The developer account is already paid for. The work is App Sandbox, which limits where the app can read and write files and would need testing against how company files are opened and saved, plus Apple's review. Apple also generally requires Premium to be sold through in-app purchase in a store app, which takes a 15 to 30% cut and needs its own implementation. Check Apple's current rules before committing, since they have been changing.
 
-Expect Homebrew to be small. The Mac App Store is the store in this list most likely to reach non-technical Mac users, which is why it is worth scoping properly rather than dismissing, even though it is the most work.
+It is the store in this list most likely to reach non-technical Mac users, which is why it is worth scoping properly rather than dismissing, even though it is the most work.
