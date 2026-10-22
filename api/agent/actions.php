@@ -446,7 +446,7 @@ function agent_after_proposing(PDO $pdo, int $id, string $approvalSetting, ?call
  * @param array $edits fields of the payload the owner rewrote (text, or subject and body)
  * @return string the proposal's status afterwards
  */
-function agent_decide(PDO $pdo, int $id, bool $approve, array $edits = [], string $note = '', ?callable $http = null): string
+function agent_decide(PDO $pdo, int $id, bool $approve, array $edits = [], string $note = '', ?callable $http = null, ?callable $send = null): string
 {
     $proposal = agent_proposal($pdo, $id);
     if ($proposal === null || $proposal['status'] !== 'pending') {
@@ -477,16 +477,17 @@ function agent_decide(PDO $pdo, int $id, bool $approve, array $edits = [], strin
         "UPDATE agent_proposals SET status = 'approved', payload = ?, edited = ?, owner_note = ?, decided_at = NOW() WHERE id = ?"
     )->execute([json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE), $changed ? 1 : 0, $note, $id]);
 
-    return agent_carry_out($pdo, $id, $http);
+    return agent_carry_out($pdo, $id, $http, $send);
 }
 
 /**
  * Carries out an approved proposal: publishes the post, or puts the business on the outreach
- * list with its email ready to send.
+ * list and sends its email.
  *
+ * @param callable|null $send stands in for agent_send_lead_now in tests
  * @return string 'done' or 'failed'
  */
-function agent_carry_out(PDO $pdo, int $id, ?callable $http = null): string
+function agent_carry_out(PDO $pdo, int $id, ?callable $http = null, ?callable $send = null): string
 {
     $proposal = agent_proposal($pdo, $id);
     if ($proposal === null || $proposal['status'] !== 'approved') {
@@ -501,8 +502,9 @@ function agent_carry_out(PDO $pdo, int $id, ?callable $http = null): string
             $result = ['post_id' => $postId];
             agent_log($pdo, $runId, 'post', 'ok', ['proposal_id' => $id, 'platform' => $proposal['platform'], 'post_id' => $postId]);
         } else {
-            $result = ['lead_id' => agent_add_lead($pdo, $payload)];
-            agent_log($pdo, $runId, 'email', 'ok', ['proposal_id' => $id, 'lead_id' => $result['lead_id'], 'business_name' => $payload['business_name']]);
+            $leadId = agent_add_lead($pdo, $payload);
+            $result = ['lead_id' => $leadId, 'send' => ($send ?? 'agent_send_lead_now')($pdo, $leadId)];
+            agent_log($pdo, $runId, 'email', 'ok', ['proposal_id' => $id, 'lead_id' => $leadId, 'business_name' => $payload['business_name'], 'send' => $result['send']]);
         }
         $status = 'done';
     } catch (AgentPlatformFailed | AgentRefused $e) {
@@ -519,7 +521,7 @@ function agent_carry_out(PDO $pdo, int $id, ?callable $http = null): string
 /**
  * Puts a business on the outreach list with the email the agent wrote already approved. The
  * existing pipeline only drafts for a lead that has no email, and sends any that is approved,
- * so it sends this one as it stands: same daily cap, same tracked link, same unsubscribe line.
+ * so a lead that agent_send_lead_now could not send goes out with the next pipeline run.
  *
  * The contact check runs again here. Days can pass between proposing and approving, and the
  * business may have become a customer.
@@ -554,6 +556,41 @@ function agent_add_lead(PDO $pdo, array $payload): int
     $leadId = (int) $pdo->lastInsertId();
     log_activity($pdo, $leadId, 'lead_created', 'Lead and first email added by the marketing agent');
     return $leadId;
+}
+
+/**
+ * Sends an approved lead's first email now, the way the outreach cron would, and schedules its
+ * follow-ups. When outreach sending is switched off or today's limit is used up it sends
+ * nothing, and the lead waits for the cron like any other approved lead.
+ *
+ * @return string 'sent', 'outreach_off', 'daily_limit', or send_outreach_lead's reason
+ */
+function agent_send_lead_now(PDO $pdo, int $leadId): string
+{
+    if (!agent_outreach_sending($pdo)) {
+        return 'outreach_off';
+    }
+    if (outreach_sent_today($pdo) >= outreach_daily_send_limit()) {
+        return 'daily_limit';
+    }
+
+    $stmt = $pdo->prepare('SELECT id, business_name, email, draft_subject, draft_body, unsubscribe_token, source FROM outreach_leads WHERE id = ?');
+    $stmt->execute([$leadId]);
+    $lead = $stmt->fetch();
+    if ($lead === false) {
+        return 'lead_missing';
+    }
+
+    $reason = null;
+    if (send_outreach_lead($pdo, $lead, $reason)) {
+        log_activity($pdo, $leadId, 'email_sent', 'Outreach email sent when the owner approved it, to: ' . $lead['email']);
+        schedule_followups_for_lead($pdo, $leadId);
+        return 'sent';
+    }
+    if ($reason === 'smtp_failed') {
+        log_activity($pdo, $leadId, 'email_failed', 'Send on approval failed for: ' . $lead['email'] . '. The outreach cron tries again.');
+    }
+    return $reason ?? 'failed';
 }
 
 // ─── Follow-ups for the agent's own leads ───

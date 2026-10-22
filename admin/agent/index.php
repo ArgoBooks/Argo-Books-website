@@ -53,12 +53,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 array_intersect_key($_POST, array_flip(['text', 'subject', 'body'])),
                 (string) ($_POST['note'] ?? '')
             );
-            $kind = $pdo->prepare('SELECT kind FROM agent_proposals WHERE id = ?');
-            $kind->execute([(int) ($_POST['id'] ?? 0)]);
+            $decided = $pdo->prepare('SELECT kind, result FROM agent_proposals WHERE id = ?');
+            $decided->execute([(int) ($_POST['id'] ?? 0)]);
+            $decided = $decided->fetch() ?: ['kind' => '', 'result' => null];
+            $send = json_decode((string) $decided['result'], true)['send'] ?? '';
             $done = match (true) {
-                $kind->fetchColumn() !== 'email' => ['success', 'Approved and published.'],
-                agent_outreach_sending($pdo) => ['success', 'Approved. It goes out with the next outreach send, at 8:00 AM.'],
-                default => ['error', 'Approved, but it cannot go out: outreach is switched off in Admin, Outreach, Settings.'],
+                $decided['kind'] !== 'email' => ['success', 'Approved and published.'],
+                $send === 'sent' => ['success', 'Approved and sent.'],
+                $send === 'outreach_off' => ['error', 'Approved, but it cannot go out: outreach is switched off in Admin, Outreach, Settings.'],
+                $send === 'daily_limit' => ['success', "Approved. Today's outreach limit is used up, so it goes out with the next outreach send, at 8:00 AM."],
+                $send === 'smtp_failed' => ['error', 'Approved, but the email could not be sent just now. The outreach send at 8:00 AM tries again.'],
+                default => ['error', 'Approved, but it was not sent (' . $send . '). The lead\'s history on the Outreach page says why.'],
             };
             $message = match ($status) {
                 'done' => $done,
@@ -206,7 +211,7 @@ $rows = fn (?string $text, int $least = 6) => max($least, min(28, substr_count(w
         <?= $toggle('posting_enabled', 'Posting on', 'It may write posts for the connected platforms.', 'Posting off', 'It cannot propose or publish a post.') ?>
         <?= $toggle('outreach_enabled', 'Outreach on', 'It may find businesses and write them emails.', 'Outreach off', 'It cannot propose an email or write a follow-up.') ?>
         <?= $toggle('approve_posts', 'Posts wait for approval', 'Each post sits above until you approve it.', 'Posts go out automatically', 'A post is published as soon as the agent writes it.') ?>
-        <?= $toggle('approve_emails', 'Emails wait for approval', 'Each email sits above until you approve it. Follow-ups wait in Outreach, Follow-ups.', 'Emails go out automatically', 'An email is queued to send as soon as the agent writes it.') ?>
+        <?= $toggle('approve_emails', 'Emails wait for approval', 'Each email sits above until you approve it. Follow-ups wait in Outreach, Follow-ups.', 'Emails go out automatically', 'An email is sent as soon as the agent writes it.') ?>
     </div>
 </div></div>
 

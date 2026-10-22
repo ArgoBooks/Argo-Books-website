@@ -47,7 +47,7 @@ if (!flock($lockFp, LOCK_EX | LOCK_NB)) {
 
 // ─── Configuration ───
 
-define('DAILY_SEND_LIMIT', (int) ($_ENV['OUTREACH_DAILY_SEND_LIMIT'] ?? 10));
+define('DAILY_SEND_LIMIT', outreach_daily_send_limit());
 // Follow-ups have their own daily cap, separate from first-touch sends. With the multi-touch sequence (touches 2 through N), this cap applies across ALL touch positions combined.
 define('DAILY_FOLLOWUP_LIMIT', (int) ($_ENV['OUTREACH_DAILY_FOLLOWUP_LIMIT'] ?? 75));
 define('DAILY_DRAFT_LIMIT', (int) ($_ENV['OUTREACH_DAILY_DRAFT_LIMIT'] ?? 100));
@@ -288,10 +288,7 @@ function stepSendEmails($pdo, $dryRun)
 {
     logPipeline('--- Step 5: Send Emails ---');
 
-    // Check how many already sent today
-    $stmt = $pdo->prepare("SELECT COUNT(*) as sent_today FROM outreach_leads WHERE DATE(sent_at) = CURDATE()");
-    $stmt->execute();
-    $sentToday = (int) $stmt->fetch(PDO::FETCH_ASSOC)['sent_today'];
+    $sentToday = outreach_sent_today($pdo);
 
     $remaining = DAILY_SEND_LIMIT - $sentToday;
 

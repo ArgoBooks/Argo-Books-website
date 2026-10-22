@@ -75,6 +75,18 @@ function outreach_known_contact($pdo, $email): ?string
 
 // ─── Send a Single Outreach Email ───
 
+/** How many first emails may go out in a day, across every source of leads. */
+function outreach_daily_send_limit(): int
+{
+    return (int) ($_ENV['OUTREACH_DAILY_SEND_LIMIT'] ?? 10);
+}
+
+/** How many first emails have gone out today, counted the same way for the cron and for a send on approval. */
+function outreach_sent_today($pdo): int
+{
+    return (int) $pdo->query("SELECT COUNT(*) FROM outreach_leads WHERE DATE(sent_at) = CURDATE()")->fetchColumn();
+}
+
 /**
  * Send an outreach email for a lead and update its DB status.
  * Returns true on success, false on failure.

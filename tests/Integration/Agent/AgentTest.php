@@ -174,13 +174,20 @@ final class AgentTest extends DatabaseTestCase
         $this->assertSame('waiting for approval', $proposed['status']);
         $this->assertSame(0, $this->rows("SELECT COUNT(*) FROM outreach_leads WHERE email = 'info@shop.test'"), 'a lead was added before approval');
 
-        $status = agent_decide($this->pdo, $proposed['proposal_id'], true, ['body' => str_repeat('The owner rewrote this. ', 10)], 'Too salesy');
+        $sentTo = [];
+        $send = function (\PDO $pdo, int $leadId) use (&$sentTo) {
+            $sentTo[] = $leadId;
+            return 'sent';
+        };
+        $status = agent_decide($this->pdo, $proposed['proposal_id'], true, ['body' => str_repeat('The owner rewrote this. ', 10)], 'Too salesy', null, $send);
 
         $this->assertSame('done', $status);
         $lead = $this->pdo->query("SELECT * FROM outreach_leads WHERE email = 'info@shop.test'")->fetch();
         $this->assertSame('agent', $lead['source']);
         $this->assertSame('approved', $lead['approval_status'], 'the pipeline would ask for a second approval');
         $this->assertStringContainsString('The owner rewrote this.', $lead['draft_body']);
+        $this->assertSame([(int) $lead['id']], $sentTo, 'approving did not send the email at once');
+        $this->assertSame('sent', json_decode((string) agent_proposal($this->pdo, $proposed['proposal_id'])['result'], true)['send']);
 
         // The agent is shown what was changed, and shown again until a run that saw it finishes.
         $report = agent_decisions_to_report($this->pdo);
@@ -222,6 +229,30 @@ final class AgentTest extends DatabaseTestCase
 
         $this->assertSame([], agent_followups_due($this->pdo));
         $this->expectRefusal('LIVE_SITE_ONLY', fn () => agent_write_followup($this->pdo, null, ['followup_id' => 1, 'body' => str_repeat('x', 100)]));
+    }
+
+    public function test_an_approved_email_is_not_sent_while_outreach_is_switched_off(): void
+    {
+        $this->pdo->exec("INSERT INTO outreach_pipeline_state (state_key, state_value) VALUES ('outreach_enabled', '0')
+                          ON DUPLICATE KEY UPDATE state_value = '0'");
+        $leadId = $this->approvedAgentLead('info@shop.test');
+
+        $this->assertSame('outreach_off', agent_send_lead_now($this->pdo, $leadId));
+        $this->assertNull($this->pdo->query("SELECT sent_at FROM outreach_leads WHERE id = $leadId")->fetchColumn());
+    }
+
+    public function test_an_approved_email_waits_for_the_cron_once_the_daily_limit_is_used(): void
+    {
+        $this->pdo->exec("INSERT INTO outreach_pipeline_state (state_key, state_value) VALUES ('outreach_enabled', '1')
+                          ON DUPLICATE KEY UPDATE state_value = '1'");
+        $_ENV['OUTREACH_DAILY_SEND_LIMIT'] = (string) (outreach_sent_today($this->pdo) + 1);
+        $this->pdo->exec("INSERT INTO outreach_leads (business_name, email, source, status, approval_status, sent_at)
+                          VALUES ('Earlier Shop', 'earlier@shop.test', 'manual', 'contacted', 'approved', NOW())");
+        $leadId = $this->approvedAgentLead('info@shop.test');
+
+        $this->assertSame('daily_limit', agent_send_lead_now($this->pdo, $leadId));
+        $this->assertNull($this->pdo->query("SELECT sent_at FROM outreach_leads WHERE id = $leadId")->fetchColumn(),
+            'the lead must stay unsent, so the cron picks it up');
     }
 
     public function test_a_business_that_became_a_customer_while_waiting_is_not_emailed(): void
@@ -365,6 +396,11 @@ final class AgentTest extends DatabaseTestCase
             'link' => 'https://argorobots.com/?source=ag-test',
             'sources' => ['general advice, no factual claim'],
         ];
+    }
+
+    private function approvedAgentLead(string $email): int
+    {
+        return agent_add_lead($this->pdo, $this->email(['email' => $email, 'website' => '']));
     }
 
     private function rows(string $sql): int

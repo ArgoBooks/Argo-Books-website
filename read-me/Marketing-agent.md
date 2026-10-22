@@ -30,7 +30,7 @@ The agent holds one secret token and nothing else. Every credential and every li
 
 The agent starts in approval mode. It writes the post or the email and the site holds it on the admin page, on the **Waiting** tab. Nothing goes out until you approve it.
 
-- **Approve** carries it out. A post is published at once. An email is not sent at once: the business goes onto the outreach list with its email already approved, and the outreach cron sends it on its next run, at 8:00 AM. That cron has its own switch, in **Admin, Outreach, Settings**. While it is off, approved emails wait. The Setup tab shows whether it is on, and the page tells you when you approve an email that cannot go out.
+- **Approve** carries it out. A post is published at once. An email is sent at once too: the business goes onto the outreach list and its email goes out the same way the outreach cron sends one, with the tracked link, the unsubscribe line and the follow-ups scheduled. Two things hold it back. Outreach sending has its own switch, in **Admin, Outreach, Settings**, and while it is off approved emails wait. And sends share the outreach daily limit, `OUTREACH_DAILY_SEND_LIMIT`, so once that is used up an approved email waits for the outreach cron at 8:00 AM. The page tells you which happened when you approve.
 - **Edit and approve** does the same with your wording.
 - **Reject** drops it. Add a line saying why.
 
