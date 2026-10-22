@@ -46,7 +46,7 @@ return [
   'hub_weight' => 10,
 
   'published' => '2026-09-04',
-  'updated'   => '2026-09-16',
+  'updated'   => '2026-10-22',
   'stylesheet' => 'winforms-to-avalonia.css',
 
   'intro_html' => <<<'HTML'
@@ -567,6 +567,18 @@ HTML,
 <p>There’s also a plainer commercial argument I should say out loud, because it’s the one that pays for the nine months. Every Mac and Linux user was somebody I had nothing to sell. Not a harder sale or a worse conversion rate: no product at all. And you never notice them, because they don’t show up in your analytics as lost customers. They just never arrive.</p>
 
 <p>I know that demand was real because people signed up to be told when the Mac build landed, months before there was one. That was a waitlist for software that didn’t exist, on a platform I couldn’t have shipped to under any circumstances a year ago. Every one of those signups was worth exactly nothing to version 1. They have something to download now.</p>
+
+<p>Six weeks after the Mac build shipped, that guess has an answer. Of everyone who has run Argo Books, <strong>more than a third are on macOS</strong>, with a thin slice on Linux. Not a third of the downloads: a third of the people who actually opened it. That share was built entirely in the six weeks since the Mac build existed, against months of Windows-only history, and over the last thirty days the split is closer to even. Every one of those people was someone version 1 could not have served at any price, and I would never have known they existed.</p>
+
+<figure class="wfa-figure-pair">
+  <div class="wfa-figure-half">
+    <img class="wfa-shot-light" src="/resources/images/winforms-to-avalonia/platform-split.webp" alt="Donut chart of active users by platform: Windows largest, macOS over a third, a thin Linux slice" width="753" height="398">
+    <img class="wfa-shot-dark" src="/resources/images/winforms-to-avalonia/platform-split-dark.webp" alt="" aria-hidden="true" width="753" height="398">
+    <figcaption>Active users by platform, all time, from the application's own telemetry. On version 1 this chart could only ever have been one color.</figcaption>
+  </div>
+</figure>
+
+<p>There are platforms past those three. An Android companion is in development on the same framework: it pairs with the desktop over an encrypted channel, shows the books read-only, and captures receipts with the phone camera. It is an Avalonia Android head that references the same shared project the desktop app does, so the models and the wire format come across without being written twice. iOS is the same shape of job, another head on the same shared project, and it is next. That is not a road that starts anywhere near WinForms.</p>
 
 <p>Reaching more operating systems is the benefit I can point at on a download page, and the one that shows up in revenue. The rest of that list is the reason I’d have done it anyway.</p>
 HTML,
