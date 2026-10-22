@@ -608,7 +608,7 @@ HTML,
     ],
     [
       'q' => 'Do you still need platform-specific code with Avalonia?',
-      'a' => 'Yes, but only where the operating systems genuinely differ. In this codebase that’s one interface with 20 members and four implementations, covering things like secure credential storage and biometric unlock. The interface itself, all the layout, and all the business logic are shared across every platform.',
+      'a' => 'Yes, but only where the operating systems genuinely differ. In this codebase that’s one interface with 23 members and three implementations, covering things like secure credential storage and biometric unlock. The interface itself, all the layout, and all the business logic are shared across every platform.',
     ],
     [
       'q' => 'Is Argo Books free?',
