@@ -39,7 +39,7 @@ const TELEMETRY_FEATURE_NAMES = [
     'ChartExportedToGoogleSheets', 'ChartExportedToExcel',
     'ThemeChanged', 'LanguageChanged',
     'CompanyCreated', 'ChecklistStepCompleted', 'OnboardingCompleted', 'OnboardingSkipped',
-    'SampleCompanyOpened',
+    'SampleCompanyOpened', 'FirstStepChosen',
     'CompanyCreateOpened', 'ReceiptScanOpened', 'InvoiceCreateOpened',
     'ExpenseCreateOpened', 'RevenueCreateOpened', 'ReportOpened',
     // The import funnel
