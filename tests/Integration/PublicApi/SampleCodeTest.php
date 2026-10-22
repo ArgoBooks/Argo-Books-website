@@ -30,6 +30,9 @@ final class SampleCodeTest extends TestCase
     private static ?string $baseUrl = null;
     private static string $apiKey = '';
     private static ?string $csharpDir = null;
+
+    /** @var list<string> */
+    private static array $tempFiles = [];
     private static string $csharpError = '';
     private static int $accountId = 0;
     private static string $subscriptionId = '';
@@ -55,6 +58,10 @@ final class SampleCodeTest extends TestCase
         if (self::$csharpDir !== null && is_dir(self::$csharpDir)) {
             self::removeTree(self::$csharpDir);
         }
+        foreach (self::$tempFiles as $path) {
+            @unlink($path);
+        }
+        self::$tempFiles = [];
         self::clearAuthThrottle();
     }
 
@@ -224,6 +231,7 @@ final class SampleCodeTest extends TestCase
     {
         $path = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'argo-sample-' . bin2hex(random_bytes(6)) . $suffix;
         file_put_contents($path, $contents);
+        self::$tempFiles[] = $path;
 
         return $path;
     }
