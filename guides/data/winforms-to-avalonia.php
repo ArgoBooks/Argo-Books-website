@@ -580,6 +580,8 @@ HTML,
 
 <p>There are platforms past those three. An Android companion is in development on the same framework: it pairs with the desktop over an encrypted channel, shows the books read-only, and captures receipts with the phone camera. It is an Avalonia Android head that references the same shared project the desktop app does, so the models and the wire format come across without being written twice. iOS is the same shape of job, another head on the same shared project, and it is next. That is not a road that starts anywhere near WinForms.</p>
 
+<p>One cost nobody warns you about: shipping on three platforms means being trusted on three platforms, and that's a separate job from writing the code. The Windows installer is signed through Azure Trusted Signing, or SmartScreen warns every person who downloads it. The Mac build is signed with a Developer ID, notarized, and stapled, and every bundled native library has to be signed individually, because <code>codesign --deep</code> quietly misses them. Notarization also requires the hardened runtime, which blocks the JIT and unsigned executable memory by default, so the entitlements file is load-bearing: drop one entry and the app dies at launch with no useful message. Skip any of this and macOS tells your customer the app is damaged. For accounting software, where the whole proposition is that people trust you with their books.</p>
+
 <p>Reaching more operating systems is the benefit I can point at on a download page, and the one that shows up in revenue. The rest of that list is the reason I’d have done it anyway.</p>
 HTML,
     ],
