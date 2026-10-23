@@ -300,7 +300,7 @@ $isDocsLanding = true;
                         </svg>
                     </div>
                     <h3>Fixed Assets</h3>
-                    <p>Depreciate land, vehicles and equipment</p>
+                    <p>Depreciate buildings, vehicles and equipment</p>
                 </a>
                 <a href="pages/features/inventory.php" class="doc-card">
                     <div class="card-icon">
