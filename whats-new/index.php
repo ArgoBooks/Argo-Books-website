@@ -89,6 +89,50 @@ $pricing = get_pricing_config();
     <div class="container">
         <div class="version-grid">
 
+            <!-- Version 2.0.22 -->
+            <div class="version-card">
+                <div class="version-header">
+                    <div class="version-info">
+                        <span class="version-tag">Version 2.0.22</span>
+                        <span class="date-tag">October 2026</span>
+                    </div>
+                    <?= svg_icon('chevron-down', 24, 'dropdown-arrow', null, 'stroke-linecap="round" stroke-linejoin="round"') ?>
+                </div>
+
+                <div class="version-content">
+                    <div class="changelog">
+                        <div class="changelog-section">
+                            <h4 class="section-label feature">New Features</h4>
+                            <ul class="changelog-list">
+                                <li><strong>Track assets:</strong> Record vehicles, equipment, furniture, buildings and land as fixed assets, straight from an expense or on the new Assets page. Argo Books works out their depreciation for you, and your Income Statement, Balance Sheet and Cash Flow Statement show it, along with a new Asset Register report. When you sell an asset, the gain or loss is worked out too.</li>
+                                <li><strong>Five new report templates:</strong> Sales by Customer, Expenses by Supplier, Payroll Summary, Rentals and Customer Statement. A customer statement shows what a customer owes today, or their account's activity between two dates. Sales by Customer can also show all of one customer's sales.</li>
+                                <li><strong>Edit many at once:</strong> Select rows, a range with Shift, or everything a filter shows, then set the product, supplier or customer of expenses and sales, move products to another category, or delete them.</li>
+                                <li><strong>Add and remove report pages where you want them:</strong> Right-click a page in the report designer to add a new page right after it, or delete it.</li>
+                            </ul>
+                        </div>
+                        <div class="changelog-section">
+                            <h4 class="section-label enhancement">Enhancements</h4>
+                            <ul class="changelog-list">
+                                <li><strong>Clearer report charts:</strong> Easier-to-read numbers, dates and names, a legend when a chart shows two datasets, and three tax charts ready to add to any report.</li>
+                                <li><strong>A smoother report designer:</strong> A click no longer nudges what you clicked, adding a page takes you straight to it, and Argo Books reminds you to save a report design before you close or switch company.</li>
+                                <li><strong>Easier dashboard layout:</strong> Widgets move between rows smoother, and a new widget fills the empty spot in its row.</li>
+                                <li><strong>Search that tells you when nothing matches:</strong> A table search with no results says so, with a button to clear it.</li>
+                                <li><strong>More disk space:</strong> Update files from earlier versions are cleaned up automatically.</li>
+                                <li><strong>A tidier Mac menu bar:</strong> The menu bar shows the app's name, and the File menu sits in it with Open Company and Close Company.</li>
+                            </ul>
+                        </div>
+                        <div class="changelog-section">
+                            <h4 class="section-label fix">Fixes</h4>
+                            <ul class="changelog-list">
+                                <li>Charts in a report, for a business with only expenses display columns properly.</li>
+                                <li>Bank statements with an extra long block of account details at the top, import all their transactions.</li>
+                                <li>Fit to Window in the report designer fits the page without a horizontal scroll bar appearing.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Version 2.0.21 -->
             <div class="version-card">
                 <div class="version-header">

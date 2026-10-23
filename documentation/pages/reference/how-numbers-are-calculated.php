@@ -50,8 +50,12 @@ include __DIR__ . '/../../docs-header.php';
                             <td>Its exchange rate isn't available yet, so it counts as zero until it is. See <a href="#pending-conversion" class="link">Currency display</a> below.</td>
                         </tr>
                         <tr>
-                            <td>Why isn't my loan or equipment on the Balance Sheet?</td>
-                            <td>Argo Books doesn't record loans, long-term assets or money you put in or take out yourself. See <a href="#balance-sheet" class="link">Balance Sheet</a> below.</td>
+                            <td>Why isn't my loan on the Balance Sheet?</td>
+                            <td>Argo Books doesn't record loans or money you put in or take out yourself. Equipment and other things you keep for years are recorded as fixed assets. See <a href="#balance-sheet" class="link">Balance Sheet</a> below.</td>
+                        </tr>
+                        <tr>
+                            <td>Why does the Income Statement show less spending than the Dashboard?</td>
+                            <td>A purchase recorded as a fixed asset is spread over the years you use it on the Income Statement, but counted when you paid for it on the Dashboard. See <a href="#fixed-assets" class="link">Fixed assets and depreciation</a> below.</td>
                         </tr>
                     </tbody>
                 </table>
@@ -165,17 +169,28 @@ include __DIR__ . '/../../docs-header.php';
                 <li><strong>Cash:</strong> estimated from the sales, invoice payments and expenses you've recorded. It starts from zero, because there's no way yet to enter a bank balance from before you began recording.</li>
                 <li><strong>Accounts receivable:</strong> what customers still owed on their invoices on that date.</li>
                 <li><strong>Inventory:</strong> the stock you had on hand, explained <a href="#inventory-balance-sheet" class="link">below</a>.</li>
+                <li><strong>Fixed assets:</strong> what the land, buildings, vehicles and equipment you held on that date cost, less the depreciation so far, explained <a href="#fixed-assets" class="link">below</a>.</li>
                 <li><strong>Accounts payable:</strong> purchase orders sent to a supplier but not yet received. Drafts and cancelled orders are left out.</li>
                 <li><strong>Sales tax payable:</strong> tax you collected, less tax refunded to customers and tax you paid on expenses.</li>
                 <li><strong>Security deposits:</strong> deposits on invoices that you're still holding.</li>
                 <li><strong>Retained earnings:</strong> the difference between your assets and your liabilities, which is what makes the two sides balance.</li>
             </ul>
-            <p>Loans, equipment and other long-term assets, and money you put into or take out of the business yourself, aren't recorded in Argo Books, so they don't appear on it.</p>
+            <p>Loans, and money you put into or take out of the business yourself, aren't recorded in Argo Books, so they don't appear on it.</p>
 
             <h2 id="inventory-balance-sheet">Inventory on the Balance Sheet</h2>
             <p>The Balance Sheet lists your stock on hand as a current asset. It values each item at its current unit cost (Argo Books doesn't keep a history of past costs) and works out how much stock you held as of the report date from your recorded stock movements.</p>
             <p>For a product with Track Inventory on, buying stock adds it to your stock instead of counting as an expense. When it sells, what that stock cost comes off your profit, and the Income Statement shows it as Cost of Goods Sold with Gross Profit underneath. The cost is saved on the sale, so changing a cost price later doesn't rewrite past profit.</p>
             <p>Stock you already had when this started was expensed when you bought it, so it sells at no cost and isn't taken off your profit twice. Tax, shipping and fees on a purchase stay expenses, and the Expenses page still shows every purchase in full, because that money did leave the business.</p>
+
+            <h2 id="fixed-assets">Fixed assets and depreciation</h2>
+            <p>A purchase you mark as a fixed asset, like a vehicle or equipment, isn't counted as an expense on the Income Statement. Its cost is spread over the years you use it instead, as a Depreciation line. Land isn't depreciated.</p>
+            <ul>
+                <li><strong>Depreciation</strong> is counted at the end of each month, from the month you bought the asset until it reaches its value at end or leaves the business.</li>
+                <li><strong>Selling an asset</strong> shows a gain or loss on the Income Statement: what you got for it, less what it was worth on your books. The money from the sale counts as cash, so don't also record it as revenue.</li>
+                <li><strong>On the Balance Sheet,</strong> assets you still hold show at what they cost, less the depreciation so far.</li>
+                <li><strong>The Dashboard and Analytics</strong> count money as it comes and goes, so they show the purchase as an expense on the day you paid for it, like any other expense. What you sell it for is added to your profit on the day you sell it, but not to your revenue, since it isn't a sale to a customer.</li>
+            </ul>
+            <p>An asset bought in a currency other than your company's is converted at the rate on its purchase date, and a sale at the rate on the sale date. See <a href="../features/assets.php" class="link">Fixed Assets</a> for how to set assets up.</p>
 
             <h2 id="sales-by-product">Sales by product</h2>
             <p>The Products tab in Analytics and the "Sales by Product" report both break your sales down per product. Two things about these figures surprise people, so they're worth knowing up front.</p>

@@ -43,6 +43,10 @@ include __DIR__ . '/../../docs-header.php';
                 <strong>New items:</strong> An item or category you type that doesn't exist yet is created when you save, so there's no need to set up products first. A new item takes the price from its line.
             </div>
 
+            <div class="info-box">
+                <strong>Things you'll keep for years:</strong> For a purchase like a vehicle or equipment, tick "This is an asset I'll keep for years (depreciate it)" on the expense form. Your reports then spread its cost over the years you use it instead of counting it all at once. See <a class="link" href="assets.php">Fixed Assets</a>.
+            </div>
+
             <h2>Multi-Item Transactions</h2>
             <p>A single transaction can include multiple products. Click the "Add item" button to add additional line items to the same transaction. This is useful for recording orders or invoices that contain several products at once.</p>
 

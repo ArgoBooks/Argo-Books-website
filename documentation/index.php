@@ -287,6 +287,21 @@ $isDocsLanding = true;
                     <h3>Supplier Management</h3>
                     <p>Manage vendors and purchase sources</p>
                 </a>
+                <a href="pages/features/assets.php" class="doc-card">
+                    <div class="card-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"></path>
+                            <path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"></path>
+                            <path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"></path>
+                            <path d="M10 6h4"></path>
+                            <path d="M10 10h4"></path>
+                            <path d="M10 14h4"></path>
+                            <path d="M10 18h4"></path>
+                        </svg>
+                    </div>
+                    <h3>Fixed Assets</h3>
+                    <p>Depreciate buildings, vehicles and equipment</p>
+                </a>
                 <a href="pages/features/inventory.php" class="doc-card">
                     <div class="card-icon">
                         <?= svg_icon('package', 20) ?>

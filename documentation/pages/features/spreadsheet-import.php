@@ -31,6 +31,7 @@ include __DIR__ . '/../../docs-header.php';
                     <li>Products</li>
                     <li>Categories</li>
                     <li>Expenses</li>
+                    <li>Assets</li>
                     <li>Revenue</li>
                     <li>Invoices</li>
                     <li>Payments</li>
