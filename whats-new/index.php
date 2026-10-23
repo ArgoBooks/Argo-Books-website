@@ -105,7 +105,7 @@ $pricing = get_pricing_config();
                             <h4 class="section-label feature">New Features</h4>
                             <ul class="changelog-list">
                                 <li><strong>Track assets:</strong> Record vehicles, equipment, furniture, buildings and land as fixed assets, straight from an expense or on the new Assets page. Argo Books works out their depreciation for you, and your Income Statement, Balance Sheet and Cash Flow Statement show it, along with a new Asset Register report. When you sell an asset, the gain or loss is worked out too.</li>
-                                <li><strong>Five new report templates:</strong> Sales by Customer, Expenses by Supplier, Payroll Summary, Rentals and Customer Statement. A customer statement shows what a customer owes today, or their account's activity between two dates. Sales by Customer can also list every sale to one customer.</li>
+                                <li><strong>Five new report templates:</strong> Sales by Customer, Expenses by Supplier, Payroll Summary, Rentals and Customer Statement. A customer statement shows what a customer owes today, or their account's activity between two dates. Sales by Customer can also show all of one customer's sales.</li>
                                 <li><strong>Edit many at once:</strong> Select rows, a range with Shift, or everything a filter shows, then set the product, supplier or customer of expenses and sales, move products to another category, or delete them.</li>
                                 <li><strong>Add and remove report pages where you want them:</strong> Right-click a page in the report designer to add a new page right after it, or delete it.</li>
                             </ul>

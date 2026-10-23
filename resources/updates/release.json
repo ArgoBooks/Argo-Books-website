@@ -1,10 +1,10 @@
 {
-    "version":  "2.0.21",
-    "date":  "2026-10-18",
+    "version":  "2.0.22",
+    "date":  "2026-10-23",
     "downloads":  {
-                      "ArgoBooks-2.0.21-win-Setup.exe":  174874296,
-                      "ArgoBooks-2.0.21-osx-arm64.zip":  112453137,
-                      "ArgoBooks-2.0.21-osx-x64.zip":  140886945,
-                      "ArgoBooks-2.0.21-linux-x64.AppImage":  150739448
+                      "ArgoBooks-2.0.22-win-Setup.exe":  175452384,
+                      "ArgoBooks-2.0.22-osx-arm64.zip":  113058714,
+                      "ArgoBooks-2.0.22-osx-x64.zip":  141560190,
+                      "ArgoBooks-2.0.22-linux-x64.AppImage":  151398904
                   }
 }
