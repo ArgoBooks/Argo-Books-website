@@ -1236,7 +1236,7 @@ CREATE TABLE IF NOT EXISTS agent_proposals (
     environment ENUM('production', 'sandbox') NOT NULL,
     run_id INT DEFAULT NULL,
     kind ENUM('post', 'email', 'reply') NOT NULL COMMENT 'reply: a Reddit reply the owner posts by hand',
-    platform VARCHAR(20) DEFAULT NULL COMMENT 'For posts: bluesky or linkedin. For replies: reddit',
+    platform VARCHAR(20) DEFAULT NULL COMMENT 'For posts: bluesky or linkedin. For replies: reddit or youtube',
     payload TEXT NOT NULL COMMENT 'JSON: the text or the email, its sources, and what the agent first wrote if the owner changed it',
     text_hash CHAR(64) NOT NULL COMMENT 'To catch the same post, or an email to the same address, twice',
     status ENUM('pending', 'approved', 'rejected', 'done', 'failed') NOT NULL DEFAULT 'pending',

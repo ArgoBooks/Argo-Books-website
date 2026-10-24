@@ -12,6 +12,7 @@
 require_once __DIR__ . '/lib.php';
 require_once __DIR__ . '/platforms.php';
 require_once __DIR__ . '/reddit.php';
+require_once __DIR__ . '/youtube.php';
 
 // ─── Tracked links ───
 
@@ -778,6 +779,7 @@ function agent_brief(PDO $pdo, int $runId, ?callable $http = null): array
             'posting' => agent_on($pdo, 'posting_enabled'),
             'outreach' => agent_on($pdo, 'outreach_enabled'),
             'reddit_replies' => agent_on($pdo, 'replies_enabled'),
+            'youtube_replies' => agent_on($pdo, 'replies_enabled') && ($_ENV['YOUTUBE_API_KEY'] ?? '') !== '',
             'outreach_sending' => agent_outreach_sending($pdo),
             'approved_emails_not_sent_yet' => agent_emails_not_sent($pdo),
             'posts_wait_for_approval' => agent_on($pdo, 'approve_posts'),
@@ -795,6 +797,9 @@ function agent_brief(PDO $pdo, int $runId, ?callable $http = null): array
             'reddit_replies' => agent_limit($pdo, 'replies_per_day'),
             'reddit_replies_per_subreddit' => AGENT_REPLIES_PER_SUBREDDIT,
             'reddit_reads' => agent_limit($pdo, 'reddit_reads_per_day'),
+            'youtube_replies' => agent_limit($pdo, 'youtube_replies_per_day'),
+            'youtube_replies_per_video' => AGENT_YOUTUBE_REPLIES_PER_VIDEO,
+            'youtube_reads' => agent_limit($pdo, 'youtube_reads_per_day'),
         ],
     ];
 }
@@ -853,7 +858,9 @@ function agent_update_email(PDO $pdo, int $runId): ?array
         $p = json_decode((string) $row['payload'], true) ?: [];
         $needs[] = match ($row['kind']) {
             'post' => 'Post for ' . ucfirst((string) $row['platform']) . ': ' . mb_strimwidth((string) ($p['text'] ?? ''), 0, 90, '...'),
-            'reply' => 'Reddit reply for you to post in r/' . ($p['subreddit'] ?? '') . ': ' . mb_strimwidth((string) ($p['thread_title'] ?? ''), 0, 90, '...'),
+            'reply' => ($row['platform'] === 'youtube'
+                ? 'YouTube reply for you to post under "' . mb_strimwidth((string) ($p['thread_title'] ?? ''), 0, 70, '...') . '"'
+                : 'Reddit reply for you to post in r/' . ($p['subreddit'] ?? '') . ': ' . mb_strimwidth((string) ($p['thread_title'] ?? ''), 0, 90, '...')),
             default => 'Email to ' . ($p['business_name'] ?? '') . (empty($p['city']) ? '' : ', ' . $p['city']) . ': ' . ($p['subject'] ?? ''),
         };
     }

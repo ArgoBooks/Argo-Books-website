@@ -23,6 +23,7 @@ const AGENT_LIMITS = [
     'runs_per_day' => 'Runs a day', 'calls_per_run' => 'Requests a run', 'posts_per_day' => 'Posts a day, each platform',
     'emails_per_day' => 'New outreach emails a day', 'links_per_day' => 'New links a day', 'research_per_day' => 'Research questions a day',
     'replies_per_day' => 'Reddit replies a day', 'reddit_reads_per_day' => 'Reddit searches and reads a day',
+    'youtube_replies_per_day' => 'YouTube replies a day', 'youtube_reads_per_day' => 'YouTube searches and reads a day',
 ];
 const AGENT_TABS = [
     'waiting' => 'Waiting', 'switches' => 'Switches', 'setup' => 'Setup', 'limits' => 'Limits', 'notes' => 'Notes',
@@ -116,8 +117,7 @@ foreach ($notes as $i => $note) {
 $configured = [
     'Token for the agent (AGENT_API_TOKEN in .env, 32 characters or more)' => strlen($_ENV['AGENT_API_TOKEN'] ?? '') >= 32,
     'Read-only database user (AGENT_DB_USER in .env), for SQL' => ($_ENV['AGENT_DB_USER'] ?? '') !== '',
-    'Gemini key (GEMINI_API_KEY in .env), for research' => ($_ENV['GEMINI_API_KEY'] ?? '') !== '',
-    'Outreach sending (the switch in Admin, Outreach, Settings). Approved emails wait while it is off' => agent_outreach_sending($pdo),
+    'Gemini key (GEMINI_API_KEY in .env), for research' => ($_ENV['GEMINI_API_KEY'] ?? '') !== '',    'Outreach sending (the switch in Admin, Outreach, Settings). Approved emails wait while it is off' => agent_outreach_sending($pdo),
     'Playbook (api/agent/playbook.md)' => trim(agent_playbook()) !== '',
     'Facts file (api/agent/facts.md)' => trim(agent_facts()) !== '',
 ];
@@ -160,6 +160,7 @@ $rows = fn (?string $text, int $least = 6) => max($least, min(28, substr_count(w
     .agent-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 10px; }
     .agent-pre { white-space: pre-wrap; margin: 4px 0 0; }
     .agent-ok { color: var(--green-600); } .agent-bad { color: var(--red); }
+    .agent-quote { margin: 8px 0; padding: 8px 12px; border-left: 3px solid var(--gray-border); white-space: normal; }
 </style>
 
 <div class="section-tabs">
@@ -176,7 +177,7 @@ $rows = fn (?string $text, int $least = 6) => max($least, min(28, substr_count(w
     <div class="panel-header"><h2>Waiting for you (<?= count($pending) ?>)</h2></div>
     <div class="panel-content">
         <?php if (!$pending): ?>
-            <p class="hint" style="margin:0;">Nothing is waiting. Posts and emails the agent writes appear here while approval is on, and so does every Reddit reply, since you post those yourself.</p>
+            <p class="hint" style="margin:0;">Nothing is waiting. Posts and emails the agent writes appear here while approval is on, and so does every Reddit and YouTube reply, since you post those yourself.</p>
         <?php endif; ?>
         <?php foreach ($pending as $row): $p = json_decode((string) $row['payload'], true) ?: []; ?>
             <form method="POST" class="agent-card">
@@ -188,13 +189,20 @@ $rows = fn (?string $text, int $least = 6) => max($least, min(28, substr_count(w
                     <strong>Post on <?= $h(ucfirst((string) $row['platform'])) ?></strong>
                     <div class="agent-meta"><?= $h($p['about'] ?? '') ?> &middot; link: <?= $h(($p['link'] ?? '') ?: 'none') ?> &middot; limit <?= (int) (AGENT_PLATFORM_LIMITS[$row['platform']] ?? 0) ?> characters</div>
                     <textarea name="text" rows="<?= $rows($p['text'] ?? '') ?>"><?= $h($p['text'] ?? '') ?></textarea>
-                <?php elseif ($row['kind'] === 'reply'): ?>
-                    <strong>Reddit reply in r/<?= $h($p['subreddit'] ?? '') ?></strong>
+                <?php elseif ($row['kind'] === 'reply'): $youtube = $row['platform'] === 'youtube'; ?>
+                    <?php if ($youtube): ?>
+                        <strong>YouTube reply on <?= $h($p['channel'] ?? '') ?>'s video</strong>
+                    <?php else: ?>
+                        <strong>Reddit reply in r/<?= $h($p['subreddit'] ?? '') ?></strong>
+                    <?php endif; ?>
                     <div class="agent-meta"><a href="<?= $h($p['thread_url'] ?? '') ?>" target="_blank" rel="noopener noreferrer"><?= $h($p['thread_title'] ?? '') ?></a></div>
-                    <div class="agent-meta">Why this thread: <?= $h($p['why'] ?? '') ?></div>
+                    <?php if ($youtube): ?>
+                        <blockquote class="agent-quote"><strong><?= $h($p['comment_author'] ?? '') ?></strong> <span class="agent-meta"><?= $h(substr((string) ($p['comment_posted'] ?? ''), 0, 10)) ?></span><br><?= nl2br($h($p['comment_text'] ?? '')) ?></blockquote>
+                    <?php endif; ?>
+                    <div class="agent-meta">Why this <?= $youtube ? 'comment' : 'thread' ?>: <?= $h($p['why'] ?? '') ?></div>
                     <textarea name="text" rows="<?= $rows($p['text'] ?? '') ?>"><?= $h($p['text'] ?? '') ?></textarea>
                     <div class="agent-row" style="margin-top:6px;">
-                        <a class="btn btn-small btn-neutral" href="<?= $h($p['thread_url'] ?? '') ?>" target="_blank" rel="noopener noreferrer">Open thread</a>
+                        <a class="btn btn-small btn-neutral" href="<?= $h($p['thread_url'] ?? '') ?>" target="_blank" rel="noopener noreferrer"><?= $youtube ? 'Open comment' : 'Open thread' ?></a>
                         <button type="button" class="btn btn-small btn-neutral" data-copy-reply>Copy reply</button>
                         <span class="agent-meta" style="margin:0;">Edit it here first if you change anything, so the agent learns from it.</span>
                     </div>
@@ -230,7 +238,7 @@ $rows = fn (?string $text, int $least = 6) => max($least, min(28, substr_count(w
         <?= $toggle('enabled', 'Agent on', 'It can start a run and read.', 'Agent off', 'Every request is refused. Nothing runs.') ?>
         <?= $toggle('posting_enabled', 'Posting on', 'It may write posts for the connected platforms.', 'Posting off', 'It cannot propose or publish a post.') ?>
         <?= $toggle('outreach_enabled', 'Outreach on', 'It may find businesses and write them emails.', 'Outreach off', 'It cannot propose an email or write a follow-up.') ?>
-        <?= $toggle('replies_enabled', 'Reddit replies on', 'It may find Reddit questions and draft replies for you to post.', 'Reddit replies off', 'It cannot read Reddit or draft a reply.') ?>
+        <?= $toggle('replies_enabled', 'Replies on', 'It may find questions on Reddit and YouTube and draft replies for you to post.', 'Replies off', 'It cannot read Reddit or YouTube or draft a reply.') ?>
         <?= $toggle('approve_posts', 'Posts wait for approval', 'Each post sits above until you approve it.', 'Posts go out automatically', 'A post is published as soon as the agent writes it.') ?>
         <?= $toggle('approve_emails', 'Emails wait for approval', 'Each email sits above until you approve it. Follow-ups wait in Outreach, Follow-ups.', 'Emails go out automatically', 'An email is sent as soon as the agent writes it.') ?>
     </div>
@@ -265,7 +273,15 @@ $rows = fn (?string $text, int $least = 6) => max($least, min(28, substr_count(w
         <div class="agent-row" style="margin-top:4px;">
             <span class="agent-ok">Nothing to connect</span>
             <strong>Reddit</strong>
-            <span class="agent-meta" style="margin:0;">The agent reads Reddit's public feeds and drafts replies; you post each one yourself. Switch it on under Switches.</span>
+            <span class="agent-meta" style="margin:0;">The agent reads Reddit's public feeds and drafts replies; you post each one yourself. Switch replies on under Switches.</span>
+        </div>
+        <?php $youtubeReady = ($_ENV['YOUTUBE_API_KEY'] ?? '') !== ''; ?>
+        <div class="agent-row" style="margin-top:4px;">
+            <span class="<?= $youtubeReady ? 'agent-ok' : 'agent-bad' ?>"><?= $youtubeReady ? 'Ready' : 'Needs a key' ?></span>
+            <strong>YouTube</strong>
+            <span class="agent-meta" style="margin:0;"><?= $youtubeReady
+                ? 'The agent reads comments through the YouTube Data API and drafts replies; you post each one yourself.'
+                : 'Add YOUTUBE_API_KEY to .env. read-me/Marketing-agent.md says how to get one; it is free.' ?></span>
         </div>
     </div>
 </div></div>
@@ -343,7 +359,9 @@ $rows = fn (?string $text, int $least = 6) => max($least, min(28, substr_count(w
                     <td><?= $h($row['decided_at'] ?? $row['created_at']) ?></td>
                     <td><?= match ($row['kind']) {
                         'post' => 'Post, ' . $h($row['platform']),
-                        'reply' => 'Reddit reply, <a href="' . $h($p['thread_url'] ?? '') . '" target="_blank" rel="noopener noreferrer">r/' . $h($p['subreddit'] ?? '') . '</a>',
+                        'reply' => $row['platform'] === 'youtube'
+                            ? 'YouTube reply, <a href="' . $h($p['thread_url'] ?? '') . '" target="_blank" rel="noopener noreferrer">' . $h($p['channel'] ?? 'comment') . '</a>'
+                            : 'Reddit reply, <a href="' . $h($p['thread_url'] ?? '') . '" target="_blank" rel="noopener noreferrer">r/' . $h($p['subreddit'] ?? '') . '</a>',
                         default => 'Email to ' . $h($p['business_name'] ?? ''),
                     } ?></td>
                     <td class="<?= $row['status'] === 'done' ? 'agent-ok' : ($row['status'] === 'failed' ? 'agent-bad' : '') ?>">

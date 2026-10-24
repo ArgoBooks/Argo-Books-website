@@ -1,15 +1,14 @@
 <?php
 /**
- * Reddit replies: the agent finds people asking a question Argo Books answers and drafts a
- * reply, which waits on the admin page for the owner to post by hand.
+ * Reddit's part of the replies: finding threads where someone asks a question Argo Books
+ * answers, and saving a reply to one. What every reply shares is in replies.php.
  *
  * Nothing here posts to Reddit. Its API is closed to new sign-ups, and software posting from
  * the owner's account would break its rules. The site reads Reddit's public RSS feeds instead,
- * which need no account. A reply never carries a link: Reddit's spam filter watches young
- * accounts that repeat one, and the product's name is enough for someone who wants to find it.
+ * which need no account.
  */
 
-require_once __DIR__ . '/lib.php';
+require_once __DIR__ . '/replies.php';
 
 const AGENT_REDDIT_USER_AGENT = 'Mozilla/5.0 (compatible; ArgoBooksAgent/1.0; +https://argorobots.com)';
 
@@ -73,25 +72,6 @@ function agent_reddit_feed(string $url, callable $http): array
         ];
     }
     return $entries;
-}
-
-/** Refuses Reddit work while the owner has it switched off. */
-function agent_require_replies_on(PDO $pdo): void
-{
-    if (!agent_on($pdo, 'replies_enabled')) {
-        throw new AgentRefused('REPLIES_OFF', 'Reddit replies are switched off for the agent.', 403);
-    }
-}
-
-/** Whether a reply has already been drafted for a thread, whatever became of it. */
-function agent_reply_exists(PDO $pdo, string $threadId): bool
-{
-    $stmt = $pdo->prepare(
-        "SELECT 1 FROM agent_proposals WHERE environment = ? AND kind = 'reply'
-            AND JSON_UNQUOTE(JSON_EXTRACT(payload, '$.thread_id')) = ? LIMIT 1"
-    );
-    $stmt->execute([current_environment(), $threadId]);
-    return (bool) $stmt->fetchColumn();
 }
 
 /** Runs one Reddit read, counting it against the day's allowance and recording it. */
@@ -180,77 +160,40 @@ function agent_reddit_thread(PDO $pdo, ?int $runId, array $in, ?callable $http =
     ];
 }
 
-/** Whether text holds a link or a web address, which a reply must not. */
-function agent_reply_has_link(string $text): bool
-{
-    return (bool) preg_match('~https?://|www\.|\b[a-z0-9-]+\.(?:com|ca|net|org|io|app|co|us|uk|dev|ai|me|info|biz)\b~i', $text);
-}
-
 /**
- * Proposes a reply to a Reddit thread. It always waits for the owner, because he is the one
- * who posts it.
- *
- * @return array{proposal_id: int, status: string}
+ * Saves a reply to a Reddit thread for the owner to post, and returns its proposal id.
  */
-function agent_propose_reply(PDO $pdo, ?int $runId, array $in): array
+function agent_propose_reddit_reply(PDO $pdo, ?int $runId, array $in): int
 {
-    agent_require_replies_on($pdo);
-
     $thread = agent_reddit_thread_url((string) ($in['thread_url'] ?? ''));
     $title = trim((string) ($in['thread_title'] ?? ''));
-    $text = trim((string) ($in['text'] ?? ''));
-    $why = trim((string) ($in['why'] ?? ''));
-
     if ($thread === null) {
         throw new AgentRefused('BAD_INPUT', 'thread_url is the address of a Reddit thread: https://www.reddit.com/r/NAME/comments/ID/...');
     }
     if ($title === '' || mb_strlen($title) > 300) {
         throw new AgentRefused('BAD_INPUT', "thread_title is the thread's title, as Reddit shows it.");
     }
-    if (mb_strlen($text) < 60 || mb_strlen($text) > 2500) {
-        throw new AgentRefused('BAD_INPUT', 'A reply is 60 to 2500 characters. Short is better.');
-    }
-    if (agent_reply_has_link($text)) {
-        throw new AgentRefused('BAD_INPUT', 'A reply carries no link and no web address of any kind. Name Argo Books instead; whoever wants it will look it up.');
-    }
-    if ($why === '') {
-        throw new AgentRefused('BAD_INPUT', 'Say in "why" what the person asked and why Argo Books fits it.');
-    }
-    $sources = agent_sources($in);
+    $reply = agent_reply_text($pdo, $in, 2500);
 
     $limit = agent_limit($pdo, 'replies_per_day');
-    if (agent_proposed_today($pdo, 'reply') >= $limit) {
+    if (agent_replies_today($pdo, 'reddit') >= $limit) {
         throw new AgentRefused('DAILY_LIMIT', "Today's limit of $limit Reddit replies is used up.", 429);
     }
-    $inSubreddit = $pdo->prepare(
-        "SELECT COUNT(*) FROM agent_proposals WHERE environment = ? AND kind = 'reply' AND status != 'rejected'
-            AND created_at >= CURDATE() AND LOWER(JSON_UNQUOTE(JSON_EXTRACT(payload, '$.subreddit'))) = ?"
-    );
-    $inSubreddit->execute([current_environment(), strtolower($thread['subreddit'])]);
-    if ((int) $inSubreddit->fetchColumn() >= AGENT_REPLIES_PER_SUBREDDIT) {
+    if (agent_replies_today($pdo, 'reddit', 'subreddit', $thread['subreddit']) >= AGENT_REPLIES_PER_SUBREDDIT) {
         throw new AgentRefused('DAILY_LIMIT', 'There are already ' . AGENT_REPLIES_PER_SUBREDDIT . " replies in r/{$thread['subreddit']} today. Find a thread somewhere else.", 429);
     }
     if (agent_reply_exists($pdo, $thread['id'])) {
         throw new AgentRefused('DUPLICATE', 'A reply was already drafted for that thread. One per thread, whatever happened to it.', 409);
     }
 
-    $hash = agent_text_hash($text);
-    $seen = $pdo->prepare("SELECT 1 FROM agent_proposals WHERE environment = ? AND kind = 'reply' AND text_hash = ? LIMIT 1");
-    $seen->execute([current_environment(), $hash]);
-    if ($seen->fetchColumn()) {
-        throw new AgentRefused('DUPLICATE', 'That exact reply was written before. Every reply is written fresh for its thread.', 409);
-    }
-
-    $id = agent_save_proposal($pdo, $runId, 'reply', 'reddit', [
+    return agent_save_proposal($pdo, $runId, 'reply', 'reddit', [
         'thread_url' => $thread['url'],
         'thread_id' => $thread['id'],
         'subreddit' => $thread['subreddit'],
         'thread_title' => mb_substr($title, 0, 300),
-        'text' => $text,
-        'why' => mb_substr($why, 0, 1000),
-        'sources' => $sources,
+        'text' => $reply['text'],
+        'why' => $reply['why'],
+        'sources' => $reply['sources'],
         'experiment_key' => mb_substr(trim((string) ($in['experiment_key'] ?? '')), 0, 60),
-    ], $hash);
-
-    return ['proposal_id' => $id, 'status' => 'waiting for the owner to post it'];
+    ], $reply['hash']);
 }

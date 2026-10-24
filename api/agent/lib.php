@@ -48,6 +48,8 @@ const AGENT_DEFAULTS = [
     'research_per_day' => '40',
     'replies_per_day'  => '5',
     'reddit_reads_per_day' => '60',
+    'youtube_replies_per_day' => '5',
+    'youtube_reads_per_day' => '40',
 ];
 
 function agent_setting(PDO $pdo, string $key): string

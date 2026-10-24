@@ -14,13 +14,13 @@ The agent holds one secret token and nothing else. Every credential and every li
 - **Research** through Gemini with Google Search, or with its own web search.
 - **Propose posts** for Bluesky and LinkedIn.
 - **Propose outreach emails** to businesses it found, and write the follow-ups for those businesses.
-- **Draft Reddit replies** for you to post. See "Reddit replies" below.
+- **Draft replies on Reddit and YouTube** for you to post. See "Replies on Reddit and YouTube" below.
 - **Keep a journal and notes**, which are its memory between runs.
 
 ## What it cannot do
 
 - Spend money. X is not connected, because posting there is paid. See "X, if it is added" below.
-- Post on Reddit, or put a link in a Reddit reply.
+- Post on Reddit or YouTube, or put a link in a reply.
 - Post on Threads. Meta's developer access for it needs a working Facebook account, and none is available.
 - Create pages on the site or submit directory listings.
 - Email anyone the site already knows: a paying subscriber, a licence holder, an account holder, a newsletter subscriber, or anyone who unsubscribed from anything.
@@ -41,21 +41,23 @@ Your edits and rejections are shown to the agent at the start of its next run, a
 
 There are two switches, one for posts and one for emails. Turning one off makes that kind go out as soon as the agent writes it. Follow-up emails are the exception to the admin page: while email approval is on they wait in **Outreach, Follow-ups**, which is where follow-ups have always been approved.
 
-A Reddit reply always waits, whatever the switches say, because you are the one who posts it.
+A reply always waits, whatever the switches say, because you are the one who posts it.
 
-## Reddit replies
+## Replies on Reddit and YouTube
 
-Every paying customer so far was looking for software when they found Argo Books: in a YouTube search, a Google search, or a deal site. Cold email and posts reach people who are not. On Reddit people ask, in their own words, which software to use or how to get out of a bookkeeping mess, and the person asking reads every reply on their thread. So the agent finds those threads and drafts a reply, and you post it.
+Every paying customer so far was looking for software when they found Argo Books: in a YouTube search, a Google search, or a deal site. Cold email and posts reach people who are not. On Reddit and in YouTube comments people ask, in their own words, which software to use or how to get out of a bookkeeping mess. So the agent finds those questions and drafts a reply, and you post it. One switch, **Replies**, turns both on and off.
 
-**How it finds them.** Reddit's API is closed to new sign-ups, so the site reads Reddit's public RSS feeds, which need no account. `reddit_search` searches one subreddit at a time and `reddit_thread` reads one thread with its replies. Reddit answers a search of one subreddit but rate-limits searches across all of it, and it can refuse requests from servers it does not trust. When the site is refused, the agent fetches the feed itself and records that in its journal.
+**How it finds them on Reddit.** Reddit's API is closed to new sign-ups, so the site reads Reddit's public RSS feeds, which need no account. `reddit_search` searches one subreddit at a time and `reddit_thread` reads one thread with its replies. Reddit answers a search of one subreddit but rate-limits searches across all of it, and it can refuse requests from servers it does not trust. When the site is refused, the agent fetches the feed itself and records that in its journal.
 
-**What a reply looks like.** It answers the question first, mentions Argo Books once by name, and says plainly that you make it. It has no link: the site refuses any reply with a link or a web address in it. Reddit's spam filter watches young accounts that repeat a link, and someone who wants to find Argo Books can search the name. The playbook's "Reddit replies" section has the rest: which threads qualify, the subreddit rules it must check, and the tone.
+**How it finds them on YouTube.** Through the YouTube Data API, with a free key in `YOUTUBE_API_KEY` (step 6 below). `youtube_search` finds videos with their views and comment counts, and `youtube_comments` reads a video's comments with the replies each already has. Questions on YouTube stay useful for longer than on Reddit, because YouTube tells the person when someone answers them. When the agent drafts a reply, the site reads the comment and its video from YouTube itself, so what you see on the Waiting tab is what is really there.
 
-**On the Waiting tab** each reply shows the thread's title as a link, why the agent chose it, and the draft. **Open thread** and **Copy reply** are beside it. Edit the draft there before you copy it, so the agent learns from the change. Then click **I posted it**, or **Skip** with a line saying why.
+**What a reply looks like.** It answers the question first, mentions Argo Books once by name, and says plainly that you make it. It has no link: the site refuses any reply with a link or a web address in it. Reddit's spam filter watches young accounts that repeat a link, YouTube hides comments that carry one, and someone who wants to find Argo Books can search the name. The playbook's "Replies on Reddit and YouTube" section has the rest: which questions qualify, the subreddit rules it must check, and the tone.
 
-**The limits.** Five replies a day, at most two in one subreddit, one per thread ever, and no reply repeated word for word. Reads of Reddit are capped at 60 a day.
+**On the Waiting tab** each reply shows where it goes as a link, and for YouTube the comment it answers. Then why the agent chose it, and the draft, with **Open thread** or **Open comment** and **Copy reply** beside it. A YouTube link opens the video with that comment at the top of the comments. Edit the draft there before you copy it, so the agent learns from the change. Then click **I posted it**, or **Skip** with a line saying why.
 
-**Judging it.** A reply carries no link, so no tracked link can measure it. The measure is new users who answer "Reddit" to the app's "where did you hear about us?" question, which the agent sees in its numbers. It is slow and coarse.
+**The limits.** On Reddit, five replies a day and at most two in one subreddit. On YouTube, five a day and at most two under one video. On both, one reply per thread or comment ever, and no reply repeated word for word.
+
+**Judging it.** A reply carries no link, so no tracked link can measure it. The measure is new users who answer "Reddit" or "YouTube" to the app's "where did you hear about us?" question, which the agent sees in its numbers. It is slow and coarse, and "YouTube" also counts people who found your own videos.
 
 ## The admin page
 
@@ -95,6 +97,8 @@ These limits are set on the admin page:
 - Research questions a day: 40.
 - Reddit replies a day: 5, and at most 2 in one subreddit, which is fixed in the code.
 - Reddit searches and reads a day: 60.
+- YouTube replies a day: 5, and at most 2 under one video, which is fixed in the code.
+- YouTube searches and reads a day: 40. YouTube gives the key 10,000 units a day; a search costs 100 and reading comments 1, so 40 searches would use 4,000.
 
 ## Setting it up
 
@@ -147,9 +151,24 @@ Then on the admin Agent page, on the Setup tab, click **Connect** beside LinkedI
 
 ### 5. Reddit
 
-Nothing to connect. Turn on **Reddit replies** under Switches when you want drafts.
+Nothing to connect. Turn on **Replies** under Switches when you want drafts.
 
-### 6. The scheduled agent
+### 6. YouTube
+
+The agent reads YouTube through its Data API, which needs a key. It is free and needs no billing.
+
+1. At console.cloud.google.com, create a project, for example "Argo Books agent".
+2. Under **APIs and services, Library**, find **YouTube Data API v3** and enable it.
+3. Under **APIs and services, Credentials**, create an **API key**. Restrict it to the YouTube Data API v3, so the key can do nothing else.
+4. Add it to the server's `.env`:
+
+```
+YOUTUBE_API_KEY="<the key>"
+```
+
+The Setup tab shows YouTube as ready once the key is there. The same **Replies** switch turns YouTube on with Reddit.
+
+### 7. The scheduled agent
 
 At claude.ai/code/routines, create a routine that runs once a day, with the website repo attached so the agent can read how the site and the product work.
 
@@ -172,7 +191,7 @@ The wording it runs with is on the routine's own page, which is the only place i
 
 Each run can be read afterwards on the routine's page, step by step.
 
-### 7. Switch it on
+### 8. Switch it on
 
 On the admin Agent page, turn on **Agent**. Leave posting and outreach off for the first run, so you can read what it makes of the numbers before it writes anything. Then turn those on, with approval left on.
 
@@ -192,7 +211,7 @@ These limit what it can learn, so keep them in mind when reading its conclusions
 
 - **How a LinkedIn post did.** The free LinkedIn access creates posts and returns no likes, comments or views. A LinkedIn post is judged only by its tracked link. Bluesky does return numbers for the account's own posts.
 - **Comments and replies on posts.** It cannot answer them on any platform, so it cannot hold the conversations that early customers usually come from.
-- **How a Reddit reply did.** It drafts the reply but never sees it posted, and the feeds it reads show no votes. It learns only from what you mark posted or skipped, and from the survey.
+- **How a reply did.** It drafts the reply but never sees it posted, and it reads no votes or likes on it. It learns only from what you mark posted or skipped, and from the survey.
 - **What people do inside the app.** Feature usage is in telemetry files and is worked out inside the admin page, not in the database. The agent sees installs, first runs and survey answers.
 - **Who the customers are.** It gets counts of paying subscribers, never names or addresses.
 
@@ -218,7 +237,7 @@ X is not built. It is the one platform that costs money, so it is meant to come 
 ## What it needs from you
 
 - Approving, editing or rejecting what it writes, for as long as approval is on.
-- Posting the Reddit replies you want to use, and marking each one posted or skipped.
+- Posting the Reddit and YouTube replies you want to use, and marking each one posted or skipped.
 - Connecting LinkedIn again about every two months.
 - Updating `api/agent/facts.md` when the app changes. A fact that is missing is not used, and a fact that has gone stale is repeated.
 - Reading the journal now and then, and correcting a note that has drawn the wrong lesson.
@@ -228,7 +247,7 @@ X is not built. It is the one platform that costs money, so it is meant to come 
 - **A wrong claim goes out under your name.** The facts file, the sources each proposal must give, and the one-post-a-day limit reduce this. Only your approval prevents it, which is why approval starts on.
 - **Cold email affects deliverability.** Outreach is sent from the same domain as receipts and licence emails. More cold email means more risk to those, so the daily sending limit stays where it is.
 - **Cold email law.** Canada's anti-spam law restricts unsolicited commercial email. The outreach pipeline already sent it before the agent existed, but an agent adding businesses every day makes it steadier.
-- **A Reddit account flagged as spam.** Reddit can remove or hide comments from accounts it takes for promotion, without saying so. The defences are no links, no repeated wording, a disclosure in every reply, and a low daily number. If your replies stop appearing to other people, stop and check before posting more.
+- **An account flagged as spam.** Reddit and YouTube can remove or hide comments from accounts they take for promotion, without saying so. The defences are no links, no repeated wording, a disclosure in every reply, and a low daily number. If your replies stop appearing to other people, stop and check before posting more.
 - **Instructions hidden in web pages.** The agent reads the open web. The defence is that every power is limited on the site, not left to the agent's judgment.
 - **It rests on a preview feature.** Scheduled agents are a research preview and may change. Its cost in Claude usage has no hard limit either: the limits are how often it runs and how many requests a run may make.
 
@@ -238,7 +257,7 @@ X is not built. It is the one platform that costs money, so it is meant to come 
 - `api/agent/lib.php` holds settings, runs, the journal, notes, and reading.
 - `api/agent/actions.php` holds links, research, proposals and carrying them out, and the daily update.
 - `api/agent/platforms.php` holds Bluesky and LinkedIn.
-- `api/agent/reddit.php` reads Reddit's feeds and holds the rules for a reply.
+- `api/agent/replies.php` holds the rules every reply shares, `api/agent/reddit.php` reads Reddit's feeds, and `api/agent/youtube.php` reads YouTube.
 - `admin/agent/index.php` is the admin page, and `admin/agent/connect.php` the LinkedIn sign-in.
 - `cron/agent_watch.php` is the check that a run happened.
 - `cron/lib/outreach_helpers.php` has `outreach_known_contact()`, the rule for who outreach must never reach. The outreach cron uses it too, for every lead, not only the agent's.
