@@ -263,6 +263,9 @@ if (empty($dataDirs)) {
         $kpiFirstSeen = [];
         $dauThreshold = strtotime('today');
 
+        // Upgrading swaps the identity an upload authenticates with, so one person sends first as a device and then as a subscription. Device id => subscription id.
+        $identityLinks = [];
+
         // Process all JSON files and aggregate the data
         foreach ($dataFiles as $file) {
             $jsonDataRaw = file_get_contents($file);
@@ -297,6 +300,10 @@ if (empty($dataDirs)) {
                 // Nor an install whose premium came from another environment, since the upload endpoint does not check which environment a licence belongs to.
                 if (is_other_environment_auth_id($fileAuthId)) {
                     continue;
+                }
+
+                if (!empty($fileData['deviceAuthId']) && $fileData['deviceAuthId'] !== $fileAuthId) {
+                    $identityLinks[$fileData['deviceAuthId']] = $fileAuthId;
                 }
 
                 // Always count toward per-tier stats, even if the file is filtered out below
@@ -388,6 +395,39 @@ if (empty($dataDirs)) {
             else {
                 $failedFiles++;
             }
+        }
+
+        // Counted as the subscription from here on, as the User Activity list does, so an upgrade is one person rather than a new free user and a new premium one.
+        if ($identityLinks) {
+            $resolveUser = static fn($key) => $identityLinks[$key] ?? $key;
+            foreach (['free', 'premium'] as $t) {
+                foreach (['all', 'mau'] as $window) {
+                    $merged = [];
+                    foreach ($tierUsers[$t][$window] as $key => $_) {
+                        $merged[$resolveUser($key)] = true;
+                    }
+                    $tierUsers[$t][$window] = $merged;
+                }
+            }
+            foreach ($identityLinks as $deviceId => $subscriptionId) {
+                if (isset($kpiLastSeen[$deviceId])) {
+                    $kpiLastSeen[$subscriptionId] = max($kpiLastSeen[$subscriptionId] ?? 0, $kpiLastSeen[$deviceId]);
+                    unset($kpiLastSeen[$deviceId]);
+                }
+                if (isset($kpiFirstSeen[$deviceId])) {
+                    $kpiFirstSeen[$subscriptionId] = min($kpiFirstSeen[$subscriptionId] ?? PHP_INT_MAX, $kpiFirstSeen[$deviceId]);
+                    unset($kpiFirstSeen[$deviceId]);
+                }
+            }
+            foreach ($aggregatedData['dataPoints'] as &$categoryPoints) {
+                foreach ($categoryPoints as &$point) {
+                    if (!empty($point['hashedIP'])) {
+                        $point['hashedIP'] = $resolveUser($point['hashedIP']);
+                    }
+                }
+                unset($point);
+            }
+            unset($categoryPoints);
         }
 
         // Finalize per-tier user counts
