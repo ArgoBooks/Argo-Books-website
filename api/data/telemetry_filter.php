@@ -45,6 +45,12 @@ const TELEMETRY_FEATURE_NAMES = [
     // The import funnel
     'ImportOpened', 'ImportPreviewShown', 'ImportAbandoned', 'ImportFailed', 'ImportDiagnosticSent',
     'ReceiptScanFailed', 'EmptyStateShown', 'WelcomeShown',
+    // The dashboard banners, with the banner in the context
+    'BannerShown', 'BannerOpened', 'BannerDismissed',
+    // Fixed assets and bulk edits
+    'AssetCreated', 'AssetDisposed', 'BulkEdited',
+    // What happened to a scanned receipt, with the fields corrected before saving in the context
+    'ReceiptScanSaved', 'ReceiptScanDiscarded',
     // The paywall
     'UpgradePromptShown', 'UpgradeModalOpened', 'LicenseKeyRedeemed',
     // Payroll
