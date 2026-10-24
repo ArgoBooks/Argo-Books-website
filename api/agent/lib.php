@@ -37,6 +37,7 @@ const AGENT_DEFAULTS = [
     'enabled'          => '0',
     'posting_enabled'  => '0',
     'outreach_enabled' => '0',
+    'replies_enabled'  => '0',
     'approve_posts'    => '1',
     'approve_emails'   => '1',
     'runs_per_day'     => '2',
@@ -45,6 +46,8 @@ const AGENT_DEFAULTS = [
     'emails_per_day'   => '10',
     'links_per_day'    => '10',
     'research_per_day' => '40',
+    'replies_per_day'  => '5',
+    'reddit_reads_per_day' => '60',
 ];
 
 function agent_setting(PDO $pdo, string $key): string

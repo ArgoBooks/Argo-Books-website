@@ -11,6 +11,7 @@
 
 require_once __DIR__ . '/lib.php';
 require_once __DIR__ . '/platforms.php';
+require_once __DIR__ . '/reddit.php';
 
 // ─── Tracked links ───
 
@@ -501,6 +502,10 @@ function agent_carry_out(PDO $pdo, int $id, ?callable $http = null, ?callable $s
             $postId = agent_publish($pdo, (string) $proposal['platform'], $payload['text'], $payload['link'] ?? '', $http ?? 'agent_http');
             $result = ['post_id' => $postId];
             agent_log($pdo, $runId, 'post', 'ok', ['proposal_id' => $id, 'platform' => $proposal['platform'], 'post_id' => $postId]);
+        } elseif ($proposal['kind'] === 'reply') {
+            // The owner posts a reply himself, so approving it records that he did.
+            $result = ['posted_by' => 'owner'];
+            agent_log($pdo, $runId, 'reply', 'ok', ['proposal_id' => $id, 'thread' => $payload['thread_url'] ?? '']);
         } else {
             $leadId = agent_add_lead($pdo, $payload);
             $result = ['lead_id' => $leadId, 'send' => ($send ?? 'agent_send_lead_now')($pdo, $leadId)];
@@ -677,7 +682,7 @@ function agent_decisions_to_report(PDO $pdo): array
             'outcome' => $row['status'],
             'owner_changed_it' => (bool) $row['edited'],
             'as_you_wrote_it' => $payload['as_written'] ?? null,
-            'as_it_went_out' => array_intersect_key($payload, array_flip(['text', 'subject', 'body'])),
+            'as_it_went_out' => array_intersect_key($payload, array_flip(['text', 'subject', 'body', 'thread_url'])),
             'owner_note' => $row['owner_note'],
             'result' => json_decode((string) $row['result'], true),
         ];
@@ -739,7 +744,6 @@ function agent_refresh_post_numbers(PDO $pdo, ?callable $http = null): array
 function agent_brief(PDO $pdo, int $runId, ?callable $http = null): array
 {
     $http ??= 'agent_http';
-    agent_renew_threads($pdo, $http);
 
     $notes = agent_notes($pdo);
     $ownerNote = '';
@@ -773,6 +777,7 @@ function agent_brief(PDO $pdo, int $runId, ?callable $http = null): array
         'what_is_switched_on' => [
             'posting' => agent_on($pdo, 'posting_enabled'),
             'outreach' => agent_on($pdo, 'outreach_enabled'),
+            'reddit_replies' => agent_on($pdo, 'replies_enabled'),
             'outreach_sending' => agent_outreach_sending($pdo),
             'approved_emails_not_sent_yet' => agent_emails_not_sent($pdo),
             'posts_wait_for_approval' => agent_on($pdo, 'approve_posts'),
@@ -787,6 +792,9 @@ function agent_brief(PDO $pdo, int $runId, ?callable $http = null): array
             'outreach_emails' => agent_limit($pdo, 'emails_per_day'),
             'new_links' => agent_limit($pdo, 'links_per_day'),
             'research_questions' => agent_limit($pdo, 'research_per_day'),
+            'reddit_replies' => agent_limit($pdo, 'replies_per_day'),
+            'reddit_replies_per_subreddit' => AGENT_REPLIES_PER_SUBREDDIT,
+            'reddit_reads' => agent_limit($pdo, 'reddit_reads_per_day'),
         ],
     ];
 }
@@ -843,9 +851,11 @@ function agent_update_email(PDO $pdo, int $runId): ?array
     $needs = [];
     foreach (array_slice($pending, 0, 8) as $row) {
         $p = json_decode((string) $row['payload'], true) ?: [];
-        $needs[] = $row['kind'] === 'post'
-            ? 'Post for ' . ucfirst((string) $row['platform']) . ': ' . mb_strimwidth((string) ($p['text'] ?? ''), 0, 90, '...')
-            : 'Email to ' . ($p['business_name'] ?? '') . (empty($p['city']) ? '' : ', ' . $p['city']) . ': ' . ($p['subject'] ?? '');
+        $needs[] = match ($row['kind']) {
+            'post' => 'Post for ' . ucfirst((string) $row['platform']) . ': ' . mb_strimwidth((string) ($p['text'] ?? ''), 0, 90, '...'),
+            'reply' => 'Reddit reply for you to post in r/' . ($p['subreddit'] ?? '') . ': ' . mb_strimwidth((string) ($p['thread_title'] ?? ''), 0, 90, '...'),
+            default => 'Email to ' . ($p['business_name'] ?? '') . (empty($p['city']) ? '' : ', ' . $p['city']) . ': ' . ($p['subject'] ?? ''),
+        };
     }
     if (count($pending) > 8) {
         $needs[] = 'And ' . (count($pending) - 8) . ' more.';

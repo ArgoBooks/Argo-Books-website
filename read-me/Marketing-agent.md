@@ -12,13 +12,16 @@ The agent holds one secret token and nothing else. Every credential and every li
 - **Run SQL**, one `SELECT` at a time, over a fixed list of tables. Customer accounts, payments, licence keys, portal data and synced books are not on the list. Visitor IP addresses, and the text people typed into the surveys or the uninstall form, are removed from every answer: that text is theirs, and anyone can write it to try to instruct the agent. It sees the answers they picked.
 - **Make tracked referral links**, with codes starting `ag-`, pointing only at argorobots.com. They are listed under their own category, Marketing agent, on the admin Referral Links page.
 - **Research** through Gemini with Google Search, or with its own web search.
-- **Propose posts** for Bluesky, LinkedIn and Threads.
+- **Propose posts** for Bluesky and LinkedIn.
 - **Propose outreach emails** to businesses it found, and write the follow-ups for those businesses.
+- **Draft Reddit replies** for you to post. See "Reddit replies" below.
 - **Keep a journal and notes**, which are its memory between runs.
 
 ## What it cannot do
 
 - Spend money. X is not connected, because posting there is paid. See "X, if it is added" below.
+- Post on Reddit, or put a link in a Reddit reply.
+- Post on Threads. Meta's developer access for it needs a working Facebook account, and none is available.
 - Create pages on the site or submit directory listings.
 - Email anyone the site already knows: a paying subscriber, a licence holder, an account holder, a newsletter subscriber, or anyone who unsubscribed from anything.
 - Email an address it did not read from a page. The site loads the page the agent names and refuses the email if the address is not there.
@@ -37,6 +40,22 @@ The agent starts in approval mode. It writes the post or the email and the site 
 Your edits and rejections are shown to the agent at the start of its next run, and again at the start of each run after it until one of them finishes. This is the best teaching it gets, so the one-line reason is worth writing.
 
 There are two switches, one for posts and one for emails. Turning one off makes that kind go out as soon as the agent writes it. Follow-up emails are the exception to the admin page: while email approval is on they wait in **Outreach, Follow-ups**, which is where follow-ups have always been approved.
+
+A Reddit reply always waits, whatever the switches say, because you are the one who posts it.
+
+## Reddit replies
+
+Every paying customer so far was looking for software when they found Argo Books: in a YouTube search, a Google search, or a deal site. Cold email and posts reach people who are not. On Reddit people ask, in their own words, which software to use or how to get out of a bookkeeping mess, and the person asking reads every reply on their thread. So the agent finds those threads and drafts a reply, and you post it.
+
+**How it finds them.** Reddit's API is closed to new sign-ups, so the site reads Reddit's public RSS feeds, which need no account. `reddit_search` searches one subreddit at a time and `reddit_thread` reads one thread with its replies. Reddit answers a search of one subreddit but rate-limits searches across all of it, and it can refuse requests from servers it does not trust. When the site is refused, the agent fetches the feed itself and records that in its journal.
+
+**What a reply looks like.** It answers the question first, mentions Argo Books once by name, and says plainly that you make it. It has no link: the site refuses any reply with a link or a web address in it. Reddit's spam filter watches young accounts that repeat a link, and someone who wants to find Argo Books can search the name. The playbook's "Reddit replies" section has the rest: which threads qualify, the subreddit rules it must check, and the tone.
+
+**On the Waiting tab** each reply shows the thread's title as a link, why the agent chose it, and the draft. **Open thread** and **Copy reply** are beside it. Edit the draft there before you copy it, so the agent learns from the change. Then click **I posted it**, or **Skip** with a line saying why.
+
+**The limits.** Five replies a day, at most two in one subreddit, one per thread ever, and no reply repeated word for word. Reads of Reddit are capped at 60 a day.
+
+**Judging it.** A reply carries no link, so no tracked link can measure it. The measure is new users who answer "Reddit" to the app's "where did you hear about us?" question, which the agent sees in its numbers. It is slow and coarse.
 
 ## The admin page
 
@@ -74,6 +93,8 @@ These limits are set on the admin page:
 - New outreach emails a day: 10. Sending still follows `OUTREACH_DAILY_SEND_LIMIT`.
 - New links a day: 10.
 - Research questions a day: 40.
+- Reddit replies a day: 5, and at most 2 in one subreddit, which is fixed in the code.
+- Reddit searches and reads a day: 60.
 
 ## Setting it up
 
@@ -124,16 +145,9 @@ LINKEDIN_CLIENT_SECRET="<client secret>"
 
 Then on the admin Agent page, on the Setup tab, click **Connect** beside LinkedIn and sign in. The sign-in lasts about two months and LinkedIn offers no way to renew it, so it has to be connected again. The daily update warns you ten days before it runs out.
 
-### 5. Threads
+### 5. Reddit
 
-Create an app at developers.facebook.com with the Threads use case. Add the same redirect URL as above, and add your own Threads account as a tester of the app. Add to `.env`:
-
-```
-THREADS_APP_ID="<Threads app id>"
-THREADS_APP_SECRET="<Threads app secret>"
-```
-
-Then click **Connect** beside Threads. This sign-in lasts 60 days and the site renews it by itself while the agent is running.
+Nothing to connect. Turn on **Reddit replies** under Switches when you want drafts.
 
 ### 6. The scheduled agent
 
@@ -176,8 +190,9 @@ The measure is paid subscriptions and installs that came through the agent's own
 
 These limit what it can learn, so keep them in mind when reading its conclusions.
 
-- **How a LinkedIn post did.** The free LinkedIn access creates posts and returns no likes, comments or views. A LinkedIn post is judged only by its tracked link. Bluesky and Threads do return numbers for the account's own posts.
+- **How a LinkedIn post did.** The free LinkedIn access creates posts and returns no likes, comments or views. A LinkedIn post is judged only by its tracked link. Bluesky does return numbers for the account's own posts.
 - **Comments and replies on posts.** It cannot answer them on any platform, so it cannot hold the conversations that early customers usually come from.
+- **How a Reddit reply did.** It drafts the reply but never sees it posted, and the feeds it reads show no votes. It learns only from what you mark posted or skipped, and from the survey.
 - **What people do inside the app.** Feature usage is in telemetry files and is worked out inside the admin page, not in the database. The agent sees installs, first runs and survey answers.
 - **Who the customers are.** It gets counts of paying subscribers, never names or addresses.
 
@@ -203,6 +218,7 @@ X is not built. It is the one platform that costs money, so it is meant to come 
 ## What it needs from you
 
 - Approving, editing or rejecting what it writes, for as long as approval is on.
+- Posting the Reddit replies you want to use, and marking each one posted or skipped.
 - Connecting LinkedIn again about every two months.
 - Updating `api/agent/facts.md` when the app changes. A fact that is missing is not used, and a fact that has gone stale is repeated.
 - Reading the journal now and then, and correcting a note that has drawn the wrong lesson.
@@ -212,6 +228,7 @@ X is not built. It is the one platform that costs money, so it is meant to come 
 - **A wrong claim goes out under your name.** The facts file, the sources each proposal must give, and the one-post-a-day limit reduce this. Only your approval prevents it, which is why approval starts on.
 - **Cold email affects deliverability.** Outreach is sent from the same domain as receipts and licence emails. More cold email means more risk to those, so the daily sending limit stays where it is.
 - **Cold email law.** Canada's anti-spam law restricts unsolicited commercial email. The outreach pipeline already sent it before the agent existed, but an agent adding businesses every day makes it steadier.
+- **A Reddit account flagged as spam.** Reddit can remove or hide comments from accounts it takes for promotion, without saying so. The defences are no links, no repeated wording, a disclosure in every reply, and a low daily number. If your replies stop appearing to other people, stop and check before posting more.
 - **Instructions hidden in web pages.** The agent reads the open web. The defence is that every power is limited on the site, not left to the agent's judgment.
 - **It rests on a preview feature.** Scheduled agents are a research preview and may change. Its cost in Claude usage has no hard limit either: the limits are how often it runs and how many requests a run may make.
 
@@ -220,8 +237,9 @@ X is not built. It is the one platform that costs money, so it is meant to come 
 - `api/agent/index.php` checks the token and routes requests.
 - `api/agent/lib.php` holds settings, runs, the journal, notes, and reading.
 - `api/agent/actions.php` holds links, research, proposals and carrying them out, and the daily update.
-- `api/agent/platforms.php` holds Bluesky, LinkedIn and Threads.
-- `admin/agent/index.php` is the admin page, and `admin/agent/connect.php` the platform sign-in.
+- `api/agent/platforms.php` holds Bluesky and LinkedIn.
+- `api/agent/reddit.php` reads Reddit's feeds and holds the rules for a reply.
+- `admin/agent/index.php` is the admin page, and `admin/agent/connect.php` the LinkedIn sign-in.
 - `cron/agent_watch.php` is the check that a run happened.
 - `cron/lib/outreach_helpers.php` has `outreach_known_contact()`, the rule for who outreach must never reach. The outreach cron uses it too, for every lead, not only the agent's.
 - `tests/Integration/Agent/AgentTest.php` covers the limits.

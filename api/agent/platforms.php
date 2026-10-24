@@ -1,6 +1,6 @@
 <?php
 /**
- * The social platforms the agent can post to: Bluesky, LinkedIn and Threads.
+ * The social platforms the agent can post to: Bluesky and LinkedIn.
  *
  * Each platform has the same three pieces: whether it is connected, how to post, and how to
  * read back how a post did. X is not here. It is the plan's last stage, to be added only once
@@ -12,7 +12,7 @@
  */
 
 /** Longest text each platform takes, link included where the link goes in the text. */
-const AGENT_PLATFORM_LIMITS = ['bluesky' => 300, 'threads' => 500, 'linkedin' => 2800];
+const AGENT_PLATFORM_LIMITS = ['bluesky' => 300, 'linkedin' => 2800];
 
 /**
  * Sends one HTTP request and returns [status, headers, body].
@@ -76,15 +76,13 @@ function agent_connections(PDO $pdo): array
         'detail' => $handle !== '' ? $handle : 'BLUESKY_HANDLE and BLUESKY_APP_PASSWORD are not set in .env',
     ];
 
-    foreach (['linkedin' => 'LinkedIn', 'threads' => 'Threads'] as $key => $label) {
-        $expires = (int) agent_setting($pdo, $key . '_expires_at');
-        $has = agent_setting($pdo, $key . '_token') !== '' && agent_setting($pdo, $key . '_account') !== '';
-        $out[$key] = [
-            'connected' => $has && $expires > time(),
-            'expires_at' => $has ? $expires : null,
-            'detail' => !$has ? "$label is not connected" : ($expires > time() ? 'connected' : "the $label sign-in has expired"),
-        ];
-    }
+    $expires = (int) agent_setting($pdo, 'linkedin_expires_at');
+    $has = agent_setting($pdo, 'linkedin_token') !== '' && agent_setting($pdo, 'linkedin_account') !== '';
+    $out['linkedin'] = [
+        'connected' => $has && $expires > time(),
+        'expires_at' => $has ? $expires : null,
+        'detail' => !$has ? 'LinkedIn is not connected' : ($expires > time() ? 'connected' : 'the LinkedIn sign-in has expired'),
+    ];
     return $out;
 }
 
@@ -124,7 +122,6 @@ function agent_publish(PDO $pdo, string $platform, string $text, string $link, c
     return match ($platform) {
         'bluesky'  => agent_publish_bluesky($text, $link, $http),
         'linkedin' => agent_publish_linkedin($pdo, $text, $link, $http),
-        'threads'  => agent_publish_threads($pdo, $text, $link, $http),
         default    => throw new AgentPlatformFailed("There is no platform called $platform."),
     };
 }
@@ -194,61 +191,6 @@ function agent_publish_linkedin(PDO $pdo, string $text, string $link, callable $
     return (string) ($headers['x-restli-id'] ?? '');
 }
 
-/**
- * Threads publishes in two steps: make the post, then publish it. Its documentation asks for
- * a wait between the two, which is why this one call is slow.
- */
-function agent_publish_threads(PDO $pdo, string $text, string $link, callable $http, int $waitSeconds = 20): string
-{
-    $connection = agent_connection($pdo, 'threads');
-    $base = 'https://graph.threads.net/v1.0/' . rawurlencode($connection['account']);
-
-    $fields = ['media_type' => 'TEXT', 'text' => $text, 'access_token' => $connection['token']];
-    if ($link !== '') {
-        $fields['link_attachment'] = $link;
-    }
-    [$status, , $body] = $http('POST', $base . '/threads', ['Content-Type: application/x-www-form-urlencoded'], http_build_query($fields));
-    $container = agent_json($body);
-    if ($status !== 200 || empty($container['id'])) {
-        throw new AgentPlatformFailed("Threads answered $status when making the post: " . mb_substr($body, 0, 300));
-    }
-
-    if ($waitSeconds > 0) {
-        sleep($waitSeconds);
-    }
-
-    [$status, , $body] = $http('POST', $base . '/threads_publish', ['Content-Type: application/x-www-form-urlencoded'],
-        http_build_query(['creation_id' => $container['id'], 'access_token' => $connection['token']]));
-    $published = agent_json($body);
-    if ($status !== 200 || empty($published['id'])) {
-        throw new AgentPlatformFailed("Threads answered $status when publishing: " . mb_substr($body, 0, 300));
-    }
-    return (string) $published['id'];
-}
-
-/**
- * A Threads sign-in lasts 60 days and can be renewed while it is still good, so it is renewed
- * here whenever it has under three weeks left. LinkedIn offers no renewal: it has to be
- * connected again by hand.
- */
-function agent_renew_threads(PDO $pdo, callable $http): void
-{
-    $expires = (int) agent_setting($pdo, 'threads_expires_at');
-    if (agent_setting($pdo, 'threads_token') === '' || $expires <= time() || $expires - time() > 21 * 86400) {
-        return;
-    }
-    $token = portal_decrypt(agent_setting($pdo, 'threads_token'));
-    [$status, , $body] = $http('GET', 'https://graph.threads.net/refresh_access_token?' .
-        http_build_query(['grant_type' => 'th_refresh_token', 'access_token' => $token]));
-    $renewed = agent_json($body);
-    if ($status === 200 && !empty($renewed['access_token'])) {
-        agent_store_connection($pdo, 'threads', $renewed['access_token'], agent_setting($pdo, 'threads_account'),
-            time() + (int) ($renewed['expires_in'] ?? 5184000));
-    } else {
-        error_log("agent: Threads sign-in could not be renewed ($status): " . mb_substr($body, 0, 200));
-    }
-}
-
 // ─── Reading back ───
 
 /**
@@ -272,24 +214,6 @@ function agent_post_numbers(PDO $pdo, string $platform, string $postId, callable
         }
         return ['likes' => (int) ($post['likeCount'] ?? 0), 'replies' => (int) ($post['replyCount'] ?? 0),
                 'reposts' => (int) ($post['repostCount'] ?? 0), 'quotes' => (int) ($post['quoteCount'] ?? 0)];
-    }
-
-    if ($platform === 'threads') {
-        try {
-            $connection = agent_connection($pdo, 'threads');
-        } catch (AgentPlatformFailed) {
-            return null;
-        }
-        [$status, , $body] = $http('GET', 'https://graph.threads.net/v1.0/' . rawurlencode($postId) . '/insights?' .
-            http_build_query(['metric' => 'views,likes,replies,reposts,quotes', 'access_token' => $connection['token']]));
-        if ($status !== 200) {
-            return null;
-        }
-        $numbers = [];
-        foreach (agent_json($body)['data'] ?? [] as $metric) {
-            $numbers[(string) ($metric['name'] ?? '')] = (int) ($metric['values'][0]['value'] ?? $metric['total_value']['value'] ?? 0);
-        }
-        return $numbers ?: null;
     }
 
     return null;

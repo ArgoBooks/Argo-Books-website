@@ -18,8 +18,12 @@ if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
-const AGENT_SWITCHES = ['enabled', 'posting_enabled', 'outreach_enabled', 'approve_posts', 'approve_emails'];
-const AGENT_LIMIT_KEYS = ['runs_per_day', 'calls_per_run', 'posts_per_day', 'emails_per_day', 'links_per_day', 'research_per_day'];
+const AGENT_SWITCHES = ['enabled', 'posting_enabled', 'outreach_enabled', 'replies_enabled', 'approve_posts', 'approve_emails'];
+const AGENT_LIMITS = [
+    'runs_per_day' => 'Runs a day', 'calls_per_run' => 'Requests a run', 'posts_per_day' => 'Posts a day, each platform',
+    'emails_per_day' => 'New outreach emails a day', 'links_per_day' => 'New links a day', 'research_per_day' => 'Research questions a day',
+    'replies_per_day' => 'Reddit replies a day', 'reddit_reads_per_day' => 'Reddit searches and reads a day',
+];
 const AGENT_TABS = [
     'waiting' => 'Waiting', 'switches' => 'Switches', 'setup' => 'Setup', 'limits' => 'Limits', 'notes' => 'Notes',
     'runs' => 'Runs', 'decided' => 'Decided', 'journal' => 'Journal', 'actions' => 'Record',
@@ -38,13 +42,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($action === 'switch' && in_array($_POST['key'] ?? '', AGENT_SWITCHES, true)) {
             agent_setting_set($pdo, $_POST['key'], ($_POST['value'] ?? '') === '1' ? '1' : '0');
         } elseif ($action === 'limits') {
-            foreach (AGENT_LIMIT_KEYS as $key) {
+            foreach (array_keys(AGENT_LIMITS) as $key) {
                 if (isset($_POST[$key]) && ctype_digit((string) $_POST[$key])) {
                     agent_setting_set($pdo, $key, (string) min(1000, (int) $_POST[$key]));
                 }
             }
         } elseif ($action === 'decide') {
-            // Publishing to Threads waits between its two steps, so give the request room.
+            // Approving publishes a post or sends an email through another server, so give the request room.
             @set_time_limit(120);
             $status = agent_decide(
                 $pdo,
@@ -58,6 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $decided = $decided->fetch() ?: ['kind' => '', 'result' => null];
             $send = json_decode((string) $decided['result'], true)['send'] ?? '';
             $done = match (true) {
+                $decided['kind'] === 'reply' => ['success', 'Marked as posted. The agent sees it on its next run.'],
                 $decided['kind'] !== 'email' => ['success', 'Approved and published.'],
                 $send === 'sent' => ['success', 'Approved and sent.'],
                 $send === 'outreach_off' => ['error', 'Approved, but it cannot go out: outreach is switched off in Admin, Outreach, Settings.'],
@@ -67,12 +72,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             };
             $message = match ($status) {
                 'done' => $done,
-                'rejected' => ['success', 'Rejected. The agent will be told why on its next run.'],
+                'rejected' => ['success', ($decided['kind'] === 'reply' ? 'Skipped.' : 'Rejected.') . ' The agent will be told why on its next run.'],
                 default => ['error', 'Approved, but it could not be carried out. The reason is on the Decided tab.'],
             };
         } elseif ($action === 'note') {
             agent_note_save($pdo, (string) ($_POST['name'] ?? ''), (string) ($_POST['body'] ?? ''), true);
-        } elseif ($action === 'disconnect' && in_array($_POST['platform'] ?? '', ['linkedin', 'threads'], true)) {
+        } elseif ($action === 'disconnect' && ($_POST['platform'] ?? '') === 'linkedin') {
             agent_forget_connection($pdo, $_POST['platform']);
             $message = ['success', ucfirst($_POST['platform']) . ' disconnected.'];
         }
@@ -171,7 +176,7 @@ $rows = fn (?string $text, int $least = 6) => max($least, min(28, substr_count(w
     <div class="panel-header"><h2>Waiting for you (<?= count($pending) ?>)</h2></div>
     <div class="panel-content">
         <?php if (!$pending): ?>
-            <p class="hint" style="margin:0;">Nothing is waiting. Posts and emails the agent writes appear here while approval is on.</p>
+            <p class="hint" style="margin:0;">Nothing is waiting. Posts and emails the agent writes appear here while approval is on, and so does every Reddit reply, since you post those yourself.</p>
         <?php endif; ?>
         <?php foreach ($pending as $row): $p = json_decode((string) $row['payload'], true) ?: []; ?>
             <form method="POST" class="agent-card">
@@ -183,6 +188,16 @@ $rows = fn (?string $text, int $least = 6) => max($least, min(28, substr_count(w
                     <strong>Post on <?= $h(ucfirst((string) $row['platform'])) ?></strong>
                     <div class="agent-meta"><?= $h($p['about'] ?? '') ?> &middot; link: <?= $h(($p['link'] ?? '') ?: 'none') ?> &middot; limit <?= (int) (AGENT_PLATFORM_LIMITS[$row['platform']] ?? 0) ?> characters</div>
                     <textarea name="text" rows="<?= $rows($p['text'] ?? '') ?>"><?= $h($p['text'] ?? '') ?></textarea>
+                <?php elseif ($row['kind'] === 'reply'): ?>
+                    <strong>Reddit reply in r/<?= $h($p['subreddit'] ?? '') ?></strong>
+                    <div class="agent-meta"><a href="<?= $h($p['thread_url'] ?? '') ?>" target="_blank" rel="noopener noreferrer"><?= $h($p['thread_title'] ?? '') ?></a></div>
+                    <div class="agent-meta">Why this thread: <?= $h($p['why'] ?? '') ?></div>
+                    <textarea name="text" rows="<?= $rows($p['text'] ?? '') ?>"><?= $h($p['text'] ?? '') ?></textarea>
+                    <div class="agent-row" style="margin-top:6px;">
+                        <a class="btn btn-small btn-neutral" href="<?= $h($p['thread_url'] ?? '') ?>" target="_blank" rel="noopener noreferrer">Open thread</a>
+                        <button type="button" class="btn btn-small btn-neutral" data-copy-reply>Copy reply</button>
+                        <span class="agent-meta" style="margin:0;">Edit it here first if you change anything, so the agent learns from it.</span>
+                    </div>
                 <?php else: ?>
                     <strong>Email to <?= $h($p['business_name'] ?? '') ?></strong> &lt;<?= $h($p['email'] ?? '') ?>&gt;
                     <div class="agent-meta">
@@ -196,8 +211,13 @@ $rows = fn (?string $text, int $least = 6) => max($least, min(28, substr_count(w
                 <div class="agent-meta">Where its claims come from: <?= $h(implode(' | ', $p['sources'] ?? [])) ?></div>
                 <div class="agent-row">
                     <input type="text" name="note" placeholder="A line for the agent: why you changed or rejected it (optional)" style="flex:1; min-width:240px;">
-                    <button type="submit" name="decision" value="approve" class="btn btn-blue">Approve</button>
-                    <button type="submit" name="decision" value="reject" class="btn btn-neutral">Reject</button>
+                    <?php if ($row['kind'] === 'reply'): ?>
+                        <button type="submit" name="decision" value="approve" class="btn btn-blue">I posted it</button>
+                        <button type="submit" name="decision" value="reject" class="btn btn-neutral">Skip</button>
+                    <?php else: ?>
+                        <button type="submit" name="decision" value="approve" class="btn btn-blue">Approve</button>
+                        <button type="submit" name="decision" value="reject" class="btn btn-neutral">Reject</button>
+                    <?php endif; ?>
                 </div>
             </form>
         <?php endforeach; ?>
@@ -210,6 +230,7 @@ $rows = fn (?string $text, int $least = 6) => max($least, min(28, substr_count(w
         <?= $toggle('enabled', 'Agent on', 'It can start a run and read.', 'Agent off', 'Every request is refused. Nothing runs.') ?>
         <?= $toggle('posting_enabled', 'Posting on', 'It may write posts for the connected platforms.', 'Posting off', 'It cannot propose or publish a post.') ?>
         <?= $toggle('outreach_enabled', 'Outreach on', 'It may find businesses and write them emails.', 'Outreach off', 'It cannot propose an email or write a follow-up.') ?>
+        <?= $toggle('replies_enabled', 'Reddit replies on', 'It may find Reddit questions and draft replies for you to post.', 'Reddit replies off', 'It cannot read Reddit or draft a reply.') ?>
         <?= $toggle('approve_posts', 'Posts wait for approval', 'Each post sits above until you approve it.', 'Posts go out automatically', 'A post is published as soon as the agent writes it.') ?>
         <?= $toggle('approve_emails', 'Emails wait for approval', 'Each email sits above until you approve it. Follow-ups wait in Outreach, Follow-ups.', 'Emails go out automatically', 'An email is sent as soon as the agent writes it.') ?>
     </div>
@@ -241,6 +262,11 @@ $rows = fn (?string $text, int $least = 6) => max($least, min(28, substr_count(w
                 <?php endif; ?>
             </div>
         <?php endforeach; ?>
+        <div class="agent-row" style="margin-top:4px;">
+            <span class="agent-ok">Nothing to connect</span>
+            <strong>Reddit</strong>
+            <span class="agent-meta" style="margin:0;">The agent reads Reddit's public feeds and drafts replies; you post each one yourself. Switch it on under Switches.</span>
+        </div>
     </div>
 </div></div>
 
@@ -250,10 +276,7 @@ $rows = fn (?string $text, int $least = 6) => max($least, min(28, substr_count(w
         <form method="POST">
             <?= $csrf ?><input type="hidden" name="action" value="limits"><input type="hidden" name="tab" value="limits">
             <div class="agent-limits">
-            <?php foreach ([
-                'runs_per_day' => 'Runs a day', 'calls_per_run' => 'Requests a run', 'posts_per_day' => 'Posts a day, each platform',
-                'emails_per_day' => 'New outreach emails a day', 'links_per_day' => 'New links a day', 'research_per_day' => 'Research questions a day',
-            ] as $key => $label): ?>
+            <?php foreach (AGENT_LIMITS as $key => $label): ?>
                 <div class="form-group" style="margin:0;">
                     <label for="lim-<?= $h($key) ?>"><?= $h($label) ?></label>
                     <input type="number" min="0" max="1000" id="lim-<?= $h($key) ?>" name="<?= $h($key) ?>" value="<?= agent_limit($pdo, $key) ?>">
@@ -310,7 +333,7 @@ $rows = fn (?string $text, int $least = 6) => max($least, min(28, substr_count(w
 </div></div>
 
 <div id="decided" class="tab-content<?= $activeTab === 'decided' ? ' active' : '' ?>"><div class="panel">
-    <div class="panel-header"><h2>Posts and emails already decided</h2></div>
+    <div class="panel-header"><h2>Posts, emails and replies already decided</h2></div>
     <div class="panel-content">
         <div class="leads-table-wrapper agent-log"><table class="data-table">
             <thead><tr><th>When</th><th>What</th><th>Outcome</th><th>Text</th><th>Result</th></tr></thead>
@@ -318,7 +341,11 @@ $rows = fn (?string $text, int $least = 6) => max($least, min(28, substr_count(w
             <?php foreach ($decided as $row): $p = json_decode((string) $row['payload'], true) ?: []; ?>
                 <tr>
                     <td><?= $h($row['decided_at'] ?? $row['created_at']) ?></td>
-                    <td><?= $row['kind'] === 'post' ? 'Post, ' . $h($row['platform']) : 'Email to ' . $h($p['business_name'] ?? '') ?></td>
+                    <td><?= match ($row['kind']) {
+                        'post' => 'Post, ' . $h($row['platform']),
+                        'reply' => 'Reddit reply, <a href="' . $h($p['thread_url'] ?? '') . '" target="_blank" rel="noopener noreferrer">r/' . $h($p['subreddit'] ?? '') . '</a>',
+                        default => 'Email to ' . $h($p['business_name'] ?? ''),
+                    } ?></td>
                     <td class="<?= $row['status'] === 'done' ? 'agent-ok' : ($row['status'] === 'failed' ? 'agent-bad' : '') ?>">
                         <?= $h($row['status']) ?><?= $row['edited'] ? ', you edited it' : '' ?><?= $row['owner_note'] ? ': ' . $h($row['owner_note']) : '' ?>
                     </td>
@@ -366,6 +393,18 @@ $rows = fn (?string $text, int $least = 6) => max($least, min(28, substr_count(w
         </table></div>
     </div>
 </div></div>
+
+<script>
+    document.querySelectorAll('[data-copy-reply]').forEach(function (button) {
+        button.addEventListener('click', function () {
+            const text = button.closest('form').querySelector('textarea[name="text"]').value;
+            navigator.clipboard.writeText(text).then(function () {
+                button.textContent = 'Copied';
+                setTimeout(function () { button.textContent = 'Copy reply'; }, 1500);
+            });
+        });
+    });
+</script>
 
         </main>
     </div>

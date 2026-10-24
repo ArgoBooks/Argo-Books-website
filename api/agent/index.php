@@ -10,7 +10,8 @@
  * "run_id" and counts against that run's allowance.
  *
  * Actions: start_run, sql, numbers, research, journal_add, note_save, link_create,
- * propose_post, propose_email, followup_write, finish_run.
+ * propose_post, propose_email, followup_write, reddit_search, reddit_thread, propose_reply,
+ * finish_run.
  *
  * Answers are JSON. A refusal the agent should act on comes back as
  * {"ok": false, "reason": "CODE", "message": "..."} with a 4xx status. The rules are in
@@ -91,6 +92,9 @@ try {
         'propose_post'   => agent_propose_post($pdo, $runId, $in),
         'propose_email'  => agent_propose_email($pdo, $runId, $in),
         'followup_write' => ['status' => agent_write_followup($pdo, $runId, $in)],
+        'reddit_search'  => agent_reddit_search($pdo, $runId, $in),
+        'reddit_thread'  => agent_reddit_thread($pdo, $runId, $in),
+        'propose_reply'  => agent_propose_reply($pdo, $runId, $in),
         'finish_run'     => (function () use ($pdo, $runId, $in) {
             agent_finish_run($pdo, $runId, (string) ($in['summary'] ?? ''));
             agent_mark_decisions_told($pdo, $runId);
