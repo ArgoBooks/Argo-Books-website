@@ -49,6 +49,8 @@ const TELEMETRY_FEATURE_NAMES = [
     'BannerShown', 'BannerOpened', 'BannerDismissed',
     // Fixed assets and bulk edits
     'AssetCreated', 'AssetDisposed', 'BulkEdited',
+    // A sales tax return filed, with the frequency and paid or refunded in the context
+    'SalesTaxFiled',
     // What happened to a scanned receipt, with the fields corrected before saving in the context
     'ReceiptScanSaved', 'ReceiptScanDiscarded',
     // The paywall
