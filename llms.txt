@@ -1,0 +1,16 @@
+# Argo Books
+
+> Argo Books is accounting software for small businesses, for Windows, macOS and Linux. Its API lets other apps send revenue, expenses, customers, suppliers, products, categories and refunds into a business's books, with the owner's permission.
+
+## API
+
+- [Add Argo Books to a project](https://argorobots.com/documentation/agents.md): step-by-step setup for an AI coding agent
+- [API overview](https://argorobots.com/documentation/pages/api/overview.php): how the API works and its conventions
+- [Resources](https://argorobots.com/documentation/pages/api/resources.php): every object and field
+- [Errors](https://argorobots.com/documentation/pages/api/errors.php): every error code
+
+## Product
+
+- [Features](https://argorobots.com/features/)
+- [Pricing](https://argorobots.com/pricing/)
+- [Documentation](https://argorobots.com/documentation/)

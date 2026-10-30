@@ -32,6 +32,10 @@ include __DIR__ . '/../../docs-header.php';
             </ul>
             <p>There is no fixed timeline for the merchant to import what you send. One who opens Argo Books weekly will import your data weekly. <code>GET /v1/account</code> reports how much of yours is still waiting.</p>
 
+            <h2>Set It Up With an AI Agent</h2>
+            <p>Using Claude Code, Cursor, Codex or another coding agent? Paste this into it and it will walk you through the setup:</p>
+            <?= argo_code_block('Add Argo Books to my project: read https://argorobots.com/documentation/agents.md and follow it.', 'text', 'Prompt') ?>
+
             <h2>Getting Started</h2>
             <p>Ask the merchant for a key. The API is part of Argo Books Premium, so they need that first. They create a key in Argo Books under <strong>Settings</strong>, then <strong>Integrations</strong>, then <strong>Argo Books API</strong>. Keys start with <code>ab_</code>. See <a href="authentication.php" class="link">Authentication</a>.</p>
 

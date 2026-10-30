@@ -286,6 +286,9 @@ php_value upload_max_filesize 10M
     RewriteRule ^api/v1/lib/ - [F,L]
     RewriteRule ^v1(/.*)?$ api/v1/index.php [L,QSA]
 
+    # The setup guide AI coding agents are pointed at. Deploys skip .md files, so PHP serves it as Markdown.
+    RewriteRule ^documentation/agents\.md$ documentation/agents.php [L]
+
     # Control plane for the above: Argo Books itself creates and revokes the
     # keys here, authenticated by its licence identity rather than by a key.
     RewriteRule ^api/developer/account/?$ api/developer/account.php [L,QSA]
