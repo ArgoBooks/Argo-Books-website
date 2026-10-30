@@ -14,7 +14,7 @@
  * agent_proposals. All are split by environment, like the rest of the shared database.
  */
 
-require_once __DIR__ . '/../../referral_categories.php';
+require_once __DIR__ . '/../../referral_links.php';
 require_once __DIR__ . '/../../cron/lib/outreach_helpers.php';
 require_once __DIR__ . '/../../admin/marketing-funnel/analytics.php';
 
@@ -544,12 +544,4 @@ function agent_site_pages(): array
 {
     require_once __DIR__ . '/../../sitemap_urls.php';
     return array_map(fn ($url) => $url['loc'], sitemap_build_urls());
-}
-
-/** Only the site's own pages may be linked or posted. */
-function agent_is_site_url(string $url): bool
-{
-    $parts = parse_url($url);
-    $host = strtolower($parts['host'] ?? '');
-    return ($parts['scheme'] ?? '') === 'https' && ($host === 'argorobots.com' || $host === 'www.argorobots.com');
 }

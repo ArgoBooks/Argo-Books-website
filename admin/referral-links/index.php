@@ -3,7 +3,7 @@ require_once __DIR__ . '/../admin_session.php';
 require_once __DIR__ . '/../../db_connect.php';
 // Needed for svg_icon() when an AJAX save renders table rows without the header.
 require_once __DIR__ . '/../../resources/icons.php';
-require_once __DIR__ . '/../../referral_categories.php';
+require_once __DIR__ . '/../../referral_links.php';
 
 // Check if user is logged in
 if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
@@ -60,8 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $category = referral_category_or_other($_POST['category'] ?? null);
                 $target_url = trim($_POST['target_url']);
 
-                $stmt = $pdo->prepare('INSERT INTO referral_links (source_code, name, category, target_url) VALUES (?, ?, ?, ?)');
-                $stmt->execute([$source_code, $name, $category, $target_url]);
+                referral_link_insert($pdo, $source_code, $name, $category, $target_url);
 
                 $saved_message = 'Referral link created successfully!';
                 $saved_category = $category;

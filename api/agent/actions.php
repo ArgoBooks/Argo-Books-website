@@ -35,14 +35,13 @@ function agent_create_link(PDO $pdo, ?int $runId, array $in): array
     if ($name === '') {
         throw new AgentRefused('BAD_INPUT', 'Give the link a name that says what it is for.');
     }
-    if (!agent_is_site_url($target)) {
+    if (!referral_is_site_url($target)) {
         throw new AgentRefused('BAD_INPUT', 'target_url must be a page on https://argorobots.com.');
     }
     agent_require_room($pdo, 'link_create', 'links_per_day', 'new links');
 
     try {
-        $pdo->prepare('INSERT INTO referral_links (source_code, name, category, target_url) VALUES (?, ?, ?, ?)')
-            ->execute([$code, mb_substr($name, 0, 255), 'agent', $target]);
+        referral_link_insert($pdo, $code, $name, 'agent', $target);
     } catch (PDOException $e) {
         if ($e->getCode() === '23000') {
             throw new AgentRefused('DUPLICATE', 'That source_code is already in use.', 409);
@@ -50,7 +49,7 @@ function agent_create_link(PDO $pdo, ?int $runId, array $in): array
         throw $e;
     }
 
-    $url = $target . (str_contains($target, '?') ? '&' : '?') . 'source=' . rawurlencode($code);
+    $url = referral_link_url($target, $code);
     agent_log($pdo, $runId, 'link_create', 'ok', ['source_code' => $code, 'name' => $name, 'url' => $url]);
     return ['source_code' => $code, 'url' => $url];
 }
@@ -286,7 +285,7 @@ function agent_propose_post(PDO $pdo, ?int $runId, array $in, ?callable $http = 
     if (!(agent_connections($pdo)[$platform]['connected'] ?? false)) {
         throw new AgentRefused('NOT_CONNECTED', ucfirst($platform) . ' is not connected. Say so in your summary and leave it out today.', 409);
     }
-    if ($link !== '' && !agent_is_site_url($link)) {
+    if ($link !== '' && !referral_is_site_url($link)) {
         throw new AgentRefused('BAD_INPUT', 'link must be a page on https://argorobots.com, normally one of your tracked links.');
     }
     $length = mb_strlen($text) + ($link !== '' && $platform === 'bluesky' ? mb_strlen($link) + 2 : 0);
