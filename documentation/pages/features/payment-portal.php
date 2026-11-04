@@ -37,7 +37,8 @@ include __DIR__ . '/../../docs-header.php';
             <h2>What Your Customers See</h2>
             <ul>
                 <li>They receive an email with a link, and nothing to sign up for or install</li>
-                <li>An invoice can be paid there, securely, using their preferred payment method</li>
+                <li>An invoice can be paid there, securely, using their preferred payment method
+                    (see <a class="link" href="invoicing.php">Invoicing &amp; Payments</a>)</li>
                 <li>A quote can be accepted or declined there, with room for a message back
                     (see <a class="link" href="quotes.php">Quotes</a>)</li>
                 <li>Payments and answers come back into Argo Books on their own</li>
