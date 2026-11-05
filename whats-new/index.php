@@ -89,6 +89,53 @@ $pricing = get_pricing_config();
     <div class="container">
         <div class="version-grid">
 
+            <!-- Version 2.0.23 -->
+            <div class="version-card">
+                <div class="version-header">
+                    <div class="version-info">
+                        <span class="version-tag">Version 2.0.23</span>
+                        <span class="date-tag">November 4 2026</span>
+                    </div>
+                    <?= svg_icon('chevron-down', 24, 'dropdown-arrow', null, 'stroke-linecap="round" stroke-linejoin="round"') ?>
+                </div>
+
+                <div class="version-content">
+                    <div class="changelog">
+                        <div class="changelog-section">
+                            <h4 class="section-label feature">New Features</h4>
+                            <ul class="changelog-list">
+                                <li><strong>File your sales tax on time:</strong> The new Sales Tax page lists each monthly, quarterly or yearly period with what you owe and when its return is due in your country. Mark a period as filed to record the payment, and the dashboard reminds you when a return is due.</li>
+                                <li><strong>Track bills you'll pay later:</strong> Untick Paid on an expense to make it a bill with a due date. Bills show as Unpaid or Overdue until you pay them, and the new AP Aging report lists what you owe each supplier.</li>
+                                <li><strong>Return part of an order:</strong> Choose how much of each item came back and whether it goes back into stock. The rest can be returned later.</li>
+                                <li><strong>Credit notes:</strong> A return on a sale that hasn't been paid yet comes off what the customer owes first, and only the rest is refunded.</li>
+                                <li><strong>Five new accounting reports:</strong> Trial Balance, Inventory Valuation, Open Invoices, Unpaid Bills and Sales Tax Liability.</li>
+                                <li><strong>Compare your Income Statement:</strong> Show this period next to last year, or a column for each month.</li>
+                            </ul>
+                        </div>
+                        <div class="changelog-section">
+                            <h4 class="section-label enhancement">Enhancements</h4>
+                            <ul class="changelog-list">
+                                <li><strong>Returns on purchases work like returns on sales:</strong> A return is marked on the purchase itself, and a return on an unpaid bill comes off what you owe the supplier.</li>
+                                <li><strong>Pick a report period faster:</strong> Choose a year, or a month of it, instead of typing both dates.</li>
+                                <li><strong>Smoother move from QuickBooks:</strong> Imported QuickBooks reports match your QuickBooks totals to the cent, with open invoices linked to their customers.</li>
+                            </ul>
+                        </div>
+                        <div class="changelog-section">
+                            <h4 class="section-label fix">Fixes</h4>
+                            <ul class="changelog-list">
+                                <li>Returning a sale on a partly paid invoice clears what the customer still owed for the returned goods.</li>
+                                <li>Deleting a sale or expense removes its returns, refunds and stock changes too, and Undo brings them all back.</li>
+                                <li>Deleting an expense that bought an asset removes the asset too, and Undo brings both back.</li>
+                                <li>A refund from a supplier shows as money back on the Expenses page.</li>
+                                <li>Large amounts in accounting reports shrink to fit their column.</li>
+                                <li>A logo you pick for your company is kept even if you move the original file before saving.</li>
+                                <li>Spreadsheets that are open in Excel import just as neatly as closed ones.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Version 2.0.22 -->
             <div class="version-card">
                 <div class="version-header">
