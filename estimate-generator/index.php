@@ -17,6 +17,8 @@ $dc = invgen_doc_config($doc_type);
 
 // Server-side page view. track_page_view() filters admins, bots, and duplicates itself, so calling it unconditionally is safe.
 if (PHP_SAPI !== 'cli') {
+    // A ?source= link straight to the tool, such as one from a YouTube Short, is attributed in the referral funnel.
+    require_once __DIR__ . '/../track_referral.php';
     require_once __DIR__ . '/../statistics.php';
     track_page_view('estgen_tool');
 }
