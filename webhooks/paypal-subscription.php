@@ -150,12 +150,18 @@ function handleSubscriptionActivated($resource) {
     $stmt->execute([$paypalSubscriptionId]);
     $subscription = $stmt->fetch(PDO::FETCH_ASSOC);
 
+    // PayPal never revives a cancelled or expired subscription, so an ACTIVATED for one is a late copy of its first activation.
+    if ($subscription && in_array($subscription['status'], ['cancelled', 'expired'], true)) {
+        logPayPalWebhookEvent('BILLING.SUBSCRIPTION.ACTIVATED', $resource, 'ignored_already_' . $subscription['status']);
+        return;
+    }
+
     if ($subscription) {
         // Subscription exists, update status to active
         $stmt = $pdo->prepare("
             UPDATE premium_subscriptions
             SET status = 'active', auto_renew = 1, updated_at = NOW()
-            WHERE paypal_subscription_id = ?
+            WHERE paypal_subscription_id = ? AND status NOT IN ('cancelled', 'expired')
         ");
         $stmt->execute([$paypalSubscriptionId]);
 
@@ -318,12 +324,18 @@ function handleSubscriptionSuspended($resource) {
         return;
     }
 
+    // A cancelled or expired subscription has nothing left to suspend, and its owner must not be asked to fix a payment.
+    if ($subscription && in_array($subscription['status'], ['cancelled', 'expired'], true)) {
+        logPayPalWebhookEvent('BILLING.SUBSCRIPTION.SUSPENDED', $resource, 'ignored_already_' . $subscription['status']);
+        return;
+    }
+
     if ($subscription) {
         // Update subscription status to payment_failed
         $stmt = $pdo->prepare("
             UPDATE premium_subscriptions
             SET status = 'payment_failed', updated_at = NOW()
-            WHERE paypal_subscription_id = ?
+            WHERE paypal_subscription_id = ? AND status NOT IN ('cancelled', 'expired')
         ");
         $stmt->execute([$paypalSubscriptionId]);
 
