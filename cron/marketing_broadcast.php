@@ -40,7 +40,9 @@ if (!is_dir(__DIR__ . '/logs')) {
 }
 $lock = fopen($lockFile, 'c');
 if ($lock === false || !flock($lock, LOCK_EX | LOCK_NB)) {
-    // Another run is in progress; exit quietly.
+    // Not an error when the previous run is still going, and recording it shows the cron fired.
+    $skipNote = $lock === false ? "cannot open $lockFile (check permissions)" : 'Skipped: a previous run still holds the lock.';
+    cron_run_finish($pdo, cron_run_start($pdo, 'marketing_broadcast'), $lock === false ? 'error' : 'ok', $skipNote);
     exit(0);
 }
 

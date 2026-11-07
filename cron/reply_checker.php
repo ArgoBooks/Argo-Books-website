@@ -38,6 +38,8 @@ if (!is_dir(__DIR__ . '/logs')) {
 }
 $lockFp = fopen($lockFile, 'c');
 if (!flock($lockFp, LOCK_EX | LOCK_NB)) {
+    // Not an error: the previous run is still going, and recording it shows the cron fired.
+    cron_run_finish($pdo, cron_run_start($pdo, 'reply_checker'), 'ok', 'Skipped: a previous run still holds the lock.');
     exit(0);
 }
 

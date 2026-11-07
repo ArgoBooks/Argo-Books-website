@@ -81,7 +81,8 @@ if ($lock === false) {
 }
 
 if (!flock($lock, LOCK_EX | LOCK_NB)) {
-    // Another run holds the lock. Quiet is correct here.
+    // Not an error: the previous run is still going, and recording it shows the cron fired.
+    cron_run_finish($pdo, cron_run_start($pdo, 'portal_invoice_reminders'), 'ok', 'Skipped: a previous run still holds the lock.');
     exit(0);
 }
 
