@@ -215,9 +215,9 @@ function handleSubscriptionCancelled($resource) {
     $stmt->execute([$paypalSubscriptionId]);
     $subscription = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    // Cancelling from account settings cancels on PayPal too, and PayPal then reports that same cancellation back here.
-    if ($subscription && $subscription['status'] === 'cancelled') {
-        logPayPalWebhookEvent('BILLING.SUBSCRIPTION.CANCELLED', $resource, 'already_cancelled');
+    // Cancelling from account settings cancels on PayPal too, and PayPal then reports that same cancellation back here; an expired subscription has already ended and been counted.
+    if ($subscription && in_array($subscription['status'], ['cancelled', 'expired'], true)) {
+        logPayPalWebhookEvent('BILLING.SUBSCRIPTION.CANCELLED', $resource, 'already_' . $subscription['status']);
         return;
     }
 
@@ -230,7 +230,7 @@ function handleSubscriptionCancelled($resource) {
                 credit_balance = 0,
                 cancelled_at = NOW(),
                 updated_at = NOW()
-            WHERE paypal_subscription_id = ? AND status <> 'cancelled'
+            WHERE paypal_subscription_id = ? AND status NOT IN ('cancelled', 'expired')
         ");
         $stmt->execute([$paypalSubscriptionId]);
         // The check above and this update are separate steps, so a request that cancelled the row in between has already sent everything.
@@ -582,6 +582,12 @@ function handlePaymentDenied($resource) {
             ) VALUES (?, 0, ?, 'paypal', ?, 'failed', 'renewal', 'Payment denied by PayPal', ?, NOW())
         ");
         $stmt->execute([$subscription['subscription_id'], $subCurrency, $transactionId, current_environment()]);
+
+        // The owner of a cancelled or expired subscription has nothing left to pay for, so they are not asked to update a payment method.
+        if (in_array($subscription['status'], ['cancelled', 'expired'], true)) {
+            logPayPalWebhookEvent('PAYMENT.SALE.DENIED', $resource, 'payment_denied_logged_ended_' . $subscription['status']);
+            return;
+        }
 
         // Send notification
         try {
