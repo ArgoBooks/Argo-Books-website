@@ -117,10 +117,14 @@ function get_premium_subscription_keys()
  * license_functions.php, so both agree on whether access has run out.
  *
  * @param array $key Row from get_premium_subscription_keys()
- * @return string 'available' | 'redeemed' | 'expired'
+ * @return string 'available' | 'redeemed' | 'expired' | 'disabled'
  */
 function get_subscription_key_status(array $key)
 {
+    if (!empty($key['disabled_at'])) {
+        return 'disabled';
+    }
+
     if (empty($key['redeemed_at'])) {
         return 'available';
     }
@@ -184,7 +188,8 @@ function get_reseller_batches()
                    COUNT(*) AS total_keys,
                    SUM(CASE WHEN k.redeemed_at IS NOT NULL THEN 1 ELSE 0 END) AS redeemed,
                    SUM(CASE WHEN k.customer_email IS NOT NULL THEN 1 ELSE 0 END) AS captured,
-                   SUM(CASE WHEN k.customer_email_verified_at IS NOT NULL THEN 1 ELSE 0 END) AS verified
+                   SUM(CASE WHEN k.customer_email_verified_at IS NOT NULL THEN 1 ELSE 0 END) AS verified,
+                   SUM(CASE WHEN k.disabled_at IS NOT NULL THEN 1 ELSE 0 END) AS disabled
             FROM premium_subscription_keys k
             WHERE k.batch_label IS NOT NULL
             GROUP BY k.batch_label
@@ -193,6 +198,24 @@ function get_reseller_batches()
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {
         error_log("Error fetching reseller batches: " . $e->getMessage());
+        return [];
+    }
+}
+
+function get_disabled_reseller_keys()
+{
+    global $pdo;
+
+    try {
+        $stmt = $pdo->query("
+            SELECT id, subscription_key, batch_label, redeemed_at, customer_email, disabled_at, disabled_reason
+            FROM premium_subscription_keys
+            WHERE batch_label IS NOT NULL AND disabled_at IS NOT NULL
+            ORDER BY disabled_at DESC
+        ");
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        error_log("Error fetching disabled reseller keys: " . $e->getMessage());
         return [];
     }
 }
@@ -406,6 +429,53 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             : "Could not generate the batch. Nothing was created.";
         $_SESSION['message_type'] = $created > 0 ? 'success' : 'error';
 
+        header('Location: index.php#reseller-batches');
+        exit;
+    }
+
+    if (isset($_POST['disable_keys'])) {
+        // Keys arrive pasted from a reseller's refund notice, so any mix of spaces, commas and line breaks separates them.
+        $pasted = preg_split('/[\s,;]+/', (string) ($_POST['keys_to_disable'] ?? ''), -1, PREG_SPLIT_NO_EMPTY);
+
+        if (empty($pasted) || count($pasted) > 500) {
+            $_SESSION['message'] = "Paste between 1 and 500 keys to disable.";
+            $_SESSION['message_type'] = 'error';
+            header('Location: index.php#reseller-batches');
+            exit;
+        }
+
+        try {
+            $r = disable_reseller_keys($pasted, (string) ($_POST['disable_reason'] ?? ''));
+        } catch (PDOException $e) {
+            error_log("Error disabling reseller keys: " . $e->getMessage());
+            $_SESSION['message'] = "Could not disable the keys. Nothing was changed.";
+            $_SESSION['message_type'] = 'error';
+            header('Location: index.php#reseller-batches');
+            exit;
+        }
+
+        $parts = ["Disabled {$r['disabled']} key(s)."];
+        if ($r['redeemed'] > 0) {
+            $parts[] = "{$r['redeemed']} of them had been redeemed, so Premium turns off on that computer the next time Argo Books starts.";
+        }
+        if ($r['already'] > 0) {
+            $parts[] = "{$r['already']} were already disabled.";
+        }
+        if (!empty($r['not_found'])) {
+            $parts[] = "Not found among reseller keys: " . implode(', ', $r['not_found']) . ".";
+        }
+
+        $_SESSION['message'] = implode(' ', $parts);
+        $_SESSION['message_type'] = $r['disabled'] > 0 || $r['already'] > 0 ? 'success' : 'error';
+        header('Location: index.php#reseller-batches');
+        exit;
+    }
+
+    if (isset($_POST['enable_key'])) {
+        $enabled = enable_reseller_key((int) ($_POST['key_id'] ?? 0));
+
+        $_SESSION['message'] = $enabled ? "Key enabled again." : "That key was not found or is not disabled.";
+        $_SESSION['message_type'] = $enabled ? 'success' : 'error';
         header('Location: index.php#reseller-batches');
         exit;
     }
@@ -652,8 +722,8 @@ $premium_subscriptions = get_premium_subscriptions();
 $premium_subscription_keys = get_premium_subscription_keys();
 $subscription_chart_data = get_subscription_chart_data();
 
-// Reseller batches, plus the keys of whichever batch is open.
 $reseller_batches = get_reseller_batches();
+$disabled_reseller_keys = get_disabled_reseller_keys();
 
 $batch_totals = ['keys' => 0, 'redeemed' => 0, 'captured' => 0, 'verified' => 0];
 foreach ($reseller_batches as $b) {
@@ -1177,6 +1247,7 @@ include __DIR__ . '/../admin_header.php';
                             <th>Redeemed</th>
                             <th>Emails captured</th>
                             <th>Verified</th>
+                            <th>Disabled</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -1187,6 +1258,7 @@ include __DIR__ . '/../admin_header.php';
                             $redeemed = (int) $b['redeemed'];
                             $captured = (int) $b['captured'];
                             $verified = (int) $b['verified'];
+                            $disabled = (int) $b['disabled'];
                             // Capture is measured against REDEEMED, not against the whole batch.
                             $redeemPct = $total > 0 ? round($redeemed / $total * 100) : 0;
                             $capturePct = $redeemed > 0 ? round($captured / $redeemed * 100) : 0;
@@ -1199,6 +1271,7 @@ include __DIR__ . '/../admin_header.php';
                                 <td><?php echo $redeemed; ?> <span style="color: var(--text-secondary);">(<?php echo $redeemPct; ?>%)</span></td>
                                 <td><?php echo $captured; ?> <span style="color: var(--text-secondary);">(<?php echo $capturePct; ?>% of redeemed)</span></td>
                                 <td><?php echo $verified; ?> <span style="color: var(--text-secondary);">(<?php echo $verifyPct; ?>% of captured)</span></td>
+                                <td><?php echo $disabled; ?></td>
                                 <td>
                                     <form method="post" style="display: inline;">
                                         <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
@@ -1212,6 +1285,79 @@ include __DIR__ . '/../admin_header.php';
                 </table>
             <?php endif; ?>
         </div>
+
+        <?php if (!empty($reseller_batches)): ?>
+        <div class="table-container" style="padding: 20px 20px 30px 20px;">
+            <h2>Disable Keys</h2>
+            <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 16px;">
+                For keys the reseller refunded. A disabled key can no longer be redeemed, and if it
+                already was, Premium turns off on that computer the next time Argo Books starts.
+                You can enable a key again below.
+            </p>
+
+            <form method="post" id="disable-keys-form">
+                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
+                <div class="form-group">
+                    <label for="keys_to_disable">Keys, one per line</label>
+                    <textarea id="keys_to_disable" name="keys_to_disable" rows="3"
+                              placeholder="PREM-XXXX-XXXX-XXXX-XXXX" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="disable_reason">Reason (optional)</label>
+                    <input type="text" id="disable_reason" name="disable_reason" maxlength="255"
+                           placeholder="Refunded by StackSocial">
+                </div>
+                <button type="submit" name="disable_keys" class="btn btn-delete">Disable Keys</button>
+            </form>
+        </div>
+        <?php endif; ?>
+
+        <?php if (!empty($disabled_reseller_keys)): ?>
+        <div class="table-container">
+            <h2>Disabled Keys</h2>
+            <div class="table-responsive">
+                <table data-paginate="25">
+                    <thead>
+                        <tr>
+                            <th>Key</th>
+                            <th>Batch</th>
+                            <th>Was redeemed</th>
+                            <th>Disabled</th>
+                            <th>Reason</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($disabled_reseller_keys as $dk): ?>
+                            <tr>
+                                <td class="key-field"><?php echo htmlspecialchars($dk['subscription_key']); ?></td>
+                                <td><?php echo htmlspecialchars($dk['batch_label']); ?></td>
+                                <td>
+                                    <?php if ($dk['redeemed_at']): ?>
+                                        <?php echo date('M j, Y', strtotime($dk['redeemed_at'])); ?>
+                                        <?php if ($dk['customer_email']): ?>
+                                            <span style="color: var(--text-secondary);">(<?php echo htmlspecialchars($dk['customer_email']); ?>)</span>
+                                        <?php endif; ?>
+                                    <?php else: ?>
+                                        <span style="color: var(--text-secondary);">No</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td><?php echo date('M j, Y', strtotime($dk['disabled_at'])); ?></td>
+                                <td><?php echo $dk['disabled_reason'] ? htmlspecialchars($dk['disabled_reason']) : '-'; ?></td>
+                                <td>
+                                    <form method="post" style="display: inline;" class="enable-key-form">
+                                        <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
+                                        <input type="hidden" name="key_id" value="<?php echo (int) $dk['id']; ?>">
+                                        <button type="submit" name="enable_key" class="btn btn-secondary">Enable</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <?php endif; ?>
 
     </div>
 </div>
@@ -1470,6 +1616,24 @@ document.addEventListener('DOMContentLoaded', function() {
     if (subKeyBulkResetUsage) {
         subKeyBulkResetUsage.addEventListener('click', () => resetUsage('.sub-key-checkbox'));
     }
+
+    const disableKeysForm = document.getElementById('disable-keys-form');
+    if (disableKeysForm) {
+        disableKeysForm.addEventListener('submit', function(e) {
+            const count = document.getElementById('keys_to_disable').value.split(/[\s,;]+/).filter(Boolean).length;
+            if (!confirm(`Disable ${count} key(s)? Anyone using them loses Premium the next time Argo Books starts.`)) {
+                e.preventDefault();
+            }
+        });
+    }
+
+    document.querySelectorAll('.enable-key-form').forEach(function(form) {
+        form.addEventListener('submit', function(e) {
+            if (!confirm('Enable this key again? If it was redeemed, its Premium comes back.')) {
+                e.preventDefault();
+            }
+        });
+    });
 });
 
 function filterTable(input, tbodyId) {

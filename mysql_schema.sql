@@ -392,6 +392,8 @@ CREATE TABLE IF NOT EXISTS premium_subscription_keys (
     customer_email_token CHAR(64) DEFAULT NULL COMMENT 'One-click verification link token',
     customer_email_source VARCHAR(30) DEFAULT NULL COMMENT 'Where the address came from, e.g. app_redemption',
     batch_label VARCHAR(60) DEFAULT NULL COMMENT 'Reseller batch this key was minted for, e.g. StackSocial Aug 2026. NULL for a hand-issued promo key',
+    disabled_at DATETIME DEFAULT NULL COMMENT 'Set when an admin turns the key off, e.g. after a reseller refund. A disabled key cannot be redeemed or validated',
+    disabled_reason VARCHAR(255) DEFAULT NULL,
     INDEX idx_subscription_key (subscription_key),
     INDEX idx_email (email),
     INDEX idx_redeemed (redeemed_at),

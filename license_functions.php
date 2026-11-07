@@ -40,7 +40,7 @@ function validate_premium_key($key) {
     try {
         $stmt = $pdo->prepare("
             SELECT subscription_key, email, duration_months, created_at,
-                redeemed_at, device_id, subscription_id, notes
+                redeemed_at, device_id, subscription_id, notes, disabled_at
             FROM premium_subscription_keys
             WHERE subscription_key = ?
         ");
@@ -51,6 +51,14 @@ function validate_premium_key($key) {
             return [
                 'success' => false,
                 'message' => 'Invalid premium key.'
+            ];
+        }
+
+        if ($premium_key['disabled_at'] !== null) {
+            return [
+                'success' => false,
+                'status' => 'disabled',
+                'message' => 'This license key has been disabled. Please contact support if you think this is a mistake.'
             ];
         }
 
@@ -145,7 +153,7 @@ function redeem_premium_key($key, $device_id) {
         return [
             'success' => false,
             'status' => 'invalid_key',
-            'message' => 'Invalid license key.'
+            'message' => ($validation['status'] ?? '') === 'disabled' ? $validation['message'] : 'Invalid license key.'
         ];
     }
 
@@ -521,15 +529,15 @@ function validate_license($key, $device_id) {
     try {
         // Look up the key
         $stmt = $pdo->prepare("
-            SELECT subscription_key, device_id, subscription_id, redeemed_at
+            SELECT subscription_key, device_id, subscription_id, redeemed_at, disabled_at
             FROM premium_subscription_keys
             WHERE subscription_key = ?
         ");
         $stmt->execute([$key]);
         $premium_key = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        // Key not found or not yet redeemed
-        if (!$premium_key || $premium_key['redeemed_at'] === null) {
+        // invalid_key is the status that makes the app remove the key and turn Premium off.
+        if (!$premium_key || $premium_key['redeemed_at'] === null || $premium_key['disabled_at'] !== null) {
             return [
                 'success' => false,
                 'status' => 'invalid_key',
@@ -594,5 +602,125 @@ function validate_license($key, $device_id) {
             'status' => 'error',
             'message' => 'Error validating license. Please try again.'
         ];
+    }
+}
+
+/**
+ * @param string[] $keys
+ * @return array{disabled:int, redeemed:int, already:int, not_found:string[]}
+ */
+function disable_reseller_keys(array $keys, string $reason = ''): array
+{
+    global $pdo;
+
+    $result = ['disabled' => 0, 'redeemed' => 0, 'already' => 0, 'not_found' => []];
+    $keys = array_values(array_unique(array_filter(array_map(
+        fn($k) => strtoupper(trim((string) $k)),
+        $keys
+    ))));
+    if (empty($keys)) {
+        return $result;
+    }
+
+    $reason = mb_substr(trim($reason), 0, 255);
+
+    $pdo->beginTransaction();
+    try {
+        // Only reseller batch keys, because a paid subscription also has a row in this table.
+        $find = $pdo->prepare("
+            SELECT id, subscription_id, redeemed_at, disabled_at
+            FROM premium_subscription_keys
+            WHERE subscription_key = ? AND batch_label IS NOT NULL
+            FOR UPDATE
+        ");
+        $disable = $pdo->prepare("
+            UPDATE premium_subscription_keys
+            SET disabled_at = NOW(), disabled_reason = ?
+            WHERE id = ?
+        ");
+        // Every Premium check reads the subscription status, and a key has no environment of its own, so this ends Premium wherever the key is in use.
+        $endSubscription = $pdo->prepare("
+            UPDATE premium_subscriptions
+            SET status = 'expired'
+            WHERE subscription_id = ? AND payment_method = 'free_key'
+        ");
+
+        foreach ($keys as $key) {
+            $find->execute([$key]);
+            $row = $find->fetch(PDO::FETCH_ASSOC);
+
+            if (!$row) {
+                $result['not_found'][] = $key;
+                continue;
+            }
+            if ($row['disabled_at'] !== null) {
+                $result['already']++;
+                continue;
+            }
+
+            $disable->execute([$reason !== '' ? $reason : null, $row['id']]);
+            $result['disabled']++;
+
+            if ($row['redeemed_at'] !== null) {
+                $result['redeemed']++;
+                if (!empty($row['subscription_id'])) {
+                    $endSubscription->execute([$row['subscription_id']]);
+                }
+            }
+        }
+
+        $pdo->commit();
+    } catch (PDOException $e) {
+        $pdo->rollBack();
+        throw $e;
+    }
+
+    return $result;
+}
+
+/** @return bool False when there is no disabled reseller key with that id */
+function enable_reseller_key(int $id): bool
+{
+    global $pdo;
+
+    $pdo->beginTransaction();
+    try {
+        $stmt = $pdo->prepare("
+            SELECT subscription_id, redeemed_at
+            FROM premium_subscription_keys
+            WHERE id = ? AND batch_label IS NOT NULL AND disabled_at IS NOT NULL
+            FOR UPDATE
+        ");
+        $stmt->execute([$id]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$row) {
+            $pdo->rollBack();
+            return false;
+        }
+
+        $pdo->prepare("
+            UPDATE premium_subscription_keys
+            SET disabled_at = NULL, disabled_reason = NULL
+            WHERE id = ?
+        ")->execute([$id]);
+
+        if ($row['redeemed_at'] !== null && !empty($row['subscription_id'])) {
+            // A term that ran out while the key was disabled stays expired.
+            $pdo->prepare("
+                UPDATE premium_subscriptions
+                SET status = 'active'
+                WHERE subscription_id = ?
+                  AND payment_method = 'free_key'
+                  AND status = 'expired'
+                  AND end_date > NOW()
+            ")->execute([$row['subscription_id']]);
+        }
+
+        $pdo->commit();
+        return true;
+    } catch (PDOException $e) {
+        $pdo->rollBack();
+        throw $e;
     }
 }
