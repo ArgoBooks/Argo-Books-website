@@ -6,7 +6,7 @@ The flow has three moving parts:
 
 1. **Website**: Receives the `app_first_run` POST at `/api/track-app-event.php`, resolves the install token back to a `visitor_id`, and writes a row to `referral_events`.
 2. **Desktop app**: `ArgoBooks.Core.Services.FirstRunReporter` fires the POST once per machine on the first successful launch.
-3. **Installer**: Every download carries an 8-character HMAC token in its filename. On Windows, the app's Velopack install hook (`WindowsInstallHooks.AfterInstall()`) reads it from the filename of the Setup.exe that is installing it and writes it to `%LOCALAPPDATA%\ArgoBooks\install_token.txt`. On Mac and Linux the app reads it from the filename directly.
+3. **Installer**: Every download carries an 8-character HMAC token in its filename. On Windows, the app's Velopack install hook (`WindowsInstallHooks.AfterInstall()`) reads it from the filename of the Setup.exe that is installing it and writes it to `%LOCALAPPDATA%\ArgoBooks\install_token.txt`. On Linux the app reads it from the name of the downloaded AppImage, which the AppImage runtime passes in the `APPIMAGE` variable. On Mac the zip is expanded before the first launch, so no token reaches the app; instead the app opens the website's welcome page with its machine id, and the page links the install to the browser that downloaded it.
 
 The admin funnel at `/admin/marketing-funnel/` reads the resulting rows from `referral_events` to populate the "App first run" stage.
 
