@@ -261,9 +261,12 @@ try {
 // pill so a card without recent activity still tells you when it last ran.
 $latestByCron = [];
 try {
+    // Skips are left out, so a run that hangs while holding its lock still shows as stalled rather than hidden behind the skips it causes.
     $stmt = $pdo->query("SELECT t1.cron_name, t1.started_at, t1.completed_at, t1.status, t1.error_message, t1.metrics
         FROM cron_runs t1
-        INNER JOIN (SELECT cron_name, MAX(id) AS max_id FROM cron_runs GROUP BY cron_name) t2
+        INNER JOIN (SELECT cron_name, MAX(id) AS max_id FROM cron_runs
+                    WHERE NOT (status = 'ok' AND error_message LIKE 'Skipped:%')
+                    GROUP BY cron_name) t2
           ON t1.id = t2.max_id");
     foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $r) {
         $latestByCron[$r['cron_name']] = $r;
