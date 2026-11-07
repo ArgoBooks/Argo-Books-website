@@ -28,6 +28,11 @@ require_once __DIR__ . '/../paypal-helper.php';
 require_once __DIR__ . '/../cron/lib/renewal_helpers.php';
 require_once __DIR__ . '/../track_referral_event.php';
 
+/** A failure that saved nothing, so PayPal is asked to deliver the event again and the second delivery is safe. */
+class PayPalWebhookRetry extends Exception
+{
+}
+
 // Only accept POST requests
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
@@ -126,10 +131,14 @@ try {
     error_log("PayPal webhook error: " . $e->getMessage());
     logPayPalWebhookEvent($eventType, $event, 'ERROR: ' . $e->getMessage());
 
-    // Still respond with 200 to prevent PayPal from retrying
-    // The error is logged for manual investigation
-    http_response_code(200);
-    echo json_encode(['status' => 'error', 'message' => 'Internal error logged']);
+    // Only a failure that saved nothing asks PayPal to deliver the event again; any other is answered 200 and left in the log.
+    if ($e instanceof PayPalWebhookRetry) {
+        http_response_code(503);
+        echo json_encode(['status' => 'retry']);
+    } else {
+        http_response_code(200);
+        echo json_encode(['status' => 'error', 'message' => 'Internal error logged']);
+    }
 }
 
 /**
@@ -456,8 +465,16 @@ function handlePaymentCompleted($resource) {
     $cycleSwitchFirstBill = !empty($subscription['last_cycle_change_at'])
         && $secsUntilEnd > (0.7 * $cycleSecs);
 
-    // The UNIQUE index on transaction_id is the real guard, so a duplicate delivery cannot log the payment twice.
+    // First bill after a cycle switch: the sale is recorded, but end_date and the email were already handled when the user confirmed the switch.
+    $extendsTerm = !$cycleSwitchFirstBill && $paymentType === 'renewal';
+    $billing = $subscription['billing_cycle'];
+    $newEndDate = $extendsTerm ? calculateNewEndDate($subscription['end_date'], $billing) : null;
+
+    // The payment and the longer term are saved together, so a failure between them cannot leave a paid renewal unextended.
     try {
+        $pdo->beginTransaction();
+
+        // The UNIQUE index on transaction_id is the real guard, so a duplicate delivery cannot log the payment twice.
         $stmt = $pdo->prepare("
             INSERT INTO premium_subscription_payments (
                 subscription_id, amount, currency, payment_method,
@@ -472,12 +489,28 @@ function handlePaymentCompleted($resource) {
             $paymentType,
             current_environment()
         ]);
+
+        if ($extendsTerm) {
+            $stmt = $pdo->prepare("
+                UPDATE premium_subscriptions
+                SET end_date = ?,
+                    status = 'active',
+                    updated_at = NOW()
+                WHERE subscription_id = ?
+            ");
+            $stmt->execute([$newEndDate, $subscription['subscription_id']]);
+        }
+
+        $pdo->commit();
     } catch (PDOException $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
         if ($e->getCode() === '23000') {
             logPayPalWebhookEvent('PAYMENT.SALE.COMPLETED', $resource, 'duplicate_transaction_race');
             return;
         }
-        throw $e;
+        throw new PayPalWebhookRetry("Payment $transactionId for {$subscription['subscription_id']} was not saved: " . $e->getMessage(), 0, $e);
     }
 
     // Fire funnel event for this payment. Webhook has no session/cookie;
@@ -491,21 +524,8 @@ function handlePaymentCompleted($resource) {
     ]);
 
     if ($cycleSwitchFirstBill) {
-        // First bill after a cycle switch: record the sale (above), but don't extend end_date and don't send a renewal email. Both were already handled when the user confirmed the switch.
         logPayPalWebhookEvent('PAYMENT.SALE.COMPLETED', $resource, 'cycle_switch_first_bill_recorded');
-    } elseif ($paymentType === 'renewal') {
-        $billing = $subscription['billing_cycle'];
-        $newEndDate = calculateNewEndDate($subscription['end_date'], $billing);
-
-        $stmt = $pdo->prepare("
-            UPDATE premium_subscriptions
-            SET end_date = ?,
-                status = 'active',
-                updated_at = NOW()
-            WHERE subscription_id = ?
-        ");
-        $stmt->execute([$newEndDate, $subscription['subscription_id']]);
-
+    } elseif ($extendsTerm) {
         // Send renewal receipt email
         try {
             send_premium_subscription_receipt(
