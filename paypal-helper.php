@@ -494,3 +494,10 @@ function logPayPalWebhookEvent($eventType, $data, $result = 'processed') {
     $logEntry = "[$timestamp] [$result] $eventType\n$dataJson\n\n";
     file_put_contents($logFile, $logEntry, FILE_APPEND);
 }
+
+/** Whether a PayPal sale was made within $windowSeconds of $now, judged by its create_time; a sale with no readable time counts as recent. */
+function paypal_sale_is_recent(array $sale, int $now, int $windowSeconds = 3600): bool
+{
+    $created = strtotime((string) ($sale['create_time'] ?? ''));
+    return $created === false || $now - $created <= $windowSeconds;
+}

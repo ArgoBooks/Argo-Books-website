@@ -426,8 +426,12 @@ function handlePaymentCompleted($resource) {
             logPayPalWebhookEvent('PAYMENT.SALE.COMPLETED', $resource, 'sale_on_replaced_subscription');
             return;
         }
-        logPayPalWebhookEvent('PAYMENT.SALE.COMPLETED', $resource, 'subscription_not_found');
-        // The first sale can arrive before checkout has saved the subscription, and PayPal's redelivery then records the real sale id.
+        // The first sale can arrive before checkout has saved the subscription, and PayPal's redelivery then records the real sale id; an older sale is for a subscription that will never be saved.
+        if (!paypal_sale_is_recent($resource, time())) {
+            logPayPalWebhookEvent('PAYMENT.SALE.COMPLETED', $resource, 'subscription_not_found');
+            return;
+        }
+        logPayPalWebhookEvent('PAYMENT.SALE.COMPLETED', $resource, 'subscription_not_found_yet');
         throw new PayPalWebhookRetry("PAYMENT.SALE.COMPLETED $transactionId arrived before subscription $billingAgreementId was saved");
     }
 
