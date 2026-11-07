@@ -437,8 +437,8 @@ function getPayPalSubscriptionBilledAmount($subscriptionId) {
     return null;
 }
 
-/** The custom_id the checkout gave a PayPal subscription ("user_<id>"), or null when PayPal cannot be asked. */
-function getPayPalSubscriptionCustomId(string $subscriptionId): ?string
+/** The PayPal subscription as PayPal reports it, or null when it does not exist or PayPal cannot be asked. */
+function getPayPalSubscription(string $subscriptionId): ?array
 {
     if (!isValidPayPalResourceId($subscriptionId)) {
         return null;
@@ -460,10 +460,17 @@ function getPayPalSubscriptionCustomId(string $subscriptionId): ?string
     $response = curl_exec($ch);
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     if ($httpCode !== 200) {
-        error_log("getPayPalSubscriptionCustomId: subscription GET failed. HTTP $httpCode");
+        error_log("getPayPalSubscription: subscription GET failed. HTTP $httpCode");
         return null;
     }
-    $customId = json_decode((string) $response, true)['custom_id'] ?? null;
+    $subscription = json_decode((string) $response, true);
+    return is_array($subscription) ? $subscription : null;
+}
+
+/** The custom_id the checkout gave a PayPal subscription ("user_<id>"), or null when PayPal cannot be asked. */
+function getPayPalSubscriptionCustomId(string $subscriptionId): ?string
+{
+    $customId = getPayPalSubscription($subscriptionId)['custom_id'] ?? null;
     return is_string($customId) ? $customId : null;
 }
 
