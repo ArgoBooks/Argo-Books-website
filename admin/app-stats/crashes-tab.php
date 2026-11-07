@@ -30,6 +30,7 @@ $crashGroups = [];
 $crashTotal = 0;
 $crashVersions = [];
 $crashDevices = [];
+$backgroundTotal = 0;
 
 foreach ($crashFiles as $crashFile) {
     $raw = @file_get_contents($crashFile);
@@ -79,22 +80,34 @@ foreach ($crashFiles as $crashFile) {
             }
         }
 
-        $crashTotal++;
-        if ($meta['authId']) {
-            $crashDevices[$meta['authId']] = true;
-        }
+        // A task that failed with nothing waiting on it is reported from the TaskScheduler handler, and the app keeps running after one.
+        $background = ($c['handler'] ?? '') === 'TaskScheduler';
 
         // Prefer the version/platform stamped into each crash at capture time, falling back to the upload's file-level values for older reports.
         $cVersion = (string) ($c['appVersion'] ?? $meta['appVersion']);
         $cPlatform = (string) ($c['platform'] ?? $meta['platform']);
-        $crashVersions[$cVersion] = true;
+
+        if ($background) {
+            $backgroundTotal++;
+        } else {
+            $crashTotal++;
+            if ($meta['authId']) {
+                $crashDevices[$meta['authId']] = true;
+            }
+            $crashVersions[$cVersion] = true;
+        }
 
         $type = (string) ($c['exceptionType'] ?? 'UnknownException');
+        // Older app versions send a task's failure still in its wrapper, so the wrapped type is what tells them apart.
+        if ($type === 'System.AggregateException' && preg_match('/^([\w.]+):/', (string) ($c['innerException'] ?? ''), $inner)) {
+            $type = $inner[1];
+        }
         $source = (string) ($c['source'] ?? '');
-        $sig = $type . '|' . $source;
+        $sig = ($background ? 'background|' : '') . $type . '|' . $source;
 
         if (!isset($crashGroups[$sig])) {
             $crashGroups[$sig] = [
+                'background' => $background,
                 'type' => $type, 'source' => $source, 'count' => 0,
                 'platforms' => [], 'versions' => [], 'devices' => [],
                 'first' => null, 'last' => null, 'firstEpoch' => null, 'lastEpoch' => null,
@@ -133,6 +146,84 @@ foreach ($crashFiles as $crashFile) {
 }
 
 uasort($crashGroups, fn ($a, $b) => $b['count'] <=> $a['count']);
+$backgroundGroups = array_filter($crashGroups, fn ($g) => $g['background']);
+$crashGroups = array_filter($crashGroups, fn ($g) => !$g['background']);
+
+if (!function_exists('crash_render_group')) {
+    function crash_render_group(array $g): void
+    {
+        $sample = $g['sample'] ?? [];
+        $sampleMeta = $g['sampleMeta'] ?? [];
+        ?>
+        <details class="crash-group<?= $g['background'] ? ' background' : '' ?>">
+            <summary>
+                <span class="crash-count"><?= number_format($g['count']) ?></span>
+                <span class="crash-sig">
+                    <div class="type"><?= htmlspecialchars($g['type']) ?></div>
+                    <?php if ($g['source'] !== ''): ?><div class="loc"><?= htmlspecialchars($g['source']) ?></div><?php endif; ?>
+                </span>
+                <span class="crash-tags">
+                    <span><?= htmlspecialchars(implode(', ', array_keys($g['versions']))) ?></span><br>
+                    <span><?= htmlspecialchars(implode(', ', array_keys($g['platforms']))) ?> &middot; <?= count($g['devices']) ?> device<?= count($g['devices']) === 1 ? '' : 's' ?></span><br>
+                    <span>last <?= crash_fmt($g['last']) ?></span>
+                </span>
+            </summary>
+            <div class="crash-detail">
+                <?php if (!empty($sample['message'])): ?>
+                    <h4>Message</h4>
+                    <div class="msg"><?= htmlspecialchars($sample['message']) ?></div>
+                <?php endif; ?>
+
+                <?php if (!empty($sample['innerException'])): ?>
+                    <h4>Inner Exception</h4>
+                    <div class="msg"><?= htmlspecialchars($sample['innerException']) ?></div>
+                <?php endif; ?>
+
+                <h4>Where &amp; When (latest)</h4>
+                <div class="msg">
+                    Handler: <?= htmlspecialchars($sample['handler'] ?? '-') ?> &middot;
+                    <?= htmlspecialchars($sampleMeta['platform'] ?? '-') ?>
+                    <?php if (!empty($sample['osVersion'])): ?> (<?= htmlspecialchars($sample['osVersion']) ?>)<?php endif; ?> &middot;
+                    V.<?= htmlspecialchars($sampleMeta['appVersion'] ?? '-') ?> &middot;
+                    <?= crash_fmt($g['last']) ?>
+                </div>
+
+                <?php if (!empty($sample['stackTrace'])): ?>
+                    <div class="crash-stack-head">
+                        <h4>Stack Trace</h4>
+                        <button type="button" class="crash-copy">Copy</button>
+                    </div>
+                    <pre class="crash-stack"><?= htmlspecialchars($sample['stackTrace']) ?></pre>
+                <?php endif; ?>
+
+                <?php if (!empty($sample['breadcrumbs']) && is_array($sample['breadcrumbs'])): ?>
+                    <h4>Breadcrumbs (leading up to it)</h4>
+                    <ul class="breadcrumbs">
+                        <?php foreach ($sample['breadcrumbs'] as $b): ?>
+                            <li><?= htmlspecialchars(is_scalar($b) ? (string) $b : json_encode($b)) ?></li>
+                        <?php endforeach; ?>
+                    </ul>
+                <?php endif; ?>
+
+                <h4>Occurrences (<?= $g['count'] ?> total, first <?= crash_fmt($g['first']) ?>)</h4>
+                <table class="occ-table">
+                    <thead><tr><th>Time</th><th>Platform</th><th>Version</th><th>Country</th></tr></thead>
+                    <tbody>
+                        <?php foreach ($g['occurrences'] as $o): ?>
+                            <tr>
+                                <td><?= crash_fmt($o['ts']) ?></td>
+                                <td><?= htmlspecialchars($o['platform']) ?></td>
+                                <td><?= htmlspecialchars($o['version']) ?></td>
+                                <td><?= htmlspecialchars($o['country'] ?? '-') ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        </details>
+        <?php
+    }
+}
 
 if (!function_exists('crash_fmt')) {
     function crash_fmt(?string $ts): string
@@ -161,6 +252,7 @@ if (!function_exists('crash_fmt')) {
     font-weight: 700; font-size: 1.1rem; color: #fff;
     background: var(--danger-color, #e5484d); border-radius: 8px; padding: 0.35rem 0.6rem;
 }
+.crash-group.background .crash-count { background: var(--amber-600); }
 .crash-sig { flex: 1 1 auto; min-width: 0; }
 .crash-sig .type { font-weight: 600; color: var(--text-color); word-break: break-all; }
 .crash-sig .loc { font-family: monospace; font-size: 0.85rem; color: var(--text-muted); margin-top: 0.15rem; }
@@ -213,77 +305,15 @@ if (!function_exists('crash_fmt')) {
         <?php endif; ?>
     </div>
 <?php else: ?>
-    <?php foreach ($crashGroups as $g):
-        $sample = $g['sample'] ?? [];
-        $sampleMeta = $g['sampleMeta'] ?? [];
-    ?>
-    <details class="crash-group">
-        <summary>
-            <span class="crash-count"><?= number_format($g['count']) ?></span>
-            <span class="crash-sig">
-                <div class="type"><?= htmlspecialchars($g['type']) ?></div>
-                <?php if ($g['source'] !== ''): ?><div class="loc"><?= htmlspecialchars($g['source']) ?></div><?php endif; ?>
-            </span>
-            <span class="crash-tags">
-                <span><?= htmlspecialchars(implode(', ', array_keys($g['versions']))) ?></span><br>
-                <span><?= htmlspecialchars(implode(', ', array_keys($g['platforms']))) ?> &middot; <?= count($g['devices']) ?> device<?= count($g['devices']) === 1 ? '' : 's' ?></span><br>
-                <span>last <?= crash_fmt($g['last']) ?></span>
-            </span>
-        </summary>
-        <div class="crash-detail">
-            <?php if (!empty($sample['message'])): ?>
-                <h4>Message</h4>
-                <div class="msg"><?= htmlspecialchars($sample['message']) ?></div>
-            <?php endif; ?>
+    <?php foreach ($crashGroups as $g) { crash_render_group($g); } ?>
+<?php endif; ?>
 
-            <?php if (!empty($sample['innerException'])): ?>
-                <h4>Inner Exception</h4>
-                <div class="msg"><?= htmlspecialchars($sample['innerException']) ?></div>
-            <?php endif; ?>
-
-            <h4>Where &amp; When (latest)</h4>
-            <div class="msg">
-                Handler: <?= htmlspecialchars($sample['handler'] ?? '-') ?> &middot;
-                <?= htmlspecialchars($sampleMeta['platform'] ?? '-') ?>
-                <?php if (!empty($sample['osVersion'])): ?> (<?= htmlspecialchars($sample['osVersion']) ?>)<?php endif; ?> &middot;
-                V.<?= htmlspecialchars($sampleMeta['appVersion'] ?? '-') ?> &middot;
-                <?= crash_fmt($g['last']) ?>
-            </div>
-
-            <?php if (!empty($sample['stackTrace'])): ?>
-                <div class="crash-stack-head">
-                    <h4>Stack Trace</h4>
-                    <button type="button" class="crash-copy">Copy</button>
-                </div>
-                <pre class="crash-stack"><?= htmlspecialchars($sample['stackTrace']) ?></pre>
-            <?php endif; ?>
-
-            <?php if (!empty($sample['breadcrumbs']) && is_array($sample['breadcrumbs'])): ?>
-                <h4>Breadcrumbs (leading up to the crash)</h4>
-                <ul class="breadcrumbs">
-                    <?php foreach ($sample['breadcrumbs'] as $b): ?>
-                        <li><?= htmlspecialchars(is_scalar($b) ? (string) $b : json_encode($b)) ?></li>
-                    <?php endforeach; ?>
-                </ul>
-            <?php endif; ?>
-
-            <h4>Occurrences (<?= $g['count'] ?> total, first <?= crash_fmt($g['first']) ?>)</h4>
-            <table class="occ-table">
-                <thead><tr><th>Time</th><th>Platform</th><th>Version</th><th>Country</th></tr></thead>
-                <tbody>
-                    <?php foreach ($g['occurrences'] as $o): ?>
-                        <tr>
-                            <td><?= crash_fmt($o['ts']) ?></td>
-                            <td><?= htmlspecialchars($o['platform']) ?></td>
-                            <td><?= htmlspecialchars($o['version']) ?></td>
-                            <td><?= htmlspecialchars($o['country'] ?? '-') ?></td>
-                        </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
-        </div>
-    </details>
-    <?php endforeach; ?>
+<?php if (count($backgroundGroups) > 0): ?>
+    <h2 class="section-title" style="margin-top: 2.5rem;">Background Errors (<?= number_format($backgroundTotal) ?>)</h2>
+    <p style="color: var(--text-muted); margin-top: -0.5rem; margin-bottom: 1.5rem;">
+        Work the app ran in the background failed, and nothing was waiting for the result. The app kept running, so these are not counted as crashes above.
+    </p>
+    <?php foreach ($backgroundGroups as $g) { crash_render_group($g); } ?>
 <?php endif; ?>
 
 <script>
