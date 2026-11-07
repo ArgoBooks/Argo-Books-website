@@ -81,10 +81,9 @@ foreach ($argv as $arg) {
 $lockFile   = __DIR__ . '/logs/argo_books_sync.lock';
 $lockHandle = fopen($lockFile, 'c');
 if ($lockHandle === false || !flock($lockHandle, LOCK_EX | LOCK_NB)) {
-    // Not an error: the previous run is simply still going. Recorded so the admin
-    // page shows a run happened rather than looking like a missed cron.
-    $runId = cron_run_start($pdo, 'argo_books_sync');
-    cron_run_finish($pdo, $runId, 'ok', 'Skipped: a previous run still holds the lock.');
+    // A run still going is not an error and is recorded to show the cron fired, but a lock that cannot be opened stops every run, so it is one.
+    $skipNote = $lockHandle === false ? "cannot open $lockFile (check permissions)" : 'Skipped: a previous run still holds the lock.';
+    cron_run_finish($pdo, cron_run_start($pdo, 'argo_books_sync'), $lockHandle === false ? 'error' : 'ok', $skipNote);
     exit(0);
 }
 

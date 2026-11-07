@@ -59,7 +59,10 @@ function indexnow_log(string $msg): void
 // Prevent overlapping runs.
 $lock = fopen($lockFile, 'c');
 if ($lock === false || !flock($lock, LOCK_EX | LOCK_NB)) {
-    indexnow_log('Another indexnow_submit run is in progress; exiting.');
+    // A run still going is not an error and is recorded to show the cron fired, but a lock that cannot be opened stops every run, so it is one.
+    $skipNote = $lock === false ? "cannot open $lockFile (check permissions)" : 'Skipped: a previous run still holds the lock.';
+    cron_run_finish($pdo, cron_run_start($pdo, 'indexnow_submit'), $lock === false ? 'error' : 'ok', $skipNote);
+    indexnow_log($skipNote);
     exit(0);
 }
 

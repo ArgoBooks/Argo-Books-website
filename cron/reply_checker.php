@@ -37,9 +37,10 @@ if (!is_dir(__DIR__ . '/logs')) {
     mkdir(__DIR__ . '/logs', 0755, true);
 }
 $lockFp = fopen($lockFile, 'c');
-if (!flock($lockFp, LOCK_EX | LOCK_NB)) {
-    // Not an error: the previous run is still going, and recording it shows the cron fired.
-    cron_run_finish($pdo, cron_run_start($pdo, 'reply_checker'), 'ok', 'Skipped: a previous run still holds the lock.');
+if ($lockFp === false || !flock($lockFp, LOCK_EX | LOCK_NB)) {
+    // A run still going is not an error and is recorded to show the cron fired, but a lock that cannot be opened stops every run, so it is one.
+    $skipNote = $lockFp === false ? "cannot open $lockFile (check permissions)" : 'Skipped: a previous run still holds the lock.';
+    cron_run_finish($pdo, cron_run_start($pdo, 'reply_checker'), $lockFp === false ? 'error' : 'ok', $skipNote);
     exit(0);
 }
 

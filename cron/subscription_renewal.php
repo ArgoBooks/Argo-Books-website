@@ -53,11 +53,10 @@ if (!is_dir(__DIR__ . '/logs')) {
 $lockFile = __DIR__ . '/logs/subscription_renewal.lock';
 $lockHandle = fopen($lockFile, 'c');
 if ($lockHandle === false || !flock($lockHandle, LOCK_EX | LOCK_NB)) {
-    // Not an error: the previous run is still going. Recorded so the admin page
-    // shows a run happened rather than looking like a missed cron.
-    $skippedRunId = cron_run_start($pdo, 'subscription_renewal');
-    cron_run_finish($pdo, $skippedRunId, 'ok', 'Skipped: a previous run still holds the lock.');
-    logMessage('Skipped: a previous run still holds the lock.', 'WARNING');
+    // A run still going is not an error and is recorded to show the cron fired, but a lock that cannot be opened stops every run, so it is one.
+    $skipNote = $lockHandle === false ? "cannot open $lockFile (check permissions)" : 'Skipped: a previous run still holds the lock.';
+    cron_run_finish($pdo, cron_run_start($pdo, 'subscription_renewal'), $lockHandle === false ? 'error' : 'ok', $skipNote);
+    logMessage($skipNote, $lockHandle === false ? 'ERROR' : 'WARNING');
     exit(0);
 }
 
