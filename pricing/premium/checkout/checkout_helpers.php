@@ -47,17 +47,36 @@ function premium_paypal_subscription_refusal(string $paypalSubscriptionId, int $
     if (!is_array($subscription)) {
         return 'unconfirmed';
     }
-    // PayPal reports APPROVED for a moment after the buyer approves, before the first charge makes it ACTIVE.
-    if (!in_array($subscription['status'] ?? '', ['ACTIVE', 'APPROVED'], true)) {
-        return 'not_active';
-    }
     // The checkout page stamps every subscription it creates with the buyer's user id.
     if (($subscription['custom_id'] ?? null) !== "user_$userId") {
         return 'other_user';
+    }
+    // APPROVED comes before the first charge, so only ACTIVE shows the customer has paid.
+    if (($subscription['status'] ?? '') === 'APPROVED') {
+        return 'not_yet_active';
+    }
+    if (($subscription['status'] ?? '') !== 'ACTIVE') {
+        return 'not_active';
     }
     // Without this a monthly subscription could be posted as a yearly one.
     if ($expectedPlanId === '' || ($subscription['plan_id'] ?? null) !== $expectedPlanId) {
         return 'wrong_plan';
     }
     return null;
+}
+
+/** PayPal's record of a subscription, asked again for a few seconds while it is missing or still APPROVED, since it turns ACTIVE shortly after the buyer approves. */
+function premium_fetch_settled_paypal_subscription(string $paypalSubscriptionId, callable $fetch, callable $wait, int $attempts = 6): ?array
+{
+    $subscription = null;
+    for ($attempt = 1; $attempt <= $attempts; $attempt++) {
+        $subscription = $fetch($paypalSubscriptionId);
+        if (is_array($subscription) && ($subscription['status'] ?? '') !== 'APPROVED') {
+            return $subscription;
+        }
+        if ($attempt < $attempts) {
+            $wait();
+        }
+    }
+    return $subscription;
 }

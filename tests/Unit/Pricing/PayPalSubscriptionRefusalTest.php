@@ -30,9 +30,10 @@ final class PayPalSubscriptionRefusalTest extends TestCase
         $this->assertNull(premium_paypal_subscription_refusal('I-REAL', 42, self::PLAN, self::paypalSays(self::subscription())));
     }
 
-    public function test_a_just_approved_subscription_is_accepted(): void
+    public function test_a_subscription_not_yet_charged_is_not_accepted(): void
     {
-        $this->assertNull(premium_paypal_subscription_refusal('I-REAL', 42, self::PLAN, self::paypalSays(self::subscription(['status' => 'APPROVED']))));
+        // APPROVED comes before the first charge, so granting on it would give Premium before any payment.
+        $this->assertSame('not_yet_active', premium_paypal_subscription_refusal('I-REAL', 42, self::PLAN, self::paypalSays(self::subscription(['status' => 'APPROVED']))));
     }
 
     public function test_a_made_up_id_paypal_does_not_know_is_refused(): void
@@ -51,6 +52,41 @@ final class PayPalSubscriptionRefusalTest extends TestCase
     {
         $this->assertSame('other_user', premium_paypal_subscription_refusal('I-REAL', 7, self::PLAN, self::paypalSays(self::subscription())));
         $this->assertSame('other_user', premium_paypal_subscription_refusal('I-REAL', 42, self::PLAN, self::paypalSays(self::subscription(['custom_id' => null]))));
+    }
+
+    public function test_another_users_subscription_is_named_as_such_whatever_its_status(): void
+    {
+        // Only other_user is a plain refusal, so a stranger's subscription must never come back as one of the customer's own.
+        $this->assertSame('other_user', premium_paypal_subscription_refusal('I-REAL', 7, self::PLAN, self::paypalSays(self::subscription(['status' => 'CANCELLED']))));
+        $this->assertSame('other_user', premium_paypal_subscription_refusal('I-REAL', 7, 'P-OTHER', self::paypalSays(self::subscription())));
+    }
+
+    public function test_a_subscription_that_turns_active_while_checkout_waits_is_used(): void
+    {
+        $statuses = ['APPROVED', 'APPROVED', 'ACTIVE'];
+        $waits = 0;
+        $fetch = function (string $id) use (&$statuses): ?array {
+            return self::subscription(['status' => array_shift($statuses)]);
+        };
+
+        $subscription = premium_fetch_settled_paypal_subscription('I-REAL', $fetch, function () use (&$waits) { $waits++; });
+
+        $this->assertSame('ACTIVE', $subscription['status']);
+        $this->assertSame(2, $waits);
+    }
+
+    public function test_waiting_stops_after_the_last_attempt(): void
+    {
+        $fetches = 0;
+        $fetch = function (string $id) use (&$fetches): ?array {
+            $fetches++;
+            return self::subscription(['status' => 'APPROVED']);
+        };
+
+        $subscription = premium_fetch_settled_paypal_subscription('I-REAL', $fetch, fn() => null, 4);
+
+        $this->assertSame('APPROVED', $subscription['status']);
+        $this->assertSame(4, $fetches);
     }
 
     public function test_a_subscription_on_a_different_plan_is_refused(): void

@@ -193,25 +193,20 @@ try {
                     echo json_encode(['success' => false, 'error' => 'Invalid PayPal subscription identifier']);
                     exit();
                 }
-                $fetchSubscription = function (string $id): ?array {
-                    $subscription = getPayPalSubscription($id);
-                    if ($subscription === null) {
-                        // A second try rides out a brief PayPal hiccup right after approval.
-                        sleep(1);
-                        $subscription = getPayPalSubscription($id);
-                    }
-                    return $subscription;
-                };
+                $fetchSubscription = fn(string $id): ?array => premium_fetch_settled_paypal_subscription(
+                    $id, 'getPayPalSubscription', fn() => sleep(1));
                 $refusal = premium_paypal_subscription_refusal($paypalSubscriptionId, $userId, premium_paypal_plan_id($billing), $fetchSubscription);
                 if ($refusal !== null) {
                     $pdo->rollBack();
-                    if ($refusal === 'unconfirmed') {
-                        error_log("CRITICAL: PayPal could not confirm subscription $paypalSubscriptionId for user $userId ($billing); nothing was granted, so finish or cancel it by hand");
-                        // Subscribing again would start a second PayPal subscription that also bills, so the customer is sent to support instead.
-                        echo json_encode(['success' => false, 'error' => 'PayPal has not confirmed your subscription yet, so Premium was not set up. Please contact support and we will finish it for you. Do not subscribe again.']);
-                    } else {
+                    if ($refusal === 'other_user') {
                         error_log("Rejected PayPal subscription $paypalSubscriptionId for user $userId ($billing): $refusal");
                         echo json_encode(['success' => false, 'error' => 'This PayPal subscription could not be verified.']);
+                    } else {
+                        error_log("CRITICAL: PayPal subscription $paypalSubscriptionId for user $userId ($billing) was refused ($refusal); nothing was granted, so finish or cancel it by hand");
+                        // The subscription may already bill the customer, and subscribing again would start a second one, so they are sent to support instead.
+                        echo json_encode(['success' => false, 'error' => $refusal === 'unconfirmed' || $refusal === 'not_yet_active'
+                            ? 'PayPal has not confirmed your subscription yet, so Premium was not set up. Please contact support and we will finish it for you. Do not subscribe again.'
+                            : 'Your PayPal subscription does not match this checkout, so Premium was not set up. Please contact support and we will sort it out. Do not subscribe again.']);
                     }
                     exit();
                 }

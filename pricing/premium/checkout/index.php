@@ -16,6 +16,7 @@
     require_once __DIR__ . '/../../../db_connect.php';
     require_once __DIR__ . '/../../../community/users/user_functions.php';
     require_once __DIR__ . '/../../../config/pricing.php';
+    require_once __DIR__ . '/checkout_helpers.php';
 
     $pricing = get_pricing_config();
 
@@ -54,14 +55,9 @@
         ? $_ENV['PAYPAL_LIVE_CLIENT_ID']
         : $_ENV['PAYPAL_SANDBOX_CLIENT_ID'];
 
-    // PayPal subscription plan IDs (create these in PayPal dashboard)
-    $paypal_monthly_plan_id = $is_production
-        ? ($_ENV['PAYPAL_LIVE_MONTHLY_PLAN_ID'] ?? '')
-        : ($_ENV['PAYPAL_SANDBOX_MONTHLY_PLAN_ID'] ?? '');
-
-    $paypal_yearly_plan_id = $is_production
-        ? ($_ENV['PAYPAL_LIVE_YEARLY_PLAN_ID'] ?? '')
-        : ($_ENV['PAYPAL_SANDBOX_YEARLY_PLAN_ID'] ?? '');
+    // The same rule the server checks a returned subscription against, so the page and the check cannot pick different plans.
+    $paypal_monthly_plan_id = premium_paypal_plan_id('monthly');
+    $paypal_yearly_plan_id = premium_paypal_plan_id('yearly');
 
     $square_app_id = $is_production
         ? $_ENV['SQUARE_LIVE_APP_ID']
