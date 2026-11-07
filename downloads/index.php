@@ -9,32 +9,6 @@ track_referral_event('downloads_page');
 
 $hide_header_cta = true;
 /**
- * macOS-only download-link suffix carrying the visitor's install token.
- *
- * Windows and Linux recover the token from the downloaded filename that
- * serveFile() builds in get_avalonia_installer.php: the Windows installer reads
- * it during install, and on Linux the AppImage *is* the executable, so the name
- * survives. On macOS the download is a .zip the user expands, and the extracted
- * "Argo Books.app" carries none of the archive's name, so the token is gone by
- * first run and the install reports as unattributed.
- *
- * Putting it in the query string instead means the browser records it as the
- * download's source URL, which macOS stores on the file as the
- * com.apple.metadata:kMDItemWhereFroms attribute. FirstRunReporter reads it back
- * from there. Nothing server-side consumes ?t; the token is still derived from
- * the cookie when the filename is built.
- */
-function macInstallTokenQuery(): string
-{
-    $visitor_id = $_COOKIE[ARGO_VISITOR_COOKIE] ?? null;
-    if (!$visitor_id || !preg_match('/^[0-9a-f-]{36}$/i', $visitor_id)) {
-        return '';
-    }
-    $token = referral_install_token($visitor_id);
-    return $token === '' ? '' : '?t=' . urlencode($token);
-}
-
-/**
  * Which desktop system the visitor is on, or null when it cannot be told.
  *
  * Only used to pick which store badges to show. The platform cards above stay
@@ -239,8 +213,6 @@ $systemRequirements = getSystemRequirements();
                 // Only worth asking when there are two answers. The browser cannot tell them
                 // apart: Safari and Chrome both report an Intel user agent on Apple Silicon.
                 'help' => ['id' => 'macInstallHelp', 'text' => 'Which one do I need?', 'min_builds' => 2],
-                // macOS only: a Mac expands the zip and the extracted app keeps nothing of the archive's name, so the token cannot ride in it.
-                'install_token' => true,
             ],
             [
                 'class' => 'platform-linux',
@@ -277,7 +249,7 @@ $systemRequirements = getSystemRequirements();
                         <?php foreach ($card['builds'] as $build): ?>
                             <?php $file = $latestVersion['platforms'][$build['key']] ?? null; ?>
                             <?php if ($file): ?>
-                                <a href="../download/avalonia/<?php echo $build['slug'] . (!empty($card['install_token']) ? macInstallTokenQuery() : ''); ?>"
+                                <a href="../download/avalonia/<?php echo $build['slug']; ?>"
                                    class="btn btn-blue download-btn"
                                    data-platform="<?php echo $build['key']; ?>">
                                     <?= svg_icon('download', null, 'btn-icon') ?>
