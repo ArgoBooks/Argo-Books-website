@@ -420,8 +420,15 @@ function handlePaymentCompleted($resource) {
     $subscription = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$subscription) {
+        $stmt = $pdo->prepare("SELECT 1 FROM premium_subscriptions WHERE previous_paypal_subscription_id = ? LIMIT 1");
+        $stmt->execute([$billingAgreementId]);
+        if ($stmt->fetchColumn() !== false) {
+            logPayPalWebhookEvent('PAYMENT.SALE.COMPLETED', $resource, 'sale_on_replaced_subscription');
+            return;
+        }
         logPayPalWebhookEvent('PAYMENT.SALE.COMPLETED', $resource, 'subscription_not_found');
-        return;
+        // The first sale can arrive before checkout has saved the subscription, and PayPal's redelivery then records the real sale id.
+        throw new PayPalWebhookRetry("PAYMENT.SALE.COMPLETED $transactionId arrived before subscription $billingAgreementId was saved");
     }
 
     // Check if this is the initial payment (transaction already exists) or a renewal
