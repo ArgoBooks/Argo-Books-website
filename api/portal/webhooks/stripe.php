@@ -58,7 +58,7 @@ try {
 switch ($event->type) {
     case 'payment_intent.succeeded':
         $paymentIntent = $event->data->object;
-        handle_payment_succeeded($paymentIntent);
+        handle_payment_succeeded($paymentIntent, $event->account ?? null);
         break;
 
     case 'charge.refunded':
@@ -83,15 +83,20 @@ echo json_encode(['received' => true]);
 /**
  * Handle a successful payment intent
  */
-function handle_payment_succeeded(\Stripe\PaymentIntent $paymentIntent): void
+function handle_payment_succeeded(\Stripe\PaymentIntent $paymentIntent, ?string $account): void
 {
-    global $is_production;
+    global $is_production, $pdo;
     $metadata = $paymentIntent->metadata;
     $invoiceId = $metadata['portal_invoice_id'] ?? '';
     $companyId = $metadata['portal_company_id'] ?? '';
 
     if (empty($invoiceId) || empty($companyId)) {
         // Not a portal payment (could be a license purchase)
+        return;
+    }
+
+    if (!stripe_payment_belongs_to_portal_invoice($pdo, (int) $companyId, (string) $invoiceId, $account, current_environment())) {
+        error_log("Portal Stripe webhook: ignored {$paymentIntent->id} from account " . ($account ?? 'none') . ", which is not the account connected for company $companyId invoice $invoiceId");
         return;
     }
 

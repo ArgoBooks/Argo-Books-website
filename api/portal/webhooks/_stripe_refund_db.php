@@ -29,6 +29,24 @@ declare(strict_types=1);
  * PDO would cause the negative-payment INSERT to land on a different
  * connection than the rest of this function. Don't do that.
  */
+/** Whether a payment that succeeded on Stripe account $account may be credited to this portal invoice, because any connected account can put any company and invoice in its metadata. */
+function stripe_payment_belongs_to_portal_invoice(PDO $pdo, int $companyId, string $invoiceId, ?string $account, string $environment): bool
+{
+    if ($account === null || $account === '') {
+        return false;
+    }
+    $stmt = $pdo->prepare(
+        'SELECT 1
+         FROM portal_invoices pi
+         JOIN portal_companies pc ON pc.id = pi.company_id
+         WHERE pc.id = ? AND pc.stripe_account_id = ? AND pc.environment = ?
+           AND pi.invoice_id = ? AND pi.environment = ?
+         LIMIT 1'
+    );
+    $stmt->execute([$companyId, $account, $environment, $invoiceId, $environment]);
+    return $stmt->fetchColumn() !== false;
+}
+
 function apply_stripe_refund_to_db(
     PDO $pdo,
     string $providerPaymentId,
