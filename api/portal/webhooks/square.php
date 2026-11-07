@@ -118,6 +118,8 @@ switch ($eventType) {
                 // Keyed by Square's own refund id, because keying by the payment collides on a second partial refund and drops it.
                 $refundRow = 'refund_' . $refundId;
                 $refundAmount = $amount / 100.0;
+                // The refund row and the restored balance are saved together, because a redelivery finds the row and would skip the balance.
+                $pdo->beginTransaction();
                 $recordResult = record_portal_payment([
                     'company_id' => $original['company_id'],
                     'invoice_id' => $original['invoice_id'],
@@ -162,6 +164,10 @@ switch ($eventType) {
                          WHERE company_id = ? AND invoice_id = ?'
                     )->execute([$refundAmount, $refundAmount, $original['company_id'], $original['invoice_id']]);
                 }
+                if (empty($recordResult['success'])) {
+                    throw new RuntimeException('Refund row not recorded: ' . ($recordResult['message'] ?? $recordResult['error'] ?? 'unknown'));
+                }
+                $pdo->commit();
 
                 // Matched by argo_request_id, which is sent as Square's idempotency_key and echoed back in the payload.
                 $combined = ($refund['idempotency_key'] ?? '') . '|' . $note . '|' . ($refund['order_id'] ?? '');
@@ -189,7 +195,13 @@ switch ($eventType) {
                 }
             }
         } catch (\Throwable $e) {
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
             error_log('SQUARE refund handler: ' . $e->getMessage());
+            // Square delivers the event again on a non-2xx, and every step above is safe to repeat.
+            http_response_code(500);
+            exit;
         }
         break;
 
