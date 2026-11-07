@@ -471,6 +471,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
+    if (isset($_POST['update_disable_reason'])) {
+        $reason = mb_substr(trim((string) ($_POST['disable_reason'] ?? '')), 0, 255);
+
+        try {
+            $pdo->prepare("
+                UPDATE premium_subscription_keys
+                SET disabled_reason = ?
+                WHERE id = ? AND batch_label IS NOT NULL AND disabled_at IS NOT NULL
+            ")->execute([$reason !== '' ? $reason : null, (int) ($_POST['key_id'] ?? 0)]);
+            $_SESSION['message'] = "Reason saved.";
+            $_SESSION['message_type'] = 'success';
+        } catch (PDOException $e) {
+            error_log("Error saving disable reason: " . $e->getMessage());
+            $_SESSION['message'] = "Could not save the reason.";
+            $_SESSION['message_type'] = 'error';
+        }
+
+        header('Location: index.php#reseller-batches');
+        exit;
+    }
+
     if (isset($_POST['enable_key'])) {
         $enabled = enable_reseller_key((int) ($_POST['key_id'] ?? 0));
 
@@ -1343,13 +1364,26 @@ include __DIR__ . '/../admin_header.php';
                                     <?php endif; ?>
                                 </td>
                                 <td><?php echo date('M j, Y', strtotime($dk['disabled_at'])); ?></td>
-                                <td><?php echo $dk['disabled_reason'] ? htmlspecialchars($dk['disabled_reason']) : '-'; ?></td>
                                 <td>
-                                    <form method="post" style="display: inline;" class="enable-key-form">
+                                    <span class="reason-text"><?php echo $dk['disabled_reason'] ? htmlspecialchars($dk['disabled_reason']) : '-'; ?></span>
+                                    <form method="post" class="reason-edit-form" style="display: none; gap: 8px; align-items: center;">
                                         <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
                                         <input type="hidden" name="key_id" value="<?php echo (int) $dk['id']; ?>">
-                                        <button type="submit" name="enable_key" class="btn btn-secondary">Enable</button>
+                                        <input type="text" name="disable_reason" maxlength="255" style="flex: 1; min-width: 180px;"
+                                               value="<?php echo htmlspecialchars($dk['disabled_reason'] ?? ''); ?>">
+                                        <button type="submit" name="update_disable_reason" class="btn btn-premium">Save</button>
+                                        <button type="button" class="btn btn-secondary reason-cancel">Cancel</button>
                                     </form>
+                                </td>
+                                <td>
+                                    <div style="display: flex; gap: 8px;">
+                                        <button type="button" class="btn btn-secondary reason-edit">Edit</button>
+                                        <form method="post" style="display: inline;" class="enable-key-form">
+                                            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
+                                            <input type="hidden" name="key_id" value="<?php echo (int) $dk['id']; ?>">
+                                            <button type="submit" name="enable_key" class="btn btn-secondary">Enable</button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -1626,6 +1660,32 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+
+    document.querySelectorAll('.reason-edit').forEach(function(btn) {
+        const row = btn.closest('tr');
+        const text = row.querySelector('.reason-text');
+        const form = row.querySelector('.reason-edit-form');
+        const input = form.querySelector('input[name="disable_reason"]');
+
+        function setEditing(editing) {
+            text.style.display = editing ? 'none' : '';
+            form.style.display = editing ? 'flex' : 'none';
+            btn.style.display = editing ? 'none' : '';
+        }
+
+        btn.addEventListener('click', function() {
+            setEditing(true);
+            input.focus();
+            input.select();
+        });
+        form.querySelector('.reason-cancel').addEventListener('click', function() {
+            input.value = input.defaultValue;
+            setEditing(false);
+        });
+        input.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') form.querySelector('.reason-cancel').click();
+        });
+    });
 
     document.querySelectorAll('.enable-key-form').forEach(function(form) {
         form.addEventListener('submit', function(e) {
