@@ -293,10 +293,13 @@ function process_square_payment(array $invoice, array $company, array $data, int
                 'payment_environment' => $is_production ? 'production' : 'sandbox',
             ]);
 
-            // The idempotency key above makes a retry return this same Square payment, so failing here cannot charge twice.
-            if (!$result['success']) {
-                send_error_response(500, $result['message'] ?? $result['error'] ?? 'Failed to record payment', 'RECORD_FAILED');
+            // The customer has been charged, so they are told it worked (a retry would charge them again) and the Square webhook records the payment instead.
+            $recorded = $result['success'] ?? false;
+            if (!$recorded) {
+                error_log('CRITICAL: Square portal payment ' . $payment['id'] . ' for invoice ' . $invoice['invoice_id']
+                    . ' was charged but not recorded: ' . ($result['message'] ?? $result['error'] ?? 'unknown error'));
             }
+            $customerReference = $recorded ? $result['reference_number'] : $payment['id'];
 
             // Send payment confirmation email (best-effort, don't block the response on failure)
             if (!empty($invoice['customer_email'])) {
@@ -307,7 +310,7 @@ function process_square_payment(array $invoice, array $company, array $data, int
                     'invoiceId' => $invoice['invoice_id'],
                     'amount' => $amount,
                     'currency' => strtoupper($currency),
-                    'referenceNumber' => $result['reference_number'],
+                    'referenceNumber' => $customerReference,
                     'paymentMethod' => 'square',
                 ]);
             }
@@ -315,7 +318,7 @@ function process_square_payment(array $invoice, array $company, array $data, int
             send_json_response(200, [
                 'success' => true,
                 'method' => 'square',
-                'reference_number' => $result['reference_number'],
+                'reference_number' => $recorded ? $result['reference_number'] : null,
                 'provider_payment_id' => $payment['id'],
                 'amount' => $amount,
                 'currency' => strtoupper($currency),

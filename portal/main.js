@@ -516,7 +516,7 @@ document.addEventListener("DOMContentLoaded", function () {
               if (result.success) {
                 showConfirmation(
                   amount,
-                  result.reference_number,
+                  result.reference_number || result.provider_payment_id,
                   "Square"
                 );
               } else {
