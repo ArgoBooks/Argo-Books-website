@@ -144,6 +144,11 @@ function process_stripe_payment(array $invoice, array $data, float $amount, stri
         send_error_response(400, 'Payment has not been completed. Status: ' . $paymentIntent->status, 'PAYMENT_NOT_COMPLETED');
     }
 
+    if (!stripe_payment_intent_matches_invoice($paymentIntent->metadata->toArray(), (string) $paymentIntent->currency, $invoice)) {
+        error_log("Portal Stripe payment $paymentIntentId does not belong to invoice " . $invoice['invoice_id'] . ' of company ' . $invoice['company_id']);
+        send_error_response(400, 'This payment does not belong to this invoice.', 'PAYMENT_MISMATCH');
+    }
+
     // Verify amount matches
     $paidAmountCents = $paymentIntent->amount;
     $expectedCents = (int) round($amount * 100);

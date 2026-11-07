@@ -406,6 +406,14 @@ function find_recorded_portal_payment(string $providerPaymentId, int $companyId,
     return $stmt->fetch() ?: null;
 }
 
+/** Whether a PaymentIntent was created by checkout for this invoice, in its currency, so a payment for one invoice cannot be posted against another. */
+function stripe_payment_intent_matches_invoice(array $metadata, string $paymentCurrency, array $invoice): bool
+{
+    return (string) ($metadata['portal_invoice_id'] ?? '') === (string) $invoice['invoice_id']
+        && (string) ($metadata['portal_company_id'] ?? '') === (string) $invoice['company_id']
+        && strtolower($paymentCurrency) === strtolower($invoice['currency'] ?: 'usd');
+}
+
 /**
  * The processing fee that checkout stamped on a Stripe PaymentIntent, or 0 when
  * it is missing (PaymentIntents created before the stamp) or can't be part of
