@@ -28,6 +28,7 @@ require_once __DIR__ . '/../admin_session.php';
 require_once __DIR__ . '/telemetry-dedupe.php';        // telemetry_is_duplicate_event()
 require_once __DIR__ . '/telemetry-time.php';          // telemetry_ts_seconds()
 require_once __DIR__ . '/user-activity-events.php';    // ua_describe_event() etc.
+require_once __DIR__ . '/os-name.php';                 // telemetry_os_name()
 require_once __DIR__ . '/../../founder_identity.php';  // is_founder_auth_id()
 require_once __DIR__ . '/../../country_names.php';     // country_name()
 
@@ -164,7 +165,7 @@ function ua_rows_for_user(array $files, string $authId, array &$seen, bool &$mat
         $fileMeta = [
             'tier'        => $d['tier'] ?? 'premium',
             'app_version' => $d['appVersion'] ?? '',
-            'platform'    => $d['platform'] ?? '',
+            'platform'    => telemetry_os_name((string) ($d['platform'] ?? ''), $d['osVersion'] ?? null),
             'country'     => country_name($geo['country'] ?? ''),
             'region'      => $geo['region'] ?? '',
             'timezone'    => $geo['timezone'] ?? '',

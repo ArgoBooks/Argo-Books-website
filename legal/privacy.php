@@ -210,7 +210,8 @@
                 <li><strong>Startup timing</strong>: How long the application took to open, so we can find out how
                     slow it is on hardware we do not have.</li>
                 <li><strong>Session data</strong>: When you opened and closed the application, how long it stayed
-                    open, which version you are running, and whether you are on Windows, macOS or Linux.</li>
+                    open, which version you are running, and which operating system you are on with its
+                    version number, such as Windows 11 24H2.</li>
                 <li><strong>Outside services</strong>: Which service the application contacted (Google Sheets,
                     Google Gemini, Open Exchange Rates, or receipt scanning), how long it took to answer, and
                     whether it worked. What each of those services receives is listed under "Who Else
@@ -373,7 +374,7 @@
                 <li>By email: <a class="link" href="mailto:contact@argorobots.com">contact@argorobots.com</a>.</li>
             </ul>
 
-            <p class="last-updated">Last updated: October 5, 2026</p>
+            <p class="last-updated">Last updated: November 6, 2026</p>
         </div>
     </div>
 

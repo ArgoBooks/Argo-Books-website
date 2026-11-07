@@ -323,6 +323,12 @@ function filter_telemetry_payload(array $payload): array
         $out['appVersion'] = $appVersion;
     }
 
+    // Digits and dots only, so this field can hold a version number and nothing else.
+    $osVersion = $payload['osVersion'] ?? null;
+    if (is_string($osVersion) && preg_match('/^\d{1,6}(\.\d{1,6}){1,3}$/', $osVersion)) {
+        $out['osVersion'] = $osVersion;
+    }
+
     // Geo: country/countryCode/region/timezone only. No city, no hashedIp.
     $geo = $payload['geoLocation'] ?? null;
     if (is_array($geo)) {

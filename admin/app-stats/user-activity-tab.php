@@ -24,6 +24,7 @@ require_once __DIR__ . '/user-activity-events.php';
 require_once __DIR__ . '/telemetry-dedupe.php';       // telemetry_is_duplicate_event()
 require_once __DIR__ . '/telemetry-time.php';         // telemetry_ts_seconds()
 require_once __DIR__ . '/user-activity-files.php'; // ua_collect_files()
+require_once __DIR__ . '/os-name.php';             // telemetry_os_name()
 
 if (!function_exists('ua_set_language')) {
     // Newest wins: files are read in name order, not event order. Language comes from
@@ -120,7 +121,13 @@ foreach ($ua_files as $name => $path) {
 
     $u =& $ua_users[$authId];
     $u['files'][] = $name;
-    if (!empty($d['platform']))   $u['platforms'][$d['platform']] = true;
+    if (!empty($d['platform'])) {
+        $ua_os = telemetry_os_name($d['platform'], $d['osVersion'] ?? null);
+        // An older upload names only the platform, and must not replace a version a newer one already gave.
+        if ($ua_os !== $d['platform'] || !isset($u['platforms'][$d['platform']])) {
+            $u['platforms'][$d['platform']] = $ua_os;
+        }
+    }
     if (!empty($d['appVersion'])) $u['versions'][$d['appVersion']] = true;
     if (empty($u['country'])  && !empty($geo['country']))  $u['country']  = country_name($geo['country']);
     if (empty($u['region'])   && !empty($geo['region']))   $u['region']   = $geo['region'];
@@ -592,7 +599,7 @@ if (!function_exists('ua_fmt')) {
         $ua_haystack = strtolower(trim(
             $u['authId'] . ' ' . $u['country'] . ' ' . $u['region'] . ' ' . ($u['language'] ?? '') . ' ' .
             implode(' ', array_keys($u['versions'])) . ' ' .
-            implode(' ', array_keys($u['platforms'])) .
+            implode(' ', $u['platforms']) .
             // So "me" / "you" / "founder" all find your own card.
             ($u['isFounder'] ? ' founder you me' : '') .
             // And so a promo cohort can be pulled up by name, e.g. "stacksocial".
@@ -623,7 +630,7 @@ if (!function_exists('ua_fmt')) {
         </div>
         <h3><?= htmlspecialchars($u['authId']) ?><span class="ua-badge <?= $u['tier'] ?>"><?= htmlspecialchars($u['tier']) ?></span><?php if (!empty($u['isKeyUser'])): ?><span class="ua-badge keyuser" title="Premium from a redeemed key, not a paid subscription<?= $u['keyBatch'] ? ' — batch: ' . htmlspecialchars($u['keyBatch']) : '' ?>."><?= $u['keyBatch'] ? htmlspecialchars($u['keyBatch']) : 'Free key' ?></span><?php endif; ?><?php if ($u['isFounder']): ?><span class="ua-badge founder" title="Your own install. Counted nowhere else on the site.">You</span><?php endif; ?></h3>
         <div class="ua-meta">
-            <span><b>Platform:</b> <?= htmlspecialchars(implode(', ', array_keys($u['platforms'])) ?: '—') ?></span>
+            <span><b>Platform:</b> <?= htmlspecialchars(implode(', ', $u['platforms']) ?: '—') ?></span>
             <span><b>Country:</b> <?= htmlspecialchars($u['country'] ?: '—') ?></span>
             <span><b>Region:</b> <?= htmlspecialchars($u['region'] ?: '—') ?></span>
             <span><b>Timezone:</b> <?= htmlspecialchars($u['timezone'] ?: '—') ?></span>
