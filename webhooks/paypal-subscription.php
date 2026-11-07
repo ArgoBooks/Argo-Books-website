@@ -513,9 +513,14 @@ function handlePaymentCompleted($resource) {
         if ($pdo->inTransaction()) {
             $pdo->rollBack();
         }
+        // Any broken constraint raises 23000, so it is a duplicate delivery only when a payment with this transaction id is on file.
         if ($e->getCode() === '23000') {
-            logPayPalWebhookEvent('PAYMENT.SALE.COMPLETED', $resource, 'duplicate_transaction_race');
-            return;
+            $existing = $pdo->prepare("SELECT 1 FROM premium_subscription_payments WHERE transaction_id = ? LIMIT 1");
+            $existing->execute([$transactionId]);
+            if ($existing->fetchColumn() !== false) {
+                logPayPalWebhookEvent('PAYMENT.SALE.COMPLETED', $resource, 'duplicate_transaction_race');
+                return;
+            }
         }
         throw new PayPalWebhookRetry("Payment $transactionId for {$subscription['subscription_id']} was not saved: " . $e->getMessage(), 0, $e);
     }
