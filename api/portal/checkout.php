@@ -293,6 +293,11 @@ function process_square_payment(array $invoice, array $company, array $data, int
                 'payment_environment' => $is_production ? 'production' : 'sandbox',
             ]);
 
+            // The idempotency key above makes a retry return this same Square payment, so failing here cannot charge twice.
+            if (!$result['success']) {
+                send_error_response(500, $result['message'] ?? $result['error'] ?? 'Failed to record payment', 'RECORD_FAILED');
+            }
+
             // Send payment confirmation email (best-effort, don't block the response on failure)
             if (!empty($invoice['customer_email'])) {
                 send_payment_confirmation([
@@ -302,7 +307,7 @@ function process_square_payment(array $invoice, array $company, array $data, int
                     'invoiceId' => $invoice['invoice_id'],
                     'amount' => $amount,
                     'currency' => strtoupper($currency),
-                    'referenceNumber' => $referenceNumber,
+                    'referenceNumber' => $result['reference_number'],
                     'paymentMethod' => 'square',
                 ]);
             }
@@ -310,7 +315,7 @@ function process_square_payment(array $invoice, array $company, array $data, int
             send_json_response(200, [
                 'success' => true,
                 'method' => 'square',
-                'reference_number' => $referenceNumber,
+                'reference_number' => $result['reference_number'],
                 'provider_payment_id' => $payment['id'],
                 'amount' => $amount,
                 'currency' => strtoupper($currency),
