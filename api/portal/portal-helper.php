@@ -11,6 +11,7 @@ require_once __DIR__ . '/../../db_connect.php';
 require_once __DIR__ . '/../../smtp_mailer.php';
 require_once __DIR__ . '/../../rate_limit_helper.php';
 require_once __DIR__ . '/../../config/pricing.php';
+require_once __DIR__ . '/../../premium_entitlement.php';
 require_once __DIR__ . '/../../shared/currencies.php';
 
 /**
@@ -124,14 +125,7 @@ function authenticate_license_request(): ?array
         $stmt->execute([$premiumKey['subscription_id'], current_environment()]);
         $subscription = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if (!$subscription) {
-            return null;
-        }
-
-        $now = new DateTime();
-        $endDate = new DateTime($subscription['end_date']);
-
-        if (!in_array($subscription['status'], ['active', 'cancelled']) || $endDate <= $now) {
+        if (!$subscription || !premium_subscription_entitled($subscription)) {
             return null;
         }
 

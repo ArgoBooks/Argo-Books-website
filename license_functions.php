@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/db_connect.php';
 require_once __DIR__ . '/track_referral_event.php';
+require_once __DIR__ . '/premium_entitlement.php';
 
 /**
  * Generate a random license key
@@ -343,13 +344,9 @@ function _handle_re_redemption($key, $device_id, $subscription_id) {
             return _recreate_subscription_for_key($key, $device_id);
         }
 
-        // Check if subscription has expired
-        $now = new DateTime();
-        $end_date = new DateTime($subscription['end_date']);
-
-        if ($subscription['status'] === 'expired' || $end_date <= $now) {
+        if (!premium_subscription_entitled($subscription)) {
             // Mark as expired if not already
-            if ($subscription['status'] !== 'expired') {
+            if ($subscription['status'] !== 'expired' && new DateTime($subscription['end_date']) <= new DateTime()) {
                 $stmt = $pdo->prepare("UPDATE premium_subscriptions SET status = 'expired' WHERE subscription_id = ?");
                 $stmt->execute([$subscription_id]);
             }
@@ -571,13 +568,9 @@ function validate_license($key, $device_id) {
             ];
         }
 
-        // Check if subscription has expired
-        $now = new DateTime();
-        $end_date = new DateTime($subscription['end_date']);
-
-        if ($subscription['status'] === 'expired' || $end_date <= $now) {
+        if (!premium_subscription_entitled($subscription)) {
             // Mark as expired if not already
-            if ($subscription['status'] !== 'expired') {
+            if ($subscription['status'] !== 'expired' && new DateTime($subscription['end_date']) <= new DateTime()) {
                 $stmt = $pdo->prepare("UPDATE premium_subscriptions SET status = 'expired' WHERE subscription_id = ?");
                 $stmt->execute([$premium_key['subscription_id']]);
             }

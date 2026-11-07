@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
 
+require_once __DIR__ . '/../../../premium_entitlement.php';
+
 /**
  * Authentication for /v1.
  *
@@ -96,8 +98,8 @@ function api_authenticate(): array
         api_error(403, 'invalid_request_error', 'account_inactive', 'The Argo Books account behind this key is not active.');
     }
     // Checked on every request rather than only when the key was made, or a key minted during a paid month would keep working after the subscription ended.
-    $premium = in_array($row['subscription_status'], ['active', 'cancelled'], true)
-        && strtotime((string) $row['subscription_end']) > time()
+    $premium = $row['subscription_status'] !== null
+        && premium_subscription_entitled(['status' => $row['subscription_status'], 'end_date' => $row['subscription_end']])
         && ($row['subscription_environment'] === current_environment() || $row['payment_method'] === 'free_key');
     if (!$premium) {
         api_error(403, 'invalid_request_error', 'premium_required', 'The API is part of Argo Books Premium, and the account behind this key does not have it. The merchant needs to upgrade or renew.');

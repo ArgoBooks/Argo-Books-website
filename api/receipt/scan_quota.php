@@ -22,6 +22,7 @@
  */
 
 require_once __DIR__ . '/../../config/pricing.php';
+require_once __DIR__ . '/../../premium_entitlement.php';
 
 if (!function_exists('receipt_scan_quota_identity')) {
     /**
@@ -56,8 +57,7 @@ if (!function_exists('receipt_scan_quota_identity')) {
                         SELECT id FROM premium_subscriptions
                         WHERE subscription_id = ?
                         AND environment = ?
-                        AND status IN ('active', 'cancelled')
-                        AND end_date > NOW()
+                        AND " . premium_entitled_sql() . "
                     ");
                     $stmt->execute([$premiumKey['subscription_id'], current_environment()]);
                     if ($stmt->fetch()) {
@@ -70,8 +70,7 @@ if (!function_exists('receipt_scan_quota_identity')) {
                     SELECT id FROM premium_subscriptions
                     WHERE subscription_id = ?
                     AND environment = ?
-                    AND status IN ('active', 'cancelled')
-                    AND end_date > NOW()
+                    AND " . premium_entitled_sql() . "
                 ");
                 $stmt->execute([$licenseKey, current_environment()]);
                 if ($stmt->fetch()) {

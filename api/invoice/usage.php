@@ -51,6 +51,7 @@ $action = $input['action'];
 // Load database connection and pricing config
 require_once __DIR__ . '/../../db_connect.php';
 require_once __DIR__ . '/../../config/pricing.php';
+require_once __DIR__ . '/../../premium_entitlement.php';
 
 /**
  * Determine tier and validate identity.
@@ -80,8 +81,7 @@ function validateAndGetTier($pdo, $license_key, $device_id) {
                     FROM premium_subscriptions
                     WHERE subscription_id = ?
                     AND environment = ?
-                    AND status IN ('active', 'cancelled')
-                    AND end_date > NOW()
+                    AND " . premium_entitled_sql() . "
                 ");
                 $stmt->execute([$premiumKey['subscription_id'], current_environment()]);
                 if ($stmt->fetch()) {
