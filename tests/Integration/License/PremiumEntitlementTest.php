@@ -72,6 +72,62 @@ final class PremiumEntitlementTest extends DatabaseTestCase
         }
     }
 
+    private function autoRenewing(string $subscriptionId, string $endDate, string $status = 'active'): string
+    {
+        $this->seedSubscription($subscriptionId, $endDate, $status);
+        $this->pdo->prepare('UPDATE premium_subscriptions SET auto_renew = 1 WHERE subscription_id = ?')->execute([$subscriptionId]);
+        return $this->seedRedeemedKey(self::DEVICE, $subscriptionId);
+    }
+
+    private function statusOf(string $subscriptionId): string
+    {
+        $stmt = $this->pdo->prepare('SELECT status FROM premium_subscriptions WHERE subscription_id = ?');
+        $stmt->execute([$subscriptionId]);
+        return $stmt->fetchColumn();
+    }
+
+    public function test_a_renewal_being_retried_keeps_premium_and_is_not_expired(): void
+    {
+        $id = 'PREM-ENTL-RTRY-AAAA-0003';
+        $key = $this->autoRenewing($id, date('Y-m-d H:i:s', strtotime('-1 day')));
+
+        $this->assertSame('valid', validate_license($key, self::DEVICE)['status']);
+        $this->assertSame('premium', receipt_scan_quota_identity($this->pdo, $key, null)['tier'] ?? null);
+        $this->assertTrue($this->sqlSaysEntitled($id));
+        $this->assertSame('active', $this->statusOf($id));
+    }
+
+    public function test_a_renewal_past_its_grace_loses_premium_but_stays_active_for_the_cron(): void
+    {
+        $id = 'PREM-ENTL-LATE-AAAA-0004';
+        $key = $this->autoRenewing($id, date('Y-m-d H:i:s', strtotime('-5 days')));
+
+        $this->assertSame('expired', validate_license($key, self::DEVICE)['status']);
+        $this->assertFalse($this->sqlSaysEntitled($id));
+        // The renewal cron only retries active rows, and the retry page only accepts payment_failed ones.
+        $this->assertSame('active', $this->statusOf($id));
+    }
+
+    public function test_a_failed_payment_past_its_term_loses_premium_but_can_still_be_retried(): void
+    {
+        $id = 'PREM-ENTL-GONE-AAAA-0005';
+        $key = $this->autoRenewing($id, date('Y-m-d H:i:s', strtotime('-1 day')), 'payment_failed');
+
+        $this->assertSame('expired', validate_license($key, self::DEVICE)['status']);
+        $this->assertFalse($this->sqlSaysEntitled($id));
+        $this->assertSame('payment_failed', $this->statusOf($id));
+    }
+
+    public function test_a_subscription_that_does_not_renew_is_marked_expired_once_it_ends(): void
+    {
+        $id = 'PREM-ENTL-DONE-AAAA-0006';
+        $this->seedSubscription($id, date('Y-m-d H:i:s', strtotime('-1 day')));
+        $key = $this->seedRedeemedKey(self::DEVICE, $id);
+
+        $this->assertSame('expired', validate_license($key, self::DEVICE)['status']);
+        $this->assertSame('expired', $this->statusOf($id));
+    }
+
     public function test_a_past_due_subscription_gets_neither(): void
     {
         $id = 'PREM-ENTL-PAST-AAAA-0002';

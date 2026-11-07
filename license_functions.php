@@ -322,7 +322,7 @@ function _handle_re_redemption($key, $device_id, $subscription_id) {
         $subscription = null;
         if ($subscription_id) {
             $stmt = $pdo->prepare("
-                SELECT subscription_id, status, end_date, environment, payment_method
+                SELECT subscription_id, status, end_date, auto_renew, environment, payment_method
                 FROM premium_subscriptions
                 WHERE subscription_id = ?
             ");
@@ -346,7 +346,7 @@ function _handle_re_redemption($key, $device_id, $subscription_id) {
 
         if (!premium_subscription_entitled($subscription)) {
             // Mark as expired if not already
-            if ($subscription['status'] !== 'expired' && new DateTime($subscription['end_date']) <= new DateTime()) {
+            if (premium_subscription_may_expire($subscription) && new DateTime($subscription['end_date']) <= new DateTime()) {
                 $stmt = $pdo->prepare("UPDATE premium_subscriptions SET status = 'expired' WHERE subscription_id = ?");
                 $stmt->execute([$subscription_id]);
             }
@@ -553,7 +553,7 @@ function validate_license($key, $device_id) {
 
         // Look up the linked subscription
         $stmt = $pdo->prepare("
-            SELECT subscription_id, status, end_date, environment, payment_method
+            SELECT subscription_id, status, end_date, auto_renew, environment, payment_method
             FROM premium_subscriptions
             WHERE subscription_id = ?
         ");
@@ -570,7 +570,7 @@ function validate_license($key, $device_id) {
 
         if (!premium_subscription_entitled($subscription)) {
             // Mark as expired if not already
-            if ($subscription['status'] !== 'expired' && new DateTime($subscription['end_date']) <= new DateTime()) {
+            if (premium_subscription_may_expire($subscription) && new DateTime($subscription['end_date']) <= new DateTime()) {
                 $stmt = $pdo->prepare("UPDATE premium_subscriptions SET status = 'expired' WHERE subscription_id = ?");
                 $stmt->execute([$premium_key['subscription_id']]);
             }
