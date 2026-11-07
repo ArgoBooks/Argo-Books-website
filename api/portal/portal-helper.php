@@ -118,7 +118,7 @@ function authenticate_license_request(): ?array
         }
 
         $stmt = $pdo->prepare("
-            SELECT status, end_date, auto_renew
+            SELECT status, end_date, auto_renew, " . premium_entitlement_columns() . "
             FROM premium_subscriptions
             WHERE subscription_id = ? AND environment = ?
         ");

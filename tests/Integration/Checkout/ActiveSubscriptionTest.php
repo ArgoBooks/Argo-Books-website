@@ -47,10 +47,34 @@ final class ActiveSubscriptionTest extends DatabaseTestCase
         $this->assertNull(premium_active_subscription($this->pdo, $user));
     }
 
-    public function test_an_active_subscription_past_its_end_date_does_not_block_checkout(): void
+    /** A time on the database's clock, which is the one the checks compare end_date against. */
+    private function databaseTime(int $hoursFromNow): string
+    {
+        return (string) $this->pdo->query("SELECT NOW() + INTERVAL $hoursFromNow HOUR")->fetchColumn();
+    }
+
+    public function test_an_active_subscription_past_its_renewal_grace_does_not_block_checkout(): void
     {
         $user = $this->seedCommunityUser();
-        $this->subscribe($user, 'active', date('Y-m-d H:i:s', strtotime('-1 day')));
+        $this->subscribe($user, 'active', $this->databaseTime(-73));
+
+        $this->assertNull(premium_active_subscription($this->pdo, $user));
+    }
+
+    public function test_a_subscription_whose_renewal_is_still_being_retried_blocks_checkout(): void
+    {
+        // The retried renewal may still charge the customer, so a second subscription would bill them twice.
+        $user = $this->seedCommunityUser();
+        $id = $this->subscribe($user, 'active', $this->databaseTime(-71));
+
+        $this->assertSame($id, premium_active_subscription($this->pdo, $user)['subscription_id'] ?? null);
+    }
+
+    public function test_a_subscription_that_does_not_renew_does_not_block_checkout_once_it_ends(): void
+    {
+        $user = $this->seedCommunityUser();
+        $id = $this->subscribe($user, 'active', $this->databaseTime(-1));
+        $this->pdo->prepare('UPDATE premium_subscriptions SET auto_renew = 0 WHERE subscription_id = ?')->execute([$id]);
 
         $this->assertNull(premium_active_subscription($this->pdo, $user));
     }

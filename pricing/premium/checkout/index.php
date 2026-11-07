@@ -33,9 +33,10 @@
     $is_cycle_switch = isset($_GET['cycle_switch']) && $_GET['cycle_switch'] === '1';
 
     if ($existing_subscription && in_array($existing_subscription['status'], ['active', 'cancelled', 'payment_failed'])) {
-        // User already has a subscription
-        $has_valid_subscription = $existing_subscription['status'] === 'active' ||
-            (in_array($existing_subscription['status'], ['cancelled', 'payment_failed']) && strtotime($existing_subscription['end_date']) > time());
+        // An active row past its end date and renewal grace no longer carries Premium, so its owner may subscribe again.
+        $entitlement = $pdo->prepare('SELECT ' . premium_entitlement_columns() . ' FROM premium_subscriptions WHERE subscription_id = ?');
+        $entitlement->execute([$existing_subscription['subscription_id']]);
+        $has_valid_subscription = premium_subscription_entitled($entitlement->fetch(PDO::FETCH_ASSOC) ?: ['premium_entitled' => 0]);
 
         if ($has_valid_subscription && !$is_changing_method) {
             // Redirect to subscription page unless they're changing payment method

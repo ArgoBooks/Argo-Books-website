@@ -75,7 +75,7 @@ function api_authenticate(): array
         'SELECT k.id AS key_id, k.scopes, k.revoked_at, k.last_used_at,
                 a.id AS account_id, a.public_id AS account_public_id,
                 a.company_uid, a.is_active,
-                s.status AS subscription_status, s.end_date AS subscription_end, s.auto_renew AS subscription_auto_renew,
+                s.status AS subscription_status, ' . premium_entitlement_columns('s.') . ',
                 s.environment AS subscription_environment, s.payment_method
            FROM api_keys k
            JOIN api_accounts a ON a.id = k.account_id
@@ -99,7 +99,7 @@ function api_authenticate(): array
     }
     // Checked on every request rather than only when the key was made, or a key minted during a paid month would keep working after the subscription ended.
     $premium = $row['subscription_status'] !== null
-        && premium_subscription_entitled(['status' => $row['subscription_status'], 'end_date' => $row['subscription_end'], 'auto_renew' => $row['subscription_auto_renew']])
+        && premium_subscription_entitled($row)
         && ($row['subscription_environment'] === current_environment() || $row['payment_method'] === 'free_key');
     if (!$premium) {
         api_error(403, 'invalid_request_error', 'premium_required', 'The API is part of Argo Books Premium, and the account behind this key does not have it. The merchant needs to upgrade or renew.');

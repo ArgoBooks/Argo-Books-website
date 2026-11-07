@@ -13,15 +13,27 @@ final class PremiumEntitlementTest extends DatabaseTestCase
 {
     private const DEVICE = 'device-hash-entitlement-001';
 
-    private static function future(): string
+    /** A time on the database's clock, which is the one every check compares end_date against. */
+    private function databaseTime(int $hoursFromNow): string
     {
-        return date('Y-m-d H:i:s', strtotime('+10 days'));
+        return (string) $this->pdo->query("SELECT NOW() + INTERVAL $hoursFromNow HOUR")->fetchColumn();
     }
 
-    private static function past(): string
+    private function future(): string
     {
-        // Days rather than hours, because local PHP runs in UTC while MySQL's NOW() is local time.
-        return date('Y-m-d H:i:s', strtotime('-2 days'));
+        return $this->databaseTime(1);
+    }
+
+    private function past(): string
+    {
+        return $this->databaseTime(-1);
+    }
+
+    private function rowOf(string $subscriptionId): array
+    {
+        $stmt = $this->pdo->prepare('SELECT status, ' . premium_entitlement_columns() . ' FROM premium_subscriptions WHERE subscription_id = ?');
+        $stmt->execute([$subscriptionId]);
+        return $stmt->fetch(\PDO::FETCH_ASSOC);
     }
 
     private function sqlSaysEntitled(string $subscriptionId): bool
@@ -45,20 +57,25 @@ final class PremiumEntitlementTest extends DatabaseTestCase
     }
 
     #[DataProvider('cases')]
-    public function test_the_php_rule_and_the_sql_rule_agree(string $status, bool $endsInFuture, bool $expected): void
+    public function test_the_selected_rule_and_the_filter_rule_agree(string $status, bool $endsInFuture, bool $expected): void
     {
         $id = 'PREM-ENTL-' . strtoupper(bin2hex(random_bytes(4)));
-        $endDate = $endsInFuture ? self::future() : self::past();
-        $this->seedSubscription($id, $endDate, $status);
+        $this->seedSubscription($id, $endsInFuture ? $this->future() : $this->past(), $status);
 
-        $this->assertSame($expected, premium_subscription_entitled(['status' => $status, 'end_date' => $endDate]));
+        $this->assertSame($expected, premium_subscription_entitled($this->rowOf($id)));
         $this->assertSame($expected, $this->sqlSaysEntitled($id));
+    }
+
+    public function test_a_row_read_without_the_entitlement_columns_is_refused_rather_than_judged_by_php_time(): void
+    {
+        $this->expectException(\LogicException::class);
+        premium_subscription_entitled(['status' => 'active', 'end_date' => '2099-01-01 00:00:00']);
     }
 
     public function test_a_failed_payment_still_inside_its_term_gets_premium_features_as_well_as_the_launch_check(): void
     {
         $id = 'PREM-ENTL-FAIL-AAAA-0001';
-        $this->seedSubscription($id, self::future(), 'payment_failed');
+        $this->seedSubscription($id, $this->future(), 'payment_failed');
         $key = $this->seedRedeemedKey(self::DEVICE, $id);
 
         $this->assertSame('valid', validate_license($key, self::DEVICE)['status']);
@@ -88,8 +105,9 @@ final class PremiumEntitlementTest extends DatabaseTestCase
 
     public function test_a_renewal_being_retried_keeps_premium_and_is_not_expired(): void
     {
+        // The renewal cron only retries active rows, so the row stays active through the last hour of its grace.
         $id = 'PREM-ENTL-RTRY-AAAA-0003';
-        $key = $this->autoRenewing($id, date('Y-m-d H:i:s', strtotime('-1 day')));
+        $key = $this->autoRenewing($id, $this->databaseTime(-71));
 
         $this->assertSame('valid', validate_license($key, self::DEVICE)['status']);
         $this->assertSame('premium', receipt_scan_quota_identity($this->pdo, $key, null)['tier'] ?? null);
@@ -97,21 +115,21 @@ final class PremiumEntitlementTest extends DatabaseTestCase
         $this->assertSame('active', $this->statusOf($id));
     }
 
-    public function test_a_renewal_past_its_grace_loses_premium_but_stays_active_for_the_cron(): void
+    public function test_a_renewal_past_its_grace_loses_premium_and_is_marked_expired(): void
     {
+        // A row the cron never handles, such as one with no stored card, would otherwise stay active for good.
         $id = 'PREM-ENTL-LATE-AAAA-0004';
-        $key = $this->autoRenewing($id, date('Y-m-d H:i:s', strtotime('-5 days')));
+        $key = $this->autoRenewing($id, $this->databaseTime(-73));
 
         $this->assertSame('expired', validate_license($key, self::DEVICE)['status']);
         $this->assertFalse($this->sqlSaysEntitled($id));
-        // The renewal cron only retries active rows, and the retry page only accepts payment_failed ones.
-        $this->assertSame('active', $this->statusOf($id));
+        $this->assertSame('expired', $this->statusOf($id));
     }
 
     public function test_a_failed_payment_past_its_term_loses_premium_but_can_still_be_retried(): void
     {
         $id = 'PREM-ENTL-GONE-AAAA-0005';
-        $key = $this->autoRenewing($id, date('Y-m-d H:i:s', strtotime('-1 day')), 'payment_failed');
+        $key = $this->autoRenewing($id, $this->past(), 'payment_failed');
 
         $this->assertSame('expired', validate_license($key, self::DEVICE)['status']);
         $this->assertFalse($this->sqlSaysEntitled($id));
@@ -121,7 +139,7 @@ final class PremiumEntitlementTest extends DatabaseTestCase
     public function test_a_subscription_that_does_not_renew_is_marked_expired_once_it_ends(): void
     {
         $id = 'PREM-ENTL-DONE-AAAA-0006';
-        $this->seedSubscription($id, date('Y-m-d H:i:s', strtotime('-1 day')));
+        $this->seedSubscription($id, $this->past());
         $key = $this->seedRedeemedKey(self::DEVICE, $id);
 
         $this->assertSame('expired', validate_license($key, self::DEVICE)['status']);
@@ -131,7 +149,7 @@ final class PremiumEntitlementTest extends DatabaseTestCase
     public function test_a_past_due_subscription_gets_neither(): void
     {
         $id = 'PREM-ENTL-PAST-AAAA-0002';
-        $this->seedSubscription($id, self::future(), 'past_due');
+        $this->seedSubscription($id, $this->future(), 'past_due');
         $key = $this->seedRedeemedKey(self::DEVICE, $id);
 
         $this->assertSame('expired', validate_license($key, self::DEVICE)['status']);

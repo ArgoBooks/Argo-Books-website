@@ -1,12 +1,16 @@
 <?php
 // Shared by process-subscription.php and check-active.php, so the PayPal button and the server agree on who already has Premium.
 
-/** The user's active, unexpired Premium subscription in this environment, or null. */
+require_once __DIR__ . '/../../../premium_entitlement.php';
+
+/** The user's active Premium subscription in this environment, counting one whose renewal is still being retried, or null. */
 function premium_active_subscription(PDO $pdo, int $userId): ?array
 {
+    // A renewal still being retried may yet charge the customer, so a second subscription then would bill them twice.
     $stmt = $pdo->prepare("
         SELECT * FROM premium_subscriptions
-        WHERE user_id = ? AND status = 'active' AND environment = ? AND end_date > NOW()
+        WHERE user_id = ? AND status = 'active' AND environment = ?
+        AND (end_date > NOW() OR " . premium_in_renewal_grace_sql() . ")
         ORDER BY created_at DESC LIMIT 1
     ");
     $stmt->execute([$userId, current_environment()]);
