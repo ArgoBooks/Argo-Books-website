@@ -53,9 +53,6 @@ $ua_users = []; // authId => aggregate
 // than sharing index.php's. See telemetry-dedupe.php for why duplicates exist.
 $ua_seenEventIds = [];
 
-// Surfaced under the filters rather than silently swallowed.
-$ua_duplicatesCollapsed = 0;
-
 // Installs whose premium came from another environment's subscription, counted so
 // the page can say they were left out rather than silently dropping them.
 $ua_otherEnvUsers = [];
@@ -137,7 +134,6 @@ foreach ($ua_files as $name => $path) {
         // A re-uploaded event is the same action, not a second one. This is what
         // stops a single tutorial skip rendering as three at the same timestamp.
         if (telemetry_is_duplicate_event($ev, $authId, $ua_seenEventIds)) {
-            $ua_duplicatesCollapsed++;
             continue;
         }
 
@@ -526,11 +522,9 @@ if (!function_exists('ua_fmt')) {
 
 /* Filter controls. Pagination itself is the shared admin TablePaginator. */
 .ua-controls { display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:1rem; }
-.ua-dupes { font-size:.78rem; color:#b45309; }
-[data-theme="dark"] .ua-dupes { color:#fbbf24; }
 .ua-input { padding:8px 10px; border:1px solid #d1d5db; border-radius:6px; font-size:.85rem; background:#fff; color:var(--admin-text); }
 .ua-input:focus { outline:none; border-color:#3b82f6; }
-#ua-search { flex:1; min-width:220px; }
+#ua-search { flex:0 1 320px; min-width:220px; }
 .ua-count { font-size:.8rem; color:#6b7280; margin-left:auto; white-space:nowrap; }
 .ua-noresults { color:#6b7280; font-size:.9rem; padding:1rem 0; }
 .ua-table { width:100%; border-collapse:collapse; }
@@ -572,16 +566,6 @@ if (!function_exists('ua_fmt')) {
            title="Every event from every user, in one file. Ignores the filters above.">Download all users (CSV)</a>
         <a class="ua-dl" href="download-user.php?all=1&amp;today=1"
            title="Everyone who has used the app today, with every event each of them has ever sent. Ignores the filters above.">Download today's users (CSV)</a>
-        <?php if ($ua_otherEnvUsers): ?>
-            <span class="ua-dupes" title="Premium installs whose subscription is not in this environment: a sandbox test redemption, or a subscription since deleted. Hidden here and everywhere else on this page.">
-                <?= count($ua_otherEnvUsers) ?> <?= htmlspecialchars($ua_otherEnvLabel) ?> install<?= count($ua_otherEnvUsers) === 1 ? '' : 's' ?> hidden
-            </span>
-        <?php endif; ?>
-        <?php if ($ua_duplicatesCollapsed > 0): ?>
-            <span class="ua-dupes" title="The same event uploaded more than once and collapsed by dataId. Should trend to zero as the client-side locking fix rolls out.">
-                <?= number_format($ua_duplicatesCollapsed) ?> duplicate event<?= $ua_duplicatesCollapsed === 1 ? '' : 's' ?> collapsed
-            </span>
-        <?php endif; ?>
     </div>
 
     <div class="table-responsive">
