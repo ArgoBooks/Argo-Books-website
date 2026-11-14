@@ -151,6 +151,7 @@ $rows = fn (?string $text, int $least = 6) => max($least, min(28, substr_count(w
 <style>
     .agent-card { border: 1px solid var(--gray-border); border-radius: 8px; padding: 14px 16px; margin-bottom: 14px; }
     .agent-card textarea, .agent-note textarea { width: 100%; min-height: 140px; resize: vertical; box-sizing: border-box; font: inherit; padding: 8px; border: 1px solid var(--gray-border); border-radius: 6px; background: transparent; color: inherit; }
+    .agent-card textarea.agent-fit { min-height: 0; overflow-y: hidden; }
     .agent-card input[type=text] { width: 100%; padding: 8px; border: 1px solid var(--gray-border); border-radius: 6px; background: transparent; color: inherit; }
     .agent-limits { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px 16px; align-items: end; }
     .agent-log { max-height: 70vh; overflow-y: auto; }
@@ -214,7 +215,7 @@ $rows = fn (?string $text, int $least = 6) => max($least, min(28, substr_count(w
                     </div>
                     <div class="agent-meta">Why this business: <?= $h($p['why'] ?? '') ?></div>
                     <input type="text" name="subject" value="<?= $h($p['subject'] ?? '') ?>">
-                    <textarea name="body" rows="<?= $rows($p['body'] ?? '', 9) ?>" style="margin-top:8px;"><?= $h($p['body'] ?? '') ?></textarea>
+                    <textarea name="body" class="agent-fit" rows="<?= $rows($p['body'] ?? '', 1) ?>" style="margin-top:8px;"><?= $h($p['body'] ?? '') ?></textarea>
                 <?php endif; ?>
                 <div class="agent-meta">Where its claims come from: <?= $h(implode(' | ', $p['sources'] ?? [])) ?></div>
                 <div class="agent-row">
@@ -422,6 +423,23 @@ $rows = fn (?string $text, int $least = 6) => max($least, min(28, substr_count(w
             });
         });
     });
+
+    // The box grows to the text it holds, so a short email has no empty space under it.
+    function fitEmailBoxes() {
+        document.querySelectorAll('textarea.agent-fit').forEach(function (box) {
+            if (box.offsetParent === null) return;
+            box.style.height = 'auto';
+            box.style.height = (box.scrollHeight + box.offsetHeight - box.clientHeight) + 'px';
+        });
+    }
+    document.querySelectorAll('textarea.agent-fit').forEach(function (box) {
+        box.addEventListener('input', fitEmailBoxes);
+    });
+    document.querySelectorAll('.section-tab').forEach(function (tab) {
+        tab.addEventListener('click', function () { setTimeout(fitEmailBoxes, 0); });
+    });
+    window.addEventListener('resize', fitEmailBoxes);
+    fitEmailBoxes();
 </script>
 
         </main>
