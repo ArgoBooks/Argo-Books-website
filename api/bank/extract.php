@@ -30,6 +30,8 @@ set_portal_headers();
 require_method(['POST']);
 
 const BS_MAX_BYTES = 15 * 1024 * 1024; // 15 MB upload ceiling
+// Thinking shares this allowance with the answer, and the app stops waiting after 120 seconds, which is about this many tokens.
+const BS_MAX_OUTPUT_TOKENS = 32768;
 
 // --- 1. Auth: a licence, or the device id for the free tier ---
 // The app offers PDF import to free users inside their monthly allowance.
@@ -113,17 +115,11 @@ if (!bs_wait_active($geminiKey, $fileName, $pollCount)) {
 // --- 6. Ask the model to extract the rows. ---
 $extractElapsedMs = null;
 $extractUsage = null;
-$content = bs_call_gemini($geminiKey, $model, $fileName, $extractElapsedMs, $extractUsage);
+$finishReason = null;
+$content = bs_call_gemini($geminiKey, $model, $fileName, $extractElapsedMs, $extractUsage, $finishReason);
 bs_delete_file($geminiKey, $fileName); // store nothing past this point
 
-if ($content === null) {
-    send_error_response(502, 'The extraction service had trouble reading that PDF.', 'UPSTREAM_ERROR');
-}
-
-$lines = bs_normalize_lines($content);
-
-// Record the server-measured timing (best-effort; never breaks the response).
-ai_timing_record([
+$timing = [
     'operation' => 'bank_pdf_extract',
     'model' => $model,
     'size_feature' => strlen($pdfBytes),
@@ -133,14 +129,30 @@ ai_timing_record([
     'prompt_tokens' => $extractUsage['promptTokenCount'] ?? null,
     'output_tokens' => $extractUsage['candidatesTokenCount'] ?? null,
     'thought_tokens' => $extractUsage['thoughtsTokenCount'] ?? null,
-    'max_output_tokens' => 16000,
-    'finish_reason' => 'STOP',
+    'max_output_tokens' => BS_MAX_OUTPUT_TOKENS,
+    'finish_reason' => $finishReason,
     'elapsed_ms' => $extractElapsedMs ?? 0,
     'poll_count' => $pollCount,
-    'success' => true,
     'caller' => $rateLimitId,
     'tier' => $license ? 'premium' : 'free',
-]);
+];
+
+// An answer cut off at the token limit is half-written JSON, which would otherwise read as a statement with no transactions.
+if ($content !== null && $finishReason === 'MAX_TOKENS') {
+    ai_timing_record($timing + ['success' => false]);
+    send_error_response(422, 'This statement is too long to read in one go. Try splitting it into smaller files, such as one month each.', 'TOO_LONG');
+}
+if ($content === null || ($finishReason !== null && $finishReason !== 'STOP')) {
+    if ($extractElapsedMs !== null) {
+        ai_timing_record($timing + ['success' => false]);
+    }
+    send_error_response(502, 'The extraction service had trouble reading that PDF.', 'UPSTREAM_ERROR');
+}
+
+$lines = bs_normalize_lines($content);
+
+// Record the server-measured timing (best-effort; never breaks the response).
+ai_timing_record($timing + ['success' => true]);
 
 // A valid-but-empty result (no transactions found) is still success: the client
 // shows its own "no transactions" message. Hard failures returned errors above.
@@ -248,10 +260,10 @@ function bs_delete_file(string $geminiKey, string $fileName): void
 
 /**
  * Calls Gemini generateContent referencing the uploaded PDF. Returns the JSON text or null.
- * Reports the server-measured wall time (ms) and Gemini usageMetadata via by-ref params
- * for the timing priors.
+ * Reports the server-measured wall time (ms), Gemini usageMetadata and the finish reason
+ * via by-ref params.
  */
-function bs_call_gemini(string $geminiKey, string $model, string $fileName, ?int &$elapsedMs = null, ?array &$usage = null): ?string
+function bs_call_gemini(string $geminiKey, string $model, string $fileName, ?int &$elapsedMs = null, ?array &$usage = null, ?string &$finishReason = null): ?string
 {
     $fileUri = "https://generativelanguage.googleapis.com/v1beta/{$fileName}";
 
@@ -288,7 +300,7 @@ PROMPT;
         'system_instruction' => ['parts' => [['text' => $system]]],
         'generationConfig' => [
             'temperature' => 0.0,
-            'maxOutputTokens' => 16000,
+            'maxOutputTokens' => BS_MAX_OUTPUT_TOKENS,
             'responseMimeType' => 'application/json',
         ],
     ];
@@ -316,9 +328,9 @@ PROMPT;
     $candidate = $data['candidates'][0] ?? [];
     // gemini-2.5-flash spends hidden "thinking" tokens out of maxOutputTokens; log any
     // non-STOP finish so truncation on a very long statement is visible, not silent.
-    $finish = $candidate['finishReason'] ?? null;
-    if ($finish !== null && $finish !== 'STOP') {
-        error_log('[bank-extract] non-STOP finishReason=' . $finish);
+    $finishReason = $candidate['finishReason'] ?? null;
+    if ($finishReason !== null && $finishReason !== 'STOP') {
+        error_log('[bank-extract] non-STOP finishReason=' . $finishReason);
     }
     return $candidate['content']['parts'][0]['text'] ?? null;
 }
