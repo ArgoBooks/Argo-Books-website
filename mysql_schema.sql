@@ -1429,6 +1429,8 @@ CREATE TABLE IF NOT EXISTS ai_call_timings (
     elapsed_ms INT NOT NULL COMMENT 'Server-measured Gemini generate wall time',
     poll_count INT DEFAULT NULL COMMENT 'PDF Files-API polls until ACTIVE',
     success TINYINT(1) NOT NULL DEFAULT 1,
+    check_result VARCHAR(20) DEFAULT NULL COMMENT 'Bank statements: balanced, fixed, off or unchecked against the printed balances',
+    check_gap DECIMAL(14,2) DEFAULT NULL COMMENT 'Closing balance minus what the rows come to',
     app_platform VARCHAR(20) DEFAULT NULL,
     caller VARCHAR(16) DEFAULT NULL COMMENT 'Start of the license key hash or device id hash, as the AI rate limit uses',
     tier ENUM('free','premium') DEFAULT NULL,

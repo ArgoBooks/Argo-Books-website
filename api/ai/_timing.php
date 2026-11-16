@@ -36,8 +36,8 @@ function ai_timing_record(array $row): void
             "INSERT INTO ai_call_timings
                 (operation, model, size_feature, page_count, input_bytes, mime,
                  prompt_tokens, output_tokens, thought_tokens, max_output_tokens, finish_reason,
-                 elapsed_ms, poll_count, success, app_platform, caller, tier, environment)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+                 elapsed_ms, poll_count, success, check_result, check_gap, app_platform, caller, tier, environment)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
         );
         $stmt->execute([
             substr((string) $row['operation'], 0, 40),
@@ -54,6 +54,8 @@ function ai_timing_record(array $row): void
             (int) $row['elapsed_ms'],
             ai_timing_int($row['poll_count'] ?? null),
             !empty($row['success']) ? 1 : 0,
+            isset($row['check_result']) ? substr((string) $row['check_result'], 0, 20) : null,
+            isset($row['check_gap']) && is_numeric($row['check_gap']) ? round((float) $row['check_gap'], 2) : null,
             isset($row['app_platform']) ? substr((string) $row['app_platform'], 0, 20) : null,
             isset($row['caller']) ? substr((string) $row['caller'], 0, 16) : null,
             in_array($row['tier'] ?? null, ['free', 'premium'], true) ? $row['tier'] : null,

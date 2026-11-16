@@ -28,7 +28,8 @@ Turns a spreadsheet of any layout into the company's records. One import can mak
 
 Reads bank statements and suggests what each line is.
 
-- **Read a PDF or photo:** sends the statement to `/api/bank/extract.php` and gets back its transactions. Counts as one bank import.
+- **Read a PDF or photo:** sends the statement to `/api/bank/extract.php` and gets back its transactions and the opening and closing balances it prints. Counts as one bank import.
+- **Read it again:** sends the statement again with the transactions found so far, only when they don't add up to the closing balance and the app will still be waiting. Not counted against the limit.
 - **Map unknown columns:** for a CSV or Excel file whose headers aren't recognized, the same column mapping call as the spreadsheet import.
 - **Categorize lines:** one call per 40 lines, suggesting a product, category and supplier or customer for each.
 

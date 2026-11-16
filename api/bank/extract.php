@@ -10,20 +10,25 @@
  * the monthly AI import allowance, which the desktop app checks and counts around it.
  * Stores nothing past the request. The Gemini API key lives server-side.
  *
+ * The rows are checked against the opening and closing balances the statement prints. When
+ * they don't add up and the app will still be waiting, the model is asked to look again.
+ *
  * Response shape (consumed by PdfStatementExtractor.ParseRows in the desktop app):
- *   { "success": true, "lines": [ { "date": "YYYY-MM-DD", "description": "...", "amount": -12.34 } ] }
+ *   { "success": true, "lines": [ { "date": "YYYY-MM-DD", "description": "...", "amount": -12.34 } ],
+ *     "check": { "status": "balanced|fixed|off|unchecked", "gap": 0.00 } }
  *
  * Mirrors the proven PDF upload/poll/generate/cleanup flow in api/ai/completions.php.
  */
 
 require_once __DIR__ . '/../portal/portal-helper.php';
 require_once __DIR__ . '/../ai/_timing.php';
+require_once __DIR__ . '/_statement_check.php';
 
 require_once __DIR__ . '/../../vendor/autoload.php';
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../../');
 $dotenv->safeLoad();
 
-@set_time_limit(180);
+@set_time_limit(300);
 ignore_user_abort(true);
 
 set_portal_headers();
@@ -32,6 +37,7 @@ require_method(['POST']);
 const BS_MAX_BYTES = 15 * 1024 * 1024; // 15 MB upload ceiling
 // Thinking shares this allowance with the answer, and the app stops waiting after 120 seconds, which is about this many tokens.
 const BS_MAX_OUTPUT_TOKENS = 32768;
+const BS_MIN_SECONDS_FOR_SECOND_PASS = 45;
 
 // --- 1. Auth: a licence, or the device id for the free tier ---
 // The app offers PDF import to free users inside their monthly allowance.
@@ -113,56 +119,80 @@ if (!bs_wait_active($geminiKey, $fileName, $pollCount)) {
 }
 
 // --- 6. Ask the model to extract the rows. ---
-$extractElapsedMs = null;
-$extractUsage = null;
-$finishReason = null;
-$content = bs_call_gemini($geminiKey, $model, $fileName, $extractElapsedMs, $extractUsage, $finishReason);
-bs_delete_file($geminiKey, $fileName); // store nothing past this point
+// The app says how long it waits for an answer. Versions before 2.0.24 don't, and wait 120 seconds.
+$clientWaitSeconds = max(60, min(290, (int) ($_POST['waitSeconds'] ?? 120)));
+$requestStart = (float) ($_SERVER['REQUEST_TIME_FLOAT'] ?? microtime(true));
 
-$timing = [
-    'operation' => 'bank_pdf_extract',
+$first = bs_call_gemini($geminiKey, $model, $fileName, bs_extract_prompt(), bs_seconds_left($requestStart, $clientWaitSeconds));
+
+$timingBase = [
     'model' => $model,
     'size_feature' => strlen($pdfBytes),
     'page_count' => $pageCount,
     'input_bytes' => strlen($pdfBytes),
     'mime' => 'application/pdf',
-    'prompt_tokens' => $extractUsage['promptTokenCount'] ?? null,
-    'output_tokens' => $extractUsage['candidatesTokenCount'] ?? null,
-    'thought_tokens' => $extractUsage['thoughtsTokenCount'] ?? null,
     'max_output_tokens' => BS_MAX_OUTPUT_TOKENS,
-    'finish_reason' => $finishReason,
-    'elapsed_ms' => $extractElapsedMs ?? 0,
     'poll_count' => $pollCount,
     'caller' => $rateLimitId,
     'tier' => $license ? 'premium' : 'free',
 ];
+$firstTiming = ['operation' => 'bank_pdf_extract'] + bs_timing_fields($first) + $timingBase;
 
 // An answer cut off at the token limit is half-written JSON, which would otherwise read as a statement with no transactions.
-if ($content !== null && $finishReason === 'MAX_TOKENS') {
-    ai_timing_record($timing + ['success' => false]);
+if ($first['content'] !== null && $first['finish'] === 'MAX_TOKENS') {
+    bs_delete_file($geminiKey, $fileName);
+    ai_timing_record($firstTiming + ['success' => false]);
     send_error_response(422, 'This statement is too long to read in one go. Try splitting it into smaller files, such as one month each.', 'TOO_LONG');
 }
-if ($content === null || ($finishReason !== null && $finishReason !== 'STOP')) {
-    if ($extractElapsedMs !== null) {
-        ai_timing_record($timing + ['success' => false]);
+if ($first['content'] === null || ($first['finish'] !== null && $first['finish'] !== 'STOP')) {
+    bs_delete_file($geminiKey, $fileName);
+    if ($first['elapsed_ms'] !== null) {
+        ai_timing_record($firstTiming + ['success' => false]);
     }
     send_error_response(502, 'The extraction service had trouble reading that PDF.', 'UPSTREAM_ERROR');
 }
 
-$lines = bs_normalize_lines($content);
+$parsed = bs_parse_statement($first['content']);
+$check = bs_check_balance($parsed);
+$checkStatus = $check['status'];
+$lines = $parsed['lines'];
 
-// Record the server-measured timing (best-effort; never breaks the response).
-ai_timing_record($timing + ['success' => true]);
+// A second look takes about as long as the first, so it runs only when the app will still be waiting for the answer.
+$secondsLeft = bs_seconds_left($requestStart, $clientWaitSeconds);
+if ($check['status'] === 'off' && $secondsLeft >= BS_MIN_SECONDS_FOR_SECOND_PASS) {
+    $second = bs_call_gemini($geminiKey, $model, $fileName, bs_verify_prompt($parsed, $check['gap']), $secondsLeft);
+    $secondParsed = $second['content'] !== null && $second['finish'] === 'STOP' ? bs_parse_statement($second['content']) : null;
+    $secondCheck = $secondParsed !== null && $secondParsed['lines'] !== [] ? bs_check_balance($secondParsed) : null;
+
+    ai_timing_record(['operation' => 'bank_pdf_verify'] + bs_timing_fields($second) + $timingBase + [
+        'success' => $secondCheck !== null,
+        'check_result' => $secondCheck['status'] ?? null,
+        'check_gap' => $secondCheck['gap'] ?? null,
+    ]);
+
+    if ($secondCheck !== null && $secondCheck['status'] === 'balanced') {
+        $lines = $secondParsed['lines'];
+        $check = $secondCheck;
+        $checkStatus = 'fixed';
+    } elseif ($secondCheck !== null && $secondCheck['status'] === 'off' && abs($secondCheck['gap']) < abs($check['gap'])) {
+        $lines = $secondParsed['lines'];
+        $check = $secondCheck;
+    }
+}
+bs_delete_file($geminiKey, $fileName); // store nothing past this point
+
+ai_timing_record($firstTiming + ['success' => true, 'check_result' => $checkStatus, 'check_gap' => $check['gap']]);
 
 // A valid-but-empty result (no transactions found) is still success: the client
 // shows its own "no transactions" message. Hard failures returned errors above.
 send_json_response(200, [
     'success' => true,
     'lines' => $lines,
+    'check' => ['status' => $checkStatus, 'gap' => $check['gap']],
     'timing' => [
-        'elapsed_ms' => $extractElapsedMs ?? 0,
-        'prompt_tokens' => $extractUsage['promptTokenCount'] ?? 0,
-        'output_tokens' => $extractUsage['candidatesTokenCount'] ?? 0,
+        'elapsed_ms' => $first['elapsed_ms'] ?? 0,
+        'prompt_tokens' => $first['usage']['promptTokenCount'] ?? 0,
+        'output_tokens' => $first['usage']['candidatesTokenCount'] ?? 0,
         'load_factor' => ai_timing_load_factor(),
     ],
     'timestamp' => date('c'),
@@ -258,22 +288,31 @@ function bs_delete_file(string $geminiKey, string $fileName): void
     curl_exec($ch);
 }
 
-/**
- * Calls Gemini generateContent referencing the uploaded PDF. Returns the JSON text or null.
- * Reports the server-measured wall time (ms), Gemini usageMetadata and the finish reason
- * via by-ref params.
- */
-function bs_call_gemini(string $geminiKey, string $model, string $fileName, ?int &$elapsedMs = null, ?array &$usage = null, ?string &$finishReason = null): ?string
+/** Seconds until the app stops waiting, keeping a few back to send the answer. */
+function bs_seconds_left(float $requestStart, int $clientWaitSeconds): int
 {
-    $fileUri = "https://generativelanguage.googleapis.com/v1beta/{$fileName}";
+    return (int) floor($clientWaitSeconds - 5 - (microtime(true) - $requestStart));
+}
 
-    $system = 'You extract transactions from a bank or credit-card statement PDF. '
-        . 'Always respond with valid JSON only, no markdown, matching the requested schema.';
+/** The timing columns for one Gemini call. */
+function bs_timing_fields(array $call): array
+{
+    return [
+        'prompt_tokens' => $call['usage']['promptTokenCount'] ?? null,
+        'output_tokens' => $call['usage']['candidatesTokenCount'] ?? null,
+        'thought_tokens' => $call['usage']['thoughtsTokenCount'] ?? null,
+        'finish_reason' => $call['finish'],
+        'elapsed_ms' => $call['elapsed_ms'] ?? 0,
+    ];
+}
 
-    $prompt = <<<'PROMPT'
+function bs_extract_prompt(): string
+{
+    return <<<'PROMPT'
 Extract every transaction row from this statement. Return JSON of this exact shape:
 
-{ "lines": [ { "date": "YYYY-MM-DD", "description": "string", "amount": number } ] }
+{ "openingBalance": number or null, "closingBalance": number or null, "creditCard": boolean,
+  "accountCount": number, "lines": [ { "date": "YYYY-MM-DD", "description": "string", "amount": number } ] }
 
 Rules:
 - One object per real transaction. SKIP headers, column labels, page numbers, and
@@ -286,8 +325,58 @@ Rules:
 - "date" must be ISO format YYYY-MM-DD. If a row omits the year, infer it from the
   statement period. If a date cannot be determined, omit that row.
 - "description" is the transaction narrative, trimmed of extra whitespace.
+- "openingBalance" and "closingBalance" are the balances the statement prints for the
+  start and end of the period, such as "Balance forward" or "Beginning balance" and
+  "Ending balance" or "Closing balance". Copy them as printed, and use null when the
+  statement does not print one. An overdrawn balance is negative.
+- "creditCard" is true for a credit card statement, where the balance is the amount owed.
+- "accountCount" is how many separate accounts have transactions listed in this document.
 - If the document contains no transactions, return { "lines": [] }.
 PROMPT;
+}
+
+/** Asks for the rows again, telling the model how far its first list is from the printed closing balance. */
+function bs_verify_prompt(array $parsed, float $gap): string
+{
+    $rows = json_encode(['lines' => $parsed['lines']], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    $opening = number_format((float) $parsed['opening'], 2, '.', '');
+    $closing = number_format((float) $parsed['closing'], 2, '.', '');
+    $gapText = number_format(abs($gap), 2, '.', '');
+    $formula = $parsed['credit_card']
+        ? 'The opening balance minus the sum of the amounts'
+        : 'The opening balance plus the sum of the amounts';
+
+    return <<<PROMPT
+These transactions were extracted from this statement, but they do not add up. {$formula}
+should equal the closing balance of {$closing}, starting from the opening balance of {$opening},
+and it is {$gapText} away from it.
+
+{$rows}
+
+Go through the statement again, page by page. Find transactions that are missing, listed twice,
+have the wrong amount, or have money in and money out the wrong way round. Return the complete
+corrected list in this exact JSON shape:
+
+{ "openingBalance": number or null, "closingBalance": number or null, "creditCard": boolean,
+  "accountCount": number, "lines": [ { "date": "YYYY-MM-DD", "description": "string", "amount": number } ] }
+
+Money IN is POSITIVE and money OUT is NEGATIVE. Skip opening balance, closing balance, total and
+subtotal rows.
+PROMPT;
+}
+
+/**
+ * Calls Gemini generateContent referencing the uploaded PDF.
+ *
+ * @return array{content: ?string, finish: ?string, elapsed_ms: ?int, usage: ?array}
+ */
+function bs_call_gemini(string $geminiKey, string $model, string $fileName, string $prompt, int $timeoutSeconds): array
+{
+    $result = ['content' => null, 'finish' => null, 'elapsed_ms' => null, 'usage' => null];
+    $fileUri = "https://generativelanguage.googleapis.com/v1beta/{$fileName}";
+
+    $system = 'You extract transactions from a bank or credit-card statement PDF. '
+        . 'Always respond with valid JSON only, no markdown, matching the requested schema.';
 
     $payload = [
         'contents' => [[
@@ -312,71 +401,26 @@ PROMPT;
         CURLOPT_POST => true,
         CURLOPT_POSTFIELDS => json_encode($payload),
         CURLOPT_HTTPHEADER => ["x-goog-api-key: {$geminiKey}", 'Content-Type: application/json'],
-        CURLOPT_TIMEOUT => 120,
+        CURLOPT_TIMEOUT => max(10, $timeoutSeconds),
         CURLOPT_CONNECTTIMEOUT => 10,
     ]);
     $t0 = microtime(true);
     $resp = curl_exec($ch);
-    $elapsedMs = (int) round((microtime(true) - $t0) * 1000);
+    $result['elapsed_ms'] = (int) round((microtime(true) - $t0) * 1000);
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     if ($resp === false || $httpCode !== 200) {
         error_log('[bank-extract] Gemini error ' . $httpCode . ': ' . substr((string)$resp, 0, 500));
-        return null;
+        return $result;
     }
     $data = json_decode($resp, true);
-    $usage = $data['usageMetadata'] ?? null;
+    $result['usage'] = $data['usageMetadata'] ?? null;
     $candidate = $data['candidates'][0] ?? [];
-    // gemini-2.5-flash spends hidden "thinking" tokens out of maxOutputTokens; log any
-    // non-STOP finish so truncation on a very long statement is visible, not silent.
-    $finishReason = $candidate['finishReason'] ?? null;
-    if ($finishReason !== null && $finishReason !== 'STOP') {
-        error_log('[bank-extract] non-STOP finishReason=' . $finishReason);
+    $result['finish'] = $candidate['finishReason'] ?? null;
+    if ($result['finish'] !== null && $result['finish'] !== 'STOP') {
+        error_log('[bank-extract] non-STOP finishReason=' . $result['finish']);
     }
-    return $candidate['content']['parts'][0]['text'] ?? null;
-}
-
-/**
- * Parses the model's JSON content into clean line rows. Tolerant of a bare array,
- * a { "lines": [...] } wrapper, and string amounts. Returns a list of
- * [ 'date' => 'YYYY-MM-DD', 'description' => string, 'amount' => float ].
- */
-function bs_normalize_lines(string $content): array
-{
-    $decoded = json_decode($content, true);
-    if (!is_array($decoded)) {
-        return [];
-    }
-    $rows = $decoded['lines'] ?? (array_is_list($decoded) ? $decoded : []);
-    if (!is_array($rows)) {
-        return [];
-    }
-
-    $out = [];
-    foreach ($rows as $row) {
-        if (!is_array($row)) {
-            continue;
-        }
-        $desc = trim((string)($row['description'] ?? ''));
-        $rawAmount = $row['amount'] ?? null;
-        if ($rawAmount === null || !is_numeric($rawAmount)) {
-            continue; // a row with no usable amount is not a transaction
-        }
-        $amount = (float)$rawAmount;
-
-        $date = trim((string)($row['date'] ?? ''));
-        $ts = $date !== '' ? strtotime($date) : false;
-        $isoDate = $ts !== false ? date('Y-m-d', $ts) : '';
-
-        if ($desc === '' && $isoDate === '') {
-            continue;
-        }
-        $out[] = [
-            'date' => $isoDate,
-            'description' => $desc,
-            'amount' => $amount,
-        ];
-    }
-    return $out;
+    $result['content'] = $candidate['content']['parts'][0]['text'] ?? null;
+    return $result;
 }
 
 /**
