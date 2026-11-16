@@ -53,6 +53,8 @@ const TELEMETRY_FEATURE_NAMES = [
     'SalesTaxFiled',
     // What happened to a scanned receipt, with the fields corrected before saving in the context
     'ReceiptScanSaved', 'ReceiptScanDiscarded',
+    // How well a scan or import read: its own check against printed totals, then what the user changed or threw out
+    'ImportChecked', 'ImportedRecordCorrected', 'ImportedRecordDeleted', 'ImportRowsUnticked', 'ImportedLineIgnored',
     // The paywall
     'UpgradePromptShown', 'UpgradeModalOpened', 'LicenseKeyRedeemed',
     // Payroll
