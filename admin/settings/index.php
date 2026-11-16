@@ -257,14 +257,14 @@ include __DIR__ . '/../admin_header.php';
                 <div class="settings-card-head">
                     <div>
                         <h2>Trusted Devices</h2>
-                        <p class="settings-muted">Browsers allowed to skip the 2FA code for 30 days.</p>
+                        <p class="settings-muted">Browsers that stay signed in for 30 days.</p>
                     </div>
                 </div>
                 <p>
                     <?php if ($trusted_count === 0): ?>
-                        No trusted devices right now. Tick "Trust this device" at sign-in to add one.
+                        No trusted devices right now. Tick "Keep me signed in" at sign-in to add one.
                     <?php else: ?>
-                        <?= (int)$trusted_count ?> device<?= $trusted_count === 1 ? '' : 's' ?> can currently skip the code.
+                        <?= (int)$trusted_count ?> device<?= $trusted_count === 1 ? '' : 's' ?> currently signed in.
                     <?php endif; ?>
                 </p>
                 <div class="settings-center">

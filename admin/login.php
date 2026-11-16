@@ -64,7 +64,7 @@ if (isset($_SESSION['awaiting_2fa']) && $_SESSION['awaiting_2fa'] === true) {
                     rate_limit_clear('admin_2fa', $clientIp);
                     rate_limit_clear('admin_login', $clientIp);
 
-                    // A ticked "trust this device" box issues a token so later logins from this browser skip TOTP, with the password still required.
+                    // A ticked "keep me signed in" box issues a token that keeps this browser signed in for 30 days.
                     if (!empty($_POST['trust_device'])) {
                         $u = get_user_by_username($username);
                         if ($u) {
@@ -112,7 +112,7 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
             $actual_username = $user['username']; // Get actual username with correct case
 
             if (is_2fa_enabled($actual_username)) {
-                // The password was verified above, so a valid trust-this-device cookie skips the TOTP step; the cookie alone never grants access.
+                // The password was verified above, so a valid trust cookie skips the TOTP step.
                 $trusted_for = verify_trusted_device_cookie($clientIp);
                 if ($trusted_for !== null && strcasecmp($trusted_for, $actual_username) === 0) {
                     session_regenerate_id(true);
@@ -218,7 +218,7 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
                 <div class="form-group trust-device-group">
                     <label class="trust-device-label">
                         <input type="checkbox" id="trust_device" name="trust_device" value="1">
-                        Trust this device for 30 days
+                        Keep me signed in on this device for 30 days
                     </label>
                 </div>
 

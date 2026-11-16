@@ -10,7 +10,7 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
 }
 
 $page_title = 'Trusted Devices';
-$page_description = 'Devices that can skip the 2FA code on this account. Revoke any device that is no longer yours.';
+$page_description = 'Browsers that stay signed in to this account. Revoke any device that is no longer yours.';
 
 $username = $_SESSION['admin_username'];
 $user = get_user_by_username($username);
@@ -64,11 +64,11 @@ include __DIR__ . '/../admin_header.php';
     <?php if (empty($devices)): ?>
         <div class="center">
             <h2>No trusted devices</h2>
-            <p>When you sign in, tick "Trust this device for 30 days" to skip the verification code on this browser for 30 days.</p>
+            <p>When you sign in, tick "Keep me signed in on this device for 30 days" to stay signed in on this browser for 30 days.</p>
         </div>
     <?php else: ?>
         <div class="center" style="margin-bottom: 16px;">
-            <form method="post" style="display: inline;" onsubmit="return confirm('Revoke ALL trusted devices? You will need to enter a 2FA code on every device next time you sign in.');">
+            <form method="post" style="display: inline;" onsubmit="return confirm('Revoke ALL trusted devices? Every device will need to sign in again, with the password and a 2FA code.');">
                 <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf) ?>">
                 <button type="submit" name="revoke_all" value="1" class="btn btn-red">Revoke all trusted devices</button>
             </form>
@@ -100,7 +100,7 @@ include __DIR__ . '/../admin_header.php';
                             <td><?= htmlspecialchars(date('Y-m-d H:i', strtotime($d['last_used_at']))) ?></td>
                             <td><?= htmlspecialchars(date('Y-m-d', strtotime($d['expires_at']))) ?></td>
                             <td>
-                                <form method="post" style="display: inline;" onsubmit="return confirm('Revoke this device? You will need to enter a 2FA code from this browser next time.');">
+                                <form method="post" style="display: inline;" onsubmit="return confirm('Revoke this device? It will need to sign in again, with the password and a 2FA code.');">
                                     <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf) ?>">
                                     <input type="hidden" name="revoke_id" value="<?= (int)$d['id'] ?>">
                                     <button type="submit" class="btn btn-small btn-red">Revoke</button>

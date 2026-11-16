@@ -1,7 +1,7 @@
 <?php
 /**
- * Trusted device helpers: let an admin skip the TOTP step on devices they've
- * opted in on, for 30 days. The password step is always still required.
+ * Trusted device helpers: an admin who ticks the box at a full sign-in (password and
+ * TOTP) stays signed in on that browser for 30 days. Signing out forgets the browser.
  *
  * Storage uses a split-token pattern (selector + validator), the same approach
  * Symfony and Spring Security use for "remember me":
@@ -150,6 +150,22 @@ function revoke_all_trusted_devices($user_id)
         error_log('revoke_all_trusted_devices failed: ' . $e->getMessage());
         return 0;
     }
+}
+
+/** Forgets the browser this request came from, so signing out there means signing in again. */
+function revoke_current_trusted_device()
+{
+    global $pdo;
+    $raw = $_COOKIE[ADMIN_TRUST_COOKIE] ?? '';
+    $selector = is_string($raw) ? explode('.', $raw, 2)[0] : '';
+    if (preg_match('/^[a-f0-9]{16}$/', $selector)) {
+        try {
+            $pdo->prepare('DELETE FROM admin_trusted_devices WHERE selector = ?')->execute([$selector]);
+        } catch (Throwable $e) {
+            error_log('revoke_current_trusted_device failed: ' . $e->getMessage());
+        }
+    }
+    clear_trusted_device_cookie();
 }
 
 /** Expire the cookie on the client. Safe to call even if no cookie is set. */

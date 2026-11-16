@@ -56,6 +56,19 @@ session_set_cookie_params([
 
 session_start();
 
+// A browser trusted at a full sign-in stays signed in for the 30 days the trust lasts, however often the session itself ends.
+if (empty($_SESSION['admin_logged_in']) && !empty($_COOKIE['admin_trust_token'])) {
+    require_once __DIR__ . '/trusted_devices.php';
+    require_once __DIR__ . '/../rate_limit_helper.php';
+    $trusted_username = verify_trusted_device_cookie(get_client_ip());
+    if ($trusted_username !== null) {
+        session_regenerate_id(true);
+        unset($_SESSION['awaiting_2fa'], $_SESSION['temp_username']);
+        $_SESSION['admin_logged_in'] = true;
+        $_SESSION['admin_username'] = $trusted_username;
+    }
+}
+
 // Remembers the admin page being asked for so login can return there, skipping the login and logout endpoints and anything that is not a GET.
 $admin_request_uri = $_SERVER['REQUEST_URI'] ?? '';
 if ($admin_request_uri !== ''
