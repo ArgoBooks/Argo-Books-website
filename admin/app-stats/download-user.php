@@ -166,7 +166,7 @@ function ua_rows_for_user(array $files, string $authId, array &$seen, bool &$mat
             'tier'        => $d['tier'] ?? 'premium',
             'app_version' => $d['appVersion'] ?? '',
             'platform'    => telemetry_os_name((string) ($d['platform'] ?? ''), $d['osVersion'] ?? null),
-            'country'     => country_name($geo['country'] ?? ''),
+            'country'     => geo_country_name($geo),
             'region'      => $geo['region'] ?? '',
             'timezone'    => $geo['timezone'] ?? '',
         ];

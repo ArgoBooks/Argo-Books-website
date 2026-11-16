@@ -7,6 +7,7 @@ require_once __DIR__ . '/../portal/portal-helper.php';
 require_once __DIR__ . '/telemetry_filter.php';
 // Provides lookup_country_for_ip(): DB-cached + ipinfo.io fallback.
 require_once __DIR__ . '/../../track_referral_event.php';
+require_once __DIR__ . '/../../country_names.php';
 
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../../');
 $dotenv->load();
@@ -93,27 +94,6 @@ function checkRateLimit(string $authIdentifier, string $limitName, ?string $ipLi
 }
 
 /**
- * Map a 2-letter ISO country code to a full country name. Falls back to the
- * code itself when not in the map. Mirrors the table used in
- * admin/referral-links/index.php so admin pages render consistent names.
- */
-function telemetry_country_name_from_code(?string $code): ?string
-{
-    if (empty($code)) return null;
-    static $map = [
-        'US' => 'United States', 'CA' => 'Canada', 'GB' => 'United Kingdom',
-        'AU' => 'Australia', 'DE' => 'Germany', 'FR' => 'France', 'JP' => 'Japan',
-        'CN' => 'China', 'IN' => 'India', 'BR' => 'Brazil', 'MX' => 'Mexico',
-        'IT' => 'Italy', 'ES' => 'Spain', 'NL' => 'Netherlands', 'SE' => 'Sweden',
-        'CH' => 'Switzerland', 'PL' => 'Poland', 'BE' => 'Belgium', 'NO' => 'Norway',
-        'AT' => 'Austria', 'DK' => 'Denmark', 'FI' => 'Finland', 'IE' => 'Ireland',
-        'NZ' => 'New Zealand', 'SG' => 'Singapore', 'HK' => 'Hong Kong', 'KR' => 'South Korea',
-        'RU' => 'Russia', 'ZA' => 'South Africa', 'AR' => 'Argentina', 'CL' => 'Chile',
-    ];
-    return $map[strtoupper($code)] ?? $code;
-}
-
-/**
  * Backfill geoLocation when the desktop app couldn't resolve it client-side
  * (firewall, rate limiting, etc). Reuses the website's lookup_country_for_ip()
  * so a single shared IP lookup serves both the funnel tracker and telemetry.
@@ -127,15 +107,20 @@ function backfill_geolocation_from_request(array $payload): array
         return $payload;
     }
 
+    // Some of the app's lookups give a country code and no name, and the code is enough without asking for the IP again.
+    if (is_array($existing) && geo_country_name($existing) !== '') {
+        $payload['geoLocation']['country'] = geo_country_name($existing);
+        return $payload;
+    }
+
     $ip = $_SERVER['REMOTE_ADDR'] ?? null;
     $code = lookup_country_for_ip($ip);
     if (empty($code)) {
         return $payload;
     }
 
-    $name = telemetry_country_name_from_code($code);
     $payload['geoLocation'] = [
-        'country' => $name ?? $code,
+        'country' => country_name($code),
         'countryCode' => strtoupper($code),
         'region' => $existing['region'] ?? '',
         'timezone' => $existing['timezone'] ?? '',

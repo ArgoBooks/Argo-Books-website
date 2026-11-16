@@ -98,7 +98,7 @@ function normalizeEvent($event, $sessionMeta = []) {
     $geo = $event['geoLocation'] ?? $sessionMeta['geoLocation'] ?? null;
     if (isset($geo) && is_array($geo)) {
         // The geolocation service gives a full name for some countries and a bare ISO code for others, which would split one place into two buckets.
-        $normalized['country'] = country_name($geo['country'] ?? '') ?: 'Unknown';
+        $normalized['country'] = geo_country_name($geo) ?: 'Unknown';
         $normalized['region'] = $geo['region'] ?? '';
         $normalized['timezone'] = $geo['timezone'] ?? '';
         $normalized['hashedIP'] = $geo['hashedIp'] ?? '';

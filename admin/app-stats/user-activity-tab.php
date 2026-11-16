@@ -93,7 +93,7 @@ foreach ($ua_files as $name => $path) {
             'isFounder' => $isFounder,
             'platforms' => [],
             'versions'  => [],
-            'country'   => country_name($geo['country'] ?? ''),
+            'country'   => geo_country_name($geo),
             'region'    => $geo['region'] ?? '',
             'timezone'  => $geo['timezone'] ?? '',
             'language'  => null,
@@ -126,7 +126,7 @@ foreach ($ua_files as $name => $path) {
         }
     }
     if (!empty($d['appVersion'])) $u['versions'][$d['appVersion']] = true;
-    if (empty($u['country'])  && !empty($geo['country']))  $u['country']  = country_name($geo['country']);
+    if (empty($u['country'])  && geo_country_name($geo) !== '') $u['country'] = geo_country_name($geo);
     if (empty($u['region'])   && !empty($geo['region']))   $u['region']   = $geo['region'];
     if (empty($u['timezone']) && !empty($geo['timezone'])) $u['timezone'] = $geo['timezone'];
 

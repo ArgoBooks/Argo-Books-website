@@ -268,3 +268,19 @@ function country_name(?string $code): string
     $upper = strtoupper(trim($code));
     return $GLOBALS['__COUNTRY_NAME_MAP'][$upper] ?? $code;
 }
+
+/**
+ * The country of a telemetry geoLocation, or an empty string when it isn't known.
+ * Some lookups give the app only a country code, so the code stands in when the name says Unknown.
+ */
+function geo_country_name(?array $geo): string
+{
+    $country = trim((string) ($geo['country'] ?? ''));
+    if ($country === '' || strcasecmp($country, 'Unknown') === 0) {
+        $country = trim((string) ($geo['countryCode'] ?? ''));
+    }
+    if ($country === '' || strcasecmp($country, 'Unknown') === 0) {
+        return '';
+    }
+    return country_name($country);
+}
