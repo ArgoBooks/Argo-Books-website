@@ -50,6 +50,8 @@ return [
   'stylesheet' => 'winforms-to-avalonia.css',
 
   'intro_html' => <<<'HTML'
+<p class="wfa-award"><strong>Grand Prize winner, 2026 Avalonia Port Challenge.</strong> Judged by the Avalonia team and Devolutions. <a href="https://avaloniaui.net/blog/avalonia-port-challenge-winners" target="_blank" rel="noopener">Read the announcement</a>.</p>
+
 <p>Most framework comparisons are written by someone who built a to-do list in both. This one comes out of a production accounting application with paying customers, rebuilt over nine months by one developer.</p>
 
 <p>Argo Books version 1 was a Windows-only WinForms application: 91,089 lines of C# across 246 files. Version 2 is the same product on Avalonia, running on Windows, macOS, and Linux. Every number below was measured from the two codebases.</p>

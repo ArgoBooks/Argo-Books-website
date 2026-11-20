@@ -258,3 +258,21 @@
     /* Already dark, so it skips the dimming applied to light screenshots. */
     filter: none;
 }
+
+/* ---------------------------------------------- Award line */
+
+/* Sits above the first paragraph: the readers arriving from Avalonia's own
+   announcement should see why they were sent here before they read anything. */
+.article-intro .wfa-award {
+    margin: 0 0 24px;
+    padding: 14px 18px;
+    border-left: 3px solid var(--primary-color);
+    background: var(--gray-50);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-sm);
+    line-height: 1.5;
+}
+
+.article-intro .wfa-award strong {
+    color: var(--gray-900);
+}

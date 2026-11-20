@@ -89,6 +89,51 @@ $pricing = get_pricing_config();
     <div class="container">
         <div class="version-grid">
 
+            <!-- Version 2.0.24 -->
+            <div class="version-card">
+                <div class="version-header">
+                    <div class="version-info">
+                        <span class="version-tag">Version 2.0.24</span>
+                        <span class="date-tag">November 20 2026</span>
+                    </div>
+                    <?= svg_icon('chevron-down', 24, 'dropdown-arrow', null, 'stroke-linecap="round" stroke-linejoin="round"') ?>
+                </div>
+
+                <div class="version-content">
+                    <div class="changelog">
+                        <div class="changelog-section">
+                            <h4 class="section-label feature">New Features</h4>
+                            <ul class="changelog-list">
+                                <li><strong>Fix statements that show purchases as money in:</strong> Some bank statements list purchases as positive amounts, so they import as money coming in. One button on the import review swaps every line, so purchases become money out and payments become money in, then picks the right product, supplier or customer for each line again.</li>
+                            </ul>
+                        </div>
+                        <div class="changelog-section">
+                            <h4 class="section-label enhancement">Enhancements</h4>
+                            <ul class="changelog-list">
+                                <li><strong>Instant spreadsheet imports:</strong> A spreadsheet exported from Argo Books imports straight away and doesn't count toward your monthly AI imports.</li>
+                                <li><strong>Faster bank matching:</strong> Large bank statements match much more quickly.</li>
+                                <li><strong>Know when connected apps send data:</strong> Data sent by a connected app is announced as soon as you open your company instead of when you visit the Revenue or Expenses page.</li>
+                            </ul>
+                        </div>
+                        <div class="changelog-section">
+                            <h4 class="section-label fix">Fixes</h4>
+                            <ul class="changelog-list">
+                                <li>Installs and updates on Windows now add Microsoft WebView2, so invoices and PDF previews show on PCs that didn't have it.</li>
+                                <li>Better compatibility with antivirus software: if it scans your company's files while the company is opening, your saves still work afterwards.</li>
+                                <li>On Mac, if the app can't update where it's kept, it now asks you to move it to Applications.</li>
+                                <li>Opening an old copy of Argo Books on Windows now opens your up-to-date copy instead.</li>
+                                <li>Large imports with many dates fetch their exchange rates more smoothly.</li>
+                                <li>CSV imports add new customers and exchange rates just like spreadsheet imports.</li>
+                                <li>Bank statement imports skip total and balance rows, and read more file types.</li>
+                                <li>Spreadsheet imports bring in every row and column.</li>
+                                <li>Company names ending in a dot, like "Acme Inc.", give tidy file names.</li>
+                                <li>Stripe and Argo Books API settings are saved as soon as you change them.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Version 2.0.23 -->
             <div class="version-card">
                 <div class="version-header">
